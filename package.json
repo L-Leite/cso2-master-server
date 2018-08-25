@@ -1,0 +1,34 @@
+{
+  "name": "cso2emulator-server",
+  "version": "0.0.1",
+  "description": "A master server for Nexon's (South Korea) Counter-Strike: Online 2",
+  "author": "Luís Leite",
+  "license": "MIT",
+  "main": "src/server.ts",
+  "scripts": {
+    "start": "node dist/server.js",
+    "build": "npm run tslint && npm run build-ts",
+    "debug": "npm run build && npm run watch-debug",
+    "watch": "nodemon dist/server.js",
+    "watch-debug": "nodemon --inspect dist/server.js",
+    "build-ts": "tsc",
+    "watch-ts": "tsc -w",
+    "tslint": "tslint -c tslint.json -p tsconfig.json"
+  },
+  "dependencies": {
+    "@types/node-int64": "^0.4.29",
+    "@types/uuid": "^3.4.3",
+    "hexy": "^0.2.11",
+    "int64-buffer": "^0.1.10",
+    "node-int64": "^0.4.0",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^10.9.1",
+    "eslint": "^4.19.1",
+    "nodemon": "^1.18.3",
+    "ts-node": "^6.2.0",
+    "tslint": "^5.11.0",
+    "typescript": "^2.9.2"
+  }
+}

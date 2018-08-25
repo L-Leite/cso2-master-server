@@ -1,0 +1,16 @@
+{
+    "extends": "tslint:recommended",
+    "rules": {
+        "no-console": [
+            false
+        ], // enable this when out of dev environment
+        "quotemark": [
+            true,
+            "single"
+        ],
+        "semicolon": [
+            false,
+            "never"
+        ]
+    }
+}
