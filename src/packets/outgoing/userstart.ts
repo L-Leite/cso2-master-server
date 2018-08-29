@@ -36,10 +36,10 @@ export class OutgoingUserStartPacket extends OutgoingPacket {
         curOffset += 4
 
         this.loginName.toBuffer().copy(newBuffer, curOffset)
-        curOffset += this.loginName.length() + 1
+        curOffset += this.loginName.length()
 
         this.userName.toBuffer().copy(newBuffer, curOffset)
-        curOffset += this.userName.length() + 1
+        curOffset += this.userName.length()
 
         newBuffer.writeUInt8(this.unk00, curOffset++)
 

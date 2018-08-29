@@ -11,13 +11,25 @@ export class PacketUtf8String {
     }
 
     public length(): number {
+        if (this.str == null) {
+            return 0
+        }
         return this.str.length
     }
 
+    public rawLength(): number {
+        if (this.str == null) {
+            return 2
+        }
+        return this.str.length + 2
+    }
+
     public toBuffer(): Buffer {
-        const newBuffer = Buffer.alloc(2 + this.str.length)
-        newBuffer.writeUInt16LE(this.str.length, 0)
-        newBuffer.write(this.str, 2, this.str.length, 'utf8')
+        const newBuffer = Buffer.alloc(this.rawLength())
+        newBuffer.writeUInt16LE(this.length(), 0)
+        if (this.str) {
+            newBuffer.write(this.str, 2, this.length(), 'utf8')
+        }
         return newBuffer
     }
 }

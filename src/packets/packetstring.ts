@@ -12,13 +12,20 @@ export class PacketString {
 
     public length(): number {
         if (this.str == null) {
-            return null
+            return 0
         }
         return this.str.length
     }
 
+    public rawLength(): number {
+        if (this.str == null) {
+            return 1
+        }
+        return this.str.length + 1
+    }
+
     public toBuffer(): Buffer {
-        const newBuffer = Buffer.alloc(1 + this.length())
+        const newBuffer = Buffer.alloc(this.rawLength())
         newBuffer[0] = this.length()
         if (this.str) {
             newBuffer.write(this.str, 1, this.length(), 'ascii')

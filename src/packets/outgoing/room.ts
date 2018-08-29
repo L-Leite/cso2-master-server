@@ -1,61 +1,132 @@
+import { Uint64LE } from 'int64-buffer'
+import { WritableStreamBuffer } from 'stream-buffers'
+import { ValToBuffer } from '../../util';
+
+import { hexy } from 'hexy';
 import { PacketId } from '../definitions'
 import { PacketString } from '../packetstring'
 import { OutgoingPacket } from './packet'
-
-// this is not ready for use
+import { OutgoingUserInfoPacket } from './userinfo'
 export class OutgoingRoomPacket extends OutgoingPacket {
     private roomStatus: number
-    private unk00: number
+    private roomHostId: number
     private unk01: number
     private unk02: number
-    private unk03: number
+    private roomId: number
     private unk04: number
-    private roomFlags: number
+    private roomFlags: Uint64LE
+    // flags & 0x1
     private roomName: PacketString
+    // end of flags & 0x1
+    // flags & 0x2
     private unk05: number
+    // end of flags & 0x2
+    // flags & 0x4
     private unk06: number
     private unk07: number
     private unk08: number
+    // end of flags & 0x4
+    // flags & 0x8
     private unk09: PacketString
+    // end of flags & 0x8
+    // flags & 0x10
     private unk10: number
+    // end of flags & 0x10
+    // flags & 0x20
     private unk11: number
+    // end of flags & 0x20
+    // flags & 0x40
     private gameModeId: number
+    // end of flags & 0x40
+    // flags & 0x80
     private mapId: number
     private unk13: number
+    // end of flags & 0x80
+    // flags & 0x100
     private unk14: number
+    // end of flags & 0x100
+    // flags & 0x200
     private winLimit: number
+    // end of flags & 0x200
+    // flags & 0x400
     private killLimit: number
+    // end of flags & 0x400
+    // flags & 0x800
     private unk17: number
+    // end of flags & 0x800
+    // flags & 0x1000
     private unk18: number
+    // end of flags & 0x1000
+    // flags & 0x2000
     private unk19: number
+    // end of flags & 0x2000
+    // flags & 0x4000
     private unk20: number
+    // end of flags & 0x4000
+    // flags & 0x8000
     private unk21: number
     private unk22: number
     private unk23: number
     private unk24: number
+    // end of flags & 0x8000
+    // flags & 0x10000
     private unk25: number
+    // end of flags & 0x10000
+    // flags & 0x20000
     private unk26: number
-    private unk27: number
+    private unk27: number[]
+    // end of flags & 0x20000
+    // flags & 0x40000
     private unk28: number
+    // end of flags & 0x40000
+    // flags & 0x80000
     private unk29: number
     private unk30: number
     private unk31: number
     private unk32: number
     private unk33: number
-    private unk34: number
+    // end of flags & 0x80000
+    // flags & 0x100000
+    private unk34: number // if == 1, it can have 3 more bytes
+    // end of flags & 0x100000
+    // flags & 0x200000
     private unk35: number
+    // end of flags & 0x200000
+    // flags & 0x400000
     private unk36: number
+    // end of flags & 0x400000
+    // flags & 0x800000
     private unk37: number
+    // end of flags & 0x800000
+    // flags & 0x1000000
     private unk38: number
+    // end of flags & 0x1000000
+    // flags & 0x2000000
     private unk39: number
+    // end of flags & 0x2000000
+    // flags & 0x4000000
     private unk40: number
+    // end of flags & 0x4000000
+    // flags & 0x8000000
     private unk41: number
+    // end of flags & 0x8000000
+    // flags & 0x10000000
     private unk42: number
+    // end of flags & 0x10000000
+    // flags & 0x20000000
     private unk43: number
+    // end of flags & 0x20000000
+    // flags & 0x40000000
     private unk44: number
+    // end of flags & 0x40000000
+    // flags & 0x80000000
     private unk45: number
+    // end of flags & 0x80000000
+    // flags & 0x100000000
+    private unk46: number
+    // end of flags & 0x100000000
     private numOfPlayers: number
-    private playerIds: number[] // is it playerIds?
+    private playerIds: number[]
     private playerUnk00: number[]
     private playerUnk01: number[]
     private playerUnk02: number[]
@@ -67,45 +138,20 @@ export class OutgoingRoomPacket extends OutgoingPacket {
     private playerUnk08: number[]
     private playerUnk09: number[]
     private playerUnk10: number[]
-    private playerFlags: number[]
-    private playerUnk11: number[]
-    private playerUnk12: PacketString
-    private playerLevel: number[]
-    private playerUnk13: number[]
-    private playerUnk14: number[]
-    private playerUnk15: number[]
-    private playerUnk16: number[]
-    private playerUnk17: number[]
-    private playerUnk18: number[]
-    private playerUnk19: number[]
-    private playerUnk20: number[]
-    private playerUnk21: number[]
-    private playerUnk22: number[]
-    private playerUnk23: number[]
-    private playerUnk24: number[]
-    private playerUnk25: number[]
-    private playerUnk26: number[]
-    private playerUnk27: number[]
-    private playerUnk28: number[]
-    private playerUnk29: number[]
-    private playerUnk30: number[]
-    private playerUnk31: number[]
-    private playerUnk32: number[]
-    private playerUnk33: number[]
-    private playerUnk34: number[]
-    private playerUnk35: number[]
-    private playerUnk36: number[]
-    private playerUnk37: number[]
+    private players: OutgoingUserInfoPacket[]
 
-    constructor() {
+    constructor(players: OutgoingUserInfoPacket[], seq: number) {
         super()
+        this.sequence = seq
+        this.id = PacketId.Room
+
         this.roomStatus = 0 // joinroom
-        this.unk00 = 0x2005B8C
+        this.roomHostId = 1
         this.unk01 = 2
         this.unk02 = 2
-        this.unk03 = 0x219
+        this.roomId = 0x219
         this.unk04 = 5
-        this.roomFlags = 0xFFFFFFFFFFFF
+        this.roomFlags = new Uint64LE(-1)
         this.roomName = new PacketString('??!????????!')
         this.unk05 = 0
         this.unk06 = 0
@@ -130,28 +176,31 @@ export class OutgoingRoomPacket extends OutgoingPacket {
         this.unk24 = 0
         this.unk25 = 0x5A
         this.unk26 = 0
-        this.unk27 = 1
-        this.unk28 = 0
+        /*for (let i = 0; i < this.unk26; i++) {
+            add to this.unk27
+        }*/
+        this.unk28 = 1
         this.unk29 = 0
-        this.unk30 = 1
+        this.unk30 = 0
         this.unk31 = 1
-        this.unk32 = 0
+        this.unk32 = 1
         this.unk33 = 0
         this.unk34 = 0
         this.unk35 = 0
         this.unk36 = 0
         this.unk37 = 0
-        this.unk38 = 1
-        this.unk39 = 0
-        this.unk40 = 0x3E80
-        this.unk41 = 0
-        this.unk42 = 1
+        this.unk38 = 0
+        this.unk39 = 1
+        this.unk40 = 0
+        this.unk41 = 0x3E80
+        this.unk42 = 0
         this.unk43 = 0
         this.unk44 = 0
-        this.unk45 = 3
+        this.unk45 = 0
+        this.unk46 = 3
 
         this.numOfPlayers = 1
-        this.playerIds = [0x2005B8C]
+        this.playerIds = [1]
         this.playerUnk00 = [2]
         this.playerUnk01 = [0]
         this.playerUnk02 = [0]
@@ -163,207 +212,151 @@ export class OutgoingRoomPacket extends OutgoingPacket {
         this.playerUnk08 = [0x6987]
         this.playerUnk09 = [0x697D]
         this.playerUnk10 = [0x698C]
-        this.playerFlags = [0xFFFFFFFF]
-        this.playerUnk11 = [0x2241158F]
-        this.playerUnk12 = new PacketString('GasTheJews')
-        this.playerLevel = [6]
-        this.playerUnk13 = [0x9453]
-        this.playerUnk14 = [0xBD5F]
-        this.playerUnk15 = [0x313]
-        this.playerUnk16 = [0]
-        this.playerUnk17 = [0]
+        this.players = players
     }
-
     public build(): Buffer {
-        const packetLength = OutgoingPacket.headerLength() + // base packet
-            1 + // is bad hash
-            0// this.hash.length() // hash's length including size byte
-
-        let curOffset = 0
-
-        const newBuffer = Buffer.alloc(packetLength)
+        const outStream: WritableStreamBuffer = new WritableStreamBuffer(
+            { initialSize: 100, incrementAmount: 20 })
 
         // packet size excludes packet header
-        this.buildHeader(newBuffer, packetLength)
-        curOffset += OutgoingPacket.headerLength()
+        this.buildHeader2(outStream)
 
-        newBuffer.writeUInt8(this.roomStatus, curOffset++)
+        // packet id
+        outStream.write(ValToBuffer(this.id, 1))
 
-        newBuffer.writeUInt32LE(this.unk00, curOffset)
-        curOffset += 4
+        outStream.write(ValToBuffer(this.roomStatus, 1))
 
-        newBuffer.writeUInt8(this.unk01, curOffset++)
-        newBuffer.writeUInt8(this.unk02, curOffset++)
+        outStream.write(ValToBuffer(this.roomHostId, 4))
 
-        newBuffer.writeUInt16LE(this.unk03, curOffset)
-        curOffset += 2
+        outStream.write(ValToBuffer(this.unk01, 1))
+        outStream.write(ValToBuffer(this.unk02, 1))
+
+        outStream.write(ValToBuffer(this.roomId, 2))
+
+        outStream.write(ValToBuffer(this.unk04, 1))
 
         // special class start?
-        newBuffer.writeUInt8(this.unk04, curOffset++)
+        outStream.write(ValToBuffer(this.roomFlags, 8))
+        outStream.write(this.roomName.toBuffer())
 
-        newBuffer.writeUIntLE(this.roomFlags, curOffset, 8)
-        curOffset += 8
+        outStream.write(ValToBuffer(this.unk05, 1))
 
-        this.roomName.toBuffer().copy(newBuffer, curOffset)
-        curOffset += this.roomName.length() + 1
+        outStream.write(ValToBuffer(this.unk06, 1))
+        outStream.write(ValToBuffer(this.unk07, 4))
+        outStream.write(ValToBuffer(this.unk08, 4))
 
-        newBuffer.writeUInt8(this.unk05, curOffset++)
-        newBuffer.writeUInt8(this.unk06, curOffset++)
+        outStream.write(this.unk09.toBuffer())
 
-        newBuffer.writeUInt32LE(this.unk07, curOffset)
-        curOffset += 4
+        outStream.write(ValToBuffer(this.unk10, 2))
 
-        newBuffer.writeUInt32LE(this.unk08, curOffset)
-        curOffset += 4
+        outStream.write(ValToBuffer(this.unk11, 1))
 
-        this.unk09.toBuffer().copy(newBuffer, curOffset)
-        curOffset += this.unk09.length() + 1
+        outStream.write(ValToBuffer(this.gameModeId, 1))
 
-        newBuffer.writeUInt16LE(this.unk10, curOffset)
-        curOffset += 2
+        outStream.write(ValToBuffer(this.mapId, 1))
+        outStream.write(ValToBuffer(this.unk13, 1))
 
-        newBuffer.writeUInt8(this.unk11, curOffset++)
+        outStream.write(ValToBuffer(this.unk14, 1))
+        outStream.write(ValToBuffer(this.winLimit, 1))
 
-        newBuffer.writeUInt8(this.gameModeId, curOffset++)
+        outStream.write(ValToBuffer(this.killLimit, 2))
 
-        newBuffer.writeUInt8(this.mapId, curOffset++)
+        outStream.write(ValToBuffer(this.unk17, 1))
 
-        newBuffer.writeUInt8(this.unk13, curOffset++)
+        outStream.write(ValToBuffer(this.unk18, 1))
 
-        newBuffer.writeUInt8(this.unk14, curOffset++)
+        outStream.write(ValToBuffer(this.unk19, 1))
 
-        newBuffer.writeUInt8(this.winLimit, curOffset++)
+        outStream.write(ValToBuffer(this.unk20, 1))
 
-        newBuffer.writeUInt16LE(this.killLimit, curOffset)
-        curOffset += 2
+        outStream.write(ValToBuffer(this.unk21, 1))
+        outStream.write(ValToBuffer(this.unk22, 1))
+        outStream.write(ValToBuffer(this.unk23, 1))
+        outStream.write(ValToBuffer(this.unk24, 1))
 
-        newBuffer.writeUInt8(this.unk17, curOffset++)
+        outStream.write(ValToBuffer(this.unk25, 1))
 
-        newBuffer.writeUInt8(this.unk18, curOffset++)
+        outStream.write(ValToBuffer(this.unk26, 1))
+        if (this.unk27 != null) {
+            for (const elem of this.unk27) {
+                outStream.write(ValToBuffer(elem, 1))
+            }
+        }
 
-        newBuffer.writeUInt8(this.unk19, curOffset++)
+        outStream.write(ValToBuffer(this.unk28, 1))
 
-        newBuffer.writeUInt8(this.unk20, curOffset++)
+        outStream.write(ValToBuffer(this.unk29, 1))
+        outStream.write(ValToBuffer(this.unk30, 1))
+        outStream.write(ValToBuffer(this.unk31, 1))
+        outStream.write(ValToBuffer(this.unk32, 1))
+        outStream.write(ValToBuffer(this.unk33, 1))
 
-        newBuffer.writeUInt8(this.unk21, curOffset++)
+        // if == 1, it can have 3 more bytes
+        outStream.write(ValToBuffer(this.unk34, 1))
 
-        newBuffer.writeUInt8(this.unk22, curOffset++)
+        outStream.write(ValToBuffer(this.unk35, 1))
 
-        newBuffer.writeUInt8(this.unk23, curOffset++)
+        outStream.write(ValToBuffer(this.unk36, 1))
 
-        newBuffer.writeUInt8(this.unk24, curOffset++)
+        outStream.write(ValToBuffer(this.unk37, 1))
 
-        newBuffer.writeUInt8(this.unk25, curOffset++)
+        outStream.write(ValToBuffer(this.unk38, 1))
 
-        newBuffer.writeUInt8(this.unk26, curOffset++)
+        outStream.write(ValToBuffer(this.unk39, 1))
 
-        newBuffer.writeUInt8(this.unk27, curOffset++)
+        outStream.write(ValToBuffer(this.unk40, 1))
 
-        newBuffer.writeUInt8(this.unk28, curOffset++)
+        outStream.write(ValToBuffer(this.unk41, 2))
 
-        newBuffer.writeUInt8(this.unk29, curOffset++)
+        outStream.write(ValToBuffer(this.unk42, 1))
 
-        newBuffer.writeUInt8(this.unk30, curOffset++)
+        outStream.write(ValToBuffer(this.unk43, 1))
 
-        newBuffer.writeUInt8(this.unk31, curOffset++)
+        outStream.write(ValToBuffer(this.unk44, 1))
 
-        newBuffer.writeUInt8(this.unk32, curOffset++)
+        outStream.write(ValToBuffer(this.unk45, 1))
 
-        newBuffer.writeUInt8(this.unk33, curOffset++)
-
-        newBuffer.writeUInt8(this.unk34, curOffset++)
-
-        newBuffer.writeUInt8(this.unk35, curOffset++)
-
-        newBuffer.writeUInt8(this.unk36, curOffset++)
-
-        newBuffer.writeUInt8(this.unk37, curOffset++)
-
-        newBuffer.writeUInt8(this.unk38, curOffset++)
-
-        newBuffer.writeUInt8(this.unk39, curOffset++)
-
-        newBuffer.writeUInt16LE(this.unk40, curOffset)
-        curOffset += 2
-
-        newBuffer.writeUInt8(this.unk41, curOffset++)
-
-        newBuffer.writeUInt8(this.unk42, curOffset++)
-
-        newBuffer.writeUInt8(this.unk43, curOffset++)
-
-        newBuffer.writeUInt8(this.unk44, curOffset++)
-
-        newBuffer.writeUInt8(this.unk45, curOffset++)
+        outStream.write(ValToBuffer(this.unk46, 1))
         // special class end?
 
         // special class start?
-        newBuffer.writeUInt8(this.numOfPlayers, curOffset++)
+        outStream.write(ValToBuffer(this.numOfPlayers, 1))
 
         let curPlayer = 0
         this.playerIds.forEach((element) => {
-            newBuffer.writeUInt32LE(element, curOffset)
-            curOffset += 4
+            outStream.write(ValToBuffer(element, 4))
 
-            newBuffer.writeUInt8(this.playerUnk00[curPlayer], curOffset++)
+            outStream.write(ValToBuffer(this.playerUnk00[curPlayer], 1))
 
-            newBuffer.writeUInt8(this.playerUnk01[curPlayer], curOffset++)
+            outStream.write(ValToBuffer(this.playerUnk01[curPlayer], 1))
 
-            newBuffer.writeUInt8(this.playerUnk02[curPlayer], curOffset++)
+            outStream.write(ValToBuffer(this.playerUnk02[curPlayer], 1))
 
-            newBuffer.writeUInt32LE(this.playerUnk03[curPlayer], curOffset)
-            curOffset += 4
+            outStream.write(ValToBuffer(this.playerUnk03[curPlayer], 4))
 
-            newBuffer.writeUInt16LE(this.playerUnk04[curPlayer], curOffset)
-            curOffset += 2
+            outStream.write(ValToBuffer(this.playerUnk04[curPlayer], 2))
 
-            newBuffer.writeUInt16LE(this.playerUnk05[curPlayer], curOffset)
-            curOffset += 2
+            outStream.write(ValToBuffer(this.playerUnk05[curPlayer], 2))
 
-            newBuffer.writeUInt16LE(this.playerUnk06[curPlayer], curOffset)
-            curOffset += 2
+            outStream.write(ValToBuffer(this.playerUnk06[curPlayer], 2))
 
-            newBuffer.writeUInt32LE(this.playerUnk07[curPlayer], curOffset)
-            curOffset += 4
+            outStream.write(ValToBuffer(this.playerUnk07[curPlayer], 4))
 
-            newBuffer.writeUInt16LE(this.playerUnk08[curPlayer], curOffset)
-            curOffset += 2
+            outStream.write(ValToBuffer(this.playerUnk08[curPlayer], 2))
 
-            newBuffer.writeUInt16LE(this.playerUnk09[curPlayer], curOffset)
-            curOffset += 2
+            outStream.write(ValToBuffer(this.playerUnk09[curPlayer], 2))
 
-            newBuffer.writeUInt16LE(this.playerUnk10[curPlayer], curOffset)
-            curOffset += 2
+            outStream.write(ValToBuffer(this.playerUnk10[curPlayer], 2))
 
-            newBuffer.writeUInt32LE(this.playerFlags[curPlayer], curOffset)
-            curOffset += 4
-
-            newBuffer.writeUIntLE(this.playerUnk11[curPlayer], curOffset, 8)
-            curOffset += 8
-
-            this.playerUnk12.toBuffer().copy(newBuffer, curOffset)
-            curOffset += this.playerUnk12.length() + 1
-
-            newBuffer.writeUInt16LE(this.playerLevel[curPlayer], curOffset)
-            curOffset += 2
-
-            newBuffer.writeUIntLE(this.playerUnk13[curPlayer], curOffset, 8)
-            curOffset += 8
-
-            newBuffer.writeUIntLE(this.playerUnk14[curPlayer], curOffset, 8)
-            curOffset += 8
-
-            newBuffer.writeUInt32LE(this.playerUnk15[curPlayer], curOffset)
-            curOffset += 4
-
-            newBuffer.writeUInt8(this.playerUnk16[curPlayer], curOffset++)
-
-            newBuffer.writeUInt8(this.playerUnk17[curPlayer], curOffset++)
+            this.players[curPlayer].buildData(outStream)
 
             curPlayer++
-        });
+        })
         // special class end?
 
-        return newBuffer
+        const resBuffer: Buffer = outStream.getContents()
+        this.setPacketLength(resBuffer)
+
+        return resBuffer
     }
 }

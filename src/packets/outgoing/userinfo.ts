@@ -1,4 +1,6 @@
 import { Uint64LE } from 'int64-buffer';
+import { WritableStreamBuffer } from 'stream-buffers';
+import { ValToBuffer } from '../../util';
 import { PacketId } from '../definitions'
 import { PacketString } from '../packetstring'
 import { OutgoingPacket } from './packet'
@@ -285,329 +287,155 @@ export class OutgoingUserInfoPacket extends OutgoingPacket {
         this.unk84 = 0
     }
 
-    public build(): Buffer {
-        // TODO: find a better way to calculate the packet size for the buffer
-        const packetLength = this.getSize()
+    public buildData(outStream: WritableStreamBuffer): void {
+        outStream.write(ValToBuffer(this.userId, 4))
 
-        let curOffset = 0
+        outStream.write(ValToBuffer(this.flags, 4))
 
-        const newBuffer = Buffer.alloc(packetLength)
+        outStream.write(ValToBuffer(this.unk00, 8))
 
-        // packet size excludes packet header
-        this.buildHeader(newBuffer, packetLength)
-        curOffset += OutgoingPacket.headerLength()
+        outStream.write(this.userName.toBuffer())
 
-        newBuffer.writeUInt32LE(this.userId, curOffset)
-        curOffset += 4
+        outStream.write(ValToBuffer(this.level, 2))
 
-        newBuffer.writeUInt32LE(this.flags, curOffset)
-        curOffset += 4
+        outStream.write(ValToBuffer(this.curExp, 8))
+        outStream.write(ValToBuffer(this.maxExp, 8))
+        outStream.write(ValToBuffer(this.unk03, 4))
 
-        this.unk00.toBuffer().copy(newBuffer, curOffset)
-        curOffset += 8
+        outStream.write(ValToBuffer(this.unk04, 1))
+        outStream.write(ValToBuffer(this.unk05, 1))
 
-        this.userName.toBuffer().copy(newBuffer, curOffset)
-        curOffset += this.userName.length() + 1
+        outStream.write(ValToBuffer(this.unk06, 8))
 
-        newBuffer.writeInt16LE(this.level, curOffset)
-        curOffset += 2
+        outStream.write(ValToBuffer(this.unk07, 4))
+        outStream.write(ValToBuffer(this.wins, 4))
+        outStream.write(ValToBuffer(this.kills, 4))
+        outStream.write(ValToBuffer(this.unk10, 4))
+        outStream.write(ValToBuffer(this.deaths, 4))
+        outStream.write(ValToBuffer(this.assists, 4))
+        outStream.write(ValToBuffer(this.unk13, 2))
+        outStream.write(ValToBuffer(this.unk14, 4))
+        outStream.write(ValToBuffer(this.unk15, 4))
+        outStream.write(ValToBuffer(this.unk16, 4))
+        outStream.write(ValToBuffer(this.unk17, 1))
+        outStream.write(ValToBuffer(this.unk18, 8))
+        outStream.write(ValToBuffer(this.unk19, 4))
+        outStream.write(ValToBuffer(this.unk20, 4))
+        outStream.write(ValToBuffer(this.unk21, 4))
+        outStream.write(ValToBuffer(this.unk22, 4))
+        outStream.write(ValToBuffer(this.unk23, 4))
+        outStream.write(ValToBuffer(this.unk24, 4))
+        outStream.write(ValToBuffer(this.unk25, 4))
 
-        this.curExp.toBuffer().copy(newBuffer, curOffset)
-        curOffset += 8
-        this.maxExp.toBuffer().copy(newBuffer, curOffset)
-        curOffset += 8
-        newBuffer.writeUInt32LE(this.unk03, curOffset)
-        curOffset += 4
+        outStream.write(this.unk26.toBuffer())
+        outStream.write(ValToBuffer(this.unk27, 4))
+        outStream.write(ValToBuffer(this.unk28, 4))
+        outStream.write(ValToBuffer(this.unk29, 4))
+        outStream.write(ValToBuffer(this.unk30, 4))
+        outStream.write(this.unk31.toBuffer())
 
-        newBuffer.writeUInt8(this.unk04, curOffset++)
-        newBuffer.writeUInt8(this.unk05, curOffset++)
+        outStream.write(ValToBuffer(this.unk32, 4))
+        outStream.write(ValToBuffer(this.unk33, 4))
 
-        this.unk06.toBuffer().copy(newBuffer, curOffset)
-        curOffset += 8
-
-        newBuffer.writeUInt32LE(this.unk07, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.wins, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.kills, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk10, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.deaths, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.assists, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt16LE(this.unk13, curOffset)
-        curOffset += 2
-        newBuffer.writeUInt32LE(this.unk14, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk15, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk16, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt8(this.unk17, curOffset++)
-        this.unk18.toBuffer().copy(newBuffer, curOffset)
-        curOffset += 8
-        newBuffer.writeUInt32LE(this.unk19, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk20, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk21, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk22, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk23, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk24, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk25, curOffset)
-        curOffset += 4
-
-        this.unk26.toBuffer().copy(newBuffer, curOffset)
-        curOffset += this.unk26.length() + 1
-        newBuffer.writeUInt32LE(this.unk27, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk28, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk29, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk30, curOffset)
-        curOffset += 4
-        this.unk31.toBuffer().copy(newBuffer, curOffset)
-        curOffset += this.unk31.length() + 1
-
-        newBuffer.writeUInt32LE(this.unk32, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk33, curOffset)
-        curOffset += 4
-
-        newBuffer.writeUInt32LE(this.unk34, curOffset)
-        curOffset += 4
-        this.unk35.toBuffer().copy(newBuffer, curOffset)
-        curOffset += this.unk35.length() + 1
-        newBuffer.writeUInt32LE(this.unk36, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt8(this.unk37, curOffset++)
+        outStream.write(ValToBuffer(this.unk34, 4))
+        outStream.write(this.unk35.toBuffer())
+        outStream.write(ValToBuffer(this.unk36, 4))
+        outStream.write(ValToBuffer(this.unk37, 1))
         for (const elem of this.unk38) {
-            newBuffer.writeUInt32LE(elem, curOffset)
-            curOffset += 4
+            outStream.write(ValToBuffer(elem, 4))
         }
         for (const elem of this.unk39) {
-            newBuffer.writeUInt32LE(elem, curOffset)
-            curOffset += 4
+            outStream.write(ValToBuffer(elem, 4))
         }
 
-        newBuffer.writeUInt8(this.unk40, curOffset++)
+        outStream.write(ValToBuffer(this.unk40, 1))
 
-        newBuffer.writeUInt32LE(this.unk41, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk42, curOffset)
-        curOffset += 4
+        outStream.write(ValToBuffer(this.unk41, 4))
+        outStream.write(ValToBuffer(this.unk42, 4))
 
-        newBuffer.writeUInt8(this.unk43, curOffset++)
-        newBuffer.writeUInt16LE(this.unk44, curOffset)
-        curOffset += 2
-        newBuffer.writeUInt32LE(this.unk45, curOffset)
-        curOffset += 4
+        outStream.write(ValToBuffer(this.unk43, 1))
+        outStream.write(ValToBuffer(this.unk44, 2))
+        outStream.write(ValToBuffer(this.unk45, 4))
 
-        newBuffer.writeUInt32LE(this.unk46, curOffset)
-        curOffset += 4
-        this.unk47.toBuffer().copy(newBuffer, curOffset)
-        curOffset += 8
+        outStream.write(ValToBuffer(this.unk46, 4))
+        outStream.write(ValToBuffer(this.unk47, 8))
 
-        newBuffer.writeUInt32LE(this.unk48, curOffset)
-        curOffset += 4
+        outStream.write(ValToBuffer(this.unk48, 4))
 
-        newBuffer.writeUInt16LE(this.unk49, curOffset)
-        curOffset += 2
+        outStream.write(ValToBuffer(this.unk49, 2))
 
-        newBuffer.writeUInt16LE(this.unk50, curOffset)
-        curOffset += 2
+        outStream.write(ValToBuffer(this.unk50, 2))
 
         for (const elem of this.unk51) {
-            newBuffer.writeUInt8(elem, curOffset)
-            curOffset += 1
+            outStream.write(ValToBuffer(elem, 1))
         }
 
-        this.unk52.toBuffer().copy(newBuffer, curOffset)
-        curOffset += this.unk52.length() + 1
+        outStream.write(this.unk52.toBuffer())
 
-        newBuffer.writeUInt8(this.unk53, curOffset++)
-        newBuffer.writeUInt8(this.unk54, curOffset++)
+        outStream.write(ValToBuffer(this.unk53, 1))
+        outStream.write(ValToBuffer(this.unk54, 1))
 
-        newBuffer.writeUInt32LE(this.unk55, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk56, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk57, curOffset)
-        curOffset += 4
+        outStream.write(ValToBuffer(this.unk55, 4))
+        outStream.write(ValToBuffer(this.unk56, 4))
+        outStream.write(ValToBuffer(this.unk57, 4))
 
-        newBuffer.writeUInt16LE(this.unk58, curOffset)
-        curOffset += 2
+        outStream.write(ValToBuffer(this.unk58, 4))
 
         for (const elem of this.unk59) {
-            newBuffer.writeUInt8(elem, curOffset)
-            curOffset += 1
+            outStream.write(ValToBuffer(elem, 1))
         }
-        newBuffer.writeUInt32LE(this.unk60, curOffset)
-        curOffset += 4
+        outStream.write(ValToBuffer(this.unk60, 4))
 
-        newBuffer.writeUInt16LE(this.unk61, curOffset)
-        curOffset += 2
+        outStream.write(ValToBuffer(this.unk61, 2))
 
-        newBuffer.writeUInt16LE(this.unk62, curOffset)
-        curOffset += 2
+        outStream.write(ValToBuffer(this.unk62, 2))
 
         for (const elem of this.unk63) {
-            newBuffer.writeUInt8(elem, curOffset)
-            curOffset += 1
+            outStream.write(ValToBuffer(elem, 1))
         }
 
-        newBuffer.writeUInt8(this.unk64, curOffset++)
-        newBuffer.writeUInt8(this.unk65, curOffset++)
-        newBuffer.writeUInt32LE(this.unk66, curOffset)
-        curOffset += 4
+        outStream.write(ValToBuffer(this.unk64, 1))
+        outStream.write(ValToBuffer(this.unk65, 1))
+        outStream.write(ValToBuffer(this.unk66, 4))
 
-        newBuffer.writeUInt32LE(this.unk67, curOffset)
-        curOffset += 4
+        outStream.write(ValToBuffer(this.unk67, 4))
 
-        this.unk68.toBuffer().copy(newBuffer, curOffset)
-        curOffset += 8
-        this.unk69.toBuffer().copy(newBuffer, curOffset)
-        curOffset += 8
-        newBuffer.writeUInt8(this.unk70, curOffset++)
-        this.unk71.toBuffer().copy(newBuffer, curOffset)
-        curOffset += 8
-        this.unk72.toBuffer().copy(newBuffer, curOffset)
-        curOffset += 8
-        newBuffer.writeUInt8(this.unk73, curOffset++)
-        newBuffer.writeUInt32LE(this.unk74, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk75, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk76, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk77, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk78, curOffset)
-        curOffset += 4
-        newBuffer.writeUInt32LE(this.unk79, curOffset)
+        outStream.write(ValToBuffer(this.unk68, 8))
+        outStream.write(ValToBuffer(this.unk69, 8))
+        outStream.write(ValToBuffer(this.unk70, 1))
+        outStream.write(ValToBuffer(this.unk71, 8))
+        outStream.write(ValToBuffer(this.unk72, 8))
+        outStream.write(ValToBuffer(this.unk73, 1))
+        outStream.write(ValToBuffer(this.unk74, 4))
+        outStream.write(ValToBuffer(this.unk75, 4))
+        outStream.write(ValToBuffer(this.unk76, 4))
+        outStream.write(ValToBuffer(this.unk77, 4))
+        outStream.write(ValToBuffer(this.unk78, 4))
+        outStream.write(ValToBuffer(this.unk79, 4))
 
-        newBuffer.writeUInt32LE(this.unk80, curOffset)
-        newBuffer.writeUInt32LE(this.unk81, curOffset)
+        outStream.write(ValToBuffer(this.unk80, 4))
+        outStream.write(ValToBuffer(this.unk81, 4))
 
-        newBuffer.writeUInt8(this.unk82, curOffset++)
-        newBuffer.writeUInt8(this.unk83, curOffset++)
-        newBuffer.writeUInt8(this.unk84, curOffset++)
-
-        return newBuffer
+        outStream.write(ValToBuffer(this.unk82, 1))
+        outStream.write(ValToBuffer(this.unk83, 1))
+        outStream.write(ValToBuffer(this.unk84, 1))
     }
 
-    private getSize(): number {
-        let curOffset = 0
+    public build(): Buffer {
+        const outStream: WritableStreamBuffer = new WritableStreamBuffer(
+            { initialSize: 100, incrementAmount: 20 })
 
-        curOffset += OutgoingPacket.headerLength()
+        // packet size excludes packet header
+        this.buildHeader2(outStream)
 
-        curOffset += 4
-        curOffset += 4
-        curOffset += 8
-        curOffset += this.userName.length() + 1
-        curOffset += 2
-        curOffset += 8
-        curOffset += 8
-        curOffset += 4
-        curOffset += 1
-        curOffset += 1
-        curOffset += 8
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 2
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 1
-        curOffset += 8
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += this.unk26.length() + 1
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += this.unk31.length() + 1
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += this.unk35.length() + 1
-        curOffset += 4
-        curOffset += 1
-        for (const elem of this.unk38) {
-            curOffset += 4
-        }
-        for (const elem of this.unk39) {
-            curOffset += 4
-        }
-        curOffset += 1
-        curOffset += 4
-        curOffset += 4
-        curOffset += 1
-        curOffset += 2
-        curOffset += 4
-        curOffset += 4
-        curOffset += 8
-        curOffset += 4
-        curOffset += 2
-        curOffset += 2
-        for (const elem of this.unk51) {
-            curOffset += 1
-        }
-        curOffset += this.unk52.length() + 1
-        curOffset += 1
-        curOffset += 1
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 2
-        for (const elem of this.unk59) {
-            curOffset += 1
-        }
-        curOffset += 4
-        curOffset += 2
-        curOffset += 2
-        for (const elem of this.unk63) {
-            curOffset += 1
-        }
-        curOffset += 1
-        curOffset += 1
-        curOffset += 4
-        curOffset += 4
-        curOffset += 8
-        curOffset += 8
-        curOffset += 1
-        curOffset += 8
-        curOffset += 8
-        curOffset += 1
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 4
-        curOffset += 1
-        curOffset += 1
-        curOffset += 1
+        // packet id
+        outStream.write(ValToBuffer(this.id, 1))
 
-        return curOffset
+        this.buildData(outStream)
+
+        const resBuffer: Buffer = outStream.getContents()
+        this.setPacketLength(resBuffer)
+
+        return resBuffer
     }
 }

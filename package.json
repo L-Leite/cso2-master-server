@@ -17,10 +17,12 @@
   },
   "dependencies": {
     "@types/node-int64": "^0.4.29",
+    "@types/stream-buffers": "^3.0.2",
     "@types/uuid": "^3.4.3",
     "hexy": "^0.2.11",
     "int64-buffer": "^0.1.10",
     "node-int64": "^0.4.0",
+    "stream-buffers": "^3.0.2",
     "uuid": "^3.3.2"
   },
   "devDependencies": {

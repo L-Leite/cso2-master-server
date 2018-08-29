@@ -8,6 +8,7 @@ export enum PacketId {
     ServerList = 5,
     Character,
     Crypt,
+    Room = 65,
     Ban = 74,
     Automatch = 88,
     Achievement = 96,
