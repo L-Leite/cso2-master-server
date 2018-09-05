@@ -14,7 +14,7 @@ export class IncomingLoginPacket extends IncomingPacket {
     public userSn: Uint64LE
     public unk02: string
     public unk03: number
-    public isLeague: boolean
+    public isLeague: number
     public unk04: number // always null
     public unk05: string // always null
     public unk06: string // always null
@@ -58,7 +58,7 @@ export class IncomingLoginPacket extends IncomingPacket {
         curOffset += 2 + this.packetData[curOffset]
 
         this.unk03 = this.packetData[curOffset++]
-        this.isLeague = this.packetData[curOffset++] as any as boolean // ugly
+        this.isLeague = this.packetData[curOffset++]
         this.unk04 = this.packetData[curOffset++]
 
         this.unk05 = PacketString.from(

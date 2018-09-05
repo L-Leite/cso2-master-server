@@ -1,3 +1,9 @@
+/**
+ * Stores an utf8 string used by packets
+ * The first 2 bytes (in Little Endian) are the size of the string,
+ * followed by the string itself
+ * @class PacketUtf8String
+ */
 export class PacketUtf8String {
     public static from(data: Buffer): PacketUtf8String {
         return new PacketUtf8String(data.slice(2,

@@ -1,3 +1,9 @@
+/**
+ * Stores an ascii (?) string used by packets
+ * The first byte is the size of the string,
+ * followed by the string itself
+ * @class PacketString
+ */
 export class PacketString {
     public static from(data: Buffer): PacketString {
         return new PacketString(data.slice(1,

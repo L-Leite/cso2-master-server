@@ -1,6 +1,8 @@
 import { Uint64LE } from 'int64-buffer';
 import { WritableStreamBuffer } from 'stream-buffers';
+
 import { ValToBuffer } from '../../util';
+
 import { PacketId } from '../definitions'
 import { PacketString } from '../packetstring'
 import { OutgoingPacket } from './packet'
@@ -288,8 +290,6 @@ export class OutgoingUserInfoPacket extends OutgoingPacket {
     }
 
     public buildData(outStream: WritableStreamBuffer): void {
-        outStream.write(ValToBuffer(this.userId, 4))
-
         outStream.write(ValToBuffer(this.flags, 4))
 
         outStream.write(ValToBuffer(this.unk00, 8))
@@ -379,7 +379,7 @@ export class OutgoingUserInfoPacket extends OutgoingPacket {
         outStream.write(ValToBuffer(this.unk56, 4))
         outStream.write(ValToBuffer(this.unk57, 4))
 
-        outStream.write(ValToBuffer(this.unk58, 4))
+        outStream.write(ValToBuffer(this.unk58, 2))
 
         for (const elem of this.unk59) {
             outStream.write(ValToBuffer(elem, 1))
@@ -426,10 +426,12 @@ export class OutgoingUserInfoPacket extends OutgoingPacket {
             { initialSize: 100, incrementAmount: 20 })
 
         // packet size excludes packet header
-        this.buildHeader2(outStream)
+        this.buildHeader(outStream)
 
         // packet id
         outStream.write(ValToBuffer(this.id, 1))
+
+        outStream.write(ValToBuffer(this.userId, 4))
 
         this.buildData(outStream)
 

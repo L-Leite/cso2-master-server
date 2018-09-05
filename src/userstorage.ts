@@ -1,26 +1,34 @@
 import { UserData } from './userdata'
 
+/**
+ * stores the logged in users
+ */
 export class UserStorage {
-    private data: Map<string, UserData>
-    private dataCount: number
-
-    constructor() {
-        this.data = new Map<string, UserData>()
-        this.dataCount = 0
+    public static getUser(userId: number): UserData {
+        return this.data.get(userId)
     }
 
-    public getUser(uuid: string): UserData {
-        return this.data.get(uuid)
+    public static getUserByUuid(uuid: string): UserData {
+        for (const entry of this.data) {
+            if (entry['1'].uuid === uuid) {
+                return entry['1']
+            }
+        }
+        return null
     }
 
-    public addUser(uuid: string, userName: string): void {
-        const newData: UserData = new UserData(uuid, userName)
-        this.data.set(uuid, newData)
+    public static addUser(uuid: string, userId: number, userName: string): UserData {
+        const newData: UserData = new UserData(uuid, userId, userName)
+        this.data.set(userId, newData)
         this.dataCount++
+        return newData
     }
 
-    public removeUser(uuid: string): void {
-        this.data.delete(uuid)
+    public static removeUser(userId: number): void {
+        this.data.delete(userId)
         this.dataCount--
     }
+
+    private static data: Map<number, UserData> = new Map<number, UserData>()
+    private static dataCount: number = 0
 }

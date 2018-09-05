@@ -1,9 +1,13 @@
+import { WritableStreamBuffer } from 'stream-buffers';
+
+import { ValToBuffer } from '../../util';
+
 import { PacketId } from '../definitions'
 import { PacketString } from '../packetstring'
 import { OutgoingPacket } from './packet'
 
 export class OutgoingVersionPacket extends OutgoingPacket {
-    private badHash: boolean
+    private badHash: number
     private hash: PacketString
 
     constructor(badHash: boolean, hash: string, seq: number) {
@@ -11,26 +15,29 @@ export class OutgoingVersionPacket extends OutgoingPacket {
         this.sequence = seq
         this.id = PacketId.Version
 
-        this.badHash = badHash
+        this.badHash = badHash as any as number
         this.hash = new PacketString(hash)
     }
 
     public build(): Buffer {
-        const packetLength = OutgoingPacket.headerLength() + // base packet
-            1 + // is bad hash
-            this.hash.length() // hash's length including size byte
-
-        const newBuffer = Buffer.alloc(packetLength)
+        const outStream: WritableStreamBuffer = new WritableStreamBuffer(
+            { initialSize: 16, incrementAmount: 4 })
 
         // packet size excludes packet header
-        this.buildHeader(newBuffer, packetLength)
+        this.buildHeader(outStream)
+
+        // packet id
+        outStream.write(ValToBuffer(this.id, 1))
 
         // is bad hash?
-        newBuffer[5] = this.badHash as any as number // this is ugly
+        outStream.write(ValToBuffer(this.badHash, 1))
 
         // some hash
-        this.hash.toBuffer().copy(newBuffer, 6)
+        outStream.write(this.hash.toBuffer())
 
-        return newBuffer
+        const resBuffer: Buffer = outStream.getContents()
+        this.setPacketLength(resBuffer)
+
+        return resBuffer
     }
 }

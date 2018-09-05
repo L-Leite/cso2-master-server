@@ -1,4 +1,7 @@
-import Int64 from 'int64-buffer'
+import { WritableStreamBuffer } from 'stream-buffers';
+
+import { ValToBuffer } from '../../util';
+
 import { PacketId } from '../definitions'
 import { PacketString } from '../packetstring'
 import { OutgoingPacket } from './packet'
@@ -22,44 +25,28 @@ export class OutgoingUserStartPacket extends OutgoingPacket {
     }
 
     public build(): Buffer {
-        const packetLength = this.getSize()
-
-        let curOffset = 0
-
-        const newBuffer = Buffer.alloc(packetLength)
+        const outStream: WritableStreamBuffer = new WritableStreamBuffer(
+            { initialSize: 16, incrementAmount: 4 })
 
         // packet size excludes packet header
-        this.buildHeader(newBuffer, packetLength)
-        curOffset += OutgoingPacket.headerLength()
+        this.buildHeader(outStream)
 
-        newBuffer.writeUInt32LE(this.userId, curOffset)
-        curOffset += 4
+        // packet id
+        outStream.write(ValToBuffer(this.id, 1))
 
-        this.loginName.toBuffer().copy(newBuffer, curOffset)
-        curOffset += this.loginName.length()
+        outStream.write(ValToBuffer(this.userId, 4))
 
-        this.userName.toBuffer().copy(newBuffer, curOffset)
-        curOffset += this.userName.length()
+        outStream.write(this.loginName.toBuffer())
 
-        newBuffer.writeUInt8(this.unk00, curOffset++)
+        outStream.write(this.userName.toBuffer())
 
-        newBuffer.writeUInt16LE(this.somePort, curOffset)
-        curOffset += 2
+        outStream.write(ValToBuffer(this.unk00, 1))
 
-        return newBuffer
-    }
+        outStream.write(ValToBuffer(this.somePort, 2))
 
-    private getSize(): number {
-        let curOffset = 0
+        const resBuffer: Buffer = outStream.getContents()
+        this.setPacketLength(resBuffer)
 
-        curOffset += OutgoingPacket.headerLength()
-
-        curOffset += 4
-        curOffset += this.loginName.length() + 1
-        curOffset += this.userName.length() + 1
-        curOffset += 1
-        curOffset += 2
-
-        return curOffset
+        return resBuffer
     }
 }

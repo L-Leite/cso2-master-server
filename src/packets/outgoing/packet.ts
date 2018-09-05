@@ -15,15 +15,7 @@ export class OutgoingPacket {
         throw new Error('You must use a packet class!')
     }
 
-    protected buildHeader(newBuffer: Buffer, packetLength: number): void {
-        newBuffer[0] = PacketSignature // signature
-        newBuffer[1] = this.sequence
-        // 4 is the real header size, id doesnt count
-        newBuffer.writeUInt16LE(packetLength - 4, 2)
-        newBuffer[4] = this.id // packet id
-    }
-
-    protected buildHeader2(bufStream: WritableStreamBuffer): void {
+    protected buildHeader(bufStream: WritableStreamBuffer): void {
         bufStream.write(ValToBuffer(PacketSignature, 1))
         bufStream.write(ValToBuffer(this.sequence, 1))
         bufStream.write(ValToBuffer(0, 2))

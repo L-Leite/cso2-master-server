@@ -9,6 +9,8 @@ export enum PacketId {
     Character,
     Crypt,
     Room = 65,
+    Host = 68,
+    Udp = 70,
     Ban = 74,
     Automatch = 88,
     Achievement = 96,
