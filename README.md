@@ -1,5 +1,5 @@
 # cso2-master-server
-A master server for Nexon's (South Korea) Counter-Strike: Online 2.
+An incomplete master server for Nexon's (South Korea) Counter-Strike: Online 2.
 
 You can find its client [here](https://github.com/Ochii/cso2-launcher/tree/server_emulator).
 
