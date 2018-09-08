@@ -38,4 +38,4 @@ If you wish or have any improvements that you would like to share, feel free to 
 ## License
 Read ```LICENSE``` for license information.
 
-I'm not affiliated with neither Valve or Nexon, just like I don't own Counter-Strike Online 2.
+I'm not affiliated with either Valve or Nexon, just like I don't own Counter-Strike Online 2.
