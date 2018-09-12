@@ -1,12 +1,12 @@
-import { ExtendedSocket } from '../extendedsocket';
+import { ExtendedSocket } from '../extendedsocket'
 
 /**
- * Base implementation of a packet callback
+ * Base implementation of a packet event
  * @class BasePacketCallback
  */
-export abstract class BasePacketCallback {
+export abstract class BasePacketEvent {
 
-    public static get(): BasePacketCallback {
+    public static new(): BasePacketEvent {
         return Object.create(this.prototype)
     }
     /**

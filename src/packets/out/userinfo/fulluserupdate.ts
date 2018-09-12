@@ -1,17 +1,19 @@
-import { Uint64LE } from 'int64-buffer';
-import { WritableStreamBuffer } from 'stream-buffers';
+import { Uint64LE } from 'int64-buffer'
 
-import { ValToBuffer } from '../../util';
+import { UserData } from '../../../userdata'
+import { PacketString } from '../../packetstring'
+import { OutPacketBase } from '../packet'
 
-import { PacketId } from '../definitions'
-import { PacketString } from '../packetstring'
-import { OutgoingPacket } from './packet'
-
-export class OutgoingUserInfoPacket extends OutgoingPacket {
+/**
+ * Sub structure of UserInfo packet
+ * Stores full information about an user
+ * @class UserInfoFullUpdate
+ */
+export class UserInfoFullUpdate {
     private userId: number
-    private flags: number
+    private flags: number // should always be 0xFFFFFFFF for a full update
     // flag & 0x1
-    private unk00: Uint64LE // nexon id? printed
+    private unk00: Uint64LE // nexon id?
     // end flag & 0x1
     // flag & 0x2
     private userName: PacketString
@@ -159,32 +161,25 @@ export class OutgoingUserInfoPacket extends OutgoingPacket {
     private unk83: number
     private unk84: number
     // end of flag & 0x40000000
-    constructor(userId: number, userName: string, level: number,
-                curExp: Uint64LE, maxExp: Uint64LE,
-                wins: number, kills: number,
-                deaths: number, assists: number,
-                seq: number) {
-        super()
-        this.sequence = seq
-        this.id = PacketId.UserInfo
 
-        this.userId = userId
+    constructor(user: UserData) {
+        this.userId = user.userId
         this.flags = 0xFFFFFFFF
         this.unk00 = new Uint64LE(0x2241158F)
-        this.userName = new PacketString(userName)
-        this.level = level
-        this.curExp = new Uint64LE(0x9453)
-        this.maxExp = new Uint64LE(0xBD5F)
+        this.userName = new PacketString(user.userName)
+        this.level = user.level
+        this.curExp = user.curExp
+        this.maxExp = user.maxExp
         this.unk03 = 0x0313
         this.unk04 = 0
         this.unk05 = 0
         this.unk06 = new Uint64LE(0x7AF3)
         this.unk07 = 0x0A
-        this.wins = 0x04
-        this.kills = 159
+        this.wins = user.wins
+        this.kills = user.kills
         this.unk10 = 0x50
-        this.deaths = 176
-        this.assists = 120
+        this.deaths = user.deaths
+        this.assists = user.assists
         this.unk13 = 0x0A
         this.unk14 = 0x290C
         this.unk15 = 0
@@ -289,155 +284,139 @@ export class OutgoingUserInfoPacket extends OutgoingPacket {
         this.unk84 = 0
     }
 
-    public buildData(outStream: WritableStreamBuffer): void {
-        outStream.write(ValToBuffer(this.flags, 4))
+    /**
+     * builds the sub structure to a packet's stream buffer
+     * @param outPacket the packet where the data will go
+     */
+    public build(outPacket: OutPacketBase): void {
+        outPacket.writeUInt32(this.flags)
 
-        outStream.write(ValToBuffer(this.unk00, 8))
+        outPacket.writeUInt64(this.unk00)
 
-        outStream.write(this.userName.toBuffer())
+        outPacket.writeString(this.userName)
 
-        outStream.write(ValToBuffer(this.level, 2))
+        outPacket.writeUInt16(this.level)
 
-        outStream.write(ValToBuffer(this.curExp, 8))
-        outStream.write(ValToBuffer(this.maxExp, 8))
-        outStream.write(ValToBuffer(this.unk03, 4))
+        outPacket.writeUInt64(this.curExp)
+        outPacket.writeUInt64(this.maxExp)
+        outPacket.writeUInt32(this.unk03)
 
-        outStream.write(ValToBuffer(this.unk04, 1))
-        outStream.write(ValToBuffer(this.unk05, 1))
+        outPacket.writeUInt8(this.unk04)
+        outPacket.writeUInt8(this.unk05)
 
-        outStream.write(ValToBuffer(this.unk06, 8))
+        outPacket.writeUInt64(this.unk06)
 
-        outStream.write(ValToBuffer(this.unk07, 4))
-        outStream.write(ValToBuffer(this.wins, 4))
-        outStream.write(ValToBuffer(this.kills, 4))
-        outStream.write(ValToBuffer(this.unk10, 4))
-        outStream.write(ValToBuffer(this.deaths, 4))
-        outStream.write(ValToBuffer(this.assists, 4))
-        outStream.write(ValToBuffer(this.unk13, 2))
-        outStream.write(ValToBuffer(this.unk14, 4))
-        outStream.write(ValToBuffer(this.unk15, 4))
-        outStream.write(ValToBuffer(this.unk16, 4))
-        outStream.write(ValToBuffer(this.unk17, 1))
-        outStream.write(ValToBuffer(this.unk18, 8))
-        outStream.write(ValToBuffer(this.unk19, 4))
-        outStream.write(ValToBuffer(this.unk20, 4))
-        outStream.write(ValToBuffer(this.unk21, 4))
-        outStream.write(ValToBuffer(this.unk22, 4))
-        outStream.write(ValToBuffer(this.unk23, 4))
-        outStream.write(ValToBuffer(this.unk24, 4))
-        outStream.write(ValToBuffer(this.unk25, 4))
+        outPacket.writeUInt32(this.unk07)
+        outPacket.writeUInt32(this.wins)
+        outPacket.writeUInt32(this.kills)
+        outPacket.writeUInt32(this.unk10)
+        outPacket.writeUInt32(this.deaths)
+        outPacket.writeUInt32(this.assists)
+        outPacket.writeUInt16(this.unk13)
+        outPacket.writeUInt32(this.unk14)
+        outPacket.writeUInt32(this.unk15)
+        outPacket.writeUInt32(this.unk16)
+        outPacket.writeUInt8(this.unk17)
+        outPacket.writeUInt64(this.unk18)
+        outPacket.writeUInt32(this.unk19)
+        outPacket.writeUInt32(this.unk20)
+        outPacket.writeUInt32(this.unk21)
+        outPacket.writeUInt32(this.unk22)
+        outPacket.writeUInt32(this.unk23)
+        outPacket.writeUInt32(this.unk24)
+        outPacket.writeUInt32(this.unk25)
 
-        outStream.write(this.unk26.toBuffer())
-        outStream.write(ValToBuffer(this.unk27, 4))
-        outStream.write(ValToBuffer(this.unk28, 4))
-        outStream.write(ValToBuffer(this.unk29, 4))
-        outStream.write(ValToBuffer(this.unk30, 4))
-        outStream.write(this.unk31.toBuffer())
+        outPacket.writeString(this.unk26)
+        outPacket.writeUInt32(this.unk27)
+        outPacket.writeUInt32(this.unk28)
+        outPacket.writeUInt32(this.unk29)
+        outPacket.writeUInt32(this.unk30)
+        outPacket.writeString(this.unk31)
 
-        outStream.write(ValToBuffer(this.unk32, 4))
-        outStream.write(ValToBuffer(this.unk33, 4))
+        outPacket.writeUInt32(this.unk32)
+        outPacket.writeUInt32(this.unk33)
 
-        outStream.write(ValToBuffer(this.unk34, 4))
-        outStream.write(this.unk35.toBuffer())
-        outStream.write(ValToBuffer(this.unk36, 4))
-        outStream.write(ValToBuffer(this.unk37, 1))
+        outPacket.writeUInt32(this.unk34)
+        outPacket.writeString(this.unk35)
+        outPacket.writeUInt32(this.unk36)
+        outPacket.writeUInt8(this.unk37)
         for (const elem of this.unk38) {
-            outStream.write(ValToBuffer(elem, 4))
+            outPacket.writeUInt32(elem)
         }
         for (const elem of this.unk39) {
-            outStream.write(ValToBuffer(elem, 4))
+            outPacket.writeUInt32(elem)
         }
 
-        outStream.write(ValToBuffer(this.unk40, 1))
+        outPacket.writeUInt8(this.unk40)
 
-        outStream.write(ValToBuffer(this.unk41, 4))
-        outStream.write(ValToBuffer(this.unk42, 4))
+        outPacket.writeUInt32(this.unk41)
+        outPacket.writeUInt32(this.unk42)
 
-        outStream.write(ValToBuffer(this.unk43, 1))
-        outStream.write(ValToBuffer(this.unk44, 2))
-        outStream.write(ValToBuffer(this.unk45, 4))
+        outPacket.writeUInt8(this.unk43)
+        outPacket.writeUInt16(this.unk44)
+        outPacket.writeUInt32(this.unk45)
 
-        outStream.write(ValToBuffer(this.unk46, 4))
-        outStream.write(ValToBuffer(this.unk47, 8))
+        outPacket.writeUInt32(this.unk46)
+        outPacket.writeUInt64(this.unk47)
 
-        outStream.write(ValToBuffer(this.unk48, 4))
+        outPacket.writeUInt32(this.unk48)
 
-        outStream.write(ValToBuffer(this.unk49, 2))
+        outPacket.writeUInt16(this.unk49)
 
-        outStream.write(ValToBuffer(this.unk50, 2))
+        outPacket.writeUInt16(this.unk50)
 
         for (const elem of this.unk51) {
-            outStream.write(ValToBuffer(elem, 1))
+            outPacket.writeUInt8(elem)
         }
 
-        outStream.write(this.unk52.toBuffer())
+        outPacket.writeString(this.unk52)
 
-        outStream.write(ValToBuffer(this.unk53, 1))
-        outStream.write(ValToBuffer(this.unk54, 1))
+        outPacket.writeUInt8(this.unk53)
+        outPacket.writeUInt8(this.unk54)
 
-        outStream.write(ValToBuffer(this.unk55, 4))
-        outStream.write(ValToBuffer(this.unk56, 4))
-        outStream.write(ValToBuffer(this.unk57, 4))
+        outPacket.writeUInt32(this.unk55)
+        outPacket.writeUInt32(this.unk56)
+        outPacket.writeUInt32(this.unk57)
 
-        outStream.write(ValToBuffer(this.unk58, 2))
+        outPacket.writeUInt16(this.unk58)
 
         for (const elem of this.unk59) {
-            outStream.write(ValToBuffer(elem, 1))
+            outPacket.writeUInt8(elem)
         }
-        outStream.write(ValToBuffer(this.unk60, 4))
+        outPacket.writeUInt32(this.unk60)
 
-        outStream.write(ValToBuffer(this.unk61, 2))
+        outPacket.writeUInt16(this.unk61)
 
-        outStream.write(ValToBuffer(this.unk62, 2))
+        outPacket.writeUInt16(this.unk62)
 
         for (const elem of this.unk63) {
-            outStream.write(ValToBuffer(elem, 1))
+            outPacket.writeUInt8(elem)
         }
 
-        outStream.write(ValToBuffer(this.unk64, 1))
-        outStream.write(ValToBuffer(this.unk65, 1))
-        outStream.write(ValToBuffer(this.unk66, 4))
+        outPacket.writeUInt8(this.unk64)
+        outPacket.writeUInt8(this.unk65)
+        outPacket.writeUInt32(this.unk66)
 
-        outStream.write(ValToBuffer(this.unk67, 4))
+        outPacket.writeUInt32(this.unk67)
 
-        outStream.write(ValToBuffer(this.unk68, 8))
-        outStream.write(ValToBuffer(this.unk69, 8))
-        outStream.write(ValToBuffer(this.unk70, 1))
-        outStream.write(ValToBuffer(this.unk71, 8))
-        outStream.write(ValToBuffer(this.unk72, 8))
-        outStream.write(ValToBuffer(this.unk73, 1))
-        outStream.write(ValToBuffer(this.unk74, 4))
-        outStream.write(ValToBuffer(this.unk75, 4))
-        outStream.write(ValToBuffer(this.unk76, 4))
-        outStream.write(ValToBuffer(this.unk77, 4))
-        outStream.write(ValToBuffer(this.unk78, 4))
-        outStream.write(ValToBuffer(this.unk79, 4))
+        outPacket.writeUInt64(this.unk68)
+        outPacket.writeUInt64(this.unk69)
+        outPacket.writeUInt8(this.unk70)
+        outPacket.writeUInt64(this.unk71)
+        outPacket.writeUInt64(this.unk72)
+        outPacket.writeUInt8(this.unk73)
+        outPacket.writeUInt32(this.unk74)
+        outPacket.writeUInt32(this.unk75)
+        outPacket.writeUInt32(this.unk76)
+        outPacket.writeUInt32(this.unk77)
+        outPacket.writeUInt32(this.unk78)
+        outPacket.writeUInt32(this.unk79)
 
-        outStream.write(ValToBuffer(this.unk80, 4))
-        outStream.write(ValToBuffer(this.unk81, 4))
+        outPacket.writeUInt32(this.unk80)
+        outPacket.writeUInt32(this.unk81)
 
-        outStream.write(ValToBuffer(this.unk82, 1))
-        outStream.write(ValToBuffer(this.unk83, 1))
-        outStream.write(ValToBuffer(this.unk84, 1))
-    }
-
-    public build(): Buffer {
-        const outStream: WritableStreamBuffer = new WritableStreamBuffer(
-            { initialSize: 100, incrementAmount: 20 })
-
-        // packet size excludes packet header
-        this.buildHeader(outStream)
-
-        // packet id
-        outStream.write(ValToBuffer(this.id, 1))
-
-        outStream.write(ValToBuffer(this.userId, 4))
-
-        this.buildData(outStream)
-
-        const resBuffer: Buffer = outStream.getContents()
-        this.setPacketLength(resBuffer)
-
-        return resBuffer
+        outPacket.writeUInt8(this.unk82)
+        outPacket.writeUInt8(this.unk83)
+        outPacket.writeUInt8(this.unk84)
     }
 }

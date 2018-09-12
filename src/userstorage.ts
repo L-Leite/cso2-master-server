@@ -1,3 +1,6 @@
+import * as ip from 'ip'
+
+import { ExtendedSocket } from './extendedsocket'
 import { UserData } from './userdata'
 
 /**
@@ -17,8 +20,15 @@ export class UserStorage {
         return null
     }
 
-    public static addUser(uuid: string, userId: number, userName: string): UserData {
-        const newData: UserData = new UserData(uuid, userId, userName)
+    public static addUser(socket: ExtendedSocket, userId: number, userName: string): UserData {
+        const newData: UserData = new UserData(socket.uuid, userId, userName)
+        let ipAddress: string = socket.remoteAddress
+        if (ip.isV6Format(ipAddress)) {
+            if (ipAddress.substr(0, 7) === '::ffff:') {
+                ipAddress = ipAddress.substr(7, ipAddress.length - 7)
+            }
+        }
+        newData.externalIpAddress = ipAddress
         this.data.set(userId, newData)
         this.dataCount++
         return newData

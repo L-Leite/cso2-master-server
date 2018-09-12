@@ -1,5 +1,4 @@
-import { Uint64LE } from 'int64-buffer';
-import { UserData } from './userdata';
+import { UserData } from './userdata'
 
 export class RoomData {
     public roomId: number
@@ -9,20 +8,22 @@ export class RoomData {
     public mapId: number
     public winLimit: number
     public killLimit: number
-    public players: UserData[]
+    public users: UserData[]
 
-    constructor(roomId: number, roomName: string, hostId: number) {
+    constructor(roomId: number, roomName: string, hostId: number,
+                gameModeId: number, mapId: number,
+                winLimit: number, killLimit: number) {
         this.roomId = roomId
         this.roomName = roomName
         this.hostId = hostId
-        this.gameModeId = 0x2F
-        this.mapId = 3
-        this.winLimit = 10
-        this.killLimit = 10
-        this.players = []
+        this.gameModeId = gameModeId
+        this.mapId = mapId
+        this.winLimit = winLimit
+        this.killLimit = killLimit
+        this.users = []
     }
 
-    public addPlayer(user: UserData) {
-        this.players.push(user)
+    public addUser(user: UserData) {
+        this.users.push(user)
     }
 }

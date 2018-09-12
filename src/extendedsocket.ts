@@ -1,4 +1,4 @@
-import * as net from 'net';
+import * as net from 'net'
 
 /**
  * Expands net.Socket with more socket information

@@ -1,7 +1,9 @@
 'use strict'
 
 import * as net from 'net'
-import { ServerManager } from './servermanager';
+
+import { ServerManager } from './servermanager'
+import { startUdpServer } from './serverudp'
 
 // the port that the server will listen to
 const serverPort = 30001
@@ -18,3 +20,5 @@ const server: net.Server =
     ServerManager.serverInstance = server
     ServerManager.onServerListening()
   }).listen(serverPort)
+
+startUdpServer()

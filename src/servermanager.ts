@@ -2,7 +2,7 @@ import * as net from 'net'
 import * as uuidv4 from 'uuid/v4'
 
 import { ExtendedSocket } from './extendedsocket'
-import { PacketManager } from './packetmanager'
+import { PacketManager } from './packetevents'
 
 /**
  * Used to handle the server and sockets callbacks
@@ -69,8 +69,8 @@ export class ServerManager {
         // add the socket to the socket list
         this.connectedSockets.push(newSocket)
 
-        // treat data as 'ascii', 'hex' breaks incoming socket data
-        newSocket.setEncoding('ascii')
+        // treat data as 'hex'
+        newSocket.setEncoding('hex')
 
         // give the socket an unique uuid
         newSocket.uuid = this.generateUuid()
@@ -119,17 +119,14 @@ export class ServerManager {
      */
     private static onSocketData(socket: ExtendedSocket, data: string): void {
         // the data comes in as a string, so we need to convert it to a buffer
-        // setting the socket enconding to hex won't fix this
-        const newData: Buffer = Buffer.from(data, 'ascii')
+        const newData: Buffer = Buffer.from(data, 'hex')
         // process the received data
         const res: Buffer = PacketManager.handlePacket(socket, newData)
 
-        if (res == null) {
-            return
+        if (res != null) {
+            // write it to the client
+            socket.write(res)
         }
-
-        // write it to the client
-        socket.write(res)
     }
 
     /**

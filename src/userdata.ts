@@ -1,9 +1,16 @@
-import { Uint64LE } from 'int64-buffer';
+import { Uint64LE } from 'int64-buffer'
 
 export class UserData {
     public uuid: string
-    public ip: string
+    public externalIpAddress: string
     public port: number
+    public externalClientPort: number
+    public externalServerPort: number
+    public externalTvPort: number
+    public localIpAddress: string
+    public localClientPort: number
+    public localServerPort: number
+    public localTvPort: number
     public userId: number
     public userName: string
     public level: number

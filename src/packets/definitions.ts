@@ -1,3 +1,4 @@
+// every tcp packet starts with this byte
 export const PacketSignature: number = 0x55 // 'U'
 
 export enum PacketId {

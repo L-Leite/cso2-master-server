@@ -8,8 +8,11 @@ export class RoomStorage {
         return this.data.get(roomId)
     }
 
-    public static addRoom(roomId: number, roomName: string, hostId: number): RoomData {
-        const newData: RoomData = new RoomData(roomId, roomName, hostId)
+    public static addRoom(roomId: number, roomName: string, hostId: number,
+                          gameModeId: number, mapId: number,
+                          winLimit: number, killLimit: number): RoomData {
+        const newData: RoomData = new RoomData(roomId, roomName,
+            hostId, gameModeId, mapId, winLimit, killLimit)
         this.data.set(roomId, newData)
         this.dataCount++
         return newData
