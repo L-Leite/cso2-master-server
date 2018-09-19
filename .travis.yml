@@ -8,10 +8,13 @@ script:
   - npm run build
 after_success:
   - npm pack
+before_deploy:
+  - git config --local user.name "Ochii"
+  - git config --local user.email "ochii@outlook.pt"
+  - git tag "cso2-master-server-0.1.$TRAVIS_BUILD_NUMBER"
+  - mv "cso2-master-server-0.0.1.tgz" "cso2-master-server-0.1.$TRAVIS_BUILD_NUMBER.tgz"
 deploy:
   provider: releases
   api_key: "GITHUB OAUTH TOKEN"
-  file: "cso2-master-server-0.0.1.tgz"
+  file: "cso2-master-server-0.1.$TRAVIS_BUILD_NUMBER.tgz"
   skip_cleanup: true
-  on:
-    tags: true
