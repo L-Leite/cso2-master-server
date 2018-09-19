@@ -11,11 +11,11 @@ after_success:
 before_deploy:
   - git config --local user.name "Ochii"
   - git config --local user.email "ochii@outlook.pt"
-  - git tag "v0.1.$(TRAVIS_BUILD_NUMBER)"
-  - mv "cso2-master-server-0.1.0.tgz" "cso2-master-server-0.1.$(TRAVIS_BUILD_NUMBER).tgz"
+  - git tag "v0.1.$TRAVIS_BUILD_NUMBER"
+  - mv "cso2-master-server-0.1.0.tgz" "cso2-master-server-0.1.$TRAVIS_BUILD_NUMBER.tgz"
 deploy:
   provider: releases
   api_key:
     secure: "cgxr9hBDN1BWM7ph94OGD1aHVG2Jm3kI7sDLvPfnBSWnqpoCI2b68XonBz7naooZkWPFtFaJ0nIaL9HPsUysXt6PEHCZQ25k+dpYiEZmibW236g4pCJRSHVAUhEDjkJSvFK7Qr5KD/1HR2nFDWMPe+7SiTQVHxme0ypeYHOUQJPpe4fZlMgZOUDb3eDdoLmz9WrZ3M2KQVOYpO3JRqz/p37V1hICI2Gr/oj5x+RoS67xRAf95FWmCfRQhAj/iVCWwF2NjAwdvDr+XwwNWxXb7gXj+5AXue/svER6Gt2HAH5SDeq7R0t9JG0AMC2/ecySkN2wo9IR6R66Q8Pk3up65iFH1NqNwdSDK7Usy8olp9b1VYfpfPJFsqqQnZNvv0Kqfjcjxu+7tPk6kJ9oUK3fTM+ALjaT1t6jeut8pg2GlOUb0NMzUxA+8lfG0klz7ZclxT59PNQAz5SG9B5XnZDVf1QFArgWGNt0Yhh0J8AA75PLgGZ8dEh8CmFTYBVEbaLYV18lwELo5HGg9O5udVIKlDhTctRveJJTQsf1gIEi8+DLme/hpmJT6WwFlwc7ct2ujRynNyC1sOelmbwFfLAe0lMAm+d8vUS1x1KgkdeLQ263RoZGQLNHiZZwsY1JObPagnUJ58VmGoOcDpWH/jXux8DEJMhEFpu/1p06hfuImMo="
-  file: "cso2-master-server-0.1.$(TRAVIS_BUILD_NUMBER).tgz"
+  file: "cso2-master-server-0.1.$TRAVIS_BUILD_NUMBER.tgz"
   skip_cleanup: true
