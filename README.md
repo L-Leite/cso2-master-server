@@ -13,9 +13,13 @@ You can find its client [here](https://github.com/Ochii/cso2-launcher/).
 - [Node.js](https://nodejs.org/);
 - A copy of the project transpiled to Javascript, you may [get one here](https://github.com/Ochii/cso2-master-server/releases/latest) or [build it yourself](#how-to-build)
 
+### Obtaining the dependencies
+
+In the project's directory, run the ```npm install --only=production``` command to obtain the server's dependencies.
+
 ### Starting the server
 
-In the project's directory, run the ```npm run start``` command to start the server.
+In the project's directory, use the ```npm run start``` command to start the server.
 
 It will listen to ports 30001 TCP and 30002 UDP by default.
 
