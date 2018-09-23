@@ -39,6 +39,16 @@ export class UserStorage {
         this.dataCount--
     }
 
+    public static removeUserByUuid(uuid: string): void {
+        for (const entry of this.data) {
+            if (entry['1'].uuid === uuid) {
+                this.data.delete(entry['1'].userId)
+                this.dataCount--
+                return
+            }
+        }
+    }
+
     private static data: Map<number, UserData> = new Map<number, UserData>()
     private static dataCount: number = 0
 }

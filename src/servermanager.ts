@@ -3,6 +3,7 @@ import * as uuidv4 from 'uuid/v4'
 
 import { ExtendedSocket } from './extendedsocket'
 import { PacketManager } from './packetevents'
+import { UserStorage } from './userstorage';
 
 /**
  * Used to handle the server and sockets callbacks
@@ -135,8 +136,8 @@ export class ServerManager {
      * @param err - the occured error
      */
     private static onSocketError(socket: ExtendedSocket, err: Error): void {
-        console.log('socket ' + socket.uuid + ' had an error')
-        throw err
+        console.log('socket ' + socket.uuid + ' had an error: ' + err)
+        UserStorage.removeUserByUuid(socket.uuid)
     }
 
     /**
@@ -153,6 +154,7 @@ export class ServerManager {
      * @param socket - the client's socket
      */
     private static onSocketEnd(socket: ExtendedSocket): void {
+        UserStorage.removeUserByUuid(socket.uuid)
         console.log('socket ' + socket.uuid + ' ended')
     }
 
