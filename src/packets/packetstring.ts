@@ -1,5 +1,5 @@
 /**
- * Stores an ascii (?) string used by packets
+ * Stores an utf8 string used by packets
  * The first byte is the size of the string,
  * followed by the string itself
  * @class PacketString
@@ -7,7 +7,7 @@
 export class PacketString {
     public static from(data: Buffer): PacketString {
         return new PacketString(data.slice(1,
-            1 + data[0]).toString('ascii'))
+            1 + data[0]).toString('utf8'))
     }
 
     public str: string
@@ -34,7 +34,7 @@ export class PacketString {
         const newBuffer = Buffer.alloc(this.rawLength())
         newBuffer[0] = this.length()
         if (this.str) {
-            newBuffer.write(this.str, 1, this.length(), 'ascii')
+            newBuffer.write(this.str, 1, this.length(), 'utf8')
         }
         return newBuffer
     }

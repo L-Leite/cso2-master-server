@@ -2,11 +2,11 @@
  * Stores an utf8 string used by packets
  * The first 2 bytes (in Little Endian) are the size of the string,
  * followed by the string itself
- * @class PacketUtf8String
+ * @class PacketLongString
  */
-export class PacketUtf8String {
-    public static from(data: Buffer): PacketUtf8String {
-        return new PacketUtf8String(data.slice(2,
+export class PacketLongString {
+    public static from(data: Buffer): PacketLongString {
+        return new PacketLongString(data.slice(2,
             2 + data.readUInt16LE(0)).toString('utf8'))
     }
 

@@ -1,11 +1,14 @@
+import { PacketId } from '../packets/definitions'
+import { BasePacketEvent } from './base'
+
 import { InLoginPacket } from '../packets/in/login'
 import { OutUserInfoPacket } from '../packets/out/userinfo'
 import { OutUserStartPacket } from '../packets/out/userstart'
 
-import { PacketId } from '../packets/definitions'
 import { UserData } from '../userdata'
 import { UserStorage } from '../userstorage'
-import { BasePacketEvent } from './base'
+
+import { ChannelManager } from '../channelmanager'
 
 let curUserId = 1
 
@@ -57,6 +60,9 @@ export class OnLoginPacket extends BasePacketEvent {
         const userInfoReply: Buffer =
             new OutUserInfoPacket(this.socket.getSeq()).fullUserUpdate(this.newUserData)
 
-        return Buffer.concat([userStartReply, userInfoReply])
+        const serverListReply: Buffer =
+            ChannelManager.buildAsPacket(this.socket.getSeq())
+
+        return Buffer.concat([userStartReply, userInfoReply, serverListReply])
     }
 }

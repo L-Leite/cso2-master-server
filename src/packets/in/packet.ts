@@ -1,8 +1,8 @@
 import { Int64BE, Int64LE, Uint64BE, Uint64LE } from 'int64-buffer'
 
 import { PacketSignature } from '../definitions'
+import { PacketLongString } from '../packetlongstring'
 import { PacketString } from '../packetstring'
-import { PacketUtf8String } from '../packetutf8string'
 
 /**
  * The incoming TCP packet's base
@@ -191,7 +191,7 @@ export class InPacketBase {
         if (this.canReadBytes(2) === false) {
             throw new Error('Data buffer is too small')
         }
-        const res: PacketUtf8String = PacketUtf8String.from(
+        const res: PacketLongString = PacketLongString.from(
             this.packetData.slice(this.curOffset,
                 this.packetData.length))
         this.curOffset += res.rawLength()

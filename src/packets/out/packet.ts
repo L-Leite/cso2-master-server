@@ -2,8 +2,8 @@ import { Int64BE, Int64LE, Uint64BE, Uint64LE } from 'int64-buffer'
 import { WritableStreamBuffer } from 'stream-buffers'
 
 import { PacketSignature } from '../definitions'
+import { PacketLongString } from '../packetlongstring'
 import { PacketString } from '../packetstring'
-import { PacketUtf8String } from '../packetutf8string'
 
 /**
  * The outgoing TCP packet's base
@@ -112,7 +112,7 @@ export abstract class OutPacketBase {
             this.UnsignedToBuffer(val, 8, littleEndian))
     }
 
-    public writeUtf8String(str: PacketUtf8String): void {
+    public writeUtf8String(str: PacketLongString): void {
         this.outStream.write(str.toBuffer())
     }
 
