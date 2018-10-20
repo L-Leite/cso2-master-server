@@ -1,9 +1,9 @@
 import { WritableStreamBuffer } from 'stream-buffers'
 
-import { PacketId } from '../definitions'
-import { HostGameStart } from './host/gamestart'
-import { HostJoinHost } from './host/joinhost'
-import { OutPacketBase } from './packet'
+import { PacketId } from 'packets/definitions'
+import { HostGameStart } from 'packets/out/host/gamestart'
+import { HostJoinHost } from 'packets/out/host/joinhost'
+import { OutPacketBase } from 'packets/out/packet'
 
 export enum HostPacketType {
     GameStart = 0, // when a host starts a new game

@@ -1,8 +1,9 @@
 import { Uint64LE } from 'int64-buffer'
 
-import { UserData } from '../../../userdata'
-import { PacketString } from '../../packetstring'
-import { OutPacketBase } from '../packet'
+import { OutPacketBase } from 'packets/out/packet'
+import { PacketString } from 'packets/packetstring'
+
+import { User } from 'user/user'
 
 /**
  * Sub structure of UserInfo packet
@@ -162,7 +163,7 @@ export class UserInfoFullUpdate {
     private unk84: number
     // end of flag & 0x40000000
 
-    constructor(user: UserData) {
+    constructor(user: User) {
         this.userId = user.userId
         this.flags = 0xFFFFFFFF
         this.unk00 = new Uint64LE(0x2241158F)
@@ -289,6 +290,7 @@ export class UserInfoFullUpdate {
      * @param outPacket the packet where the data will go
      */
     public build(outPacket: OutPacketBase): void {
+        outPacket.writeUInt32(this.userId)
         outPacket.writeUInt32(this.flags)
 
         outPacket.writeUInt64(this.unk00)

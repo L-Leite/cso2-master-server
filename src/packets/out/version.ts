@@ -1,8 +1,8 @@
 import { WritableStreamBuffer } from 'stream-buffers'
 
-import { PacketId } from '../definitions'
-import { PacketString } from '../packetstring'
-import { OutPacketBase } from './packet'
+import { PacketId } from 'packets/definitions'
+import { OutPacketBase } from 'packets/out/packet'
+import { PacketString } from 'packets/packetstring'
 
 /**
  * outgoing version packet

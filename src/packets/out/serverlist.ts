@@ -1,10 +1,11 @@
 import { WritableStreamBuffer } from 'stream-buffers'
 
-import { PacketId } from '../definitions'
-import { OutPacketBase } from './packet'
+import { PacketId } from 'packets/definitions'
+import { OutPacketBase } from 'packets/out/packet'
 
-import { ChannelServer } from '../../channelserver'
-import { ServerListServerInfo } from './serverlist/serverinfo'
+import { ChannelServer } from 'channel/channelserver'
+
+import { ServerListServerInfo } from 'packets/out/serverlist/serverinfo'
 
 /**
  * outgoing userstart packet

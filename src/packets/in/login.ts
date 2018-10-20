@@ -1,6 +1,6 @@
 import { Uint64LE } from 'int64-buffer'
 
-import { InPacketBase } from './packet'
+import { InPacketBase } from 'packets/in/packet'
 
 /**
  * incoming login packet

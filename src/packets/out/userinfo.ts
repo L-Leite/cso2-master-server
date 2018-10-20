@@ -1,9 +1,11 @@
 import { WritableStreamBuffer } from 'stream-buffers'
 
-import { UserData } from '../../userdata'
-import { PacketId } from '../definitions'
-import { OutPacketBase } from './packet'
-import { UserInfoFullUpdate } from './userinfo/fulluserupdate'
+import { PacketId } from 'packets/definitions'
+import { OutPacketBase } from 'packets/out/packet'
+
+import { User } from 'user/user'
+
+import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 
 /**
  * outgoing userinfo packet
@@ -16,14 +18,12 @@ export class OutUserInfoPacket extends OutPacketBase {
         this.packetId = PacketId.UserInfo
     }
 
-    public fullUserUpdate(user: UserData): Buffer {
+    public fullUserUpdate(user: User): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 100, incrementAmount: 20 })
         const fullUpdate: UserInfoFullUpdate = new UserInfoFullUpdate(user)
 
         this.buildHeader()
-
-        this.writeUInt32(user.userId)
         fullUpdate.build(this)
 
         const resBuffer: Buffer = this.outStream.getContents()

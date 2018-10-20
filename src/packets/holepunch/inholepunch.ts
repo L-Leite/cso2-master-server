@@ -2,7 +2,7 @@ import * as ip from 'ip'
 
 export const UdpPacketSignature: number = 0x57 // 'W'
 
-export enum HpPortType {
+export enum HolepunchType {
     Client = 0,
     Server = 256,
     SourceTV = 512,
@@ -28,8 +28,7 @@ export class InHolepunchPacketUdp {
         this.signature = this.packetData.readUInt8(curOffset++)
 
         if (this.signature !== UdpPacketSignature) {
-            throw new Error('this is not a packet! signature: ' +
-                this.signature)
+            throw new Error('this is not a holepucnh packet!')
         }
 
         if (this.packetData.byteLength === 6) {

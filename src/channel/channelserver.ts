@@ -1,4 +1,7 @@
-import { Channel } from './channel'
+import { Channel } from 'channel/channel'
+
+import { ExtendedSocket } from 'extendedsocket'
+import { ServerInstance } from 'serverinstance'
 
 /**
  * Represents a channel "server"
@@ -6,7 +9,7 @@ import { Channel } from './channel'
  * @class ChannelServer
  */
 export class ChannelServer {
-    private static currentServerId = 0
+    private static currentServerId = 1
 
     private static formatServerName(serverName: string,
                                     serverIndex: number,
@@ -29,7 +32,7 @@ export class ChannelServer {
         this.channels = []
 
         for (let index = 0; index < numOfChannels; index++) {
-            const newChannelId: number = ChannelServer.currentServerId + 1
+            const newChannelId: number = ChannelServer.currentServerId
             const newChannelName: string = ChannelServer.formatChannelName(
                 serverName, serverIndex, newChannelId)
 
@@ -37,5 +40,9 @@ export class ChannelServer {
 
             ChannelServer.currentServerId++
         }
+    }
+
+    public onRoomListPacket(data: Buffer, sourceSocket: ExtendedSocket, server: ServerInstance): boolean {
+        return true
     }
 }

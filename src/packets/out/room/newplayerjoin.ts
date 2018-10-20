@@ -1,7 +1,9 @@
-import { UserData } from '../../../userdata'
-import { OutPacketBase } from '../packet'
-import { UserInfoFullUpdate } from '../userinfo/fulluserupdate'
-import { RoomPlayerNetInfo } from './playernetinfo'
+import { OutPacketBase } from 'packets/out/packet'
+
+import { User } from 'user/user'
+
+import { RoomPlayerNetInfo } from 'packets/out/room/playernetinfo'
+import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 
 /**
  * Sub structure of Room packet
@@ -10,9 +12,9 @@ import { RoomPlayerNetInfo } from './playernetinfo'
  */
 export class RoomNewPlayerJoin {
     private netInfo: RoomPlayerNetInfo
-    private player: UserData
+    private player: User
 
-    constructor(user: UserData) {
+    constructor(user: User) {
         this.netInfo = new RoomPlayerNetInfo(user)
         this.player = user
     }

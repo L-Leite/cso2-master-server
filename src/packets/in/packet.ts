@@ -1,8 +1,8 @@
 import { Int64BE, Int64LE, Uint64BE, Uint64LE } from 'int64-buffer'
 
-import { PacketSignature } from '../definitions'
-import { PacketLongString } from '../packetlongstring'
-import { PacketString } from '../packetstring'
+import { PacketId, PacketSignature } from 'packets/definitions'
+import { PacketLongString } from 'packets/packetlongstring'
+import { PacketString } from 'packets/packetstring'
 
 /**
  * The incoming TCP packet's base
@@ -19,7 +19,7 @@ export class InPacketBase {
     public signature: number
     public sequence: number
     public length: number
-    public packetId: number
+    public id: PacketId
     // end of the packet structure
     protected packetData: Buffer
     // the current offset to the buffer
@@ -51,7 +51,7 @@ export class InPacketBase {
 
         this.sequence = this.readUInt8()
         this.length = this.readUInt16()
-        this.packetId = this.readUInt8()
+        this.id = this.readUInt8()
     }
 
     /**

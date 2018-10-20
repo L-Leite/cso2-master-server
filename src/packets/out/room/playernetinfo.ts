@@ -1,7 +1,8 @@
 import * as ip from 'ip'
 
-import { UserData } from '../../../userdata'
-import { OutPacketBase } from '../packet'
+import { OutPacketBase } from 'packets/out/packet'
+
+import { User } from 'user/user'
 
 /**
  * Sub structure of Room packet
@@ -22,7 +23,7 @@ export class RoomPlayerNetInfo {
     private localClientPort: number
     private localTvPort: number
 
-    constructor(user: UserData) {
+    constructor(user: User) {
         this.userId = user.userId
         this.playerUnk00 = 2
         this.playerUnk01 = 0

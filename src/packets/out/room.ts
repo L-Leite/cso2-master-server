@@ -1,11 +1,13 @@
 import { WritableStreamBuffer } from 'stream-buffers'
 
-import { RoomData } from '../../roomdata'
-import { UserData } from '../../userdata'
-import { PacketId } from '../definitions'
-import { OutPacketBase } from './packet'
-import { RoomCreateAndJoinRoom } from './room/createandjoin'
-import { RoomNewPlayerJoin } from './room/newplayerjoin'
+import { PacketId } from 'packets/definitions'
+import { OutPacketBase } from 'packets/out/packet'
+
+import { Room } from 'room/room'
+import { User } from 'user/user'
+
+import { RoomCreateAndJoinRoom } from 'packets/out/room/createandjoin'
+import { RoomNewPlayerJoin } from 'packets/out/room/newplayerjoin'
 
 export enum OutRoomPacketType {
     CreateAndJoinRoom = 0,
@@ -24,7 +26,7 @@ export class OutRoomPacket extends OutPacketBase {
         this.packetId = PacketId.Room
     }
 
-    public createAndJoinRoom(roomInfo: RoomData): Buffer {
+    public createAndJoinRoom(roomInfo: Room): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 100, incrementAmount: 20 })
 
@@ -39,7 +41,7 @@ export class OutRoomPacket extends OutPacketBase {
         return res
     }
 
-    public newPlayerJoinRoom(user: UserData): Buffer {
+    public newPlayerJoinRoom(user: User): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 60, incrementAmount: 15 })
 

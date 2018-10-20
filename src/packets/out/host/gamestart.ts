@@ -1,4 +1,4 @@
-import { OutPacketBase } from '../packet'
+import { OutPacketBase } from 'packets/out/packet'
 
 /**
  * Sub structure of Host packet

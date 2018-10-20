@@ -18,14 +18,3 @@ export enum PacketId {
     UserStart = 150,
     UserInfo = 157,
 }
-
-/*
-packet structure:
-{
-    signature, (length: byte)
-    sequence, (length: byte)
-    data_size, (length: word)
-    packet_id, (length: byte) this is part of data
-    then the data itself (length: data_size)
-}
-*/

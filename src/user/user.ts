@@ -1,6 +1,7 @@
 import { Uint64LE } from 'int64-buffer'
+import { HolepunchType } from '../packets/holepunch/inholepunch';
 
-export class UserData {
+export class User {
     public uuid: string
     public userId: number
 
@@ -38,30 +39,23 @@ export class UserData {
         this.assists = 3
     }
 
-    /**
-     * set holepunch client ports
-     */
-    public setHpClientInfo(localClientPort: number,
-                           externalClientPort: number): void {
-        this.localClientPort = localClientPort
-        this.externalClientPort = externalClientPort
-    }
-
-    /**
-     * set holepunch server ports
-     */
-    public setHpServerInfo(localServerPort: number,
-                           externalServerPort: number): void {
-        this.localServerPort = localServerPort
-        this.externalServerPort = externalServerPort
-    }
-
-    /**
-     * set holepunch SourceTV ports
-     */
-    public setHpTvInfo(localTvPort: number,
-                       externalTvPort: number): void {
-        this.localTvPort = localTvPort
-        this.externalTvPort = externalTvPort
+    public updateHolepunch(portId: number, localPort: number,
+                           externalPort: number): number {
+        switch (portId) {
+            case HolepunchType.Client:
+                this.localClientPort = localPort
+                this.externalClientPort = externalPort
+                return 0
+            case HolepunchType.Server:
+                this.localServerPort = localPort
+                this.externalServerPort = externalPort
+                return 1
+            case HolepunchType.SourceTV:
+                this.localTvPort = localPort
+                this.externalTvPort = externalPort
+                return 2
+            default:
+                return -1
+        }
     }
 }

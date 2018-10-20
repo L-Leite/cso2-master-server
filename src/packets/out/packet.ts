@@ -1,9 +1,9 @@
 import { Int64BE, Int64LE, Uint64BE, Uint64LE } from 'int64-buffer'
 import { WritableStreamBuffer } from 'stream-buffers'
 
-import { PacketSignature } from '../definitions'
-import { PacketLongString } from '../packetlongstring'
-import { PacketString } from '../packetstring'
+import { PacketSignature } from 'packets/definitions'
+import { PacketLongString } from 'packets/packetlongstring'
+import { PacketString } from 'packets/packetstring'
 
 /**
  * The outgoing TCP packet's base

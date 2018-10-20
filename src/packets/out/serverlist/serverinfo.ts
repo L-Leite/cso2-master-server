@@ -1,9 +1,10 @@
-import { PacketString } from '../../packetstring'
-import { OutPacketBase } from '../packet'
+import { OutPacketBase } from 'packets/out/packet'
+import { PacketString } from 'packets/packetstring'
 
-import { Channel } from '../../../channel'
-import { ChannelServer } from '../../../channelserver'
-import { ServerListChannelInfo } from './channelinfo'
+import { Channel } from 'channel/channel'
+import { ChannelServer } from 'channel/channelserver'
+
+import { ServerListChannelInfo } from 'packets/out/serverlist/channelinfo'
 
 /**
  * Sub structure of ServerList packet

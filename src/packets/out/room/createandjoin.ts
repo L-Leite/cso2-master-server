@@ -1,11 +1,13 @@
 import { Uint64LE } from 'int64-buffer'
 
-import { RoomData } from '../../../roomdata'
-import { UserData } from '../../../userdata'
-import { PacketString } from '../../packetstring'
-import { OutPacketBase } from '../packet'
-import { UserInfoFullUpdate } from '../userinfo/fulluserupdate'
-import { RoomPlayerNetInfo } from './playernetinfo'
+import { OutPacketBase } from 'packets/out/packet'
+import { PacketString } from 'packets/packetstring'
+
+import { Room } from 'room/room'
+import { User } from 'user/user'
+
+import { RoomPlayerNetInfo } from 'packets/out/room/playernetinfo'
+import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 
 /**
  * Sub structure of Room packet
@@ -130,9 +132,9 @@ export class RoomCreateAndJoinRoom {
     private unk46: number
     // end of flags & 0x100000000
     private numOfPlayers: number
-    private users: UserData[]
+    private users: User[]
 
-    constructor(roomInfo: RoomData) {
+    constructor(roomInfo: Room) {
 
         this.roomHostId = roomInfo.hostId
         this.unk01 = 2

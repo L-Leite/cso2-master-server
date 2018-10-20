@@ -1,13 +1,12 @@
-import { PacketString } from '../../packetstring'
+import { OutPacketBase } from 'packets/out/packet'
+import { PacketString } from 'packets/packetstring'
 
-import { OutPacketBase } from '../packet'
-
-import { Channel } from '../../../channel'
+import { Channel } from 'channel/channel'
 
 /**
  * Sub structure of ServerList sub structure
  * Has information about a server channel
- * @class ServerListSubChannelInfo
+ * @class ServerListChannelInfo
  */
 export class ServerListChannelInfo {
     private id: number
