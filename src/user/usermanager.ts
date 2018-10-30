@@ -112,6 +112,10 @@ export class UserManager {
         return this.addUser(userName, sourceSocket)
     }
 
+    public isUuidLoggedIn(uuid: string): boolean {
+        return this.getUserByUuid(uuid) != null
+    }
+
     public addUser(userName: string, socket: ExtendedSocket): User {
         const newUser: User = new User(socket.uuid,
             socket.remoteAddress, this.nextUserId++, userName)
@@ -143,7 +147,7 @@ export class UserManager {
                 const user = this.users[key]
 
                 if (user.userId === userId) {
-                    delete this.users[key]
+                    this.users.splice(this.users.indexOf(user), 1)
                     return
                 }
             }
@@ -156,7 +160,7 @@ export class UserManager {
                 const user = this.users[key]
 
                 if (user.uuid === uuid) {
-                    delete this.users[key]
+                    this.users.splice(this.users.indexOf(user), 1)
                     return
                 }
             }

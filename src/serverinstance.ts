@@ -1,4 +1,5 @@
 import * as dgram from 'dgram'
+import * as hexy from 'hexy'
 import * as net from 'net'
 import * as uuidv4 from 'uuid/v4'
 
@@ -14,6 +15,9 @@ import { User } from 'user/user'
 import { UserManager } from 'user/usermanager'
 
 import { ChannelManager } from 'channel/channelmanager'
+
+import { OutLobbyPacket } from 'packets/out/lobby'
+import { OutRoomListPacket } from 'packets/out/roomlist'
 
 /**
  * The welcome message sent to the client
@@ -248,8 +252,14 @@ export class ServerInstance {
                 return this.users.onVersionPacket(packetData, sourceSocket)
             case PacketId.Login:
                 return this.users.onLoginPacket(packetData, sourceSocket, this.channels)
+            case PacketId.RequestChannels:
+                return this.channels.onChannelListPacket(sourceSocket, this.users)
             case PacketId.Udp:
                 return this.users.onUdpPacket(packetData, sourceSocket)
+            case PacketId.Crypt:
+                sourceSocket.write(new OutLobbyPacket(sourceSocket.getSeq()).doSomething())
+                sourceSocket.write(new OutRoomListPacket(sourceSocket.getSeq()).getFullList())
+                return true
         }
 
         console.log('unknown packet id ' + packet.id + ' from ' + sourceSocket.uuid)

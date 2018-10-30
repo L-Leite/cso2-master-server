@@ -31,14 +31,12 @@ export class Channel {
     public removeRoom(roomId: number): void {
         for (const key in this.rooms) {
             if (this.rooms.hasOwnProperty(key)) {
-                continue
-            }
+                const room = this.rooms[key]
 
-            const room = this.rooms[key]
-
-            if (room.roomId === roomId) {
-                delete this.rooms[key]
-                return
+                if (room.roomId === roomId) {
+                    this.rooms.splice(this.rooms.indexOf(room), 1)
+                    return
+                }
             }
         }
     }
@@ -46,14 +44,12 @@ export class Channel {
     public removeEmptyRooms(): void {
         for (const key in this.rooms) {
             if (this.rooms.hasOwnProperty(key)) {
-                continue
-            }
+                const room = this.rooms[key]
 
-            const room = this.rooms[key]
-
-            if (room.isEmpty()) {
-                delete this.rooms[key]
-                return
+                if (room.isEmpty()) {
+                    this.rooms.splice(this.rooms.indexOf(room), 1)
+                    return
+                }
             }
         }
     }

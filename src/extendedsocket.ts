@@ -23,6 +23,11 @@ export class ExtendedSocket extends net.Socket {
      * returns the current sequence and increments it
      */
     public getSeq(): number {
+        // don't overflow the sequence count (max sequence is 255)
+        if (this.seq >= 256) {
+            this.initSeq()
+        }
+
         return this.seq++
     }
 

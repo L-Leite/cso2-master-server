@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 'use strict'
 
 // add the src path to the module search path
