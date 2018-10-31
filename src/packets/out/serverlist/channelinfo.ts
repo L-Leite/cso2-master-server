@@ -18,7 +18,7 @@ export class ServerListChannelInfo {
     private unk04: number
 
     constructor(channel: Channel) {
-        this.id = channel.id
+        this.id = channel.index
         this.name = new PacketString(channel.name)
         this.unk00 = 4
         this.unk01 = 0x1F4

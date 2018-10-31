@@ -2,6 +2,8 @@ import { OutPacketBase } from 'packets/out/packet'
 
 import { RoomListRoomData } from 'packets/out/roomlist/roomdata'
 
+import { Room } from 'room/room'
+
 /**
  * Sub structure of RoomList packet
  * send the full info about a room list
@@ -11,16 +13,18 @@ export class RoomListFullList {
     private roomCount: number
     private rooms: RoomListRoomData[]
 
-    constructor() {
-        this.roomCount = 1
+    constructor(rooms: Room[]) {
+        this.roomCount = rooms.length
         this.rooms = []
-        this.rooms.push(new RoomListRoomData())
+        for (const room of rooms) {
+            this.rooms.push(new RoomListRoomData(room))
+        }
     }
     public build(outPacket: OutPacketBase): void {
         outPacket.writeUInt16(this.roomCount)
 
-        this.rooms.forEach((room: RoomListRoomData) => {
+        for (const room of this.rooms) {
             room.build(outPacket)
-        });
+        }
     }
 }

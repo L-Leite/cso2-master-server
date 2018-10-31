@@ -73,9 +73,9 @@ export class OutConfigInfoPacket extends OutPacketBase {
         this.writeUInt8(this.unk00)
         this.writeUInt8(this.unkArrayCount)
 
-        this.unkArray.forEach((element: ConfigListSomeInfo) => {
-            element.build(this)
-        });
+        for (const iterator of this.unkArray) {
+            iterator.build(this)
+        }
 
         const res: Buffer = this.outStream.getContents()
         OutPacketBase.setPacketLength(res)

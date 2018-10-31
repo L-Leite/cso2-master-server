@@ -7,7 +7,7 @@ export enum PacketId {
     Login = 3,
     ServerList = 5,
     Character,
-    Crypt,
+    RequestRoomList,
     RequestChannels = 10,
     Room = 65,
     Host = 68,

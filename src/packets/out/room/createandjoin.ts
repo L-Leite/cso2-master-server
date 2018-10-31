@@ -136,10 +136,10 @@ export class RoomCreateAndJoinRoom {
 
     constructor(roomInfo: Room) {
 
-        this.roomHostId = roomInfo.hostId
+        this.roomHostId = roomInfo.id
         this.unk01 = 2
         this.unk02 = 2
-        this.roomId = roomInfo.roomId
+        this.roomId = roomInfo.id
         this.unk04 = 5
         this.roomFlags = new Uint64LE(-1) // or 0xFFFFFFFFFFFFFFFF
         this.roomName = new PacketString(roomInfo.roomName)
@@ -246,9 +246,9 @@ export class RoomCreateAndJoinRoom {
         outPacket.writeUInt8(this.unk25)
 
         outPacket.writeUInt8(this.unk26)
-        this.unk27.forEach((element) => {
-            outPacket.writeUInt8(element)
-        });
+        for (const iterator of this.unk27) {
+            outPacket.writeUInt8(iterator)
+        }
 
         outPacket.writeUInt8(this.unk28)
 
@@ -288,9 +288,9 @@ export class RoomCreateAndJoinRoom {
 
         outPacket.writeUInt8(this.numOfPlayers)
 
-        this.users.forEach((user) => {
+        for (const user of this.users) {
             new RoomPlayerNetInfo(user).build(outPacket)
             new UserInfoFullUpdate(user).build(outPacket)
-        })
+        }
     }
 }

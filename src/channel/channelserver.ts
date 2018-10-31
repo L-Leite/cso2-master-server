@@ -9,7 +9,7 @@ import { ServerInstance } from 'serverinstance'
  * @class ChannelServer
  */
 export class ChannelServer {
-    private static currentServerId = 1
+    private static nextChannelId = 1
 
     private static formatServerName(serverName: string,
                                     serverIndex: number,
@@ -24,25 +24,35 @@ export class ChannelServer {
     }
 
     public name: string
+    public index: number
     public channels: Channel[]
 
     constructor(serverName: string, serverIndex: number,
                 totalServers: number, numOfChannels: number) {
         this.name = ChannelServer.formatServerName(serverName, serverIndex, totalServers)
+        this.index = serverIndex
         this.channels = []
 
         for (let index = 0; index < numOfChannels; index++) {
-            const newChannelId: number = ChannelServer.currentServerId
+            const newChannelIndex: number = ChannelServer.nextChannelId
             const newChannelName: string = ChannelServer.formatChannelName(
-                serverName, serverIndex, newChannelId)
+                serverName, serverIndex, newChannelIndex)
 
-            this.channels.push(new Channel(newChannelId, newChannelName))
+            this.channels.push(new Channel(newChannelIndex, newChannelName))
 
-            ChannelServer.currentServerId++
+            ChannelServer.nextChannelId++
         }
     }
 
-    public onRoomListPacket(data: Buffer, sourceSocket: ExtendedSocket, server: ServerInstance): boolean {
-        return true
+    /**
+     * getChannelByIndex
+     */
+    public getChannelByIndex(index: number): Channel {
+        for (const channel of this.channels) {
+            if (channel.index === index) {
+                return channel
+            }
+        }
+        return null
     }
 }

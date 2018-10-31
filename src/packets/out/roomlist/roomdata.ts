@@ -1,5 +1,8 @@
 import { Uint64LE } from 'int64-buffer'
+
 import { PacketString } from 'packets/packetstring'
+
+import { Room } from 'room/room'
 
 import { OutPacketBase } from 'packets/out/packet'
 
@@ -7,7 +10,7 @@ export class RoomListRoomData {
     private id: number
     private flags: Uint64LE
     // flags & 0x1
-    private unk00: PacketString
+    private roomName: PacketString
     // end flags & 0x1
     // flags & 0x2
     private unk01: number
@@ -28,7 +31,7 @@ export class RoomListRoomData {
     private unk06: number
     // end flags & 0x40
     // flags & 0x80
-    private playerNum: number
+    private maxPlayers: number
     // end flags & 0x80
     // flags & 0x100
     private unk08: number
@@ -61,7 +64,7 @@ export class RoomListRoomData {
     private unk22: number
     // end flags & 0x4000
     // flags & 0x8000
-    private botsEnabled: number
+    private enableBots: number
     // end flags & 0x8000
     // flags & 0x10000
     private unk24: number
@@ -99,7 +102,7 @@ export class RoomListRoomData {
     private nextMapEnabled: number
     // end flags & 0x4000000
     // flags & 0x8000000
-    private teamChange: number
+    private changeTeams: number
     // end flags & 0x8000000
     // flags & 0x10000000
     private unk38: number
@@ -115,21 +118,21 @@ export class RoomListRoomData {
     private difficulty: number
     // end flags & 0x80000000
 
-    constructor() {
-        this.id = 533
+    constructor(room: Room) {
+        this.id = room.id
         this.flags = new Uint64LE(-1) // actual value is 0xFFE3FFFFFFFFFFFF
 
-        this.unk00 = new PacketString('test room')
+        this.roomName = new PacketString(room.roomName)
         this.unk01 = 0
         this.unk02 = 1
         this.unk03 = 0
-        this.gameModeId = 2
+        this.gameModeId = room.gameModeId
         this.mapId = 3
         this.unk06 = 1
-        this.playerNum = 16
+        this.maxPlayers = room.maxPlayers
         this.unk08 = 0
-        this.hostUserId = 1
-        this.hostUserName = new PacketString('someone')
+        this.hostUserId = room.host.userId
+        this.hostUserName = new PacketString(room.host.userName)
         this.unk11 = 0
         this.unk12 = 0
         this.unk13 = 0xD73DA43D // maybe some ip? it looks like 61.164.61.215
@@ -142,39 +145,39 @@ export class RoomListRoomData {
         this.unk20 = 0
         this.unk21 = 5
         this.unk22 = 2
-        this.botsEnabled = 1
+        this.enableBots = this.enableBots
         this.unk24 = 0
-        this.startMoney = 16000
+        this.startMoney = this.startMoney
         this.unk26 = 0
         this.unk27 = 0
         this.unk28 = 0
         this.unk29 = 1
         this.unk30 = new Uint64LE(0x5AF6F7BF)
-        this.winLimit = 5
-        this.killLimit = 350
+        this.winLimit = room.winLimit
+        this.killLimit = room.killLimit
         this.forceCamera = 1
         this.unk34 = 4
         this.unk35 = 0
-        this.nextMapEnabled = 0
-        this.teamChange = 0
+        this.nextMapEnabled = room.nextMapEnabled
+        this.changeTeams = room.changeTeams
         this.unk38 = 0
         this.unk39 = 0
         this.unk40 = 0
         this.unk41 = 1
-        this.difficulty = 0
+        this.difficulty = room.difficulty
     }
 
     public build(outPacket: OutPacketBase): void {
         outPacket.writeUInt16(this.id)
         outPacket.writeUInt64(this.flags)
-        outPacket.writeString(this.unk00)
+        outPacket.writeString(this.roomName)
         outPacket.writeUInt8(this.unk01)
         outPacket.writeUInt8(this.unk02)
         outPacket.writeUInt16(this.unk03)
         outPacket.writeUInt8(this.gameModeId)
         outPacket.writeUInt8(this.mapId)
         outPacket.writeUInt8(this.unk06)
-        outPacket.writeUInt8(this.playerNum)
+        outPacket.writeUInt8(this.maxPlayers)
         outPacket.writeUInt8(this.unk08)
         outPacket.writeUInt32(this.hostUserId)
         outPacket.writeString(this.hostUserName)
@@ -190,7 +193,7 @@ export class RoomListRoomData {
         outPacket.writeUInt8(this.unk20)
         outPacket.writeUInt8(this.unk21)
         outPacket.writeUInt8(this.unk22)
-        outPacket.writeUInt8(this.botsEnabled)
+        outPacket.writeUInt8(this.enableBots)
         outPacket.writeUInt8(this.unk24)
         outPacket.writeUInt16(this.startMoney)
         outPacket.writeUInt8(this.unk26)
@@ -204,7 +207,7 @@ export class RoomListRoomData {
         outPacket.writeUInt8(this.unk34)
         outPacket.writeUInt8(this.unk35)
         outPacket.writeUInt8(this.nextMapEnabled)
-        outPacket.writeUInt8(this.teamChange)
+        outPacket.writeUInt8(this.changeTeams)
         outPacket.writeUInt8(this.unk38)
         outPacket.writeUInt8(this.unk39)
         outPacket.writeUInt8(this.unk40)

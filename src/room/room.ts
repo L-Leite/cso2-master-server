@@ -1,47 +1,54 @@
 import { User } from 'user/user'
 
+export interface IRoomOptions {
+    roomName?: string,
+    gameModeId?: number,
+    mapId?: number,
+    winLimit?: number,
+    killLimit?: number,
+    startMoney?: number,
+    forceCamera?: number,
+    nextMapEnabled?: number,
+    changeTeams?: number,
+    enableBots?: number,
+    difficulty?: number
+}
+
 export class Room {
-    public roomId: number
+    public id: number
     public roomName: string
-    public hostId: number
+    public maxPlayers: number
     public gameModeId: number
     public mapId: number
     public winLimit: number
     public killLimit: number
+    public startMoney: number
+    public forceCamera: number
+    public nextMapEnabled: number
+    public changeTeams: number
+    public enableBots: number
+    public difficulty: number
+    public host: User
     public users: User[]
 
-    constructor(roomId: number, roomName: string, hostId: number,
-                gameModeId?: number, mapId?: number,
-                winLimit?: number, killLimit?: number) {
-        this.roomId = roomId
-        this.roomName = roomName
-        this.hostId = hostId
+    constructor(roomId: number, host: User,
+                options?: IRoomOptions) {
+        this.id = roomId
+        this.host = host
 
-        if (gameModeId) {
-            this.gameModeId = gameModeId
-        } else {
-            this.gameModeId = 0
-        }
+        this.roomName = options.roomName ? options.roomName : 'Room #' + this.id
+        this.gameModeId = options.gameModeId ? options.gameModeId : 0
+        this.mapId = options.mapId ? options.mapId : 1
+        this.winLimit = options.winLimit ? options.winLimit : 10
+        this.killLimit = options.killLimit ? options.killLimit : 150
+        this.startMoney = options.startMoney ? options.startMoney : 16000
+        this.forceCamera = options.forceCamera ? options.forceCamera : 1
+        this.nextMapEnabled = options.nextMapEnabled ? options.nextMapEnabled : 0
+        this.changeTeams = options.changeTeams ? options.changeTeams : 0
+        this.enableBots = options.enableBots ? options.enableBots : 0
+        this.difficulty = options.difficulty ? options.difficulty : 0
 
-        if (mapId) {
-            this.mapId = mapId
-        } else {
-            this.mapId = 0
-        }
-
-        if (winLimit) {
-            this.winLimit = winLimit
-        } else {
-            this.winLimit = 0
-        }
-
-        if (killLimit) {
-            this.killLimit = killLimit
-        } else {
-            this.killLimit = 0
-        }
-
-        this.users = []
+        this.users = [host]
     }
 
     public addUser(user: User): void {
@@ -57,7 +64,7 @@ export class Room {
             const user = this.users[key]
 
             if (user.userId === userId) {
-                delete this.users[key]
+                this.users.splice(this.users.indexOf(user), 1)
                 return
             }
         }

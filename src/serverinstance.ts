@@ -16,9 +16,6 @@ import { UserManager } from 'user/usermanager'
 
 import { ChannelManager } from 'channel/channelmanager'
 
-import { OutLobbyPacket } from 'packets/out/lobby'
-import { OutRoomListPacket } from 'packets/out/roomlist'
-
 /**
  * The welcome message sent to the client
  */
@@ -119,9 +116,9 @@ export class ServerInstance {
         // welcome new client
         newSocket.write(clientWelcomeMessage)
 
-        console.log('new client connected' +
+        console.log('new client connected ' +
             newSocket.remoteAddress + ':' + newSocket.remotePort +
-            'uuid: ' + newSocket.uuid)
+            ' uuid: ' + newSocket.uuid)
 
         // setup socket callbacks
         newSocket.on('data', (data: string) => {
@@ -210,15 +207,6 @@ export class ServerInstance {
     }
 
     /**
-     * Called when a socket closes connection
-     * @param socket the client's socket
-     * @param hadError true if it was closed because of an error
-     */
-    private onSocketClose(socket: ExtendedSocket, hadError: boolean): void {
-        console.log('socket ' + socket.uuid + ' closed hadError: ' + hadError)
-    }
-
-    /**
      * Called when a socket receives data
      * @param socket the client's socket
      * @param data the data received from the client
@@ -254,16 +242,25 @@ export class ServerInstance {
                 return this.users.onLoginPacket(packetData, sourceSocket, this.channels)
             case PacketId.RequestChannels:
                 return this.channels.onChannelListPacket(sourceSocket, this.users)
+            case PacketId.RequestRoomList:
+                return this.channels.onRoomListPacket(packetData, sourceSocket, this.users)
             case PacketId.Udp:
                 return this.users.onUdpPacket(packetData, sourceSocket)
-            case PacketId.Crypt:
-                sourceSocket.write(new OutLobbyPacket(sourceSocket.getSeq()).doSomething())
-                sourceSocket.write(new OutRoomListPacket(sourceSocket.getSeq()).getFullList())
-                return true
         }
 
         console.log('unknown packet id ' + packet.id + ' from ' + sourceSocket.uuid)
         return false
+    }
+
+    /**
+     * Called when a socket closes connection
+     * @param socket the client's socket
+     * @param hadError true if it was closed because of an error
+     */
+    private onSocketClose(socket: ExtendedSocket, hadError: boolean): void {
+        console.log('socket ' + socket.uuid + ' closed hadError: ' + hadError)
+        this.users.removeUserByUuid(socket.uuid)
+        this.removeSocket(socket)
     }
 
     /**
@@ -274,6 +271,7 @@ export class ServerInstance {
     private onSocketError(socket: ExtendedSocket, err: Error): void {
         console.log('socket ' + socket.uuid + ' had an error: ' + err)
         this.users.removeUserByUuid(socket.uuid)
+        this.removeSocket(socket)
     }
 
     /**
@@ -283,6 +281,7 @@ export class ServerInstance {
     private onSocketEnd(socket: ExtendedSocket): void {
         console.log('socket ' + socket.uuid + ' ended')
         this.users.removeUserByUuid(socket.uuid)
+        this.removeSocket(socket)
     }
 
     /**
@@ -292,6 +291,7 @@ export class ServerInstance {
     private onSocketTimeout(socket: ExtendedSocket): void {
         console.log('socket ' + socket.uuid + ' timed out')
         this.users.removeUserByUuid(socket.uuid)
+        this.removeSocket(socket)
     }
 
     /**
@@ -314,5 +314,9 @@ export class ServerInstance {
         this.sockets.push(newSocket)
 
         return newSocket
+    }
+
+    private removeSocket(socket: ExtendedSocket): void {
+        this.sockets.splice(this.sockets.indexOf(socket), 1)
     }
 }
