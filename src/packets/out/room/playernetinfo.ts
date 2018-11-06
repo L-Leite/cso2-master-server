@@ -7,9 +7,9 @@ import { User } from 'user/user'
 /**
  * Sub structure of Room packet
  * Stores network related info about an user
- * @class RoomPlayerNetInfo
+ * @class OutRoomPlayerNetInfo
  */
-export class RoomPlayerNetInfo {
+export class OutRoomPlayerNetInfo {
     private userId: number
     private playerUnk00: number
     private playerUnk01: number
@@ -39,7 +39,6 @@ export class RoomPlayerNetInfo {
     }
 
     public build(outPacket: OutPacketBase): void {
-        outPacket.writeUInt32(this.userId)
         outPacket.writeUInt8(this.playerUnk00)
         outPacket.writeUInt8(this.playerUnk01)
         outPacket.writeUInt8(this.playerUnk02)

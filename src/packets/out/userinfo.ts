@@ -24,6 +24,7 @@ export class OutUserInfoPacket extends OutPacketBase {
         const fullUpdate: UserInfoFullUpdate = new UserInfoFullUpdate(user)
 
         this.buildHeader()
+        this.writeUInt32(user.userId)
         fullUpdate.build(this)
 
         const resBuffer: Buffer = this.outStream.getContents()

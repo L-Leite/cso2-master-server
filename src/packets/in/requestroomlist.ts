@@ -2,9 +2,9 @@ import { InPacketBase } from 'packets/in/packet'
 
 /**
  * incoming roomlist request packet
- * @class InRequestRoomList
+ * @class InRequestRoomListPacket
  */
-export class InRequestRoomList extends InPacketBase {
+export class InRequestRoomListPacket extends InPacketBase {
     public channelServerIndex: number
     public channelIndex: number
 

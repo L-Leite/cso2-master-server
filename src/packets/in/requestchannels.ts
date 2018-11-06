@@ -2,7 +2,7 @@ import { InPacketBase } from 'packets/in/packet'
 
 /**
  * incoming request channel packet
- * @class InRequestChannels
+ * @class InRequestChannelsPacket
  */
-export class InRequestChannels extends InPacketBase {
+export class InRequestChannelsPacket extends InPacketBase {
 }

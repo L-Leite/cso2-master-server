@@ -23,7 +23,7 @@ export class UserManager {
 
     constructor() {
         this.users = []
-        this.nextUserId = 1
+        this.nextUserId = 2
     }
 
     /**
@@ -117,13 +117,12 @@ export class UserManager {
     }
 
     public addUser(userName: string, socket: ExtendedSocket): User {
-        const newUser: User = new User(socket.uuid,
-            socket.remoteAddress, this.nextUserId++, userName)
+        const newUser: User = new User(socket, this.nextUserId++, userName)
         this.users.push(newUser)
         return newUser
     }
 
-    public getUser(userId: number): User {
+    public getUserById(userId: number): User {
         for (const user of this.users) {
             if (user.userId === userId) {
                 return user
@@ -134,35 +133,27 @@ export class UserManager {
 
     public getUserByUuid(uuid: string): User {
         for (const user of this.users) {
-            if (user.uuid === uuid) {
+            if (user.socket.uuid === uuid) {
                 return user
             }
         }
         return null
     }
 
-    public removeUser(userId: number): void {
-        for (const key in this.users) {
-            if (this.users.hasOwnProperty(key)) {
-                const user = this.users[key]
-
-                if (user.userId === userId) {
-                    this.users.splice(this.users.indexOf(user), 1)
-                    return
-                }
+    public removeUserById(userId: number): void {
+        for (const user of this.users) {
+            if (user.userId === userId) {
+                this.users.splice(this.users.indexOf(user), 1)
+                return
             }
         }
     }
 
     public removeUserByUuid(uuid: string): void {
-        for (const key in this.users) {
-            if (this.users.hasOwnProperty(key)) {
-                const user = this.users[key]
-
-                if (user.uuid === uuid) {
-                    this.users.splice(this.users.indexOf(user), 1)
-                    return
-                }
+        for (const user of this.users) {
+            if (user.socket.uuid === uuid) {
+                this.users.splice(this.users.indexOf(user), 1)
+                return
             }
         }
     }

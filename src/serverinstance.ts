@@ -185,7 +185,7 @@ export class ServerInstance {
             return
         }
 
-        const user: User = this.users.getUser(packet.userId)
+        const user: User = this.users.getUserById(packet.userId)
 
         if (user == null) {
             console.log('Tried to send hole punch packet to ' + packet.userId)
@@ -244,6 +244,8 @@ export class ServerInstance {
                 return this.channels.onChannelListPacket(sourceSocket, this.users)
             case PacketId.RequestRoomList:
                 return this.channels.onRoomListPacket(packetData, sourceSocket, this.users)
+            case PacketId.Room:
+                return this.channels.onRoomRequest(packetData, sourceSocket, this.users)
             case PacketId.Udp:
                 return this.users.onUdpPacket(packetData, sourceSocket)
         }

@@ -13,10 +13,10 @@ export class RoomListRoomData {
     private roomName: PacketString
     // end flags & 0x1
     // flags & 0x2
-    private unk01: number
+    private roomNumber: number
     // end flags & 0x2
     // flags & 0x4
-    private unk02: number
+    private passwordProtected: number
     // end flags & 0x4
     // flags & 0x8
     private unk03: number
@@ -28,7 +28,7 @@ export class RoomListRoomData {
     private mapId: number
     // end flags & 0x20
     // flags & 0x40
-    private unk06: number
+    private numPlayers: number
     // end flags & 0x40
     // flags & 0x80
     private maxPlayers: number
@@ -54,7 +54,7 @@ export class RoomListRoomData {
     private unk19: number
     // end flags & 0x800
     // flags & 0x1000
-    private unk20: number // the arrays' count
+    private unk20: number // if nonzero, the next comment would be true
     // four variable arrays would be here
     // end flags & 0x1000
     // flags & 0x2000
@@ -120,15 +120,15 @@ export class RoomListRoomData {
 
     constructor(room: Room) {
         this.id = room.id
-        this.flags = new Uint64LE(-1) // actual value is 0xFFE3FFFFFFFFFFFF
+        this.flags = new Uint64LE('FFFFFFFFFFFFFFFF', 16) // actual value is 0xFFE3FFFFFFFFFFFF
 
         this.roomName = new PacketString(room.roomName)
-        this.unk01 = 0
-        this.unk02 = 1
+        this.roomNumber = this.id
+        this.passwordProtected = 0
         this.unk03 = 0
         this.gameModeId = room.gameModeId
-        this.mapId = 3
-        this.unk06 = 1
+        this.mapId = room.mapId
+        this.numPlayers = room.users.length
         this.maxPlayers = room.maxPlayers
         this.unk08 = 0
         this.hostUserId = room.host.userId
@@ -155,7 +155,7 @@ export class RoomListRoomData {
         this.unk30 = new Uint64LE(0x5AF6F7BF)
         this.winLimit = room.winLimit
         this.killLimit = room.killLimit
-        this.forceCamera = 1
+        this.forceCamera = room.forceCamera
         this.unk34 = 4
         this.unk35 = 0
         this.nextMapEnabled = room.nextMapEnabled
@@ -171,12 +171,12 @@ export class RoomListRoomData {
         outPacket.writeUInt16(this.id)
         outPacket.writeUInt64(this.flags)
         outPacket.writeString(this.roomName)
-        outPacket.writeUInt8(this.unk01)
-        outPacket.writeUInt8(this.unk02)
+        outPacket.writeUInt8(this.roomNumber)
+        outPacket.writeUInt8(this.passwordProtected)
         outPacket.writeUInt16(this.unk03)
         outPacket.writeUInt8(this.gameModeId)
         outPacket.writeUInt8(this.mapId)
-        outPacket.writeUInt8(this.unk06)
+        outPacket.writeUInt8(this.numPlayers)
         outPacket.writeUInt8(this.maxPlayers)
         outPacket.writeUInt8(this.unk08)
         outPacket.writeUInt32(this.hostUserId)

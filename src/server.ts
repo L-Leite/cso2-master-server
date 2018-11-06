@@ -5,6 +5,7 @@
 // add the src path to the module search path
 import 'app-module-path/register'
 
+import { Uint64LE } from 'int64-buffer'
 import { ServerInstance } from 'serverinstance'
 
 // the port that the server will listen to

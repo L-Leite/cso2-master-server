@@ -11,7 +11,7 @@ import { User } from 'user/user'
  * @class UserInfoFullUpdate
  */
 export class UserInfoFullUpdate {
-    private userId: number
+    // private userId: number
     private flags: number // should always be 0xFFFFFFFF for a full update
     // flag & 0x1
     private unk00: Uint64LE // nexon id?
@@ -164,7 +164,7 @@ export class UserInfoFullUpdate {
     // end of flag & 0x40000000
 
     constructor(user: User) {
-        this.userId = user.userId
+        // this.userId = user.userId
         this.flags = 0xFFFFFFFF
         this.unk00 = new Uint64LE(0x2241158F)
         this.userName = new PacketString(user.userName)
@@ -290,7 +290,7 @@ export class UserInfoFullUpdate {
      * @param outPacket the packet where the data will go
      */
     public build(outPacket: OutPacketBase): void {
-        outPacket.writeUInt32(this.userId)
+        // outPacket.writeUInt32(this.userId)
         outPacket.writeUInt32(this.flags)
 
         outPacket.writeUInt64(this.unk00)

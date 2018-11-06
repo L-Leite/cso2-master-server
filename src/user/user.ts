@@ -1,8 +1,13 @@
 import { Uint64LE } from 'int64-buffer'
-import { HolepunchType } from '../packets/holepunch/inholepunch';
+
+import { HolepunchType } from 'packets/holepunch/inholepunch'
+
+import { Room } from 'room/room'
+
+import { ExtendedSocket } from 'extendedsocket'
 
 export class User {
-    public uuid: string
+    public socket: ExtendedSocket
     public userId: number
 
     public externalIpAddress: string
@@ -16,6 +21,10 @@ export class User {
     public localServerPort: number
     public localTvPort: number
 
+    public currentChannelServerIndex: number
+    public currentChannelIndex: number
+    public currentRoom: Room
+
     public userName: string
     public level: number
     public curExp: Uint64LE
@@ -25,10 +34,24 @@ export class User {
     public deaths: number
     public assists: number
 
-    constructor(uuid: string, externalIp: string, userId: number, userName: string) {
-        this.uuid = uuid
-        this.externalIpAddress = externalIp
+    constructor(socket: ExtendedSocket, userId: number, userName: string) {
+        this.socket = socket
         this.userId = userId
+
+        this.externalIpAddress = socket.remoteAddress
+        this.port = 0
+
+        this.externalClientPort = 0
+        this.externalServerPort = 0
+        this.externalTvPort = 0
+        this.localIpAddress = ''
+        this.localClientPort = 0
+        this.localServerPort = 0
+        this.localTvPort = 0
+
+        this.currentChannelServerIndex = 0
+        this.currentChannelIndex = 0
+
         this.userName = userName
         this.level = 2
         this.curExp = new Uint64LE(0)
@@ -37,6 +60,11 @@ export class User {
         this.kills = 2
         this.deaths = 1
         this.assists = 3
+    }
+
+    public setCurrentChannel(channelServerIndex: number, channelIndex: number): void {
+        this.currentChannelServerIndex = channelServerIndex
+        this.currentChannelIndex = channelIndex
     }
 
     public updateHolepunch(portId: number, localPort: number,

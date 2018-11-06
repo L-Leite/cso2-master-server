@@ -112,7 +112,7 @@ export abstract class OutPacketBase {
             this.UnsignedToBuffer(val, 8, littleEndian))
     }
 
-    public writeUtf8String(str: PacketLongString): void {
+    public writeLongString(str: PacketLongString): void {
         this.outStream.write(str.toBuffer())
     }
 
