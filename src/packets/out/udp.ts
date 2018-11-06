@@ -1,8 +1,8 @@
 import * as ip from 'ip'
 import { WritableStreamBuffer } from 'stream-buffers'
 
-import { PacketId } from '../definitions'
-import { OutPacketBase } from './packet'
+import { PacketId } from 'packets/definitions'
+import { OutPacketBase } from 'packets/out/packet'
 
 /**
  * outgoing udp information packet (this is not an UDP packet)

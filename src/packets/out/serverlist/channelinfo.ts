@@ -1,13 +1,12 @@
-import { PacketString } from '../../packetstring'
+import { OutPacketBase } from 'packets/out/packet'
+import { PacketString } from 'packets/packetstring'
 
-import { OutPacketBase } from '../packet'
-
-import { Channel } from '../../../channel'
+import { Channel } from 'channel/channel'
 
 /**
  * Sub structure of ServerList sub structure
  * Has information about a server channel
- * @class ServerListSubChannelInfo
+ * @class ServerListChannelInfo
  */
 export class ServerListChannelInfo {
     private id: number
@@ -19,7 +18,7 @@ export class ServerListChannelInfo {
     private unk04: number
 
     constructor(channel: Channel) {
-        this.id = channel.id
+        this.id = channel.index
         this.name = new PacketString(channel.name)
         this.unk00 = 4
         this.unk01 = 0x1F4

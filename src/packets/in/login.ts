@@ -1,6 +1,6 @@
 import { Uint64LE } from 'int64-buffer'
 
-import { InPacketBase } from './packet'
+import { InPacketBase } from 'packets/in/packet'
 
 /**
  * incoming login packet
@@ -48,12 +48,12 @@ export class InLoginPacket extends InPacketBase {
         this.nexonUsername = this.readString()
         this.gameUsername = this.readString()
         this.unk00 = this.readUInt8()
-        this.password = this.readUtf8String()
+        this.password = this.readLongString()
         this.hddHwid = this.readArray(16)
         this.netCafeId = this.readUInt32(true).toString()
         this.unk01 = this.readUInt32()
         this.userSn = this.readUInt64()
-        this.unk02 = this.readUtf8String()
+        this.unk02 = this.readLongString()
         this.unk03 = this.readUInt8()
         this.isLeague = this.readUInt8()
         this.unk04 = this.readUInt8()

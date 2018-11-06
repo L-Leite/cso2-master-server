@@ -1,8 +1,8 @@
 import { Int64BE, Int64LE, Uint64BE, Uint64LE } from 'int64-buffer'
 
-import { PacketSignature } from '../definitions'
-import { PacketLongString } from '../packetlongstring'
-import { PacketString } from '../packetstring'
+import { PacketId, PacketSignature } from 'packets/definitions'
+import { PacketLongString } from 'packets/packetlongstring'
+import { PacketString } from 'packets/packetstring'
 
 /**
  * The incoming TCP packet's base
@@ -19,7 +19,7 @@ export class InPacketBase {
     public signature: number
     public sequence: number
     public length: number
-    public packetId: number
+    public id: PacketId
     // end of the packet structure
     protected packetData: Buffer
     // the current offset to the buffer
@@ -40,25 +40,10 @@ export class InPacketBase {
     }
 
     /**
-     * parses the packet's data
-     */
-    protected parse(): void {
-        this.signature = this.readUInt8()
-
-        if (this.isValid() === false) {
-            throw new Error('This is not a packet')
-        }
-
-        this.sequence = this.readUInt8()
-        this.length = this.readUInt16()
-        this.packetId = this.readUInt8()
-    }
-
-    /**
      * reads a byte from the current offset
      * @returns the read signed byte
      */
-    protected readInt8(): number {
+    public readInt8(): number {
         if (this.canReadBytes(1) === false) {
             throw new Error('Data buffer is too small')
         }
@@ -69,7 +54,7 @@ export class InPacketBase {
      * reads two bytes from the current offset
      * @returns the read signed bytes
      */
-    protected readInt16(bigEndian: boolean = false): number {
+    public readInt16(bigEndian: boolean = false): number {
         if (this.canReadBytes(2) === false) {
             throw new Error('Data buffer is too small')
         }
@@ -84,7 +69,7 @@ export class InPacketBase {
      * reads four bytes from the current offset
      * @returns the read signed bytes
      */
-    protected readInt32(bigEndian: boolean = false): number {
+    public readInt32(bigEndian: boolean = false): number {
         if (this.canReadBytes(4) === false) {
             throw new Error('Data buffer is too small')
         }
@@ -99,7 +84,7 @@ export class InPacketBase {
      * reads eight bytes from the current offset
      * @returns the read signed bytes
      */
-    protected readInt64(bigEndian: boolean = false): Int64LE | Int64BE {
+    public readInt64(bigEndian: boolean = false): Int64LE | Int64BE {
         if (this.canReadBytes(8) === false) {
             throw new Error('Data buffer is too small')
         }
@@ -114,7 +99,7 @@ export class InPacketBase {
      * reads a byte from the current offset
      * @returns the read unsigned byte
      */
-    protected readUInt8(): number {
+    public readUInt8(): number {
         if (this.canReadBytes(1) === false) {
             throw new Error('Data buffer is too small')
         }
@@ -125,7 +110,7 @@ export class InPacketBase {
      * reads two bytes from the current offset
      * @returns the read unsigned bytes
      */
-    protected readUInt16(bigEndian: boolean = false): number {
+    public readUInt16(bigEndian: boolean = false): number {
         if (this.canReadBytes(2) === false) {
             throw new Error('Data buffer is too small')
         }
@@ -140,7 +125,7 @@ export class InPacketBase {
      * reads four bytes from the current offset
      * @returns the read unsigned bytes
      */
-    protected readUInt32(bigEndian: boolean = false): number {
+    public readUInt32(bigEndian: boolean = false): number {
         if (this.canReadBytes(4) === false) {
             throw new Error('Data buffer is too small')
         }
@@ -155,7 +140,7 @@ export class InPacketBase {
      * reads eight bytes from the current offset
      * @returns the read unsigned bytes
      */
-    protected readUInt64(bigEndian: boolean = false): Uint64LE | Uint64BE {
+    public readUInt64(bigEndian: boolean = false): Uint64LE | Uint64BE {
         if (this.canReadBytes(8) === false) {
             throw new Error('Data buffer is too small')
         }
@@ -167,10 +152,11 @@ export class InPacketBase {
     }
 
     /**
-     * reads an ascii string from the current offset
+     * reads a string from the current offset
+     * * the string's size is 1 byte long
      * @returns the read bytes
      */
-    protected readString(): string {
+    public readString(): string {
         // let's make sure that the size is present
         if (this.canReadBytes(1) === false) {
             throw new Error('Data buffer is too small')
@@ -183,10 +169,11 @@ export class InPacketBase {
     }
 
     /**
-     * reads an utf8 string from the current offset
+     * reads an string from the current offset
+     * the string's size is 2 byte long
      * @returns the read bytes
      */
-    protected readUtf8String(): string {
+    public readLongString(): string {
         // let's make sure that the size is present
         if (this.canReadBytes(2) === false) {
             throw new Error('Data buffer is too small')
@@ -203,7 +190,7 @@ export class InPacketBase {
      * @param length - the size of the data to read in bytes
      * @returns a buffer with length's size
      */
-    protected readArray(length: number): Buffer {
+    public readArray(length: number): Buffer {
         if (this.canReadBytes(length) === false) {
             throw new Error('Data buffer is too small')
         }
@@ -211,6 +198,21 @@ export class InPacketBase {
             this.curOffset + length)
         this.curOffset += length
         return res
+    }
+
+    /**
+     * parses the packet's data
+     */
+    protected parse(): void {
+        this.signature = this.readUInt8()
+
+        if (this.isValid() === false) {
+            throw new Error('This is not a packet')
+        }
+
+        this.sequence = this.readUInt8()
+        this.length = this.readUInt16()
+        this.id = this.readUInt8()
     }
 
     private canReadBytes(bytes: number): boolean {

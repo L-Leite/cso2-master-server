@@ -16,23 +16,22 @@
     "tslint": "tslint -c tslint.json -p tsconfig.json"
   },
   "dependencies": {
+    "app-module-path": "^2.2.0",
     "hexy": "^0.2.11",
-    "int64-buffer": "^0.1.10",
+    "int64-buffer": "^0.99.1007",
     "ip": "^1.1.5",
-    "node-int64": "^0.4.0",
     "stream-buffers": "^3.0.2",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@types/ip": "0.0.31",
-    "@types/node": "^10.9.1",
-    "@types/node-int64": "^0.4.29",
+    "@types/node": "^10.12.2",
     "@types/stream-buffers": "^3.0.2",
-    "@types/uuid": "^3.4.3",
-    "eslint": "^4.19.1",
-    "nodemon": "^1.18.3",
-    "ts-node": "^6.2.0",
+    "@types/uuid": "^3.4.4",
+    "eslint": "^5.8.0",
+    "nodemon": "^1.18.5",
+    "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.1.6"
   }
 }

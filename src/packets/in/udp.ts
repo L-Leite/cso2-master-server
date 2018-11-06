@@ -1,6 +1,6 @@
 import * as ip from 'ip'
 
-import { InPacketBase } from './packet'
+import { InPacketBase } from 'packets/in/packet'
 
 enum InUdpPacketType {
     Heartbeat = 0,

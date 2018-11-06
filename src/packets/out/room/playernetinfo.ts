@@ -1,14 +1,15 @@
 import * as ip from 'ip'
 
-import { UserData } from '../../../userdata'
-import { OutPacketBase } from '../packet'
+import { OutPacketBase } from 'packets/out/packet'
+
+import { User } from 'user/user'
 
 /**
  * Sub structure of Room packet
  * Stores network related info about an user
- * @class RoomPlayerNetInfo
+ * @class OutRoomPlayerNetInfo
  */
-export class RoomPlayerNetInfo {
+export class OutRoomPlayerNetInfo {
     private userId: number
     private playerUnk00: number
     private playerUnk01: number
@@ -22,7 +23,7 @@ export class RoomPlayerNetInfo {
     private localClientPort: number
     private localTvPort: number
 
-    constructor(user: UserData) {
+    constructor(user: User) {
         this.userId = user.userId
         this.playerUnk00 = 2
         this.playerUnk01 = 0
@@ -38,7 +39,6 @@ export class RoomPlayerNetInfo {
     }
 
     public build(outPacket: OutPacketBase): void {
-        outPacket.writeUInt32(this.userId)
         outPacket.writeUInt8(this.playerUnk00)
         outPacket.writeUInt8(this.playerUnk01)
         outPacket.writeUInt8(this.playerUnk02)

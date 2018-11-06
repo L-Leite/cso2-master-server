@@ -1,4 +1,7 @@
-import { Channel } from './channel'
+import { Channel } from 'channel/channel'
+
+import { ExtendedSocket } from 'extendedsocket'
+import { ServerInstance } from 'serverinstance'
 
 /**
  * Represents a channel "server"
@@ -6,7 +9,7 @@ import { Channel } from './channel'
  * @class ChannelServer
  */
 export class ChannelServer {
-    private static currentServerId = 0
+    private static nextChannelId = 1
 
     private static formatServerName(serverName: string,
                                     serverIndex: number,
@@ -21,21 +24,35 @@ export class ChannelServer {
     }
 
     public name: string
+    public index: number
     public channels: Channel[]
 
     constructor(serverName: string, serverIndex: number,
                 totalServers: number, numOfChannels: number) {
         this.name = ChannelServer.formatServerName(serverName, serverIndex, totalServers)
+        this.index = serverIndex
         this.channels = []
 
         for (let index = 0; index < numOfChannels; index++) {
-            const newChannelId: number = ChannelServer.currentServerId + 1
+            const newChannelIndex: number = ChannelServer.nextChannelId
             const newChannelName: string = ChannelServer.formatChannelName(
-                serverName, serverIndex, newChannelId)
+                serverName, serverIndex, newChannelIndex)
 
-            this.channels.push(new Channel(newChannelId, newChannelName))
+            this.channels.push(new Channel(newChannelIndex, newChannelName))
 
-            ChannelServer.currentServerId++
+            ChannelServer.nextChannelId++
         }
+    }
+
+    /**
+     * getChannelByIndex
+     */
+    public getChannelByIndex(index: number): Channel {
+        for (const channel of this.channels) {
+            if (channel.index === index) {
+                return channel
+            }
+        }
+        return null
     }
 }

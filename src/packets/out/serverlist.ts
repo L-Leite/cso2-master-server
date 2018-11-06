@@ -1,10 +1,11 @@
 import { WritableStreamBuffer } from 'stream-buffers'
 
-import { PacketId } from '../definitions'
-import { OutPacketBase } from './packet'
+import { PacketId } from 'packets/definitions'
+import { OutPacketBase } from 'packets/out/packet'
 
-import { ChannelServer } from '../../channelserver'
-import { ServerListServerInfo } from './serverlist/serverinfo'
+import { ChannelServer } from 'channel/channelserver'
+
+import { ServerListServerInfo } from 'packets/out/serverlist/serverinfo'
 
 /**
  * outgoing userstart packet
@@ -27,9 +28,9 @@ export class OutServerListPacket extends OutPacketBase {
 
         this.serverNum = channelServers.length
         this.servers = []
-        channelServers.forEach((server: ChannelServer) => {
+        for (const server of channelServers) {
             this.servers.push(new ServerListServerInfo(server))
-        });
+        }
     }
 
     /**
@@ -41,9 +42,9 @@ export class OutServerListPacket extends OutPacketBase {
 
         this.buildHeader()
         this.writeUInt8(this.serverNum)
-        this.servers.forEach((element: ServerListServerInfo) => {
-            element.build(this)
-        });
+        for (const server of this.servers) {
+            server.build(this)
+        }
 
         const res: Buffer = this.outStream.getContents()
         OutPacketBase.setPacketLength(res)

@@ -1,9 +1,10 @@
-import { PacketString } from '../../packetstring'
-import { OutPacketBase } from '../packet'
+import { OutPacketBase } from 'packets/out/packet'
+import { PacketString } from 'packets/packetstring'
 
-import { Channel } from '../../../channel'
-import { ChannelServer } from '../../../channelserver'
-import { ServerListChannelInfo } from './channelinfo'
+import { Channel } from 'channel/channel'
+import { ChannelServer } from 'channel/channelserver'
+
+import { ServerListChannelInfo } from 'packets/out/serverlist/channelinfo'
 
 /**
  * Sub structure of ServerList packet
@@ -25,9 +26,9 @@ export class ServerListServerInfo {
         this.serverName = new PacketString(channelServer.name)
         this.channelCount = channelServer.channels.length
         this.channels = []
-        channelServer.channels.forEach((channel: Channel) => {
+        for (const channel of channelServer.channels) {
             this.channels.push(new ServerListChannelInfo(channel))
-        });
+        }
     }
 
     public build(outPacket: OutPacketBase): void {
@@ -36,8 +37,8 @@ export class ServerListServerInfo {
         outPacket.writeUInt8(this.unk02)
         outPacket.writeString(this.serverName)
         outPacket.writeUInt8(this.channelCount)
-        this.channels.forEach((element: ServerListChannelInfo) => {
-            element.build(outPacket)
-        });
+        for (const channel of this.channels) {
+            channel.build(outPacket)
+        }
     }
 }

@@ -4,28 +4,22 @@ export const PacketSignature: number = 0x55 // 'U'
 export enum PacketId {
     Version = 0,
     Reply,
-    Lobby,
-    Login,
+    Login = 3,
     ServerList = 5,
     Character,
-    Crypt,
+    RequestRoomList,
+    RequestChannels = 10,
     Room = 65,
     Host = 68,
     Udp = 70,
     Ban = 74,
+    QuickStart = 86,
     Automatch = 88,
+    GZ = 95,
     Achievement = 96,
+    ConfigInfo = 106,
+    Lobby = 107,
     UserStart = 150,
+    RoomList = 151,
     UserInfo = 157,
 }
-
-/*
-packet structure:
-{
-    signature, (length: byte)
-    sequence, (length: byte)
-    data_size, (length: word)
-    packet_id, (length: byte) this is part of data
-    then the data itself (length: data_size)
-}
-*/

@@ -1,18 +1,20 @@
 import { Uint64LE } from 'int64-buffer'
 
-import { RoomData } from '../../../roomdata'
-import { UserData } from '../../../userdata'
-import { PacketString } from '../../packetstring'
-import { OutPacketBase } from '../packet'
-import { UserInfoFullUpdate } from '../userinfo/fulluserupdate'
-import { RoomPlayerNetInfo } from './playernetinfo'
+import { OutPacketBase } from 'packets/out/packet'
+import { PacketString } from 'packets/packetstring'
+
+import { Room } from 'room/room'
+import { User } from 'user/user'
+
+import { OutRoomPlayerNetInfo } from 'packets/out/room/playernetinfo'
+import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 
 /**
  * Sub structure of Room packet
  * Stores information used to create a new room
- * @class RoomCreateAndJoinRoom
+ * @class OutRoomCreateAndJoinRoom
  */
-export class RoomCreateAndJoinRoom {
+export class OutRoomCreateAndJoinRoom {
     private roomHostId: number
     private unk01: number
     private unk02: number
@@ -85,67 +87,75 @@ export class RoomCreateAndJoinRoom {
     // end of flags & 0x40000
     // flags & 0x80000
     private unk29: number
-    private unk30: number
-    private unk31: number
-    private unk32: number
-    private unk33: number
     // end of flags & 0x80000
     // flags & 0x100000
-    private unk34: number // if == 1, it can have 3 more bytes
+    private unk30: number
     // end of flags & 0x100000
-    // flags & 0x200000
-    private unk35: number
+    // flags & 0x20000
+    private unk31: number
     // end of flags & 0x200000
     // flags & 0x400000
-    private unk36: number
+    private unk32: number
     // end of flags & 0x400000
     // flags & 0x800000
-    private unk37: number
+    private unk33: number
     // end of flags & 0x800000
     // flags & 0x1000000
-    private unk38: number
+    private unk34: number // if == 1, it can have 3 more bytes
     // end of flags & 0x1000000
     // flags & 0x2000000
-    private unk39: number
+    private unk35: number
     // end of flags & 0x2000000
     // flags & 0x4000000
-    private unk40: number
+    private unk36: number
     // end of flags & 0x4000000
     // flags & 0x8000000
-    private unk41: number
+    private unk37: number
     // end of flags & 0x8000000
     // flags & 0x10000000
-    private unk42: number
+    private unk38: number
     // end of flags & 0x10000000
     // flags & 0x20000000
-    private unk43: number
+    private unk39: number
     // end of flags & 0x20000000
     // flags & 0x40000000
-    private unk44: number
+    private unk40: number
     // end of flags & 0x40000000
     // flags & 0x80000000
-    private unk45: number
+    private unk41: number
     // end of flags & 0x80000000
     // flags & 0x100000000
-    private unk46: number
+    private unk42: number
     // end of flags & 0x100000000
+    // flags & 0x200000000
+    private unk43: number
+    // end of flags & 0x200000000
+    // flags & 0x400000000
+    private unk44: number
+    // end of flags & 0x400000000
+    // flags & 0x800000000
+    private unk45: number
+    // end of flags & 0x800000000
+    // flags & 0x1000000000
+    private unk46: number
+    // end of flags & 0x1000000000
     private numOfPlayers: number
-    private users: UserData[]
+    private users: User[]
 
-    constructor(roomInfo: RoomData) {
+    constructor(roomInfo: Room) {
 
-        this.roomHostId = roomInfo.hostId
+        this.roomHostId = roomInfo.host.userId
         this.unk01 = 2
         this.unk02 = 2
-        this.roomId = roomInfo.roomId
+        this.roomId = roomInfo.id
         this.unk04 = 5
-        this.roomFlags = new Uint64LE(-1) // or 0xFFFFFFFFFFFFFFFF
+        this.roomFlags = new Uint64LE('FFFFFFFFFFFFFFFF', 16)
         this.roomName = new PacketString(roomInfo.roomName)
         this.unk05 = 0
         this.unk06 = 0
         this.unk07 = 0
         this.unk08 = 0
-        this.unk09 = new PacketString(null)
+        this.unk09 = new PacketString('')
         this.unk10 = 0
         this.unk11 = 1
         this.gameModeId = roomInfo.gameModeId
@@ -224,6 +234,7 @@ export class RoomCreateAndJoinRoom {
         outPacket.writeUInt8(this.unk13)
 
         outPacket.writeUInt8(this.unk14)
+
         outPacket.writeUInt8(this.winLimit)
 
         outPacket.writeUInt16(this.killLimit)
@@ -244,16 +255,20 @@ export class RoomCreateAndJoinRoom {
         outPacket.writeUInt8(this.unk25)
 
         outPacket.writeUInt8(this.unk26)
-        this.unk27.forEach((element) => {
-            outPacket.writeUInt8(element)
-        });
+        for (const iterator of this.unk27) {
+            outPacket.writeUInt8(iterator)
+        }
 
         outPacket.writeUInt8(this.unk28)
 
         outPacket.writeUInt8(this.unk29)
+
         outPacket.writeUInt8(this.unk30)
+
         outPacket.writeUInt8(this.unk31)
+
         outPacket.writeUInt8(this.unk32)
+
         outPacket.writeUInt8(this.unk33)
 
         // if == 1, it can have 3 more bytes
@@ -286,9 +301,10 @@ export class RoomCreateAndJoinRoom {
 
         outPacket.writeUInt8(this.numOfPlayers)
 
-        this.users.forEach((user) => {
-            new RoomPlayerNetInfo(user).build(outPacket)
+        for (const user of this.users) {
+            outPacket.writeUInt32(user.userId)
+            new OutRoomPlayerNetInfo(user).build(outPacket)
             new UserInfoFullUpdate(user).build(outPacket)
-        })
+        }
     }
 }
