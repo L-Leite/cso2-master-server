@@ -105,7 +105,7 @@ export class InRoomPacket extends InPacketBase {
                 this.countdown = new InRoomCountdown(this)
                 break
             default:
-                throw new Error('unknown inroompacket type ' + this.packetType)
+                console.warn('unknown inroompacket type ' + this.packetType)
         }
     }
 }
