@@ -1,6 +1,6 @@
 {
   "name": "cso2-master-server",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A master server for Nexon's Counter-Strike: Online 2",
   "author": "Luís Leite",
   "license": "MIT",
@@ -8,15 +8,14 @@
   "scripts": {
     "start": "node dist/server.js",
     "build": "npm run tslint && npm run build-ts",
-    "debug": "npm run build && npm run watch-debug",
-    "watch": "nodemon dist/server.js",
-    "watch-debug": "nodemon --inspect dist/server.js",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
     "tslint": "tslint -c tslint.json -p tsconfig.json"
   },
   "dependencies": {
+    "@types/commander": "^2.12.2",
     "app-module-path": "^2.2.0",
+    "commander": "^2.19.0",
     "hexy": "^0.2.11",
     "int64-buffer": "^0.99.1007",
     "ip": "^1.1.5",
@@ -29,7 +28,6 @@
     "@types/stream-buffers": "^3.0.2",
     "@types/uuid": "^3.4.4",
     "eslint": "^5.8.0",
-    "nodemon": "^1.18.5",
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
     "typescript": "^3.1.6"

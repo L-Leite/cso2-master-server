@@ -6,6 +6,8 @@ An incomplete master server for Nexon's (South Korea) Counter-Strike: Online 2.
 
 You can find its client [here](https://github.com/Ochii/cso2-launcher/).
 
+At the moment you can create, join and start room matches in custom mode.
+
 ## How to use
 
 ### Requirements
@@ -19,9 +21,11 @@ In the project's directory, run the ```npm install --only=production``` command 
 
 ### Starting the server
 
-In the project's directory, use the ```npm run start``` command to start the server.
+As an example, in your project's directory, you can run the server with ```npm run start -- --ip-address [some IP address]``` command to start the server.
 
-It will listen to ports 30001 TCP and 30002 UDP by default.
+**You must *not* use internal IPs** (such as 0.0.0.0 or 127.0.0.1) as the machine's IP address, **or users won't be able to join each other matches!**
+
+See the [command line arguments section](#command-line-arguments) for more options.
 
 ## How to build
 
@@ -40,14 +44,19 @@ It will listen to ports 30001 TCP and 30002 UDP by default.
 
 ### List of available NPM commands
 
-- ```npm run start``` - Runs ```dist/server.js``` (the project must be built first)
+- ```npm run start -- [server arguments]``` - Runs ```dist/server.js``` (check the available arguments [below](#command-line-arguments))
 - ```npm run build``` - Lints and builds the project
-- ```npm run debug``` - Builds the project, then, debugs it
-- ```npm run watch``` - Monitors ```dist/server.js```
-- ```npm run watch-debug``` - Monitors and debugs ```dist/server.js```
 - ```npm run build-ts``` - Only builds the project
 - ```npm run watch-ts``` - Monitors the project
 - ```npm run tslint``` - Lints the project
+
+### Command line arguments
+
+Options:
+
+- ```-i, --ip-address <ip>```        The IP address to be used by the server (must not be an internal IP)
+- ```-p, --port-master [port]```    (*optional*) The server's (TCP) port (default: 30001)
+- ```-P, --port-holepunch [port]```  (*optional*) The server's holepunch (UDP) port (default: 30002)
 
 ## Bug reporting and improvements
 

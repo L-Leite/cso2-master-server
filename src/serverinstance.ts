@@ -22,9 +22,9 @@ import { ChannelManager } from 'channel/channelmanager'
 const clientWelcomeMessage: string = '~SERVERCONNECTED\n\0'
 
 export interface IServerOptions {
-    masterPort?: number,
-    holepunchPort?: number,
-    hostname?: string
+    hostname: string,
+    portMaster: number,
+    portHolepunch: number,
 }
 
 /**
@@ -56,24 +56,10 @@ export class ServerInstance {
      * constructs our server instance
      * @param options the server options
      */
-    constructor(options: IServerOptions = {}) {
-        if (options.masterPort) {
-            this.masterPort = options.masterPort
-        } else {
-            this.masterPort = 30001
-        }
-
-        if (options.holepunchPort) {
-            this.holepunchPort = options.holepunchPort
-        } else {
-            this.holepunchPort = 30002
-        }
-
-        if (options.hostname) {
-            this.hostname = options.hostname
-        } else {
-            this.hostname = '0.0.0.0'
-        }
+    constructor(options: IServerOptions) {
+        this.masterPort = options.portMaster
+        this.holepunchPort = options.portHolepunch
+        this.hostname = options.hostname
 
         this.server = net.createServer()
         this.holepunchServer = dgram.createSocket('udp4');

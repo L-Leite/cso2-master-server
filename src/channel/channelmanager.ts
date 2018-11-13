@@ -1,5 +1,3 @@
-import { hexy } from 'hexy'
-
 import { Channel } from 'channel/channel'
 import { ChannelServer } from 'channel/channelserver'
 
@@ -268,13 +266,13 @@ export class ChannelManager {
             const guestSocket: ExtendedSocket = guest.socket
 
             const hostUdpData: Buffer = new OutUdpPacket(1, host.userId,
-                host.externalIpAddress, host.localServerPort, guestSocket.getSeq()).build()
+                host.externalIpAddress, host.externalServerPort, guestSocket.getSeq()).build()
             const guestReply: Buffer = new OutHostPacket(guestSocket.getSeq()).joinHost(host.userId)
             guestSocket.write(hostUdpData)
             guestSocket.write(guestReply)
 
             const guestData = new OutUdpPacket(0, guest.userId,
-                guest.externalIpAddress, guest.localClientPort, hostSocket.getSeq()).build()
+                guest.externalIpAddress, guest.externalClientPort, hostSocket.getSeq()).build()
             hostSocket.write(guestData)
         }
 
