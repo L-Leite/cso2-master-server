@@ -19,6 +19,13 @@ export class InUdpPacket extends InPacketBase {
     public unk02: number // another port?
 
     /**
+     * is this an UDP heartbeat?
+     */
+    public isHeartbeat(): boolean {
+        return this.type === InUdpPacketType.Heartbeat
+    }
+
+    /**
      * parses the packet's data
      */
     protected parse(): void {
@@ -27,7 +34,7 @@ export class InUdpPacket extends InPacketBase {
         this.type = this.readUInt8()
 
         // the heartbeat packet doesn't have any more data
-        if (this.type === InUdpPacketType.Heartbeat) {
+        if (this.isHeartbeat()) {
             return
         }
 

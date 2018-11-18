@@ -82,13 +82,19 @@ export class UserManager {
             return false
         }
 
+        if (udpPacket.isHeartbeat()) {
+            console.log('UDP heartbeat from %s (%s)', user.userName, sourceSocket.uuid)
+            return true
+        }
+
         // cso2's client subtracts 0x8080000 from the ip (128 from the first two bytes)
         // this might bug out if one of the two bytes of the ip are less than 128
         // requires testing
-        let convertedIp = ip.toLong(udpPacket.ip)
-        convertedIp += 0x80800000
+        // UPDATE: the IPs no longer get subtracted?
+        // const convertedIp = ip.toLong(udpPacket.ip)
+        // convertedIp += 0x80800000
 
-        user.externalIpAddress = ip.fromLong(convertedIp)
+        user.externalIpAddress = udpPacket.ip
         user.port = udpPacket.port
 
         return true
