@@ -174,7 +174,7 @@ export class ChannelManager {
 
         user.currentRoom = newRoom
 
-        const reply: Buffer = new OutRoomPacket(sourceSocket.getSeq()).createAndJoinRoom(newRoom)
+        const reply: Buffer = new OutRoomPacket(sourceSocket.getSeq()).createAndJoin(newRoom)
         sourceSocket.write(reply)
 
         return true
@@ -211,12 +211,12 @@ export class ChannelManager {
         desiredRoom.addUser(user)
         user.currentRoom = desiredRoom
 
-        const reply: Buffer = new OutRoomPacket(sourceSocket.getSeq()).createAndJoinRoom(desiredRoom)
+        const reply: Buffer = new OutRoomPacket(sourceSocket.getSeq()).createAndJoin(desiredRoom)
         sourceSocket.write(reply)
 
         // inform the host of the new user
         const hostSocket: ExtendedSocket = desiredRoom.host.socket
-        const hostReply: Buffer = new OutRoomPacket(hostSocket.getSeq()).newPlayerJoinRoom(user)
+        const hostReply: Buffer = new OutRoomPacket(hostSocket.getSeq()).playerJoin(user)
         hostSocket.write(hostReply)
 
         return true

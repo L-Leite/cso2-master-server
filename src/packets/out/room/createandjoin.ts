@@ -12,9 +12,9 @@ import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 /**
  * Sub structure of Room packet
  * Stores information used to create a new room
- * @class OutRoomCreateAndJoinRoom
+ * @class OutRoomCreateAndJoin
  */
-export class OutRoomCreateAndJoinRoom {
+export class OutRoomCreateAndJoin {
     private roomHostId: number
     private unk01: number
     private unk02: number

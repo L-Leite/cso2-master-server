@@ -247,8 +247,6 @@ export class ServerInstance {
      */
     private onSocketClose(socket: ExtendedSocket, hadError: boolean): void {
         console.log('socket ' + socket.uuid + ' closed hadError: ' + hadError)
-        this.users.removeUserByUuid(socket.uuid)
-        this.removeSocket(socket)
     }
 
     /**

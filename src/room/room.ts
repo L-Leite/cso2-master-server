@@ -1,6 +1,8 @@
+import { Channel } from 'channel/channel'
 import { User } from 'user/user'
 
-import { Channel } from 'channel/channel'
+import { OutRoomPacket } from 'packets/out/room'
+import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate';
 
 export interface IRoomOptions {
     roomName?: string,
@@ -104,11 +106,11 @@ export class Room {
      * @param targetUser the user object to remove
      */
     public removeUser(targetUser: User): void {
-        // TODO: what if the host leaves?
         for (const user of this.users) {
             if (user === targetUser) {
+                const userId = user.userId
                 this.users.splice(this.users.indexOf(user), 1)
-                this.onUserRemoved()
+                this.onUserRemoved(userId)
                 return
             }
         }
@@ -119,11 +121,10 @@ export class Room {
      * @param targetUser the user's id to remove
      */
     public removeUserById(userId: number): void {
-        // TODO: what if the host leaves?
         for (const user of this.users) {
             if (user.userId === userId) {
                 this.users.splice(this.users.indexOf(user), 1)
-                this.onUserRemoved()
+                this.onUserRemoved(userId)
                 return
             }
         }
@@ -132,10 +133,57 @@ export class Room {
     /**
      * called when an user is succesfully removed
      * if the room is empty, inform the channel to delete us
+     * else, find a new host
      */
-    private onUserRemoved(): void {
+    private onUserRemoved(userId: number): void {
         if (this.users.length === 0) {
             this.emptyRoomCallback(this, this.parentChannel)
+        } else {
+            this.findAndUpdateNewHost()
+            this.sendRemovedUser(userId)
         }
+    }
+
+    /**
+     * inform the users about an user being removed
+     * @param userId the removed user's ID
+     */
+    private sendRemovedUser(userId: number) {
+        for (const user of this.users) {
+            const reply: Buffer =
+                new OutRoomPacket(user.socket.getSeq())
+                    .playerLeave(userId);
+            user.socket.write(reply)
+        }
+    }
+
+    /**
+     * sets the new room host and tells the users about it
+     * @param newHost the new host user
+     */
+    private updateHost(newHost: User): void {
+        this.host = newHost
+
+        for (const user of this.users) {
+            const reply: Buffer =
+                new OutRoomPacket(user.socket.getSeq())
+                    .setHost(this.host)
+            user.socket.write(reply)
+        }
+    }
+
+    /**
+     * assign the first available user as a host,
+     * and updates the users about it
+     * only if the room isn't empty
+     * @returns true if a new host was found, false if not
+     */
+    private findAndUpdateNewHost(): boolean {
+        if (this.users.length === 0) {
+            return false
+        }
+
+        this.updateHost(this.users[0])
+        return true
     }
 }

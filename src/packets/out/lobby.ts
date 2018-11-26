@@ -2,8 +2,7 @@ import { WritableStreamBuffer } from 'stream-buffers'
 
 import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
-import { RoomListFullList } from 'packets/out/roomlist/fulllist'
-import { LobbySomeInfo } from './lobby/someinfo';
+import { LobbySomeInfo } from './lobby/someinfo'
 
 enum OutLobbyType {
     UnkType = 1,

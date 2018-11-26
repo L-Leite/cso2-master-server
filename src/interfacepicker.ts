@@ -73,29 +73,29 @@ export async function getOrAskNetIntf(): Promise<INetIntf> {
     let chosenIntf: INetIntf = null
 
     if (interfaces.length !== 1) {
-    console.log('Please select an interface:')
+        console.log('Please select an interface:')
 
-    let printIndex = 0
+        let printIndex = 0
 
-    for (const intf of interfaces) {
-        console.log('(%i) - %s (%s)', printIndex++, intf.name, intf.net.address)
-    }
+        for (const intf of interfaces) {
+            console.log('(%i) - %s (%s)', printIndex++, intf.name, intf.net.address)
+        }
 
-    let choice: number = 0
+        let choice: number = 0
 
-    try {
-        choice = await readChoiceFromConsole()
-    } catch (error) {
-        console.error(error)
-        process.exit(1)
-    }
+        try {
+            choice = await readChoiceFromConsole()
+        } catch (error) {
+            console.error(error)
+            process.exit(1)
+        }
 
-    if (choice < 0 || choice >= interfaces.length) {
-        console.error('The user did not enter a number, exiting...')
-        process.exit(1)
-    } else {
-        chosenIntf = interfaces[choice]
-    }
+        if (choice < 0 || choice >= interfaces.length) {
+            console.error('The user did not enter a number, exiting...')
+            process.exit(1)
+        } else {
+            chosenIntf = interfaces[choice]
+        }
     } else {
         // if it finds only one interface, use it
         chosenIntf = interfaces[0]

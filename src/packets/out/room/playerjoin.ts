@@ -8,9 +8,9 @@ import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 /**
  * Sub structure of Room packet
  * Stores information of a new room player
- * @class OutRoomNewPlayerJoin
+ * @class OutRoomPlayerJoin
  */
-export class OutRoomNewPlayerJoin {
+export class OutRoomPlayerJoin {
     private netInfo: OutRoomPlayerNetInfo
     private player: User
 

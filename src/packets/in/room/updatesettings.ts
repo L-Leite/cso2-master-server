@@ -52,7 +52,7 @@ export class InRoomUpdateSettings {
     // end of flags & 0x4000
     // flags & 0x8000
     public unk21: number
-    public unk22: number
+    public mapCycleType: number
     public unk23: number
     public unk24: number
     // end of flags & 0x8000
@@ -60,8 +60,8 @@ export class InRoomUpdateSettings {
     public unk25: number
     // end of flags & 0x10000
     // flags & 0x20000
-    public unk26: number
-    public unk27: number[]
+    public numOfMultiMaps: number
+    public multiMaps: number[]
     // end of flags & 0x20000
     // flags & 0x40000
     public teamBalance: number
@@ -122,6 +122,10 @@ export class InRoomUpdateSettings {
     // end of flags & 0x1000000000
 
     constructor(inPacket: InPacketBase) {
+        if (inPacket == null) {
+            return
+        }
+
         this.flags = inPacket.readUInt64()
 
         // int64-buffer doesn't have bitwise operations,
@@ -182,7 +186,7 @@ export class InRoomUpdateSettings {
         }
         if (lowFlag & 0x8000) {
             this.unk21 = inPacket.readUInt8()
-            this.unk22 = inPacket.readUInt8()
+            this.mapCycleType = inPacket.readUInt8()
             this.unk23 = inPacket.readUInt8()
             this.unk24 = inPacket.readUInt8()
         }
@@ -190,10 +194,10 @@ export class InRoomUpdateSettings {
             this.unk25 = inPacket.readUInt8()
         }
         if (lowFlag & 0x20000) {
-            this.unk26 = inPacket.readUInt8()
-            this.unk27 = []
-            for (let i = 0; i < this.unk26; i++) {
-                this.unk27[i] = inPacket.readUInt8()
+            this.numOfMultiMaps = inPacket.readUInt8()
+            this.multiMaps = []
+            for (let i = 0; i < this.numOfMultiMaps; i++) {
+                this.multiMaps[i] = inPacket.readUInt8()
             }
         }
         if (lowFlag & 0x40000) {

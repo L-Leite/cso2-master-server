@@ -146,9 +146,15 @@ export class UserManager {
         return null
     }
 
+    public removeUser(targetUser: User): void {
+        this.cleanUpUser(targetUser)
+        this.users.splice(this.users.indexOf(targetUser), 1)
+    }
+
     public removeUserById(userId: number): void {
         for (const user of this.users) {
             if (user.userId === userId) {
+                this.cleanUpUser(user)
                 this.users.splice(this.users.indexOf(user), 1)
                 return
             }
@@ -158,9 +164,16 @@ export class UserManager {
     public removeUserByUuid(uuid: string): void {
         for (const user of this.users) {
             if (user.socket.uuid === uuid) {
+                this.cleanUpUser(user)
                 this.users.splice(this.users.indexOf(user), 1)
                 return
             }
+        }
+    }
+
+    private cleanUpUser(user: User) {
+        if (user.currentRoom) {
+            user.currentRoom.removeUser(user)
         }
     }
 }

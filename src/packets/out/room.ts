@@ -7,16 +7,21 @@ import { Room } from 'room/room'
 import { User } from 'user/user'
 
 import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
+
 import { OutRoomCountdown } from 'packets/out/room/countdown'
-import { OutRoomCreateAndJoinRoom } from 'packets/out/room/createandjoin'
-import { OutRoomNewPlayerJoin } from 'packets/out/room/newplayerjoin'
+import { OutRoomCreateAndJoin } from 'packets/out/room/createandjoin'
+import { OutRoomPlayerJoin } from 'packets/out/room/playerjoin'
 import { OutRoomSwapTeam } from 'packets/out/room/swapteam'
 import { OutRoomUpdateSettings } from 'packets/out/room/updatesettings'
+import { OutRoomPlayerLeave } from './room/playerleave'
+import { OutRoomSetHost } from './room/sethost'
 
 enum OutRoomPacketType {
-    CreateAndJoinRoom = 0,
-    NewPlayerJoinRoom = 1, // a new player enters out current room
+    CreateAndJoin = 0,
+    PlayerJoin = 1, // a new player enters out current room
+    PlayerLeave = 2,
     UpdateSettings = 4,
+    SetHost = 5,
     SwapTeam = 9,
     Countdown = 14,
 }
@@ -33,14 +38,14 @@ export class OutRoomPacket extends OutPacketBase {
         this.packetId = PacketId.Room
     }
 
-    public createAndJoinRoom(roomInfo: Room): Buffer {
+    public createAndJoin(roomInfo: Room): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 100, incrementAmount: 20 })
 
         this.buildHeader()
-        this.writeUInt8(OutRoomPacketType.CreateAndJoinRoom)
+        this.writeUInt8(OutRoomPacketType.CreateAndJoin)
 
-        new OutRoomCreateAndJoinRoom(roomInfo).build(this)
+        new OutRoomCreateAndJoin(roomInfo).build(this)
 
         const res: Buffer = this.outStream.getContents()
         OutPacketBase.setPacketLength(res)
@@ -48,14 +53,29 @@ export class OutRoomPacket extends OutPacketBase {
         return res
     }
 
-    public newPlayerJoinRoom(user: User): Buffer {
+    public playerJoin(user: User): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 60, incrementAmount: 15 })
 
         this.buildHeader()
-        this.writeUInt8(OutRoomPacketType.NewPlayerJoinRoom)
+        this.writeUInt8(OutRoomPacketType.PlayerJoin)
 
-        new OutRoomNewPlayerJoin(user).build(this)
+        new OutRoomPlayerJoin(user).build(this)
+
+        const res: Buffer = this.outStream.getContents()
+        OutPacketBase.setPacketLength(res)
+
+        return res
+    }
+
+    public playerLeave(userId: number): Buffer {
+        this.outStream = new WritableStreamBuffer(
+            { initialSize: 20, incrementAmount: 15 })
+
+        this.buildHeader()
+        this.writeUInt8(OutRoomPacketType.PlayerLeave)
+
+        new OutRoomPlayerLeave(userId).build(this)
 
         const res: Buffer = this.outStream.getContents()
         OutPacketBase.setPacketLength(res)
@@ -71,6 +91,21 @@ export class OutRoomPacket extends OutPacketBase {
         this.writeUInt8(OutRoomPacketType.UpdateSettings)
 
         new OutRoomUpdateSettings(newSettings).build(this)
+
+        const res: Buffer = this.outStream.getContents()
+        OutPacketBase.setPacketLength(res)
+
+        return res
+    }
+
+    public setHost(user: User): Buffer {
+        this.outStream = new WritableStreamBuffer(
+            { initialSize: 30, incrementAmount: 15 })
+
+        this.buildHeader()
+        this.writeUInt8(OutRoomPacketType.SetHost)
+
+        new OutRoomSetHost(user.userId).build(this)
 
         const res: Buffer = this.outStream.getContents()
         OutPacketBase.setPacketLength(res)

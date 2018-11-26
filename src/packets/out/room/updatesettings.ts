@@ -76,7 +76,7 @@ export class OutRoomUpdateSettings {
         }
         if (lowFlag & 0x8000) {
             outPacket.writeUInt8(this.settings.unk21)
-            outPacket.writeUInt8(this.settings.unk22)
+            outPacket.writeUInt8(this.settings.mapCycleType)
             outPacket.writeUInt8(this.settings.unk23)
             outPacket.writeUInt8(this.settings.unk24)
         }
@@ -84,9 +84,9 @@ export class OutRoomUpdateSettings {
             outPacket.writeUInt8(this.settings.unk25)
         }
         if (lowFlag & 0x20000) {
-            outPacket.writeUInt8(this.settings.unk26)
-            for (let i = 0; i < this.settings.unk26; i++) {
-                outPacket.writeUInt8(this.settings.unk27[i])
+            outPacket.writeUInt8(this.settings.numOfMultiMaps)
+            for (let i = 0; i < this.settings.numOfMultiMaps; i++) {
+                outPacket.writeUInt8(this.settings.multiMaps[i])
             }
         }
         if (lowFlag & 0x40000) {
