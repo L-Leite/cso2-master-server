@@ -12,29 +12,32 @@ export class PacketLongString {
 
     public str: string
 
-    constructor(str: string) {
+    // the actual size of the string in memory
+    public actualStrLen: number
+
+    // the length of actualStrLen plus the size byte
+    public totalLen: number
+
+    constructor(str: string, rawLength: number = 0) {
+        const expectedLen: number = new TextEncoder().encode(str).length
+
+        if (rawLength !== 0) {
+            // ensure the received string has a correct length
+            if (expectedLen !== rawLength) {
+                throw new Error('The string\'s expected length is different from the one in the packet')
+            }
+        }
+
         this.str = str
-    }
-
-    public length(): number {
-        if (this.str == null) {
-            return 0
-        }
-        return this.str.length
-    }
-
-    public rawLength(): number {
-        if (this.str == null) {
-            return 2
-        }
-        return this.str.length + 2
+        this.actualStrLen = expectedLen
+        this.totalLen = this.actualStrLen + 2
     }
 
     public toBuffer(): Buffer {
-        const newBuffer = Buffer.alloc(this.rawLength())
-        newBuffer.writeUInt16LE(this.length(), 0)
+        const newBuffer = Buffer.alloc(this.totalLen)
+        newBuffer.writeUInt16LE(this.actualStrLen, 0)
         if (this.str) {
-            newBuffer.write(this.str, 2, this.length(), 'utf8')
+            newBuffer.write(this.str, 2, this.actualStrLen, 'utf8')
         }
         return newBuffer
     }

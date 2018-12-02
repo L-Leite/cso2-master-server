@@ -164,7 +164,7 @@ export class InPacketBase {
         const res: PacketString = PacketString.from(
             this.packetData.slice(this.curOffset,
                 this.packetData.length))
-        this.curOffset += res.rawLength()
+        this.curOffset += res.totalLen
         return res.str
     }
 
@@ -181,7 +181,7 @@ export class InPacketBase {
         const res: PacketLongString = PacketLongString.from(
             this.packetData.slice(this.curOffset,
                 this.packetData.length))
-        this.curOffset += res.rawLength()
+        this.curOffset += res.totalLen
         return res.str
     }
 
