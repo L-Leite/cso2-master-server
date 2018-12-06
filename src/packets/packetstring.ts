@@ -1,3 +1,5 @@
+import { TextEncoder } from 'util'
+
 /**
  * Stores an utf8 string used by packets
  * The first byte is the size of the string,
