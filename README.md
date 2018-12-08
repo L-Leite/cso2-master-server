@@ -2,70 +2,57 @@
 
 [![Build Status](https://travis-ci.org/Ochii/cso2-master-server.svg?branch=master)](https://travis-ci.org/Ochii/cso2-master-server)
 
-An incomplete master server for Nexon's (South Korea) Counter-Strike: Online 2.
+A master server for Nexon's Counter-Strike: Online 2 written in Typescript on top of NodeJS.
 
-You can find its client [here](https://github.com/Ochii/cso2-launcher/).
+Used by this [client launcher](https://github.com/Ochii/cso2-launcher/).
 
-At the moment you can create, join and start room matches in custom mode.
+**Any help** towards the project is welcome and appreciated.
 
-## How to use
+## Running
 
-### Requirements
+To run the server, you need:
 
-- [Node.js](https://nodejs.org/);
-- A copy of the project transpiled to Javascript, you may [get one here](https://github.com/Ochii/cso2-master-server/releases/latest) or [build it yourself](#how-to-build)
+- [Node.js](https://nodejs.org/) (version 10 or better);
+- [A server build](https://github.com/Ochii/cso2-master-server/releases/latest).
 
-### Obtaining the dependencies
+Then, in a terminal instance:
 
-In the project's directory, run the ```npm install --only=production``` command to obtain the server's dependencies.
+```sh
+npm install --only=production # installs the required dependencies
+npm run start # starts the server
+```
 
-### Starting the server
+By the default, the server **will ask you which network interface to listen on**.
 
-As an example, in your project's directory, you can run the server with ```npm run start -- --ip-address [some IP address]``` command to start the server.
+See the [command line arguments](#command-line-arguments) for more options.
 
-**You must *not* use internal IPs** (such as 0.0.0.0 or 127.0.0.1) as the machine's IP address, **or users won't be able to join each other matches!**
+## Building
 
-See the [command line arguments section](#command-line-arguments) for more options.
+In a terminal instance:
 
-## How to build
-
-### Build requirements
-
-- [Node.js](https://nodejs.org/)
-- A clone of the project - ```git clone https://github.com/Ochii/cso2-master-server.git```
-
-### Building
-
-- In the project directory, run ```npm install``` to obtain the required project dependencies;
-
-- Once that's done, you can run ```npm run build``` whenever you wish to build the project.
-
-- After building the project, you may start the server with ```npm run start```.
-
-### List of available NPM commands
-
-- ```npm run start -- [server arguments]``` - Runs ```dist/server.js``` (check the available arguments [below](#command-line-arguments))
-- ```npm run build``` - Lints and builds the project
-- ```npm run build-ts``` - Only builds the project
-- ```npm run watch-ts``` - Monitors the project
-- ```npm run tslint``` - Lints the project
+```sh
+npm install # installs the required dependencies (includes dev dependencies)
+npm run build # builds the server
+```
 
 ### Command line arguments
 
 Options:
 
-- ```-i, --ip-address <ip>```        The IP address to be used by the server (must not be an internal IP)
-- ```-p, --port-master [port]```    (*optional*) The server's (TCP) port (default: 30001)
-- ```-P, --port-holepunch [port]```  (*optional*) The server's holepunch (UDP) port (default: 30002)
+- ```-i, --ip-address [ip]``` (*optional*) The IP address to listen on (default: auto-detect)
+- ```-p, --port-master [port]``` (*optional*) The server's (TCP) port (default: 30001)
+- ```-P, --port-holepunch [port]``` (*optional*) The server's holepunch (UDP) port (default: 30002)
 
-## Bug reporting and improvements
+## Bug reporting
 
-Have a look at the [issues](https://github.com/Ochii/cso2-master-server/issues) for a list of issues in the project found or to report them yourself.
+You can report a bug or look at list of known bugs at [issues](https://github.com/Ochii/cso2-master-server/issues).
 
-If you wish or have any improvements that you would like to share, feel free to [open a pull request](https://github.com/Ochii/cso2-master-server/pulls).
+## Pull requests
+
+If you have any improvements that you would like to share or suggest about, have a look at [pull requests](https://github.com/Ochii/cso2-master-server/pulls).
 
 ## License
 
-Read ```LICENSE``` for license information.
+Read ```LICENSE``` for the project's license information.
 
 I'm not affiliated with either Valve or Nexon, just like I don't own Counter-Strike Online 2.
