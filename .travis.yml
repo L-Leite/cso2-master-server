@@ -1,17 +1,25 @@
+sudo: false
 language: node_js
 node_js:
-- node
+- "10"
+- "11"
+cache:
+  directories:
+    - "node_modules"
 script:
-- npm run build
-before_deploy:
-- COMMIT_SHORT_HASH=$(git log --pretty=format:'%h' -n 1)
-- tar -zcf cso2-master-server-$COMMIT_SHORT_HASH.tar.gz dist package.json package-lock.json LICENSE README.md
-deploy:
-  provider: releases
-  api_key:
-    secure: fy56xoi7op5UKZcFGNFo0iFlQPxbDzMkOD6oHqlbOMgWfjU8HLHb9DLYfNcGv6UoA/d/uD20zHP9iipBGVrLsEJim8hP+IkM1K78VeVE9qg5m+1VJ9rib/Jft4fKZH4D46IdBgueBaIrXRIoBsRg2AWqtWkzFoNVgtdUjCarlB4FsUc9g4+uTSI/euKKhyY7RyKHowgbdSVqPgkDrw09sL86Qbmc3Wfba/YAu/NQ0d+QEnjuhycBluC8xVyI8JT2fpXi776/P40SZON+8EeVjgsZRylUk86ndDO+2yN39s4RhBLjqmPD3tXCvD8lhsDvsdR7on8rPLe9IZKAVoF+SfjFr/n/RT5YujHbqhAMBpx7OesjJ2SVadNHEC0txr6ZxUHgK27Kekiq/nGaGT7M2/C1CHMaPHi7vQk45pFy3WV4zrIAC5PTjtEpgvrQW/cRnbuWZq+46IOU0QS18VJ55yXgHrqHNxl2lNSwTdmzBZeeTQNf2XamS/c4QcTKGLhgBZqUFdy13wCCwegEiE+fMhDoMeC2RyqufLb6pbeQB5fOgTHpq/n9qMg9Gc/X4FfwindPLsrYhMTf2zB4z1CZ2GRdOMkgqWP29OQffDCkwG87mXz1dImyT/Q4crTs1iBJKvXvgTGvNx7CK3XHL4ov2WltNnm3I63QOYQojdmvJeo=
-  file: cso2-master-server-$COMMIT_SHORT_HASH.tar.gz
-  skip_cleanup: true
-  overwrite: true
-  on:
-    tags: true
+  - npm run build
+jobs:
+  include:
+    - stage: GitHub Release
+      script: skip
+      node_js: "11"
+      before_deploy:
+        - COMMIT_SHORT_HASH=$(git log --pretty=format:'%h' -n 1)
+        - tar -zcf cso2-master-server-$COMMIT_SHORT_HASH.tar.gz dist package.json package-lock.json LICENSE README.md
+      deploy:
+        provider: releases
+        api_key:
+          secure: fy56xoi7op5UKZcFGNFo0iFlQPxbDzMkOD6oHqlbOMgWfjU8HLHb9DLYfNcGv6UoA/d/uD20zHP9iipBGVrLsEJim8hP+IkM1K78VeVE9qg5m+1VJ9rib/Jft4fKZH4D46IdBgueBaIrXRIoBsRg2AWqtWkzFoNVgtdUjCarlB4FsUc9g4+uTSI/euKKhyY7RyKHowgbdSVqPgkDrw09sL86Qbmc3Wfba/YAu/NQ0d+QEnjuhycBluC8xVyI8JT2fpXi776/P40SZON+8EeVjgsZRylUk86ndDO+2yN39s4RhBLjqmPD3tXCvD8lhsDvsdR7on8rPLe9IZKAVoF+SfjFr/n/RT5YujHbqhAMBpx7OesjJ2SVadNHEC0txr6ZxUHgK27Kekiq/nGaGT7M2/C1CHMaPHi7vQk45pFy3WV4zrIAC5PTjtEpgvrQW/cRnbuWZq+46IOU0QS18VJ55yXgHrqHNxl2lNSwTdmzBZeeTQNf2XamS/c4QcTKGLhgBZqUFdy13wCCwegEiE+fMhDoMeC2RyqufLb6pbeQB5fOgTHpq/n9qMg9Gc/X4FfwindPLsrYhMTf2zB4z1CZ2GRdOMkgqWP29OQffDCkwG87mXz1dImyT/Q4crTs1iBJKvXvgTGvNx7CK3XHL4ov2WltNnm3I63QOYQojdmvJeo=
+        file: cso2-master-server-$COMMIT_SHORT_HASH.tar.gz
+        skip_cleanup: true
+        overwrite: true
