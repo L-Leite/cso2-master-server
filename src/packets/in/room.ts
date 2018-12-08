@@ -2,9 +2,9 @@ import { InPacketBase } from 'packets/in/packet'
 
 import { InRoomCountdown } from 'packets/in/room/countdown'
 import { InRoomNewRequest } from 'packets/in/room/fullrequest'
+import { InRoomJoinRequest } from 'packets/in/room/joinrequest'
+import { InRoomSwapTeamRequest } from 'packets/in/room/swapteam'
 import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
-import { InRoomJoinRequest } from './room/joinrequest'
-import { InRoomSwapTeamRequest } from './room/swapteam'
 
 enum InRoomType {
     NewRoomRequest = 0,

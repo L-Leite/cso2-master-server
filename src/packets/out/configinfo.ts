@@ -2,7 +2,8 @@ import { WritableStreamBuffer } from 'stream-buffers'
 
 import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
-import { ConfigListSomeInfo } from './configinfo/someinfo';
+
+import { ConfigListSomeInfo } from 'packets/out/configinfo/someinfo'
 
 enum OutConfigInfoType {
     SetInfo = 1,

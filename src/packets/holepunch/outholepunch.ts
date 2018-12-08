@@ -1,4 +1,4 @@
-import { UdpPacketSignature } from './inholepunch'
+import { UdpPacketSignature } from 'packets/holepunch/inholepunch'
 
 export class OutHolepunchPacketUdp {
     private portId: number

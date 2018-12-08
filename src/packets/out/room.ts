@@ -11,10 +11,10 @@ import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
 import { OutRoomCountdown } from 'packets/out/room/countdown'
 import { OutRoomCreateAndJoin } from 'packets/out/room/createandjoin'
 import { OutRoomPlayerJoin } from 'packets/out/room/playerjoin'
+import { OutRoomPlayerLeave } from 'packets/out/room/playerleave'
+import { OutRoomSetHost } from 'packets/out/room/sethost'
 import { OutRoomSwapTeam } from 'packets/out/room/swapteam'
 import { OutRoomUpdateSettings } from 'packets/out/room/updatesettings'
-import { OutRoomPlayerLeave } from './room/playerleave'
-import { OutRoomSetHost } from './room/sethost'
 
 enum OutRoomPacketType {
     CreateAndJoin = 0,
