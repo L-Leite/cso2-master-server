@@ -78,7 +78,7 @@ export class ChannelManager {
 
         user.setCurrentChannel(reqPacket.channelServerIndex, reqPacket.channelIndex)
 
-        const lobbyReply: Buffer = new OutLobbyPacket(sourceSocket.getSeq()).doSomething()
+        const lobbyReply: Buffer = new OutLobbyPacket(sourceSocket.getSeq()).joinRoom()
         const roomListReply: Buffer = new OutRoomListPacket(sourceSocket.getSeq()).getFullList(channel.rooms)
         sourceSocket.write(lobbyReply)
         sourceSocket.write(roomListReply)

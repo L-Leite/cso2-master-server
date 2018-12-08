@@ -2,15 +2,17 @@ import { WritableStreamBuffer } from 'stream-buffers'
 
 import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
-import { LobbySomeInfo } from './lobby/someinfo'
+
+import { LobbyJoinRoom } from 'packets/out/lobby/joinroom'
 
 enum OutLobbyType {
-    UnkType = 1,
+    JoinRoom = 1,
+    UpdateUserInfo = 2,
 }
 
 /**
  * outgoing lobby information
- * @class UnkType
+ * @class OutLobbyPacket
  */
 export class OutLobbyPacket extends OutPacketBase {
     constructor(seq: number) {
@@ -19,14 +21,14 @@ export class OutLobbyPacket extends OutPacketBase {
         this.packetId = PacketId.Lobby
     }
 
-    public doSomething(): Buffer {
+    public joinRoom(): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 10, incrementAmount: 10 })
 
         this.buildHeader()
-        this.writeUInt8(OutLobbyType.UnkType)
+        this.writeUInt8(OutLobbyType.JoinRoom)
 
-        new LobbySomeInfo(0, 2, 4).build(this)
+        new LobbyJoinRoom(0, 2, 4).build(this)
 
         const res: Buffer = this.outStream.getContents()
         OutPacketBase.setPacketLength(res)

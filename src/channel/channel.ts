@@ -37,7 +37,7 @@ export class Channel {
      * @returns the packet
      */
     public buildRoomListPacket(seq: number): Buffer {
-        const lobbyPacket: Buffer = new OutLobbyPacket(seq).doSomething()
+        const lobbyPacket: Buffer = new OutLobbyPacket(seq).joinRoom()
         const listPacket: Buffer = new OutRoomListPacket(seq).getFullList(this.rooms)
         return Buffer.concat([lobbyPacket, listPacket])
     }

@@ -2,9 +2,9 @@ import { OutPacketBase } from 'packets/out/packet'
 
 /**
  * Sub structure of Lobby packet
- * @class ConfigListSomeInfo
+ * @class LobbyJoinRoom
  */
-export class LobbySomeInfo {
+export class LobbyJoinRoom {
     private unk00: number
     private unk01: number
     private unk02: number
