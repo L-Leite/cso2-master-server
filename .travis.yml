@@ -13,6 +13,12 @@ jobs:
     - stage: GitHub Release
       node_js: "11"
       before_deploy:
+        # Set up git user name and tag this commit
+        - git config --local user.name "Luís Leite"
+        - git config --local user.email "ochii@leite.xyz"
+        - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+        - git tag $TRAVIS_TAG
+        # Pack the transpiled source code 
         - COMMIT_SHORT_HASH=$(git log --pretty=format:'%h' -n 1)
         - tar -zcf cso2-master-server-$COMMIT_SHORT_HASH.tar.gz dist package.json package-lock.json LICENSE README.md
       deploy:
