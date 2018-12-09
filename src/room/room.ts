@@ -2,7 +2,12 @@ import { Channel } from 'channel/channel'
 import { User } from 'user/user'
 
 import { OutRoomPacket } from 'packets/out/room'
-import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate';
+
+export enum RoomTeamNum {
+    Unknown = 0,
+    Terrorist = 1,
+    CounterTerrorist = 2,
+}
 
 export interface IRoomOptions {
     roomName?: string,
@@ -24,6 +29,7 @@ export interface IRoomOptions {
 
 export class Room {
     public id: number
+
     public roomName: string
     public maxPlayers: number
     public gameModeId: number
@@ -43,6 +49,7 @@ export class Room {
 
     public host: User
     public users: User[]
+    public userTeam: Map<number, RoomTeamNum>
 
     private emptyRoomCallback: (emptyRoom: Room, channel: Channel) => void
     private parentChannel: Channel
@@ -52,6 +59,8 @@ export class Room {
                 options?: IRoomOptions) {
         this.id = roomId
         this.host = host
+        this.userTeam = new Map<number, RoomTeamNum>()
+        this.userTeam.set(host.userId, RoomTeamNum.CounterTerrorist)
 
         this.parentChannel = parentChannel
         this.emptyRoomCallback = emptyRoomCallback
@@ -99,6 +108,7 @@ export class Room {
      */
     public addUser(user: User): void {
         this.users.push(user)
+        this.userTeam.set(user.userId, this.findDesirableTeamNum())
     }
 
     /**
@@ -131,6 +141,27 @@ export class Room {
     }
 
     /**
+     * getUserTeam
+     */
+    public getUserTeam(user: User): RoomTeamNum {
+        if (this.isUserHere(user) === false) {
+            console.warn('getUserTeam: user not found!')
+            return RoomTeamNum.Unknown
+        }
+        return this.userTeam.get(user.userId)
+    }
+
+    /**
+     * swaps an user to the opposite team
+     */
+    public setUserToTeam(user: User, newTeam: RoomTeamNum): void {
+        if (this.isUserHere(user) === false) {
+            return
+        }
+        this.userTeam.set(user.userId, newTeam)
+    }
+
+    /**
      * called when an user is succesfully removed
      * if the room is empty, inform the channel to delete us
      * else, find a new host
@@ -140,6 +171,7 @@ export class Room {
             this.emptyRoomCallback(this, this.parentChannel)
         } else {
             this.findAndUpdateNewHost()
+            this.userTeam.delete(userId)
             this.sendRemovedUser(userId)
         }
     }
@@ -185,5 +217,34 @@ export class Room {
 
         this.updateHost(this.users[0])
         return true
+    }
+
+    /**
+     * count the ammount of users on each team and returns the team with less users
+     * @returns the team with less users
+     */
+    private findDesirableTeamNum(): RoomTeamNum {
+        let trNum: number = 0
+        let ctNum: number = 0
+
+        for (const team of this.userTeam.values()) {
+            if (team === RoomTeamNum.Terrorist) {
+                trNum++
+            } else if (team === RoomTeamNum.CounterTerrorist) {
+                ctNum++
+            } else {
+                throw new Error('Unknown team number, debug me!')
+            }
+        }
+
+        if (trNum > ctNum) {
+            return RoomTeamNum.Terrorist
+        } else {
+            return RoomTeamNum.CounterTerrorist
+        }
+    }
+
+    private isUserHere(user: User) {
+        return this.users.find((u: User) => u === user) != null
     }
 }

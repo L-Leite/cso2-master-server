@@ -3,7 +3,7 @@ import { Uint64LE } from 'int64-buffer'
 import { OutPacketBase } from 'packets/out/packet'
 import { PacketString } from 'packets/packetstring'
 
-import { Room } from 'room/room'
+import { Room, RoomTeamNum } from 'room/room'
 import { User } from 'user/user'
 
 import { OutRoomPlayerNetInfo } from 'packets/out/room/playernetinfo'
@@ -303,7 +303,7 @@ export class OutRoomCreateAndJoin {
 
         for (const user of this.users) {
             outPacket.writeUInt32(user.userId)
-            new OutRoomPlayerNetInfo(user).build(outPacket)
+            new OutRoomPlayerNetInfo(user, RoomTeamNum.CounterTerrorist).build(outPacket)
             new UserInfoFullUpdate(user).build(outPacket)
         }
     }

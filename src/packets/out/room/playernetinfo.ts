@@ -1,8 +1,10 @@
-import * as ip from 'ip'
+import ip from 'ip'
 
 import { OutPacketBase } from 'packets/out/packet'
 
 import { User } from 'user/user'
+
+import { RoomTeamNum } from 'room/room'
 
 /**
  * Sub structure of Room packet
@@ -10,8 +12,7 @@ import { User } from 'user/user'
  * @class OutRoomPlayerNetInfo
  */
 export class OutRoomPlayerNetInfo {
-    private userId: number
-    private playerUnk00: number
+    private teamNum: RoomTeamNum
     private playerUnk01: number
     private playerUnk02: number
     private externalIpAddress: number
@@ -23,9 +24,8 @@ export class OutRoomPlayerNetInfo {
     private localClientPort: number
     private localTvPort: number
 
-    constructor(user: User) {
-        this.userId = user.userId
-        this.playerUnk00 = 2
+    constructor(user: User, teamNum: RoomTeamNum) {
+        this.teamNum = teamNum
         this.playerUnk01 = 0
         this.playerUnk02 = 0
         this.externalIpAddress = ip.toLong(user.externalIpAddress)
@@ -39,7 +39,7 @@ export class OutRoomPlayerNetInfo {
     }
 
     public build(outPacket: OutPacketBase): void {
-        outPacket.writeUInt8(this.playerUnk00)
+        outPacket.writeUInt8(this.teamNum)
         outPacket.writeUInt8(this.playerUnk01)
         outPacket.writeUInt8(this.playerUnk02)
         outPacket.writeUInt32(this.externalIpAddress, false)

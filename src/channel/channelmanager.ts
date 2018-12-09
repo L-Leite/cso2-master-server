@@ -12,7 +12,7 @@ import { InRequestRoomListPacket } from 'packets/in/requestroomlist'
 import { InRoomPacket } from 'packets/in/room'
 import { InRoomCountdown } from 'packets/in/room/countdown'
 import { InRoomJoinRequest } from 'packets/in/room/joinrequest'
-import { InRoomSwapTeamRequest } from 'packets/in/room/swapteam'
+import { InRoomSetUserTeamRequest } from 'packets/in/room/setuserteamreq'
 import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
 import { OutHostPacket } from 'packets/out/host'
 import { OutLobbyPacket } from 'packets/out/lobby'
@@ -112,8 +112,8 @@ export class ChannelManager {
             return this.onLeaveRoomRequest(reqPacket, sourceSocket, user)
         } else if (reqPacket.isUpdateSettings()) {
             return this.onRoomUpdateSettings(reqPacket, sourceSocket, user)
-        } else if (reqPacket.isSwapTeamRequest()) {
-            return this.onSwapTeamRequest(reqPacket, sourceSocket, user)
+        } else if (reqPacket.isSetUserTeamRequest()) {
+            return this.onSetTeamRequest(reqPacket, sourceSocket, user)
         } else if (reqPacket.isGameStartCountdownRequest()) {
             return this.onGameStartCountdownRequest(reqPacket, sourceSocket, user)
         }
@@ -216,7 +216,8 @@ export class ChannelManager {
 
         // inform the host of the new user
         const hostSocket: ExtendedSocket = desiredRoom.host.socket
-        const hostReply: Buffer = new OutRoomPacket(hostSocket.getSeq()).playerJoin(user)
+        const hostReply: Buffer = new OutRoomPacket(hostSocket.getSeq())
+            .playerJoin(user, desiredRoom.getUserTeam(user))
         hostSocket.write(hostReply)
 
         return true
@@ -357,19 +358,20 @@ export class ChannelManager {
      * @param user the user itself
      * @returns true if successful
      */
-    private onSwapTeamRequest(reqPacket: InRoomPacket, sourceSocket: ExtendedSocket, user: User): boolean {
+    private onSetTeamRequest(reqPacket: InRoomPacket, sourceSocket: ExtendedSocket, user: User): boolean {
         const currentRoom: Room = user.currentRoom
 
         if (currentRoom == null) {
             return false
         }
 
-        const swap: InRoomSwapTeamRequest = reqPacket.swapTeam
+        const swap: InRoomSetUserTeamRequest = reqPacket.swapTeam
+        currentRoom.setUserToTeam(user, swap.newTeam)
 
         // inform every user in the room of the changes
         for (const player of currentRoom.users) {
             const playerSocket: ExtendedSocket = player.socket
-            const reply: Buffer = new OutRoomPacket(playerSocket.getSeq()).swapTeam(swap.newTeam)
+            const reply: Buffer = new OutRoomPacket(playerSocket.getSeq()).setUserTeam(player, swap.newTeam)
             playerSocket.write(reply)
         }
 

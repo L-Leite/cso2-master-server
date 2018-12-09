@@ -3,7 +3,7 @@ import { InPacketBase } from 'packets/in/packet'
 import { InRoomCountdown } from 'packets/in/room/countdown'
 import { InRoomNewRequest } from 'packets/in/room/fullrequest'
 import { InRoomJoinRequest } from 'packets/in/room/joinrequest'
-import { InRoomSwapTeamRequest } from 'packets/in/room/swapteam'
+import { InRoomSetUserTeamRequest } from 'packets/in/room/setuserteamreq'
 import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
 
 enum InRoomType {
@@ -12,7 +12,7 @@ enum InRoomType {
     LeaveRoomRequest = 3,
     GameStartRequest = 5,
     UpdateSettings = 6,
-    SwapTeamRequest = 9,
+    SetUserTeamRequest = 9,
     GameStartCountdownRequest = 19,
 }
 
@@ -26,7 +26,7 @@ export class InRoomPacket extends InPacketBase {
     public newRequest: InRoomNewRequest
     public joinRequest: InRoomJoinRequest
     public updateSettings: InRoomUpdateSettings
-    public swapTeam: InRoomSwapTeamRequest
+    public swapTeam: InRoomSetUserTeamRequest
     public countdown: InRoomCountdown
 
     /**
@@ -67,8 +67,8 @@ export class InRoomPacket extends InPacketBase {
     /**
      * isSwapTeam
      */
-    public isSwapTeamRequest(): boolean {
-        return this.packetType === InRoomType.SwapTeamRequest
+    public isSetUserTeamRequest(): boolean {
+        return this.packetType === InRoomType.SetUserTeamRequest
     }
 
     /**
@@ -98,14 +98,14 @@ export class InRoomPacket extends InPacketBase {
             case InRoomType.UpdateSettings:
                 this.updateSettings = new InRoomUpdateSettings(this)
                 break
-            case InRoomType.SwapTeamRequest:
-                this.swapTeam = new InRoomSwapTeamRequest(this)
+            case InRoomType.SetUserTeamRequest:
+                this.swapTeam = new InRoomSetUserTeamRequest(this)
                 break
             case InRoomType.GameStartCountdownRequest:
                 this.countdown = new InRoomCountdown(this)
                 break
             default:
-                console.warn('unknown inroompacket type ' + this.packetType)
+                console.warn('InRoomPacket::parse: unknown inroompacket type ' + this.packetType)
         }
     }
 }
