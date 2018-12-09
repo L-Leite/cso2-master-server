@@ -1,6 +1,7 @@
 {
   "name": "cso2-master-server",
   "version": "0.3.0",
+  "repository": "github:Ochii/cso2-master-server",
   "description": "A master server for Nexon's Counter-Strike: Online 2",
   "author": "Luís Leite",
   "license": "MIT",
@@ -12,7 +13,7 @@
     "watch-ts": "tsc -w",
     "tslint": "tslint -c tslint.json -p tsconfig.json"
   },
-  "dependencies": {    
+  "dependencies": {
     "app-module-path": "^2.2.0",
     "commander": "^2.19.0",
     "hexy": "^0.2.11",
@@ -24,12 +25,12 @@
   "devDependencies": {
     "@types/commander": "^2.12.2",
     "@types/ip": "0.0.31",
-    "@types/node": "^10.12.2",
+    "@types/node": "^10.12.12",
     "@types/stream-buffers": "^3.0.2",
     "@types/uuid": "^3.4.4",
-    "eslint": "^5.8.0",
+    "eslint": "^5.10.0",
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
-    "typescript": "^3.1.6"
+    "typescript": "^3.2.2"
   }
 }
