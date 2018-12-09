@@ -11,13 +11,12 @@ import { getOrAskNetIntf, INetIntf } from 'interfacepicker'
 import { ServerInstance } from 'serverinstance'
 
 program
-  .version('0.2.0')
-  .option('-i, --ip-address [ip]', 'The IP address to be used by the server')
+  .version('0.3.0')
+  .option('-i, --ip-address [ip]', 'The IP address to be used by the server', null)
   .option('-p, --port-master [port]', 'The server\'s (TCP) port', 30001)
   .option('-P, --port-holepunch [port]', 'The server\'s holepunch (UDP) port', 30002)
   .parse(process.argv)
 
-// a little trick to allow us to use async functions
 async function startServer() {
   let desiredIp: string = null
 

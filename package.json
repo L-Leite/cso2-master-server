@@ -1,6 +1,6 @@
 {
   "name": "cso2-master-server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A master server for Nexon's Counter-Strike: Online 2",
   "author": "Luís Leite",
   "license": "MIT",
