@@ -8,8 +8,11 @@ import { TextEncoder } from 'util'
  */
 export class PacketLongString {
     public static from(data: Buffer): PacketLongString {
-        return new PacketLongString(data.slice(2,
-            2 + data.readUInt16LE(0)).toString('utf8'))
+        const length = data.readUInt16LE(0)
+        const str = data.slice(2,
+            2 + length).toString('utf8')
+
+        return new PacketLongString(str, length)
     }
 
     public str: string
