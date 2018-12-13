@@ -1,7 +1,7 @@
 import { Channel } from 'channel/channel'
 import { ChannelServer } from 'channel/channelserver'
 
-import { Room } from 'room/room'
+import { Room, RoomTeamNum } from 'room/room'
 
 import { User } from 'user/user'
 import { UserManager } from 'user/usermanager'
@@ -49,6 +49,41 @@ export class ChannelManager {
     }
 
     /**
+     * called when the user sends a Room packet
+     * @param reqData the packet's data
+     * @param sourceSocket the user's socket
+     * @param users the user manager object
+     */
+    public onRoomRequest(reqData: Buffer, sourceSocket: ExtendedSocket, users: UserManager): boolean {
+        const user: User = users.getUserByUuid(sourceSocket.uuid)
+
+        if (user == null) {
+            console.log('uuid ' + sourceSocket.uuid + ' tried to get rooms without session')
+            return false
+        }
+
+        const reqPacket: InRoomPacket = new InRoomPacket(reqData)
+
+        if (reqPacket.isNewRoomRequest()) {
+            return this.onNewRoomRequest(reqPacket, sourceSocket, user)
+        } else if (reqPacket.isJoinRoomRequest()) {
+            return this.onJoinRoomRequest(reqPacket, sourceSocket, user)
+        } else if (reqPacket.isGameStartRequest()) {
+            return this.onGameStartRequest(reqPacket, sourceSocket, user)
+        } else if (reqPacket.isLeaveRoomRequest()) {
+            return this.onLeaveRoomRequest(reqPacket, sourceSocket, user)
+        } else if (reqPacket.isUpdateSettings()) {
+            return this.onRoomUpdateSettings(reqPacket, sourceSocket, user)
+        } else if (reqPacket.isSetUserTeamRequest()) {
+            return this.onSetTeamRequest(reqPacket, sourceSocket, user)
+        } else if (reqPacket.isGameStartCountdownRequest()) {
+            return this.onGameStartCountdownRequest(reqPacket, sourceSocket, user)
+        }
+
+        return true
+    }
+
+    /**
      * called when the user sends a RequestRoomList packet
      * @param reqData the packet's data
      * @param sourceSocket the user's socket
@@ -82,41 +117,6 @@ export class ChannelManager {
         const roomListReply: Buffer = new OutRoomListPacket(sourceSocket.getSeq()).getFullList(channel.rooms)
         sourceSocket.write(lobbyReply)
         sourceSocket.write(roomListReply)
-
-        return true
-    }
-
-    /**
-     * called when the user sends a Room packet
-     * @param reqData the packet's data
-     * @param sourceSocket the user's socket
-     * @param users the user manager object
-     */
-    public onRoomRequest(reqData: Buffer, sourceSocket: ExtendedSocket, users: UserManager): boolean {
-        const user: User = users.getUserByUuid(sourceSocket.uuid)
-
-        if (user == null) {
-            console.log('uuid ' + sourceSocket.uuid + ' tried to get rooms without session')
-            return false
-        }
-
-        const reqPacket: InRoomPacket = new InRoomPacket(reqData)
-
-        if (reqPacket.isNewRoomRequest()) {
-            return this.onNewRoomRequest(reqPacket, sourceSocket, user)
-        } else if (reqPacket.isJoinRoomRequest()) {
-            return this.onJoinRoomRequest(reqPacket, sourceSocket, user)
-        } else if (reqPacket.isGameStartRequest()) {
-            return this.onGameStartRequest(reqPacket, sourceSocket, user)
-        } else if (reqPacket.isLeaveRoomRequest()) {
-            return this.onLeaveRoomRequest(reqPacket, sourceSocket, user)
-        } else if (reqPacket.isUpdateSettings()) {
-            return this.onRoomUpdateSettings(reqPacket, sourceSocket, user)
-        } else if (reqPacket.isSetUserTeamRequest()) {
-            return this.onSetTeamRequest(reqPacket, sourceSocket, user)
-        } else if (reqPacket.isGameStartCountdownRequest()) {
-            return this.onGameStartCountdownRequest(reqPacket, sourceSocket, user)
-        }
 
         return true
     }
@@ -208,7 +208,9 @@ export class ChannelManager {
             return false
         }
 
-        desiredRoom.addUser(user)
+        const newTeam: RoomTeamNum = desiredRoom.findDesirableTeamNum()
+
+        desiredRoom.addUser(user, newTeam)
         user.currentRoom = desiredRoom
 
         const reply: Buffer = new OutRoomPacket(sourceSocket.getSeq()).createAndJoin(desiredRoom)
@@ -217,7 +219,7 @@ export class ChannelManager {
         // inform the host of the new user
         const hostSocket: ExtendedSocket = desiredRoom.host.socket
         const hostReply: Buffer = new OutRoomPacket(hostSocket.getSeq())
-            .playerJoin(user, desiredRoom.getUserTeam(user))
+            .playerJoin(user, newTeam)
         hostSocket.write(hostReply)
 
         return true
@@ -371,7 +373,7 @@ export class ChannelManager {
         // inform every user in the room of the changes
         for (const player of currentRoom.users) {
             const playerSocket: ExtendedSocket = player.socket
-            const reply: Buffer = new OutRoomPacket(playerSocket.getSeq()).setUserTeam(player, swap.newTeam)
+            const reply: Buffer = new OutRoomPacket(playerSocket.getSeq()).setUserTeam(user, swap.newTeam)
             playerSocket.write(reply)
         }
 

@@ -60,7 +60,6 @@ export class Room {
         this.id = roomId
         this.host = host
         this.userTeam = new Map<number, RoomTeamNum>()
-        this.userTeam.set(host.userId, RoomTeamNum.CounterTerrorist)
 
         this.parentChannel = parentChannel
         this.emptyRoomCallback = emptyRoomCallback
@@ -83,7 +82,7 @@ export class Room {
         this.hltvEnabled = options.hltvEnabled ? options.hltvEnabled : 0
 
         this.users = []
-        this.addUser(host)
+        this.addUser(host, this.findDesirableTeamNum())
     }
 
     /**
@@ -106,9 +105,9 @@ export class Room {
      * add an user to a room
      * @param user the user object to add
      */
-    public addUser(user: User): void {
+    public addUser(user: User, teamNum: RoomTeamNum): void {
         this.users.push(user)
-        this.userTeam.set(user.userId, this.findDesirableTeamNum())
+        this.userTeam.set(user.userId, teamNum)
     }
 
     /**
@@ -162,6 +161,31 @@ export class Room {
     }
 
     /**
+     * count the ammount of users on each team and returns the team with less users
+     * @returns the team with less users
+     */
+    public findDesirableTeamNum(): RoomTeamNum {
+        let trNum: number = 0
+        let ctNum: number = 0
+
+        for (const team of this.userTeam.values()) {
+            if (team === RoomTeamNum.Terrorist) {
+                trNum++
+            } else if (team === RoomTeamNum.CounterTerrorist) {
+                ctNum++
+            } else {
+                throw new Error('Unknown team number, debug me!')
+            }
+        }
+
+        if (trNum < ctNum) {
+            return RoomTeamNum.Terrorist
+        } else {
+            return RoomTeamNum.CounterTerrorist
+        }
+    }
+
+    /**
      * called when an user is succesfully removed
      * if the room is empty, inform the channel to delete us
      * else, find a new host
@@ -185,7 +209,7 @@ export class Room {
             const reply: Buffer =
                 new OutRoomPacket(user.socket.getSeq())
                     .playerLeave(userId);
-            user.socket.write(reply)
+            user.socket.send(reply)
         }
     }
 
@@ -200,7 +224,7 @@ export class Room {
             const reply: Buffer =
                 new OutRoomPacket(user.socket.getSeq())
                     .setHost(this.host)
-            user.socket.write(reply)
+            user.socket.send(reply)
         }
     }
 
@@ -217,31 +241,6 @@ export class Room {
 
         this.updateHost(this.users[0])
         return true
-    }
-
-    /**
-     * count the ammount of users on each team and returns the team with less users
-     * @returns the team with less users
-     */
-    private findDesirableTeamNum(): RoomTeamNum {
-        let trNum: number = 0
-        let ctNum: number = 0
-
-        for (const team of this.userTeam.values()) {
-            if (team === RoomTeamNum.Terrorist) {
-                trNum++
-            } else if (team === RoomTeamNum.CounterTerrorist) {
-                ctNum++
-            } else {
-                throw new Error('Unknown team number, debug me!')
-            }
-        }
-
-        if (trNum > ctNum) {
-            return RoomTeamNum.Terrorist
-        } else {
-            return RoomTeamNum.CounterTerrorist
-        }
     }
 
     private isUserHere(user: User) {

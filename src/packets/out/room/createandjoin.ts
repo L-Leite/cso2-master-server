@@ -15,6 +15,7 @@ import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
  * @class OutRoomCreateAndJoin
  */
 export class OutRoomCreateAndJoin {
+    private room: Room
     private roomHostId: number
     private unk01: number
     private unk02: number
@@ -143,6 +144,7 @@ export class OutRoomCreateAndJoin {
     private users: User[]
 
     constructor(roomInfo: Room) {
+        this.room = roomInfo
 
         this.roomHostId = roomInfo.host.userId
         this.unk01 = 2
@@ -303,7 +305,7 @@ export class OutRoomCreateAndJoin {
 
         for (const user of this.users) {
             outPacket.writeUInt32(user.userId)
-            new OutRoomPlayerNetInfo(user, RoomTeamNum.CounterTerrorist).build(outPacket)
+            new OutRoomPlayerNetInfo(user, this.room.getUserTeam(user)).build(outPacket)
             new UserInfoFullUpdate(user).build(outPacket)
         }
     }
