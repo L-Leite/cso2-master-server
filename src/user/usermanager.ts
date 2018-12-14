@@ -58,9 +58,9 @@ export class UserManager {
         const serverListReply: Buffer =
             channels.buildServerListPacket(sourceSocket.getSeq())
 
-        sourceSocket.write(userStartReply)
-        sourceSocket.write(userInfoReply)
-        sourceSocket.write(serverListReply)
+        sourceSocket.send(userStartReply)
+        sourceSocket.send(userInfoReply)
+        sourceSocket.send(serverListReply)
 
         return true
     }
@@ -109,7 +109,7 @@ export class UserManager {
         const versionReply: Buffer = new OutVersionPacket(
             false, '6246015df9a7d1f7311f888e7e861f18', sourceSocket.getSeq()).build()
 
-        sourceSocket.write(versionReply)
+        sourceSocket.send(versionReply)
 
         return true
     }

@@ -19,7 +19,7 @@ export class OutVersionPacket extends OutPacketBase {
     constructor(badHash: boolean, hash: string, seq: number) {
         super()
         this.sequence = seq
-        this.packetId = PacketId.Version
+        this.id = PacketId.Version
 
         this.isBadHash = badHash as any as number // is there a better way to do this?
         this.hash = new PacketString(hash)

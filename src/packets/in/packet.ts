@@ -40,6 +40,13 @@ export class InPacketBase {
     }
 
     /**
+     * returns the packet's data
+     */
+    public getData() {
+        return this.packetData
+    }
+
+    /**
      * reads a byte from the current offset
      * @returns the read signed byte
      */
@@ -207,7 +214,8 @@ export class InPacketBase {
         this.signature = this.readUInt8()
 
         if (this.isValid() === false) {
-            throw new Error('This is not a packet')
+            // throw new Error('This is not a packet')
+            console.warn('This is not a packet')
         }
 
         this.sequence = this.readUInt8()

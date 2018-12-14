@@ -18,7 +18,7 @@ export class OutLobbyPacket extends OutPacketBase {
     constructor(seq: number) {
         super()
         this.sequence = seq
-        this.packetId = PacketId.Lobby
+        this.id = PacketId.Lobby
     }
 
     public joinRoom(): Buffer {

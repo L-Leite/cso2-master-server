@@ -34,7 +34,7 @@ export class OutRoomPacket extends OutPacketBase {
     constructor(seq: number) {
         super()
         this.sequence = seq
-        this.packetId = PacketId.Room
+        this.id = PacketId.Room
     }
 
     public createAndJoin(roomInfo: Room): Buffer {

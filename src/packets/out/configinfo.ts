@@ -21,7 +21,7 @@ export class OutConfigInfoPacket extends OutPacketBase {
     constructor(seq: number) {
         super()
         this.sequence = seq
-        this.packetId = PacketId.ConfigInfo
+        this.id = PacketId.ConfigInfo
 
         this.unk00 = 36
         this.unkArrayCount = 25

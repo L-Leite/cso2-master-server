@@ -75,3 +75,6 @@ typings/
 
 # typescript out build directory
 dist/
+
+# logged packets
+packets/

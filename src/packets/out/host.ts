@@ -18,7 +18,7 @@ export class OutHostPacket extends OutPacketBase {
     constructor(seq: number) {
         super()
         this.sequence = seq
-        this.packetId = PacketId.Host
+        this.id = PacketId.Host
     }
 
     public gameStart(hostUserId: number): Buffer {

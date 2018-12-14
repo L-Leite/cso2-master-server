@@ -15,6 +15,7 @@ program
   .option('-i, --ip-address [ip]', 'The IP address to be used by the server', null)
   .option('-p, --port-master [port]', 'The server\'s (TCP) port', 30001)
   .option('-P, --port-holepunch [port]', 'The server\'s holepunch (UDP) port', 30002)
+  .option('-l, --log-packets', 'Log the incoming and outgoing packets')
   .parse(process.argv)
 
 async function startServer() {
@@ -42,6 +43,7 @@ async function startServer() {
     hostname: desiredIp,
     portHolepunch: program.portHolepunch,
     portMaster: program.portMaster,
+    shouldLogPackets: program.logPackets,
   })
 
   masterServer.listen()

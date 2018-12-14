@@ -24,7 +24,7 @@ export class OutUserStartPacket extends OutPacketBase {
     constructor(userId: number, loginName: string, userName: string, seq: number) {
         super()
         this.sequence = seq
-        this.packetId = PacketId.UserStart
+        this.id = PacketId.UserStart
 
         this.userId = userId
         this.loginName = new PacketString(loginName)

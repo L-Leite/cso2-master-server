@@ -1,7 +1,6 @@
-import * as dgram from 'dgram'
-import * as hexy from 'hexy'
-import * as net from 'net'
-import * as uuidv4 from 'uuid/v4'
+import dgram from 'dgram'
+import net from 'net'
+import uuidv4 from 'uuid/v4'
 
 import { ExtendedSocket } from 'extendedsocket'
 
@@ -16,6 +15,8 @@ import { UserManager } from 'user/usermanager'
 
 import { ChannelManager } from 'channel/channelmanager'
 
+import { PacketLogger } from 'packetlogger'
+
 /**
  * The welcome message sent to the client
  */
@@ -25,6 +26,7 @@ export interface IServerOptions {
     hostname: string,
     portMaster: number,
     portHolepunch: number,
+    shouldLogPackets?: boolean,
 }
 
 /**
@@ -32,7 +34,7 @@ export interface IServerOptions {
  * @returns an uuid string
  */
 function generateUuid(): string {
-    return uuidv4.default()
+    return uuidv4()
 }
 
 /**
@@ -52,6 +54,8 @@ export class ServerInstance {
     private hostname: string
     private sockets: ExtendedSocket[]
 
+    private packetLogging: PacketLogger
+
     /**
      * constructs our server instance
      * @param options the server options
@@ -67,6 +71,10 @@ export class ServerInstance {
 
         this.users = new UserManager()
         this.channels = new ChannelManager()
+
+        if (options.shouldLogPackets) {
+            this.packetLogging = new PacketLogger()
+        }
 
         this.server.on('connection', (socket: net.Socket) => {
             this.onServerConnection(socket)
@@ -174,14 +182,14 @@ export class ServerInstance {
         const user: User = this.users.getUserById(packet.userId)
 
         if (user == null) {
-            console.log('Tried to send hole punch packet to ' + packet.userId)
+            console.warn('Tried to send hole punch packet to ' + packet.userId)
             return
         }
 
         const portIndex = user.updateHolepunch(packet.portId, packet.port, rinfo.port)
 
         if (portIndex === -1) {
-            console.log('Unknown hole punch port')
+            console.warn('Unknown hole punch port')
             return
         }
 
@@ -214,12 +222,16 @@ export class ServerInstance {
         const packet = new InPacketBase(packetData)
 
         if (packet.isValid() === false) {
-            console.log('bad packet from ' + sourceSocket.uuid)
+            console.warn('bad packet from ' + sourceSocket.uuid)
             return false
         }
 
         console.log('packet from ' + sourceSocket.uuid
             + ' seq: ' + packet.sequence + ' length: ' + packet.length)
+
+        if (this.packetLogging) {
+            this.packetLogging.dumpIn(packet, sourceSocket)
+        }
 
         switch (packet.id) {
             case PacketId.Version:
@@ -236,7 +248,7 @@ export class ServerInstance {
                 return this.users.onUdpPacket(packetData, sourceSocket)
         }
 
-        console.log('unknown packet id ' + packet.id + ' from ' + sourceSocket.uuid)
+        console.warn('unknown packet id ' + packet.id + ' from ' + sourceSocket.uuid)
         return false
     }
 
@@ -255,7 +267,7 @@ export class ServerInstance {
      * @param err the occured error
      */
     private onSocketError(socket: ExtendedSocket, err: Error): void {
-        console.log('socket ' + socket.uuid + ' had an error: ' + err)
+        console.warn('socket ' + socket.uuid + ' had an error: ' + err)
         this.users.removeUserByUuid(socket.uuid)
         this.removeSocket(socket)
     }
@@ -275,7 +287,7 @@ export class ServerInstance {
      * @param socket the client's socket
      */
     private onSocketTimeout(socket: ExtendedSocket): void {
-        console.log('socket ' + socket.uuid + ' timed out')
+        console.warn('socket ' + socket.uuid + ' timed out')
         this.users.removeUserByUuid(socket.uuid)
         this.removeSocket(socket)
     }
@@ -287,14 +299,14 @@ export class ServerInstance {
      * @returns the placed socket
      */
     private addSocket(socket: net.Socket): ExtendedSocket {
-        const newSocket: ExtendedSocket = ExtendedSocket.from(socket)
+        const newSocket: ExtendedSocket = ExtendedSocket.from(socket, this.packetLogging)
 
         // treat data as hexadecimal
         newSocket.setEncoding('hex')
         // give the socket an unique uuid
         newSocket.uuid = generateUuid()
         // init sequence number
-        newSocket.initSeq()
+        newSocket.resetReq()
 
         // add the socket to the socket list
         this.sockets.push(newSocket)

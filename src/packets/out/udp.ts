@@ -24,7 +24,7 @@ export class OutUdpPacket extends OutPacketBase {
     constructor(isHost: number, userId: number, ipAddress: string, port: number, seq: number) {
         super()
         this.sequence = seq
-        this.packetId = PacketId.Udp
+        this.id = PacketId.Udp
 
         this.unk00 = 1
         this.isHost = isHost

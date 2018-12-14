@@ -24,7 +24,7 @@ export class OutServerListPacket extends OutPacketBase {
     constructor(seq: number, channelServers: ChannelServer[]) {
         super()
         this.sequence = seq
-        this.packetId = PacketId.ServerList
+        this.id = PacketId.ServerList
 
         this.serverNum = channelServers.length
         this.servers = []

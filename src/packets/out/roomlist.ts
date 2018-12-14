@@ -18,7 +18,7 @@ export class OutRoomListPacket extends OutPacketBase {
     constructor(seq: number) {
         super()
         this.sequence = seq
-        this.packetId = PacketId.RoomList
+        this.id = PacketId.RoomList
     }
 
     public getFullList(rooms: Room[]): Buffer {

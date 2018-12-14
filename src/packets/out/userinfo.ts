@@ -15,7 +15,7 @@ export class OutUserInfoPacket extends OutPacketBase {
     constructor(seq: number) {
         super()
         this.sequence = seq
-        this.packetId = PacketId.UserInfo
+        this.id = PacketId.UserInfo
     }
 
     public fullUserUpdate(user: User): Buffer {

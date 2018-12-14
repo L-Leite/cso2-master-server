@@ -22,12 +22,20 @@ export abstract class OutPacketBase {
      * once we are done inserting data, calculate the packet size
      * and write it to the packet header
      */
-    protected static setPacketLength(packet: Buffer) {
+    protected static setPacketLength(packet: Buffer): void {
         packet.writeUInt16LE(packet.byteLength - 4, 2)
     }
+
+    public id: number
     protected sequence: number
-    protected packetId: number
     protected outStream: WritableStreamBuffer
+
+    /**
+     * returns the packet's data
+     */
+    public getData(): Buffer {
+        return this.outStream.getContents()
+    }
 
     /**
      * builds the packet with data provided by us
@@ -127,7 +135,7 @@ export abstract class OutPacketBase {
         this.writeUInt8(PacketSignature)
         this.writeUInt8(this.sequence)
         this.writeUInt16(0)
-        this.writeUInt8(this.packetId)
+        this.writeUInt8(this.id)
     }
 
     /**

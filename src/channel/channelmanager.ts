@@ -44,7 +44,7 @@ export class ChannelManager {
         }
 
         const reply: Buffer = this.buildServerListPacket(sourceSocket.getSeq())
-        sourceSocket.write(reply)
+        sourceSocket.send(reply)
         return true
     }
 
@@ -115,8 +115,8 @@ export class ChannelManager {
 
         const lobbyReply: Buffer = new OutLobbyPacket(sourceSocket.getSeq()).joinRoom()
         const roomListReply: Buffer = new OutRoomListPacket(sourceSocket.getSeq()).getFullList(channel.rooms)
-        sourceSocket.write(lobbyReply)
-        sourceSocket.write(roomListReply)
+        sourceSocket.send(lobbyReply)
+        sourceSocket.send(roomListReply)
 
         return true
     }
@@ -175,7 +175,7 @@ export class ChannelManager {
         user.currentRoom = newRoom
 
         const reply: Buffer = new OutRoomPacket(sourceSocket.getSeq()).createAndJoin(newRoom)
-        sourceSocket.write(reply)
+        sourceSocket.send(reply)
 
         return true
     }
@@ -214,13 +214,13 @@ export class ChannelManager {
         user.currentRoom = desiredRoom
 
         const reply: Buffer = new OutRoomPacket(sourceSocket.getSeq()).createAndJoin(desiredRoom)
-        sourceSocket.write(reply)
+        sourceSocket.send(reply)
 
         // inform the host of the new user
         const hostSocket: ExtendedSocket = desiredRoom.host.socket
         const hostReply: Buffer = new OutRoomPacket(hostSocket.getSeq())
             .playerJoin(user, newTeam)
-        hostSocket.write(hostReply)
+        hostSocket.send(hostReply)
 
         return true
     }
@@ -271,17 +271,17 @@ export class ChannelManager {
             const hostUdpData: Buffer = new OutUdpPacket(1, host.userId,
                 host.externalIpAddress, host.externalServerPort, guestSocket.getSeq()).build()
             const guestReply: Buffer = new OutHostPacket(guestSocket.getSeq()).joinHost(host.userId)
-            guestSocket.write(hostUdpData)
-            guestSocket.write(guestReply)
+            guestSocket.send(hostUdpData)
+            guestSocket.send(guestReply)
 
             const guestData = new OutUdpPacket(0, guest.userId,
                 guest.externalIpAddress, guest.externalClientPort, hostSocket.getSeq()).build()
-            hostSocket.write(guestData)
+            hostSocket.send(guestData)
         }
 
         const matchStart: Buffer =
             new OutHostPacket(hostSocket.getSeq()).gameStart(host.userId)
-        hostSocket.write(matchStart)
+        hostSocket.send(matchStart)
 
         return true
     }
@@ -347,7 +347,7 @@ export class ChannelManager {
         for (const player of currentRoom.users) {
             const playerSocket: ExtendedSocket = player.socket
             const reply: Buffer = new OutRoomPacket(playerSocket.getSeq()).updateSettings(newSettings)
-            playerSocket.write(reply)
+            playerSocket.send(reply)
         }
 
         return true
@@ -374,7 +374,7 @@ export class ChannelManager {
         for (const player of currentRoom.users) {
             const playerSocket: ExtendedSocket = player.socket
             const reply: Buffer = new OutRoomPacket(playerSocket.getSeq()).setUserTeam(user, swap.newTeam)
-            playerSocket.write(reply)
+            playerSocket.send(reply)
         }
 
         return true
@@ -398,7 +398,7 @@ export class ChannelManager {
         const countdown: InRoomCountdown = reqPacket.countdown
 
         const reply: Buffer = new OutRoomPacket(sourceSocket.getSeq()).countdown(countdown.count)
-        sourceSocket.write(reply)
+        sourceSocket.send(reply)
 
         return true
     }
