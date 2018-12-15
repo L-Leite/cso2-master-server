@@ -1,5 +1,3 @@
-import * as ip from 'ip'
-
 import { ExtendedSocket } from 'extendedsocket'
 
 import { User } from 'user/user'
