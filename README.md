@@ -42,6 +42,7 @@ Options:
 - ```-i, --ip-address [ip]``` (*optional*) The IP address to listen on (default: auto-detect)
 - ```-p, --port-master [port]``` (*optional*) The server's (TCP) port (default: 30001)
 - ```-P, --port-holepunch [port]``` (*optional*) The server's holepunch (UDP) port (default: 30002)
+- ```-l, --log-packets``` (*optional*) Log the incoming and outgoing packets
 
 ## Bug reporting
 
