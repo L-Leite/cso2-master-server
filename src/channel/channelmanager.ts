@@ -397,8 +397,18 @@ export class ChannelManager {
 
         const countdown: InRoomCountdown = reqPacket.countdown
 
-        const reply: Buffer = new OutRoomPacket(sourceSocket.getSeq()).countdown(countdown.count)
-        sourceSocket.send(reply)
+        for (const roomUser of currentRoom.users) {
+            const socket: ExtendedSocket = roomUser.socket
+            let reply: Buffer = null
+
+            if (countdown.shouldCountdown()) {
+                reply = new OutRoomPacket(socket.getSeq()).progressCountdown(countdown.count)
+            } else {
+                reply = new OutRoomPacket(socket.getSeq()).stopCountdown()
+            }
+
+            socket.send(reply)
+        }
 
         return true
     }

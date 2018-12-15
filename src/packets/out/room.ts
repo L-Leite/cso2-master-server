@@ -14,7 +14,7 @@ import { OutRoomPlayerJoin } from 'packets/out/room/playerjoin'
 import { OutRoomPlayerLeave } from 'packets/out/room/playerleave'
 import { OutRoomSetHost } from 'packets/out/room/sethost'
 import { OutRoomUpdateSettings } from 'packets/out/room/updatesettings'
-import { OutRoomSetUserTeam } from './room/setuserteam';
+import { OutRoomSetUserTeam } from './room/setuserteam'
 
 enum OutRoomPacketType {
     CreateAndJoin = 0,
@@ -112,14 +112,29 @@ export class OutRoomPacket extends OutPacketBase {
         return res
     }
 
-    public countdown(countdown: number): Buffer {
+    public progressCountdown(countdown: number): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 20, incrementAmount: 15 })
 
         this.buildHeader()
         this.writeUInt8(OutRoomPacketType.Countdown)
 
-        new OutRoomCountdown(countdown).build(this)
+        new OutRoomCountdown(true, countdown).build(this)
+
+        const res: Buffer = this.outStream.getContents()
+        OutPacketBase.setPacketLength(res)
+
+        return res
+    }
+
+    public stopCountdown(): Buffer {
+        this.outStream = new WritableStreamBuffer(
+            { initialSize: 20, incrementAmount: 15 })
+
+        this.buildHeader()
+        this.writeUInt8(OutRoomPacketType.Countdown)
+
+        new OutRoomCountdown(false).build(this)
 
         const res: Buffer = this.outStream.getContents()
         OutPacketBase.setPacketLength(res)

@@ -27,6 +27,8 @@ export interface IRoomOptions {
     hltvEnabled?: number
 }
 
+const defaultCountdownNum: number = 6
+
 export class Room {
     public id: number
 
@@ -54,6 +56,8 @@ export class Room {
     private emptyRoomCallback: (emptyRoom: Room, channel: Channel) => void
     private parentChannel: Channel
 
+    private countdown: number
+
     constructor(roomId: number, host: User, parentChannel: Channel,
                 emptyRoomCallback?: (emptyRoom: Room, channel: Channel) => void,
                 options?: IRoomOptions) {
@@ -75,11 +79,13 @@ export class Room {
         this.changeTeams = options.changeTeams ? options.changeTeams : 0
         this.enableBots = options.enableBots ? options.enableBots : 0
         this.difficulty = options.difficulty ? options.difficulty : 0
-        this.maxPlayers = options.enableBots ? 16 : 32
+        this.maxPlayers = options.enableBots ? 8 : 16
         this.respawnTime = options.respawnTime ? options.respawnTime : 3
         this.teamBalance = options.teamBalance ? options.teamBalance : 0
         this.weaponRestrictions = options.weaponRestrictions ? options.weaponRestrictions : 0
         this.hltvEnabled = options.hltvEnabled ? options.hltvEnabled : 0
+
+        this.countdown = defaultCountdownNum
 
         this.users = []
         this.addUser(host, this.findDesirableTeamNum())
@@ -186,9 +192,34 @@ export class Room {
     }
 
     /**
+     * progress through the 'game start' countdown
+     * @param hostNextNum the host's next countdown number
+     */
+    public progressCountdown(hostNextNum: number): void {
+        if (this.countdown > 6
+            || this.countdown <= 0) {
+            throw new Error('Room: the saved countdown is invalid!')
+        }
+
+        this.countdown--
+
+        if (this.countdown !== hostNextNum) {
+            throw new Error('Room: host\'s countdown does not match ours')
+        }
+    }
+
+    /**
+     * stops and resets the 'game start' countdown
+     */
+    public stopCountdown(): void {
+        this.countdown = defaultCountdownNum
+    }
+
+    /**
      * called when an user is succesfully removed
      * if the room is empty, inform the channel to delete us
      * else, find a new host
+     * @param userId the user's id
      */
     private onUserRemoved(userId: number): void {
         if (this.users.length === 0) {
