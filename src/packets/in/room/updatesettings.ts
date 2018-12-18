@@ -82,7 +82,10 @@ export class InRoomUpdateSettings {
     public unk33: number
     // end of flags & 0x800000
     // flags & 0x1000000
-    public unk34: number // if == 1, it can have 3 more bytes
+    public botEnabled: number // if == 1, it can have 3 more bytes
+    public botDifficulty: number
+    public numCtBots: number
+    public numTrBots: number
     // end of flags & 0x1000000
     // flags & 0x2000000
     public unk35: number
@@ -219,7 +222,13 @@ export class InRoomUpdateSettings {
             this.unk33 = inPacket.readUInt8()
         }
         if (lowFlag & 0x1000000) {
-            this.unk34 = inPacket.readUInt8()
+            this.botEnabled = inPacket.readUInt8()
+
+            if (this.botEnabled === 1) {
+                this.botDifficulty = inPacket.readUInt8()
+                this.numCtBots = inPacket.readUInt8()
+                this.numTrBots = inPacket.readUInt8()
+            }
         }
 
         if (lowFlag & 0x2000000) {

@@ -3,10 +3,9 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
 
+import { NewRoomSettings } from 'room/newroomsettings'
 import { Room, RoomTeamNum } from 'room/room'
 import { User } from 'user/user'
-
-import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
 
 import { OutRoomCountdown } from 'packets/out/room/countdown'
 import { OutRoomCreateAndJoin } from 'packets/out/room/createandjoin'
@@ -82,7 +81,7 @@ export class OutRoomPacket extends OutPacketBase {
         return res
     }
 
-    public updateSettings(newSettings: InRoomUpdateSettings): Buffer {
+    public updateSettings(newSettings: NewRoomSettings): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 30, incrementAmount: 15 })
 

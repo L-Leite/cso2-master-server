@@ -2,25 +2,25 @@ import { PacketString } from 'packets/packetstring'
 
 import { OutPacketBase } from 'packets/out/packet'
 
-import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
+import { NewRoomSettings } from 'room/newroomsettings'
 
 /**
  * Sub structure of Room packet
  * @class OutRoomUpdateSettings
  */
 export class OutRoomUpdateSettings {
-    private settings: InRoomUpdateSettings
+    private settings: NewRoomSettings
 
-    constructor(newSettings: InRoomUpdateSettings) {
+    constructor(newSettings: NewRoomSettings) {
         this.settings = newSettings
     }
 
     public build(outPacket: OutPacketBase): void {
-        outPacket.writeUInt64(this.settings.flags)
+        outPacket.writeUInt64(this.settings.getFlags())
 
         // int64-buffer doesn't have bitwise operations,
         // so split it to two 32 bit values and use them instead
-        const flagBuf: Buffer = this.settings.flags.toBuffer(true)
+        const flagBuf: Buffer = this.settings.getFlags().toBuffer(true)
         const lowFlag = flagBuf.readUInt32LE(0)
         const highFlag = flagBuf.readUInt32LE(4)
 
@@ -84,9 +84,9 @@ export class OutRoomUpdateSettings {
             outPacket.writeUInt8(this.settings.unk25)
         }
         if (lowFlag & 0x20000) {
-            outPacket.writeUInt8(this.settings.numOfMultiMaps)
-            for (let i = 0; i < this.settings.numOfMultiMaps; i++) {
-                outPacket.writeUInt8(this.settings.multiMaps[i])
+            outPacket.writeUInt8(this.settings.multiMaps.length)
+            for (const map of this.settings.multiMaps) {
+                outPacket.writeUInt8(map)
             }
         }
         if (lowFlag & 0x40000) {
@@ -108,7 +108,13 @@ export class OutRoomUpdateSettings {
             outPacket.writeUInt8(this.settings.unk33)
         }
         if (lowFlag & 0x1000000) {
-            outPacket.writeUInt8(this.settings.unk34)
+            outPacket.writeUInt8(this.settings.botEnabled)
+
+            if (this.settings.botEnabled === 1) {
+                outPacket.writeUInt8(this.settings.botDifficulty)
+                outPacket.writeUInt8(this.settings.numCtBots)
+                outPacket.writeUInt8(this.settings.numTrBots)
+            }
         }
 
         if (lowFlag & 0x2000000) {

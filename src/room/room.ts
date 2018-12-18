@@ -1,6 +1,8 @@
 import { Channel } from 'channel/channel'
 import { User } from 'user/user'
 
+import { RoomSettings } from 'room/roomsettings'
+
 import { OutRoomPacket } from 'packets/out/room'
 
 export enum RoomTeamNum {
@@ -31,23 +33,7 @@ const defaultCountdownNum: number = 6
 
 export class Room {
     public id: number
-
-    public roomName: string
-    public maxPlayers: number
-    public gameModeId: number
-    public mapId: number
-    public winLimit: number
-    public killLimit: number
-    public startMoney: number
-    public forceCamera: number
-    public nextMapEnabled: number
-    public changeTeams: number
-    public enableBots: number
-    public difficulty: number
-    public respawnTime: number
-    public teamBalance: number
-    public weaponRestrictions: number
-    public hltvEnabled: number
+    public settings: RoomSettings
 
     public host: User
     public users: User[]
@@ -68,22 +54,7 @@ export class Room {
         this.parentChannel = parentChannel
         this.emptyRoomCallback = emptyRoomCallback
 
-        this.roomName = options.roomName ? options.roomName : 'Room #' + this.id
-        this.gameModeId = options.gameModeId ? options.gameModeId : 0
-        this.mapId = options.mapId ? options.mapId : 1
-        this.winLimit = options.winLimit ? options.winLimit : 10
-        this.killLimit = options.killLimit ? options.killLimit : 150
-        this.startMoney = options.startMoney ? options.startMoney : 16000
-        this.forceCamera = options.forceCamera ? options.forceCamera : 1
-        this.nextMapEnabled = options.nextMapEnabled ? options.nextMapEnabled : 0
-        this.changeTeams = options.changeTeams ? options.changeTeams : 0
-        this.enableBots = options.enableBots ? options.enableBots : 0
-        this.difficulty = options.difficulty ? options.difficulty : 0
-        this.maxPlayers = options.enableBots ? 8 : 16
-        this.respawnTime = options.respawnTime ? options.respawnTime : 3
-        this.teamBalance = options.teamBalance ? options.teamBalance : 0
-        this.weaponRestrictions = options.weaponRestrictions ? options.weaponRestrictions : 0
-        this.hltvEnabled = options.hltvEnabled ? options.hltvEnabled : 0
+        this.settings = new RoomSettings(options)
 
         this.countdown = defaultCountdownNum
 
@@ -96,7 +67,7 @@ export class Room {
      * @returns the free player slots
      */
     public getFreeSlots(): number {
-        const availableSlots: number = this.maxPlayers - this.users.length
+        const availableSlots: number = this.settings.maxPlayers - this.users.length
         return availableSlots >= 0 ? availableSlots : 0
     }
 
@@ -105,6 +76,14 @@ export class Room {
      */
     public hasFreeSlots(): boolean {
         return this.getFreeSlots() !== 0
+    }
+
+    /**
+     * is the user in the room?
+     * @param user the user objects to find
+     */
+    public hasUser(user: User): boolean {
+        return this.users.find((u: User) => u === user) != null
     }
 
     /**
@@ -149,7 +128,7 @@ export class Room {
      * getUserTeam
      */
     public getUserTeam(user: User): RoomTeamNum {
-        if (this.isUserHere(user) === false) {
+        if (this.hasUser(user) === false) {
             console.warn('getUserTeam: user not found!')
             return RoomTeamNum.Unknown
         }
@@ -160,7 +139,7 @@ export class Room {
      * swaps an user to the opposite team
      */
     public setUserToTeam(user: User, newTeam: RoomTeamNum): void {
-        if (this.isUserHere(user) === false) {
+        if (this.hasUser(user) === false) {
             return
         }
         this.userTeam.set(user.userId, newTeam)
@@ -272,9 +251,5 @@ export class Room {
 
         this.updateHost(this.users[0])
         return true
-    }
-
-    private isUserHere(user: User) {
-        return this.users.find((u: User) => u === user) != null
     }
 }

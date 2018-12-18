@@ -102,7 +102,10 @@ export class OutRoomCreateAndJoin {
     private unk33: number
     // end of flags & 0x800000
     // flags & 0x1000000
-    private unk34: number // if == 1, it can have 3 more bytes
+    private botEnabled: number // if == 1, it can have 3 more bytes
+    private botDifficulty: number
+    private numCtBots: number
+    private numTrBots: number
     // end of flags & 0x1000000
     // flags & 0x2000000
     private unk35: number
@@ -152,7 +155,7 @@ export class OutRoomCreateAndJoin {
         this.roomId = roomInfo.id
         this.unk04 = 5
         this.roomFlags = new Uint64LE('FFFFFFFFFFFFFFFF', 16)
-        this.roomName = new PacketString(roomInfo.roomName)
+        this.roomName = new PacketString(roomInfo.settings.roomName)
         this.unk05 = 0
         this.unk06 = 0
         this.unk07 = 0
@@ -160,12 +163,12 @@ export class OutRoomCreateAndJoin {
         this.unk09 = new PacketString('')
         this.unk10 = 0
         this.unk11 = 1
-        this.gameModeId = roomInfo.gameModeId
-        this.mapId = roomInfo.mapId
+        this.gameModeId = roomInfo.settings.gameModeId
+        this.mapId = roomInfo.settings.mapId
         this.unk13 = 0
         this.unk14 = 1
-        this.winLimit = roomInfo.winLimit
-        this.killLimit = roomInfo.killLimit
+        this.winLimit = roomInfo.settings.winLimit
+        this.killLimit = roomInfo.settings.killLimit
         this.unk17 = 1
         this.unk18 = 0xA
         this.unk19 = 0
@@ -186,7 +189,14 @@ export class OutRoomCreateAndJoin {
         this.unk31 = 1
         this.unk32 = 1
         this.unk33 = 0
-        this.unk34 = 0
+        this.botEnabled = 0
+
+        if (this.botEnabled) {
+            this.botDifficulty = 0
+            this.numCtBots = 0
+            this.numTrBots = 0
+        }
+
         this.unk35 = 0
         this.unk36 = 0
         this.unk37 = 0
@@ -274,7 +284,13 @@ export class OutRoomCreateAndJoin {
         outPacket.writeUInt8(this.unk33)
 
         // if == 1, it can have 3 more bytes
-        outPacket.writeUInt8(this.unk34)
+        outPacket.writeUInt8(this.botEnabled)
+
+        if (this.botEnabled) {
+            outPacket.writeUInt8(this.botDifficulty)
+            outPacket.writeUInt8(this.numCtBots)
+            outPacket.writeUInt8(this.numTrBots)
+        }
 
         outPacket.writeUInt8(this.unk35)
 

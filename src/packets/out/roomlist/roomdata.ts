@@ -93,7 +93,10 @@ export class RoomListRoomData {
     private forceCamera: number
     // end flags & 0x800000
     // flags & 0x1000000
-    private unk34: number
+    private botEnabled: number
+    private botDifficulty: number
+    private numCtBots: number
+    private numTrBots: number
     // end flags & 0x1000000
     // flags & 0x2000000
     private unk35: number
@@ -122,14 +125,14 @@ export class RoomListRoomData {
         this.id = room.id
         this.flags = new Uint64LE('FFFFFFFFFFFFFFFF', 16) // actual value is 0xFFE3FFFFFFFFFFFF
 
-        this.roomName = new PacketString(room.roomName)
+        this.roomName = new PacketString(room.settings.roomName)
         this.roomNumber = this.id
         this.passwordProtected = 0
         this.unk03 = 0
-        this.gameModeId = room.gameModeId
-        this.mapId = room.mapId
+        this.gameModeId = room.settings.gameModeId
+        this.mapId = room.settings.mapId
         this.numPlayers = room.users.length
-        this.maxPlayers = room.maxPlayers
+        this.maxPlayers = room.settings.maxPlayers
         this.unk08 = 0
         this.hostUserId = room.host.userId
         this.hostUserName = new PacketString(room.host.userName)
@@ -145,26 +148,26 @@ export class RoomListRoomData {
         this.unk20 = 0
         this.unk21 = 5
         this.unk22 = 2
-        this.enableBots = this.enableBots
+        this.enableBots = room.settings.enableBots
         this.unk24 = 0
-        this.startMoney = this.startMoney
+        this.startMoney = room.settings.startMoney
         this.unk26 = 0
         this.unk27 = 0
         this.unk28 = 0
         this.unk29 = 1
         this.unk30 = new Uint64LE(0x5AF6F7BF)
-        this.winLimit = room.winLimit
-        this.killLimit = room.killLimit
-        this.forceCamera = room.forceCamera
-        this.unk34 = 4
+        this.winLimit = room.settings.winLimit
+        this.killLimit = room.settings.killLimit
+        this.forceCamera = room.settings.forceCamera
+        this.botEnabled = 4
         this.unk35 = 0
-        this.nextMapEnabled = room.nextMapEnabled
-        this.changeTeams = room.changeTeams
+        this.nextMapEnabled = room.settings.nextMapEnabled
+        this.changeTeams = room.settings.changeTeams
         this.unk38 = 0
         this.unk39 = 0
         this.unk40 = 0
         this.unk41 = 1
-        this.difficulty = room.difficulty
+        this.difficulty = room.settings.difficulty
     }
 
     public build(outPacket: OutPacketBase): void {
@@ -204,7 +207,12 @@ export class RoomListRoomData {
         outPacket.writeUInt8(this.winLimit)
         outPacket.writeUInt16(this.killLimit)
         outPacket.writeUInt8(this.forceCamera)
-        outPacket.writeUInt8(this.unk34)
+        outPacket.writeUInt8(this.botEnabled)
+        if (this.botEnabled === 1) {
+            outPacket.writeUInt8(this.botDifficulty)
+            outPacket.writeUInt8(this.numCtBots)
+            outPacket.writeUInt8(this.numTrBots)
+        }
         outPacket.writeUInt8(this.unk35)
         outPacket.writeUInt8(this.nextMapEnabled)
         outPacket.writeUInt8(this.changeTeams)

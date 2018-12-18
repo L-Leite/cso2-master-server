@@ -1,7 +1,9 @@
 import { Channel } from 'channel/channel'
 import { ChannelServer } from 'channel/channelserver'
 
+import { NewRoomSettings } from 'room/newroomsettings'
 import { Room, RoomTeamNum } from 'room/room'
+import { RoomSettings } from 'room/roomsettings'
 
 import { User } from 'user/user'
 import { UserManager } from 'user/usermanager'
@@ -13,7 +15,6 @@ import { InRoomPacket } from 'packets/in/room'
 import { InRoomCountdown } from 'packets/in/room/countdown'
 import { InRoomJoinRequest } from 'packets/in/room/joinrequest'
 import { InRoomSetUserTeamRequest } from 'packets/in/room/setuserteamreq'
-import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
 import { OutHostPacket } from 'packets/out/host'
 import { OutLobbyPacket } from 'packets/out/lobby'
 import { OutRoomPacket } from 'packets/out/room'
@@ -177,6 +178,8 @@ export class ChannelManager {
         const reply: Buffer = new OutRoomPacket(sourceSocket.getSeq()).createAndJoin(newRoom)
         sourceSocket.send(reply)
 
+        this.sendUserRoomSettings(user, newRoom)
+
         return true
     }
 
@@ -215,6 +218,8 @@ export class ChannelManager {
 
         const reply: Buffer = new OutRoomPacket(sourceSocket.getSeq()).createAndJoin(desiredRoom)
         sourceSocket.send(reply)
+
+        this.sendUserRoomSettings(user, desiredRoom)
 
         // inform the host of the new user
         const hostSocket: ExtendedSocket = desiredRoom.host.socket
@@ -300,48 +305,8 @@ export class ChannelManager {
             return false
         }
 
-        const newSettings: InRoomUpdateSettings = reqPacket.updateSettings
-
-        if (newSettings.roomName) {
-            currentRoom.roomName = newSettings.roomName
-        }
-        if (newSettings.gameModeId) {
-            currentRoom.gameModeId = newSettings.gameModeId
-        }
-        if (newSettings.mapId) {
-            currentRoom.mapId = newSettings.mapId
-        }
-        if (newSettings.killLimit) {
-            currentRoom.killLimit = newSettings.killLimit
-        }
-        if (newSettings.winLimit) {
-            currentRoom.winLimit = newSettings.winLimit
-        }
-        if (newSettings.startMoney) {
-            currentRoom.startMoney = newSettings.startMoney
-        }
-
-        if (newSettings.maxPlayers) {
-            currentRoom.maxPlayers = newSettings.maxPlayers
-        }
-        if (newSettings.respawnTime) {
-            currentRoom.respawnTime = newSettings.respawnTime
-        }
-        if (newSettings.changeTeams) {
-            currentRoom.changeTeams = newSettings.changeTeams
-        }
-        if (newSettings.forceCamera) {
-            currentRoom.forceCamera = newSettings.forceCamera
-        }
-        if (newSettings.teamBalance) {
-            currentRoom.teamBalance = newSettings.teamBalance
-        }
-        if (newSettings.weaponRestrictions) {
-            currentRoom.weaponRestrictions = newSettings.weaponRestrictions
-        }
-        if (newSettings.hltvEnabled) {
-            currentRoom.hltvEnabled = newSettings.hltvEnabled
-        }
+        const newSettings: NewRoomSettings = NewRoomSettings.from(reqPacket.updateSettings)
+        currentRoom.settings.update(newSettings)
 
         // inform every user in the room of the changes
         for (const player of currentRoom.users) {
@@ -351,6 +316,13 @@ export class ChannelManager {
         }
 
         return true
+    }
+
+    private sendUserRoomSettings(user: User, room: Room): void {
+        const newSettings: NewRoomSettings = NewRoomSettings.fromRoom(room)
+
+        const reply: Buffer = new OutRoomPacket(user.socket.getSeq()).updateSettings(newSettings)
+        user.socket.send(reply)
     }
 
     /**
