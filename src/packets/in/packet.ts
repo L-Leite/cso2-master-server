@@ -15,6 +15,7 @@ import { PacketString } from 'packets/packetstring'
  * @class InPacketBase
  */
 export class InPacketBase {
+    public static headerLength: number = 4
     // start of the packet structure
     public signature: number
     public sequence: number
