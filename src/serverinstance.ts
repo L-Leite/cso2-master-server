@@ -209,18 +209,35 @@ export class ServerInstance {
         // the data comes in as a string, so we need to convert it to a buffer
         const newData: Buffer = Buffer.from(data, 'hex')
         // process the received data
-        this.onIncomingPacket(newData, socket)
+        // this.onIncomingPacket(newData, socket)
+        this.processPackets(newData, socket)
+    }
+
+    private processPackets(packetData: Buffer, sourceSocket: ExtendedSocket) {
+        let curOffset: number = 0
+        let curTotalLen: number = 0
+
+        for (let len = packetData.length;
+            len >= InPacketBase.headerLength;
+            len -= curTotalLen) {
+            const pktBuffer: Buffer = packetData.slice(curOffset, curOffset + len)
+            const curPacket: InPacketBase = new InPacketBase(pktBuffer)
+            const totalPktLen = curPacket.length + InPacketBase.headerLength
+
+            this.onIncomingPacket(curPacket, sourceSocket)
+
+            curTotalLen = totalPktLen
+            curOffset += totalPktLen
+        }
     }
 
     /**
      * hands the packet to the appropriate callback
      * @param socket the client's socket
-     * @param data the packet data received from the client
+     * @param packet the packet received from the client
      * @returns true if successful, otherwise it failed
      */
-    private onIncomingPacket(packetData: Buffer, sourceSocket: ExtendedSocket): boolean {
-        const packet = new InPacketBase(packetData)
-
+    private onIncomingPacket(packet: InPacketBase, sourceSocket: ExtendedSocket): boolean {
         if (packet.isValid() === false) {
             console.warn('bad packet from ' + sourceSocket.uuid)
             return false
@@ -235,17 +252,17 @@ export class ServerInstance {
 
         switch (packet.id) {
             case PacketId.Version:
-                return this.users.onVersionPacket(packetData, sourceSocket)
+                return this.users.onVersionPacket(packet.getData(), sourceSocket)
             case PacketId.Login:
-                return this.users.onLoginPacket(packetData, sourceSocket, this.channels)
+                return this.users.onLoginPacket(packet.getData(), sourceSocket, this.channels)
             case PacketId.RequestChannels:
                 return this.channels.onChannelListPacket(sourceSocket, this.users)
             case PacketId.RequestRoomList:
-                return this.channels.onRoomListPacket(packetData, sourceSocket, this.users)
+                return this.channels.onRoomListPacket(packet.getData(), sourceSocket, this.users)
             case PacketId.Room:
-                return this.channels.onRoomRequest(packetData, sourceSocket, this.users)
+                return this.channels.onRoomRequest(packet.getData(), sourceSocket, this.users)
             case PacketId.Udp:
-                return this.users.onUdpPacket(packetData, sourceSocket)
+                return this.users.onUdpPacket(packet.getData(), sourceSocket)
         }
 
         console.warn('unknown packet id ' + packet.id + ' from ' + sourceSocket.uuid)
