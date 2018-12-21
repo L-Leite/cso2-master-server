@@ -10,6 +10,7 @@ enum InRoomType {
     NewRoomRequest = 0,
     JoinRoomRequest = 1,
     LeaveRoomRequest = 3,
+    ToggleReadyRequest = 4,
     GameStartRequest = 5,
     UpdateSettings = 6,
     SetUserTeamRequest = 9,
@@ -48,6 +49,13 @@ export class InRoomPacket extends InPacketBase {
      */
     public isLeaveRoomRequest(): boolean {
         return this.packetType === InRoomType.LeaveRoomRequest
+    }
+
+    /**
+     * isToggleReadyRequest
+     */
+    public isToggleReadyRequest(): boolean {
+        return this.packetType === InRoomType.ToggleReadyRequest
     }
 
     /**
@@ -93,6 +101,7 @@ export class InRoomPacket extends InPacketBase {
                 this.joinRequest = new InRoomJoinRequest(this)
                 break
             case InRoomType.LeaveRoomRequest:
+            case InRoomType.ToggleReadyRequest:
             case InRoomType.GameStartRequest:
                 break
             case InRoomType.UpdateSettings:

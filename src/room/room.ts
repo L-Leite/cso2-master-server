@@ -11,6 +11,12 @@ export enum RoomTeamNum {
     CounterTerrorist = 2,
 }
 
+export enum RoomReadyStatus {
+    No = 0,
+    Unknown = 1, // readies the player, but you can't unready
+    Yes = 2,
+}
+
 export interface IRoomOptions {
     roomName?: string,
     gameModeId?: number,
@@ -38,6 +44,7 @@ export class Room {
     public host: User
     public users: User[]
     public userTeam: Map<number, RoomTeamNum>
+    public userReadyStatus: Map<number, RoomReadyStatus>
 
     private emptyRoomCallback: (emptyRoom: Room, channel: Channel) => void
     private parentChannel: Channel
@@ -50,6 +57,7 @@ export class Room {
         this.id = roomId
         this.host = host
         this.userTeam = new Map<number, RoomTeamNum>()
+        this.userReadyStatus = new Map<number, RoomReadyStatus>()
 
         this.parentChannel = parentChannel
         this.emptyRoomCallback = emptyRoomCallback
@@ -93,6 +101,7 @@ export class Room {
     public addUser(user: User, teamNum: RoomTeamNum): void {
         this.users.push(user)
         this.userTeam.set(user.userId, teamNum)
+        this.userReadyStatus.set(user.userId, RoomReadyStatus.No)
     }
 
     /**
@@ -125,7 +134,8 @@ export class Room {
     }
 
     /**
-     * getUserTeam
+     * returns an user's current team
+     * @param user the user's object
      */
     public getUserTeam(user: User): RoomTeamNum {
         if (this.hasUser(user) === false) {
@@ -136,13 +146,48 @@ export class Room {
     }
 
     /**
+     * returns an user's ready status
+     * @param user the user's object
+     */
+    public isUserReady(user: User): boolean {
+        if (this.hasUser(user) === false) {
+            console.warn('isUserReady: user not found!')
+            return false
+        }
+        return this.userReadyStatus.get(user.userId) === RoomReadyStatus.Yes
+    }
+
+    /**
      * swaps an user to the opposite team
+     * @param user the user's object
+     * @param newTeam the user's new team
      */
     public setUserToTeam(user: User, newTeam: RoomTeamNum): void {
         if (this.hasUser(user) === false) {
+            console.warn('setUserToTeam: user not found!')
             return
         }
         this.userTeam.set(user.userId, newTeam)
+    }
+
+    /**
+     * toggles the user's room ready status
+     * @param user the user's object
+     * @param newStatus the user's new ready status
+     * @returns the new ready state
+     */
+    public toggleUserReadyStatus(user: User): RoomReadyStatus {
+        if (this.hasUser(user) === false) {
+            console.warn('setUserReadyStatus: user not found!')
+            return
+        }
+
+        const curStatus: RoomReadyStatus = this.userReadyStatus.get(user.userId)
+        const newStatus: RoomReadyStatus =
+            curStatus === RoomReadyStatus.No
+                ? RoomReadyStatus.Yes : RoomReadyStatus.No
+        this.userReadyStatus.set(user.userId, newStatus)
+        return newStatus
     }
 
     /**
@@ -206,6 +251,7 @@ export class Room {
         } else {
             this.findAndUpdateNewHost()
             this.userTeam.delete(userId)
+            this.userReadyStatus.delete(userId)
             this.sendRemovedUser(userId)
         }
     }

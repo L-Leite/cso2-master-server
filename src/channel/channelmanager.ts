@@ -2,8 +2,7 @@ import { Channel } from 'channel/channel'
 import { ChannelServer } from 'channel/channelserver'
 
 import { NewRoomSettings } from 'room/newroomsettings'
-import { Room, RoomTeamNum } from 'room/room'
-import { RoomSettings } from 'room/roomsettings'
+import { Room, RoomReadyStatus, RoomTeamNum } from 'room/room'
 
 import { User } from 'user/user'
 import { UserManager } from 'user/usermanager'
@@ -73,6 +72,8 @@ export class ChannelManager {
             return this.onGameStartRequest(reqPacket, sourceSocket, user)
         } else if (reqPacket.isLeaveRoomRequest()) {
             return this.onLeaveRoomRequest(reqPacket, sourceSocket, user)
+        } else if (reqPacket.isToggleReadyRequest()) {
+            return this.onToggleReadyRequest(reqPacket, sourceSocket, user)
         } else if (reqPacket.isUpdateSettings()) {
             return this.onRoomUpdateSettings(reqPacket, sourceSocket, user)
         } else if (reqPacket.isSetUserTeamRequest()) {
@@ -246,6 +247,32 @@ export class ChannelManager {
 
         currentRoom.removeUser(user)
         user.currentRoom = null
+
+        return true
+    }
+
+    /**
+     * called when the user requests to toggle ready status
+     * @param sourceSocket the user's socket
+     * @param user the user itself
+     * @returns true if successful
+     */
+    private onToggleReadyRequest(reqPacket: InRoomPacket, sourceSocket: ExtendedSocket, user: User): boolean {
+        const currentRoom: Room = user.currentRoom
+
+        if (currentRoom == null) {
+            return false
+        }
+
+        const readyStatus: RoomReadyStatus = currentRoom.toggleUserReadyStatus(user)
+
+        // inform every user in the room of the changes
+        for (const player of currentRoom.users) {
+            const playerSocket: ExtendedSocket = player.socket
+            const reply: Buffer = new OutRoomPacket(playerSocket.getSeq())
+                .setUserReadyStatus(user, readyStatus)
+            playerSocket.send(reply)
+        }
 
         return true
     }

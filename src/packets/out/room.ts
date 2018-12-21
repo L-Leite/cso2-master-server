@@ -4,7 +4,7 @@ import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
 
 import { NewRoomSettings } from 'room/newroomsettings'
-import { Room, RoomTeamNum } from 'room/room'
+import { Room, RoomReadyStatus, RoomTeamNum } from 'room/room'
 import { User } from 'user/user'
 
 import { OutRoomCountdown } from 'packets/out/room/countdown'
@@ -13,12 +13,14 @@ import { OutRoomPlayerJoin } from 'packets/out/room/playerjoin'
 import { OutRoomPlayerLeave } from 'packets/out/room/playerleave'
 import { OutRoomSetHost } from 'packets/out/room/sethost'
 import { OutRoomUpdateSettings } from 'packets/out/room/updatesettings'
+import { OutRoomPlayerReady } from './room/playerready';
 import { OutRoomSetUserTeam } from './room/setuserteam'
 
 enum OutRoomPacketType {
     CreateAndJoin = 0,
     PlayerJoin = 1,
     PlayerLeave = 2,
+    SetPlayerReady = 3,
     UpdateSettings = 4,
     SetHost = 5,
     setUserTeam = 7,
@@ -74,6 +76,21 @@ export class OutRoomPacket extends OutPacketBase {
         this.writeUInt8(OutRoomPacketType.PlayerLeave)
 
         new OutRoomPlayerLeave(userId).build(this)
+
+        const res: Buffer = this.outStream.getContents()
+        OutPacketBase.setPacketLength(res)
+
+        return res
+    }
+
+    public setUserReadyStatus(user: User, readyStatus: RoomReadyStatus): Buffer {
+        this.outStream = new WritableStreamBuffer(
+            { initialSize: 20, incrementAmount: 15 })
+
+        this.buildHeader()
+        this.writeUInt8(OutRoomPacketType.SetPlayerReady)
+
+        new OutRoomPlayerReady(user.userId, readyStatus).build(this)
 
         const res: Buffer = this.outStream.getContents()
         OutPacketBase.setPacketLength(res)
