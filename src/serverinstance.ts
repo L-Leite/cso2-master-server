@@ -209,7 +209,6 @@ export class ServerInstance {
         // the data comes in as a string, so we need to convert it to a buffer
         const newData: Buffer = Buffer.from(data, 'hex')
         // process the received data
-        // this.onIncomingPacket(newData, socket)
         this.processPackets(newData, socket)
     }
 
