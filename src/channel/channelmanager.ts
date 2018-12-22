@@ -79,7 +79,7 @@ export class ChannelManager {
         } else if (reqPacket.isSetUserTeamRequest()) {
             return this.onSetTeamRequest(reqPacket, sourceSocket, user)
         } else if (reqPacket.isGameStartCountdownRequest()) {
-            return this.onGameStartCountdownRequest(reqPacket, sourceSocket, user)
+            return this.onGameStartToggleRequest(reqPacket, sourceSocket, user)
         }
 
         return true
@@ -366,6 +366,10 @@ export class ChannelManager {
             return false
         }
 
+        if (currentRoom.isUserReady(user)) {
+            return false
+        }
+
         const swap: InRoomSetUserTeamRequest = reqPacket.swapTeam
         currentRoom.setUserToTeam(user, swap.newTeam)
 
@@ -387,7 +391,7 @@ export class ChannelManager {
      * @param user the user itself
      * @returns true if successful
      */
-    private onGameStartCountdownRequest(reqPacket: InRoomPacket, sourceSocket: ExtendedSocket, user: User): boolean {
+    private onGameStartToggleRequest(reqPacket: InRoomPacket, sourceSocket: ExtendedSocket, user: User): boolean {
         const currentRoom: Room = user.currentRoom
 
         if (currentRoom == null || user !== currentRoom.host) {

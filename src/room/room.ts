@@ -158,6 +158,19 @@ export class Room {
     }
 
     /**
+     * checks if the room's users are ready
+     * @returns true if everyone is ready, false if not
+     */
+    public isRoomReady(): boolean {
+        for (const user of this.users) {
+            if (this.isUserReady(user) === false) {
+                return false
+            }
+        }
+        return true
+    }
+
+    /**
      * swaps an user to the opposite team
      * @param user the user's object
      * @param newTeam the user's new team
