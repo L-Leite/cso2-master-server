@@ -11,10 +11,10 @@ import { OutRoomCountdown } from 'packets/out/room/countdown'
 import { OutRoomCreateAndJoin } from 'packets/out/room/createandjoin'
 import { OutRoomPlayerJoin } from 'packets/out/room/playerjoin'
 import { OutRoomPlayerLeave } from 'packets/out/room/playerleave'
+import { OutRoomPlayerReady } from 'packets/out/room/playerready'
 import { OutRoomSetHost } from 'packets/out/room/sethost'
+import { OutRoomSetUserTeam } from 'packets/out/room/setuserteam'
 import { OutRoomUpdateSettings } from 'packets/out/room/updatesettings'
-import { OutRoomPlayerReady } from './room/playerready';
-import { OutRoomSetUserTeam } from './room/setuserteam'
 
 enum OutRoomPacketType {
     CreateAndJoin = 0,
