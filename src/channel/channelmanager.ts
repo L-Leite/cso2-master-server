@@ -154,6 +154,11 @@ export class ChannelManager {
      * @returns true if successful
      */
     private onNewRoomRequest(reqPacket: InRoomPacket, sourceSocket: ExtendedSocket, user: User): boolean {
+        // don't allow the user to create a new room while in another one
+        if (user.currentRoom) {
+            return false
+        }
+
         const server: ChannelServer = this.getServerByIndex(user.currentChannelServerIndex)
 
         if (server == null) {
@@ -245,6 +250,11 @@ export class ChannelManager {
             return false
         }
 
+        if (currentRoom.isUserReady(user)
+            && currentRoom.isCountdownInProgress()) {
+            return false
+        }
+
         currentRoom.removeUser(user)
         user.currentRoom = null
 
@@ -261,6 +271,10 @@ export class ChannelManager {
         const currentRoom: Room = user.currentRoom
 
         if (currentRoom == null) {
+            return false
+        }
+
+        if (currentRoom.isCountdownInProgress()) {
             return false
         }
 
@@ -329,6 +343,10 @@ export class ChannelManager {
         const currentRoom: Room = user.currentRoom
 
         if (currentRoom == null || user !== currentRoom.host) {
+            return false
+        }
+
+        if (currentRoom.isCountdownInProgress()) {
             return false
         }
 

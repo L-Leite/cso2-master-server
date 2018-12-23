@@ -233,7 +233,7 @@ export class Room {
      * @param hostNextNum the host's next countdown number
      */
     public progressCountdown(hostNextNum: number): void {
-        if (this.countdown > 6
+        if (this.countdown > defaultCountdownNum
             || this.countdown <= 0) {
             throw new Error('Room: the saved countdown is invalid!')
         }
@@ -243,6 +243,15 @@ export class Room {
         if (this.countdown !== hostNextNum) {
             throw new Error('Room: host\'s countdown does not match ours')
         }
+    }
+
+    /**
+     * checks if a room's game countdown is in progress
+     * @returns true if it's in progress, false if not
+     */
+    public isCountdownInProgress(): boolean {
+        return this.countdown < defaultCountdownNum
+            || this.countdown > 0
     }
 
     /**
