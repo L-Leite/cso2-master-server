@@ -251,7 +251,7 @@ export class Room {
      */
     public isCountdownInProgress(): boolean {
         return this.countdown < defaultCountdownNum
-            || this.countdown > 0
+            && this.countdown > 0
     }
 
     /**
