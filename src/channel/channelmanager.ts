@@ -423,8 +423,10 @@ export class ChannelManager {
             let reply: Buffer = null
 
             if (countdown.shouldCountdown()) {
+                currentRoom.progressCountdown(countdown.count)
                 reply = new OutRoomPacket(socket.getSeq()).progressCountdown(countdown.count)
             } else {
+                currentRoom.stopCountdown()
                 reply = new OutRoomPacket(socket.getSeq()).stopCountdown()
             }
 
