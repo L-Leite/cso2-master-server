@@ -201,7 +201,7 @@ export class RoomSettings {
             } else {
                 this.botDifficulty = 0
                 this.numCtBots = 0
-                this.numTrBots = newSettings.numTrBots
+                this.numTrBots = 0
             }
         }
         if (newSettings.unk35 != null) {
