@@ -20,6 +20,10 @@ export class RoomSettings {
     public hltvEnabled: number
     public mapCycleType: number
     public multiMaps: number[]
+    public botEnabled: number
+    public botDifficulty: number
+    public numCtBots: number
+    public numTrBots: number
 
     public unk00: number
     public unk01: number
@@ -40,10 +44,6 @@ export class RoomSettings {
     public unk31: number
     public unk32: number
     public unk33: number
-    public botEnabled: number
-    public botDifficulty: number
-    public numCtBots: number
-    public numTrBots: number
     public unk35: number
     public unk36: number
     public unk37: number
@@ -72,8 +72,10 @@ export class RoomSettings {
         this.hltvEnabled = options.hltvEnabled ? options.hltvEnabled : 0
         this.mapCycleType = 1
         this.multiMaps = []
-
         this.botEnabled = 0
+        this.numCtBots = 0
+        this.numTrBots = 0
+        this.botDifficulty = 0
     }
 
     /**
