@@ -198,6 +198,10 @@ export class RoomSettings {
                 this.botDifficulty = newSettings.botDifficulty
                 this.numCtBots = newSettings.numCtBots
                 this.numTrBots = newSettings.numTrBots
+            } else {
+                this.botDifficulty = 0
+                this.numCtBots = 0
+                this.numTrBots = newSettings.numTrBots
             }
         }
         if (newSettings.unk35 != null) {
