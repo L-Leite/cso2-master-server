@@ -40,7 +40,7 @@ export class NewRoomSettings {
             newSettings.forceCamera = updateSettings.forceCamera
         }
         if (updateSettings.teamBalance != null) {
-            newSettings.teamBalance = updateSettings.teamBalance
+            newSettings.teamBalanceType = updateSettings.teamBalance
         }
         if (updateSettings.weaponRestrictions != null) {
             newSettings.weaponRestrictions = updateSettings.weaponRestrictions
@@ -193,7 +193,7 @@ export class NewRoomSettings {
             newSettings.nextMapEnabled = settings.nextMapEnabled
         }
         if (settings.teamBalance != null) {
-            newSettings.teamBalance = settings.teamBalance
+            newSettings.teamBalanceType = settings.teamBalance
         }
         if (settings.weaponRestrictions != null) {
             newSettings.weaponRestrictions = settings.weaponRestrictions
@@ -312,7 +312,7 @@ export class NewRoomSettings {
     public enableBots: number
     public difficulty: number
     public respawnTime: number
-    public teamBalance: number
+    public teamBalanceType: number
     public weaponRestrictions: number
     public hltvEnabled: number
     public mapCycleType: number
@@ -409,7 +409,7 @@ export class NewRoomSettings {
         if (this.multiMaps != null) {
             lowFlag |= 0x20000
         }
-        if (this.teamBalance != null) {
+        if (this.teamBalanceType != null) {
             lowFlag |= 0x40000
         }
         if (this.unk29 != null) {

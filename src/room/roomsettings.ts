@@ -1,10 +1,10 @@
 import { NewRoomSettings } from 'room/newroomsettings'
-import { IRoomOptions } from 'room/room'
+import { IRoomOptions, RoomGamemode, RoomTeamBalance } from 'room/room'
 
 export class RoomSettings {
     public roomName: string
     public maxPlayers: number
-    public gameModeId: number
+    public gameModeId: RoomGamemode
     public mapId: number
     public winLimit: number
     public killLimit: number
@@ -15,7 +15,7 @@ export class RoomSettings {
     public enableBots: number
     public difficulty: number
     public respawnTime: number
-    public teamBalance: number
+    public teamBalance: RoomTeamBalance
     public weaponRestrictions: number
     public hltvEnabled: number
     public mapCycleType: number
@@ -121,8 +121,8 @@ export class RoomSettings {
         if (newSettings.nextMapEnabled != null) {
             this.nextMapEnabled = newSettings.nextMapEnabled
         }
-        if (newSettings.teamBalance != null) {
-            this.teamBalance = newSettings.teamBalance
+        if (newSettings.teamBalanceType != null) {
+            this.teamBalance = newSettings.teamBalanceType
         }
         if (newSettings.weaponRestrictions != null) {
             this.weaponRestrictions = newSettings.weaponRestrictions
@@ -132,6 +132,18 @@ export class RoomSettings {
         }
         if (newSettings.multiMaps != null) {
             this.multiMaps = newSettings.multiMaps
+        }
+        if (newSettings.botEnabled != null) {
+            this.botEnabled = newSettings.botEnabled
+            if (newSettings.botEnabled === 1) {
+                this.botDifficulty = newSettings.botDifficulty
+                this.numCtBots = newSettings.numCtBots
+                this.numTrBots = newSettings.numTrBots
+            } else {
+                this.botDifficulty = 0
+                this.numCtBots = 0
+                this.numTrBots = 0
+            }
         }
 
         if (newSettings.unk00 != null) {
@@ -190,19 +202,6 @@ export class RoomSettings {
         }
         if (newSettings.unk33 != null) {
             this.unk33 = newSettings.unk33
-        }
-        if (newSettings.botEnabled != null) {
-            this.botEnabled = newSettings.botEnabled
-
-            if (newSettings.botEnabled === 1) {
-                this.botDifficulty = newSettings.botDifficulty
-                this.numCtBots = newSettings.numCtBots
-                this.numTrBots = newSettings.numTrBots
-            } else {
-                this.botDifficulty = 0
-                this.numCtBots = 0
-                this.numTrBots = 0
-            }
         }
         if (newSettings.unk35 != null) {
             this.unk35 = newSettings.unk35

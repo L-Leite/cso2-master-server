@@ -90,7 +90,7 @@ export class OutRoomUpdateSettings {
             }
         }
         if (lowFlag & 0x40000) {
-            outPacket.writeUInt8(this.settings.teamBalance)
+            outPacket.writeUInt8(this.settings.teamBalanceType)
         }
         if (lowFlag & 0x80000) {
             outPacket.writeUInt8(this.settings.unk29)

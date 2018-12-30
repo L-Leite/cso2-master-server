@@ -416,6 +416,10 @@ export class ChannelManager {
             return false
         }
 
+        if (currentRoom.canStartGame() === false) {
+            return false
+        }
+
         const countdown: InRoomCountdown = reqPacket.countdown
 
         for (const roomUser of currentRoom.users) {
