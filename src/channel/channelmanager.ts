@@ -359,9 +359,15 @@ export class ChannelManager {
             return false
         }
 
-        // inform every user in the room of the changes
+        // tell the ready users to join the host
         for (const guest of currentRoom.users) {
+            // 'user' is the host, don't tell it to join itself
             if (guest === user) {
+                continue
+            }
+
+            // don't tell users to join if they're not ready
+            if (currentRoom.isUserReady(guest) === false) {
                 continue
             }
 
