@@ -145,6 +145,7 @@ export class Room {
 
         this.users = []
         this.addUser(host, this.findDesirableTeamNum())
+        this.toggleUserReadyStatus(host) // always readies host
     }
 
     /**
@@ -235,7 +236,7 @@ export class Room {
     public getNumOfReadyRealPlayers(): number {
         let numReadyPlayers: number = 0
         for (const user of this.users) {
-            if (this.isUserReady(user) === false) {
+            if (this.isUserReady(user) === true) {
                 numReadyPlayers++
             }
         }
@@ -391,6 +392,10 @@ export class Room {
         }
 
         this.countdown--
+    }
+
+    public getCountdown(): number {
+        return this.countdown
     }
 
     /**

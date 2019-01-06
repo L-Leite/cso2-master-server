@@ -578,11 +578,13 @@ export class ChannelManager {
         const countdown: InRoomCountdown = reqPacket.countdown
 
         if (countdown.shouldCountdown()) {
-            console.log('room "%s"\'s (id %i) countdown is at %i',
-                currentRoom.settings.roomName, currentRoom.id, countdown.count)
+            console.log('room "%s"\'s (id %i) countdown is at %i (host says it\'s at %i)',
+                currentRoom.settings.roomName, currentRoom.id, currentRoom.getCountdown(), countdown.count)
+            currentRoom.progressCountdown(countdown.count)
         } else {
             console.log('host "%s" canceled room "%s"\'s (id %i) countdown',
                 user.userName, currentRoom.settings.roomName, currentRoom.id)
+            currentRoom.stopCountdown()
         }
 
         for (const roomUser of currentRoom.users) {
@@ -590,10 +592,8 @@ export class ChannelManager {
             let reply: Buffer = null
 
             if (countdown.shouldCountdown()) {
-                currentRoom.progressCountdown(countdown.count)
                 reply = new OutRoomPacket(socket.getSeq()).progressCountdown(countdown.count)
             } else {
-                currentRoom.stopCountdown()
                 reply = new OutRoomPacket(socket.getSeq()).stopCountdown()
             }
 
