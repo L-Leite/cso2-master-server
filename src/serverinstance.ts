@@ -242,9 +242,6 @@ export class ServerInstance {
             return false
         }
 
-        console.log('packet from ' + sourceSocket.uuid
-            + ' seq: ' + packet.sequence + ' length: ' + packet.length)
-
         if (this.packetLogging) {
             this.packetLogging.dumpIn(packet, sourceSocket)
         }

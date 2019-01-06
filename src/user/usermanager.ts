@@ -33,7 +33,6 @@ export class UserManager {
     public onLoginPacket(loginData: Buffer, sourceSocket: ExtendedSocket,
                          channels: ChannelManager): boolean {
         const loginPacket: InLoginPacket = new InLoginPacket(loginData)
-        console.log('trying to login as ' + loginPacket.gameUsername)
 
         const newUser: User = this.loginUser(loginPacket.gameUsername,
             loginPacket.password, sourceSocket)
@@ -43,6 +42,9 @@ export class UserManager {
                 + ' uuid: ' + sourceSocket.uuid)
             return false
         }
+
+        console.log('user ' + loginPacket.gameUsername
+            + ' logged in, uuid: ' + sourceSocket.uuid)
 
         const userStartReply: Buffer = new OutUserStartPacket(
             newUser.userId,
