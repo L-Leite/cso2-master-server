@@ -145,7 +145,6 @@ export class Room {
 
         this.users = []
         this.addUser(host, this.findDesirableTeamNum())
-        this.toggleUserReadyStatus(host) // always readies host
     }
 
     /**
@@ -236,7 +235,8 @@ export class Room {
     public getNumOfReadyRealPlayers(): number {
         let numReadyPlayers: number = 0
         for (const user of this.users) {
-            if (this.isUserReady(user) === true) {
+            if (this.isUserReady(user) === true
+                || user === this.host) {
                 numReadyPlayers++
             }
         }
@@ -365,7 +365,12 @@ export class Room {
      */
     public toggleUserReadyStatus(user: User): RoomReadyStatus {
         if (this.hasUser(user) === false) {
-            console.warn('setUserReadyStatus: user not found!')
+            console.warn('toggleUserReadyStatus: user not found!')
+            return
+        }
+
+        if (user === this.host) {
+            console.warn('toggleUserReadyStatus: host tried to toggle ready')
             return
         }
 
