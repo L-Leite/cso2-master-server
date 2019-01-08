@@ -431,6 +431,7 @@ export class Room {
             case RoomGamemode.original:
             case RoomGamemode.originalmr:
             case RoomGamemode.gunteamdeath:
+            case RoomGamemode.gunteamdeath_re:
             case RoomGamemode.stealth:
             case RoomGamemode.teamdeath:
             case RoomGamemode.teamdeath_mutation:
