@@ -1,5 +1,6 @@
 import { ExtendedSocket } from 'extendedsocket'
 
+import { Room } from 'room/room'
 import { User } from 'user/user'
 
 import { ChannelManager } from 'channel/channelmanager'
@@ -8,6 +9,8 @@ import { InLoginPacket } from 'packets/in/login'
 import { InUdpPacket } from 'packets/in/udp'
 import { InVersionPacket } from 'packets/in/version'
 
+import { InHostPacket } from 'packets/in/host'
+import { OutHostPacket } from 'packets/out/host';
 import { OutUserInfoPacket } from 'packets/out/userinfo'
 import { OutUserStartPacket } from 'packets/out/userstart'
 import { OutVersionPacket } from 'packets/out/version'
@@ -61,6 +64,52 @@ export class UserManager {
         sourceSocket.send(userStartReply)
         sourceSocket.send(userInfoReply)
         sourceSocket.send(serverListReply)
+
+        return true
+    }
+
+    /**
+     * handles the incoming host packets
+     * @param packetData the host's packet data
+     * @param sourceSocket the client's socket
+     */
+    public onHostPacket(packetData: Buffer, sourceSocket: ExtendedSocket): boolean {
+        const hostPacket: InHostPacket = new InHostPacket(packetData)
+
+        const user: User = this.getUserByUuid(sourceSocket.uuid)
+
+        if (user == null) {
+            console.warn('Socket %s sent a host packet, but isn\'t logged in',
+                sourceSocket.uuid)
+        }
+
+        // TODO: implement other host packet types
+        if (hostPacket.isPreloadInventory() === false) {
+            console.warn('UserManager::onHostPacket: unknown host packet type %i',
+                hostPacket.packetType)
+            return false
+        }
+
+        const currentRoom: Room = user.currentRoom
+
+        if (currentRoom == null) {
+            console.warn('User %s sent an host entity num packet without being in a room',
+                user.userName)
+            return false
+        }
+
+        const newEntityNum: number = hostPacket.preloadInventory.entityNum
+        const hostSocket: ExtendedSocket = currentRoom.host.socket
+
+        console.log('Setting user "%s"\'s entity num as %i in room %s',
+            user.userName, newEntityNum, currentRoom.settings.roomName)
+
+        currentRoom.setUserEntityNum(user, newEntityNum)
+
+        const reply: Buffer =
+            new OutHostPacket(hostSocket.getSeq()).preloadInventory(newEntityNum)
+
+        hostSocket.send(reply)
 
         return true
     }

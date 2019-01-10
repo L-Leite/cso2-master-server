@@ -3,9 +3,9 @@ import { OutPacketBase } from 'packets/out/packet'
 /**
  * Sub structure of Host packet
  * Stores information to start a room's match
- * @class HostGameStart
+ * @class OutHostGameStart
  */
-export class HostGameStart {
+export class OutHostGameStart {
     private hostUserId: number
 
     constructor(hostUserId: number) {

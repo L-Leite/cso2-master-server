@@ -17,6 +17,7 @@ export enum RoomReadyStatus {
     Yes = 2,
 }
 
+// pasted from scripts/cso2_modlist.csv
 export enum RoomGamemode {
     original = 1,
     teamdeath = 2,
@@ -113,6 +114,7 @@ export interface IRoomOptions {
 }
 
 const defaultCountdownNum: number = 6
+const invalidEntityNum: number = -1
 
 export class Room {
     public id: number
@@ -122,6 +124,7 @@ export class Room {
     public users: User[]
     public userTeam: Map<number, RoomTeamNum>
     public userReadyStatus: Map<number, RoomReadyStatus>
+    public userEntityNum: Map<number, number>
 
     private emptyRoomCallback: (emptyRoom: Room, channel: Channel) => void
     private parentChannel: Channel
@@ -135,6 +138,7 @@ export class Room {
         this.host = host
         this.userTeam = new Map<number, RoomTeamNum>()
         this.userReadyStatus = new Map<number, RoomReadyStatus>()
+        this.userEntityNum = new Map<number, number>()
 
         this.parentChannel = parentChannel
         this.emptyRoomCallback = emptyRoomCallback
@@ -189,6 +193,7 @@ export class Room {
         this.users.push(user)
         this.userTeam.set(user.userId, teamNum)
         this.userReadyStatus.set(user.userId, RoomReadyStatus.No)
+        this.userEntityNum.set(user.userId, invalidEntityNum)
     }
 
     /**
@@ -313,6 +318,39 @@ export class Room {
             }
         }
         return true
+    }
+
+    /**
+     * gives an user's entity number in a room match
+     * if the user hasn't set the entity number, returns 'invalidEntityNum' (-1)
+     * @param user the target user
+     * @returns the user's entity number
+     */
+    public getUserEntityNum(user: User): number {
+        const result = this.userEntityNum.get(user.userId)
+
+        if (result == null) {
+            console.warn('Room::getUserEntityNum: user %s did not set its entity id',
+                user.userName)
+            return invalidEntityNum
+        }
+
+        return result
+    }
+
+    /**
+     * sets an user ingame entity number
+     * @param user the target user
+     * @param entityNum the new entity number
+     */
+    public setUserEntityNum(user: User, entityNum: number): void {
+        if (this.hasUser(user) === false) {
+            console.warn('Room::setUserEntityNum: user %s isn\'t in room %s',
+                user.userName, this.settings.roomName)
+            return
+        }
+
+        this.userEntityNum.set(user.userId, entityNum)
     }
 
     /**

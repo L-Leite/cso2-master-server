@@ -1,14 +1,11 @@
 import { WritableStreamBuffer } from 'stream-buffers'
 
 import { PacketId } from 'packets/definitions'
-import { HostGameStart } from 'packets/out/host/gamestart'
-import { HostJoinHost } from 'packets/out/host/joinhost'
+import { HostPacketType } from 'packets/in/host'
+import { OutHostGameStart } from 'packets/out/host/gamestart'
+import { OutHostJoinHost } from 'packets/out/host/joinhost'
 import { OutPacketBase } from 'packets/out/packet'
-
-export enum HostPacketType {
-    GameStart = 0, // when a host starts a new game
-    HostJoin = 1, // when someone joins some host's game
-}
+import { OutHostPreloadInventory } from './host/preloadinventory';
 
 /**
  * outgoing room host information
@@ -28,7 +25,7 @@ export class OutHostPacket extends OutPacketBase {
         this.buildHeader()
         this.writeUInt8(HostPacketType.GameStart)
 
-        const gameStart = new HostGameStart(hostUserId)
+        const gameStart = new OutHostGameStart(hostUserId)
         gameStart.build(this)
 
         const res: Buffer = this.outStream.getContents()
@@ -44,7 +41,22 @@ export class OutHostPacket extends OutPacketBase {
         this.buildHeader()
         this.writeUInt8(HostPacketType.HostJoin)
 
-        new HostJoinHost(hostUserId).build(this)
+        new OutHostJoinHost(hostUserId).build(this)
+
+        const res: Buffer = this.outStream.getContents()
+        OutPacketBase.setPacketLength(res)
+
+        return res
+    }
+
+    public preloadInventory(entityNum: number): Buffer {
+        this.outStream = new WritableStreamBuffer(
+            { initialSize: 50, incrementAmount: 20 })
+
+        this.buildHeader()
+        this.writeUInt8(HostPacketType.PreloadInventory)
+
+        new OutHostPreloadInventory(entityNum).build(this)
 
         const res: Buffer = this.outStream.getContents()
         OutPacketBase.setPacketLength(res)

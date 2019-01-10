@@ -5,9 +5,9 @@ import { OutPacketBase } from 'packets/out/packet'
 /**
  * Sub structure of Host packet
  * joins a host's match
- * @class HostJoinHost
+ * @class OutHostJoinHost
  */
-export class HostJoinHost {
+export class OutHostJoinHost {
     private hostUserId: number
     private unk00: Uint64LE
 

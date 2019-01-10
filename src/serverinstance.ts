@@ -257,6 +257,8 @@ export class ServerInstance {
                 return this.channels.onRoomListPacket(packet.getData(), sourceSocket, this.users)
             case PacketId.Room:
                 return this.channels.onRoomRequest(packet.getData(), sourceSocket, this.users)
+            case PacketId.Host:
+                return this.users.onHostPacket(packet.getData(), sourceSocket)
             case PacketId.Udp:
                 return this.users.onUdpPacket(packet.getData(), sourceSocket)
         }
