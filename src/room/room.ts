@@ -299,6 +299,18 @@ export class Room {
      * returns an user's ready status
      * @param user the user's object
      */
+    public getUserReadyStatus(user: User): RoomReadyStatus {
+        if (this.hasUser(user) === false) {
+            console.warn('getUserReady: user not found!')
+            return RoomReadyStatus.No
+        }
+        return this.userReadyStatus.get(user.userId)
+    }
+
+    /**
+     * returns true if an user is ready, false if not
+     * @param user the user's object
+     */
     public isUserReady(user: User): boolean {
         if (this.hasUser(user) === false) {
             console.warn('isUserReady: user not found!')
