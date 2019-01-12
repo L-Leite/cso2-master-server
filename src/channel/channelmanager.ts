@@ -262,7 +262,7 @@ export class ChannelManager {
             const readyStatus = desiredRoom.getUserReadyStatus(player)
             const readyReply: Buffer = new OutRoomPacket(user.socket.getSeq())
                 .setUserReadyStatus(user, readyStatus)
-            user.socket.send(reply)
+            user.socket.send(readyReply)
 
             // inform users of the new player
             const playerSocket: ExtendedSocket = player.socket
