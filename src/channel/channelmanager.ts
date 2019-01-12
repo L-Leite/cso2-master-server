@@ -254,6 +254,10 @@ export class ChannelManager {
 
         // inform users of the new player
         for (const player of desiredRoom.users) {
+            if (player === user) {
+                continue
+            }
+
             const playerSocket: ExtendedSocket = player.socket
             const playerReply: Buffer = new OutRoomPacket(playerSocket.getSeq())
                 .playerJoin(user, newTeam)
