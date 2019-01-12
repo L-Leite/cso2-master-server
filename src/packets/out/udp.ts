@@ -1,4 +1,4 @@
-import * as ip from 'ip'
+import ip from 'ip'
 import { WritableStreamBuffer } from 'stream-buffers'
 
 import { PacketId } from 'packets/definitions'

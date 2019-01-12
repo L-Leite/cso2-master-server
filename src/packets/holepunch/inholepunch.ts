@@ -1,4 +1,4 @@
-import * as ip from 'ip'
+import ip from 'ip'
 
 export const UdpPacketSignature: number = 0x57 // 'W'
 

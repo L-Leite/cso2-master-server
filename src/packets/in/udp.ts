@@ -1,4 +1,4 @@
-import * as ip from 'ip'
+import ip from 'ip'
 
 import { InPacketBase } from 'packets/in/packet'
 
