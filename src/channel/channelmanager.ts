@@ -252,11 +252,13 @@ export class ChannelManager {
 
         this.sendUserRoomSettings(user, desiredRoom)
 
-        // inform the host of the new user
-        const hostSocket: ExtendedSocket = desiredRoom.host.socket
-        const hostReply: Buffer = new OutRoomPacket(hostSocket.getSeq())
-            .playerJoin(user, newTeam)
-        hostSocket.send(hostReply)
+        // inform users of the new player
+        for (const player of desiredRoom.users) {
+            const playerSocket: ExtendedSocket = player.socket
+            const playerReply: Buffer = new OutRoomPacket(playerSocket.getSeq())
+                .playerJoin(user, newTeam)
+            playerSocket.send(playerReply)
+        }
 
         console.log('user "%s" joined a new room. room name: "%s" room id: %i',
             user.userName, desiredRoom.settings.roomName, desiredRoom.id)
