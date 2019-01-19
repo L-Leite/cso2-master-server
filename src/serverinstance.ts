@@ -194,6 +194,7 @@ export class ServerInstance {
         }
 
         user.localIpAddress = packet.ipAddress
+        user.externalIpAddress = rinfo.address
         // user.port = packet.port
         const reply: Buffer = new OutHolepunchPacketUdp(portIndex).build()
 
