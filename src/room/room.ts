@@ -129,6 +129,7 @@ export class Room {
     private emptyRoomCallback: (emptyRoom: Room, channel: Channel) => void
     private parentChannel: Channel
 
+    private countingDown: boolean
     private countdown: number
 
     constructor(roomId: number, host: User, parentChannel: Channel,
@@ -145,6 +146,7 @@ export class Room {
 
         this.settings = new RoomSettings(options)
 
+        this.countingDown = false
         this.countdown = defaultCountdownNum
 
         this.users = []
@@ -434,19 +436,24 @@ export class Room {
 
     /**
      * progress through the 'game start' countdown
+     * the room's host must send countdown requests in order to progress it
+     * TODO: maybe do the countdown without depending on the room's host
      * @param hostNextNum the host's next countdown number
      */
-    public progressCountdown(hostNextNum: number): void {
+    public progressCountdown(hostNextNum: number): number {
+        this.countingDown = true
+
         if (this.countdown > defaultCountdownNum
             || this.countdown < 0) {
-            throw new Error('Room: the saved countdown is invalid!')
+            console.warn('Room: the saved countdown is invalid!')
+            this.countdown = 0
         }
 
         if (this.countdown !== hostNextNum) {
-            throw new Error('Room: host\'s countdown does not match ours')
+            console.warn('Room: host\'s countdown does not match ours')
         }
 
-        this.countdown--
+        return this.countdown--
     }
 
     public getCountdown(): number {
@@ -458,14 +465,14 @@ export class Room {
      * @returns true if it's in progress, false if not
      */
     public isCountdownInProgress(): boolean {
-        return this.countdown < defaultCountdownNum
-            && this.countdown > 0
+        return this.countingDown
     }
 
     /**
      * stops and resets the 'game start' countdown
      */
     public stopCountdown(): void {
+        this.countingDown = false
         this.countdown = defaultCountdownNum
     }
 
