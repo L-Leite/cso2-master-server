@@ -374,6 +374,9 @@ export class ChannelManager {
             return false
         }
 
+        // reset countdown for a next match
+        currentRoom.stopCountdown()
+
         // tell the ready users to join the host
         for (const guest of currentRoom.users) {
             // 'user' is the host, don't tell it to join itself
