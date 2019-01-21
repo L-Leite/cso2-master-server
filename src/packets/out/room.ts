@@ -9,6 +9,7 @@ import { User } from 'user/user'
 
 import { OutRoomCountdown } from 'packets/out/room/countdown'
 import { OutRoomCreateAndJoin } from 'packets/out/room/createandjoin'
+import { OutRoomGameResult } from 'packets/out/room/gameresult'
 import { OutRoomPlayerJoin } from 'packets/out/room/playerjoin'
 import { OutRoomPlayerLeave } from 'packets/out/room/playerleave'
 import { OutRoomPlayerReady } from 'packets/out/room/playerready'
@@ -23,6 +24,7 @@ enum OutRoomPacketType {
     SetPlayerReady = 3,
     UpdateSettings = 4,
     SetHost = 5,
+    SetGameResult = 6,
     setUserTeam = 7,
     Countdown = 14,
 }
@@ -121,6 +123,21 @@ export class OutRoomPacket extends OutPacketBase {
         this.writeUInt8(OutRoomPacketType.SetHost)
 
         new OutRoomSetHost(user.userId).build(this)
+
+        const res: Buffer = this.outStream.getContents()
+        OutPacketBase.setPacketLength(res)
+
+        return res
+    }
+
+    public SetGameResult(): Buffer {
+        this.outStream = new WritableStreamBuffer(
+            { initialSize: 30, incrementAmount: 15 })
+
+        this.buildHeader()
+        this.writeUInt8(OutRoomPacketType.SetGameResult)
+
+        new OutRoomGameResult().build(this)
 
         const res: Buffer = this.outStream.getContents()
         OutPacketBase.setPacketLength(res)
