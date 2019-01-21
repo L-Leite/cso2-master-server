@@ -1,6 +1,6 @@
 {
   "name": "cso2-master-server",
-  "version": "0.5.4",
+  "version": "0.6.0",
   "repository": "github:Ochii/cso2-master-server",
   "description": "A master server for Nexon's Counter-Strike: Online 2",
   "author": "Luís Leite",
