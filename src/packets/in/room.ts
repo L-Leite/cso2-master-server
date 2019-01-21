@@ -13,6 +13,7 @@ enum InRoomType {
     ToggleReadyRequest = 4,
     GameStartRequest = 5,
     UpdateSettings = 6,
+    OnCloseResultWindow = 7,
     SetUserTeamRequest = 9,
     GameStartCountdownRequest = 19,
 }
@@ -70,6 +71,10 @@ export class InRoomPacket extends InPacketBase {
      */
     public isUpdateSettings(): boolean {
         return this.packetType === InRoomType.UpdateSettings
+    }
+
+    public hasClosedResultWindow(): boolean {
+        return this.packetType === InRoomType.OnCloseResultWindow
     }
 
     /**

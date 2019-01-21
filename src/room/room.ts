@@ -1,8 +1,11 @@
 import { Channel } from 'channel/channel'
 import { User } from 'user/user'
 
+import { ExtendedSocket } from 'extendedsocket'
+
 import { RoomSettings } from 'room/roomsettings'
 
+import { OutHostPacket } from 'packets/out/host';
 import { OutRoomPacket } from 'packets/out/room'
 
 export enum RoomTeamNum {
@@ -522,6 +525,19 @@ export class Room {
         }
 
         return true
+    }
+
+    public setGameEnd(): void {
+        // TODO: set game end to ingame users only
+        for (const user of this.users) {
+            const userSocket: ExtendedSocket = user.socket
+            const stopReply: Buffer =
+                new OutHostPacket(userSocket.getSeq()).hostStop()
+            userSocket.send(stopReply)
+            const resultReply: Buffer =
+                new OutRoomPacket(userSocket.getSeq()).SetGameResult()
+            userSocket.send(resultReply)
+        }
     }
 
     /**

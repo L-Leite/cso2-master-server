@@ -9,7 +9,7 @@ import { InLoginPacket } from 'packets/in/login'
 import { InUdpPacket } from 'packets/in/udp'
 import { InVersionPacket } from 'packets/in/version'
 
-import { InHostPacket } from 'packets/in/host'
+import { HostPacketType, InHostPacket } from 'packets/in/host'
 import { OutHostPacket } from 'packets/out/host';
 import { OutUserInfoPacket } from 'packets/out/userinfo'
 import { OutUserStartPacket } from 'packets/out/userstart'
@@ -83,13 +83,37 @@ export class UserManager {
                 sourceSocket.uuid)
         }
 
-        // TODO: implement other host packet types
-        if (hostPacket.isPreloadInventory() === false) {
-            console.warn('UserManager::onHostPacket: unknown host packet type %i',
-                hostPacket.packetType)
+        switch (hostPacket.packetType) {
+            case HostPacketType.OnGameEnd:
+                return this.onHostGameEnd(user)
+            case HostPacketType.PreloadInventory:
+                return this.onHostPreloadInventory(hostPacket, user)
+        }
+
+        console.warn('UserManager::onHostPacket: unknown host packet type %i',
+            hostPacket.packetType)
+
+        return false
+    }
+
+    public onHostGameEnd(user: User): boolean {
+        const currentRoom: Room = user.currentRoom
+
+        if (currentRoom == null) {
+            console.warn('User %s sent an host entity num packet without being in a room',
+                user.userName)
             return false
         }
 
+        console.log('Ending game for room "%s" (room id %i)',
+            currentRoom.settings.roomName, currentRoom.id)
+
+        currentRoom.setGameEnd()
+
+        return true
+    }
+
+    public onHostPreloadInventory(hostPacket: InHostPacket, user: User): boolean {
         const currentRoom: Room = user.currentRoom
 
         if (currentRoom == null) {

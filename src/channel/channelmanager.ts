@@ -79,6 +79,8 @@ export class ChannelManager {
             return this.onToggleReadyRequest(reqPacket, sourceSocket, user)
         } else if (reqPacket.isUpdateSettings()) {
             return this.onRoomUpdateSettings(reqPacket, sourceSocket, user)
+        } else if (reqPacket.hasClosedResultWindow()) {
+            return this.onCloseResultRequest(sourceSocket, user)
         } else if (reqPacket.isSetUserTeamRequest()) {
             return this.onSetTeamRequest(reqPacket, sourceSocket, user)
         } else if (reqPacket.isGameStartCountdownRequest()) {
@@ -458,6 +460,30 @@ export class ChannelManager {
 
         const reply: Buffer = new OutRoomPacket(user.socket.getSeq()).updateSettings(newSettings)
         user.socket.send(reply)
+    }
+
+    /**
+     * called when the user requests to update its current room settings
+     * @param reqPacket the parsed Room packet
+     * @param sourceSocket the user's socket
+     * @param user the user itself
+     * @returns true if successful
+     */
+    private onCloseResultRequest(sourceSocket: ExtendedSocket, user: User): boolean {
+        const currentRoom: Room = user.currentRoom
+
+        if (currentRoom == null) {
+            console.warn('user "%s" tried to close game result window, although it isn\'t in any', user.userName)
+            return false
+        }
+
+        console.log('user "%s" closed game result window from room "%s"\'s (room id: %i)',
+            user.userName, currentRoom.settings.roomName, currentRoom.id)
+
+        const reply: Buffer = new OutHostPacket(sourceSocket.getSeq()).leaveResultWindow()
+        sourceSocket.send(reply)
+
+        return true
     }
 
     /**
