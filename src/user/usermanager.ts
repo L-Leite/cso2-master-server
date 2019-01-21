@@ -10,7 +10,7 @@ import { InUdpPacket } from 'packets/in/udp'
 import { InVersionPacket } from 'packets/in/version'
 
 import { HostPacketType, InHostPacket } from 'packets/in/host'
-import { OutHostPacket } from 'packets/out/host';
+import { OutHostPacket } from 'packets/out/host'
 import { OutUserInfoPacket } from 'packets/out/userinfo'
 import { OutUserStartPacket } from 'packets/out/userstart'
 import { OutVersionPacket } from 'packets/out/version'
@@ -24,7 +24,7 @@ export class UserManager {
 
     constructor() {
         this.users = []
-        this.nextUserId = 2
+        this.nextUserId = 1
     }
 
     /**
