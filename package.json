@@ -16,7 +16,7 @@
   "dependencies": {
     "app-module-path": "^2.2.0",
     "commander": "^2.19.0",
-    "hexy": "^0.2.11",
+    "hexy": "^0.3.0",
     "int64-buffer": "^0.99.1007",
     "ip": "^1.1.5",
     "stream-buffers": "^3.0.2",
@@ -29,6 +29,6 @@
     "@types/uuid": "^3.4.4",
     "ts-node": "^7.0.1",
     "tslint": "^5.12.1",
-    "typescript": "^3.2.2"
+    "typescript": "^3.2.4"
   }
 }
