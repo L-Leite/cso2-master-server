@@ -6,7 +6,6 @@ import { User } from 'user/user'
 import { ChannelManager } from 'channel/channelmanager'
 
 import { InLoginPacket } from 'packets/in/login'
-import { InUdpPacket } from 'packets/in/udp'
 import { InVersionPacket } from 'packets/in/version'
 
 import { HostPacketType, InHostPacket } from 'packets/in/host'
@@ -134,41 +133,6 @@ export class UserManager {
             new OutHostPacket(hostSocket.getSeq()).preloadInventory(newEntityNum)
 
         hostSocket.send(reply)
-
-        return true
-    }
-
-    /**
-     * receives the client's udp holepunch information
-     * @param udpData the udp's packet data
-     * @param sourceSocket the client's socket
-     */
-    public onUdpPacket(udpData: Buffer, sourceSocket: ExtendedSocket): boolean {
-        const udpPacket: InUdpPacket = new InUdpPacket(udpData)
-        console.log('udp data from ' + sourceSocket.uuid +
-            ': ip: ' + udpPacket.ip + 'port:' + udpPacket.port)
-
-        const user: User = this.getUserByUuid(sourceSocket.uuid)
-
-        if (user == null) {
-            console.warn('bad holepunch user, uuid: ' + sourceSocket.uuid)
-            return false
-        }
-
-        if (udpPacket.isHeartbeat()) {
-            console.log('UDP heartbeat from %s (%s)', user.userName, sourceSocket.uuid)
-            return true
-        }
-
-        // cso2's client subtracts 0x8080000 from the ip (128 from the first two bytes)
-        // this might bug out if one of the two bytes of the ip are less than 128
-        // requires testing
-        // UPDATE: the IPs no longer get subtracted?
-        // const convertedIp = ip.toLong(udpPacket.ip)
-        // convertedIp += 0x80800000
-
-        user.externalIpAddress = udpPacket.ip
-        user.port = udpPacket.port
 
         return true
     }
