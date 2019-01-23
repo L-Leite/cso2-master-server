@@ -524,11 +524,11 @@ export class Room {
             case RoomGamemode.zombie_commander:
             case RoomGamemode.zombie_prop:
             case RoomGamemode.zombie_zeta:
-            case RoomGamemode.z_scenario_side:
                 if (this.getNumOfReadyRealPlayers() < 2) {
                     return false
                 }
                 break
+            case RoomGamemode.z_scenario_side:
             case RoomGamemode.endless_wave:
             case RoomGamemode.play_ground:
             case RoomGamemode.practice:
