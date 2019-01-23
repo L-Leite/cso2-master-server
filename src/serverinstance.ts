@@ -175,6 +175,11 @@ export class ServerInstance {
     private onHolepunchMessage(msg: Buffer, rinfo: net.AddressInfo): void {
         const packet: InHolepunchPacketUdp = new InHolepunchPacketUdp(msg)
 
+        if (packet.isParsed() === false) {
+            console.warn('%s sent a bad holepunch packet', rinfo.address)
+            return
+        }
+
         if (packet.portId == null) {
             return
         }
@@ -195,9 +200,8 @@ export class ServerInstance {
 
         user.localIpAddress = packet.ipAddress
         user.externalIpAddress = rinfo.address
-        // user.port = packet.port
-        const reply: Buffer = new OutHolepunchPacketUdp(portIndex).build()
 
+        const reply: Buffer = new OutHolepunchPacketUdp(portIndex).build()
         this.holepunchServer.send(reply, packet.port, packet.ipAddress)
     }
 
@@ -251,7 +255,7 @@ export class ServerInstance {
             case PacketId.Version:
                 return this.users.onVersionPacket(packet.getData(), sourceSocket)
             case PacketId.Login:
-                return this.users.onLoginPacket(packet.getData(), sourceSocket, this.channels)
+                return this.users.onLoginPacket(packet.getData(), sourceSocket, this.channels, this.holepunchPort)
             case PacketId.RequestChannels:
                 return this.channels.onChannelListPacket(sourceSocket, this.users)
             case PacketId.RequestRoomList:

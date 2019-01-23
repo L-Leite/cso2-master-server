@@ -1,11 +1,14 @@
 import { WritableStreamBuffer } from 'stream-buffers'
 
-import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
+
+import { PacketId } from 'packets/definitions'
 import { PacketString } from 'packets/packetstring'
 
+import { ExtendedSocket } from 'extendedsocket'
+
 /**
- * outgoing userstart packet
+ * sends out the result of a login attempt
  * Structure:
  * [base packet]
  * [userId - 4 bytes]
@@ -20,17 +23,16 @@ export class OutUserStartPacket extends OutPacketBase {
     private loginName: PacketString
     private userName: PacketString
     private unk00: number
-    private serverUdpPort: number
-    constructor(userId: number, loginName: string, userName: string, seq: number) {
-        super()
-        this.sequence = seq
-        this.id = PacketId.UserStart
+    private holepunchPort: number
+    constructor(userId: number, loginName: string, userName: string,
+                holepunchPort: number, socket: ExtendedSocket) {
+        super(socket, PacketId.UserStart)
 
         this.userId = userId
         this.loginName = new PacketString(loginName)
         this.userName = new PacketString(userName)
         this.unk00 = 1
-        this.serverUdpPort = 30002
+        this.holepunchPort = holepunchPort
     }
 
     /**
@@ -45,11 +47,8 @@ export class OutUserStartPacket extends OutPacketBase {
         this.writeString(this.loginName)
         this.writeString(this.userName)
         this.writeUInt8(this.unk00)
-        this.writeUInt16(this.serverUdpPort)
+        this.writeUInt16(this.holepunchPort)
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 }

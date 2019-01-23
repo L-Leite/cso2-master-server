@@ -3,7 +3,7 @@ import { OutPacketBase } from 'packets/out/packet'
 import { RoomCountdownType } from 'packets/in/room/countdown'
 
 /**
- * Sub structure of Room packet
+ * sends the current countdown status to the user
  * @class OutRoomCountdown
  */
 export class OutRoomCountdown {

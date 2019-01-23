@@ -6,6 +6,10 @@ import { Room } from 'room/room'
 
 import { OutPacketBase } from 'packets/out/packet'
 
+/**
+ * shared room structure, used by room list
+ * @class RoomListRoomData
+ */
 export class RoomListRoomData {
     private id: number
     private flags: Uint64LE

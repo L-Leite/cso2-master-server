@@ -1,5 +1,8 @@
-import { UdpPacketSignature } from 'packets/holepunch/inholepunch'
+import { UdpPacketSignature } from 'packets/holepunchbaseshared'
 
+/**
+ * sends out an acknowledgement holepunch packet to the user
+ */
 export class OutHolepunchPacketUdp {
     private portId: number
 

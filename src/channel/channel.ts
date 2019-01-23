@@ -2,9 +2,6 @@ import { IRoomOptions, Room } from 'room/room'
 
 import { User } from 'user/user'
 
-import { OutLobbyPacket } from 'packets/out/lobby'
-import { OutRoomListPacket } from 'packets/out/roomlist'
-
 /**
  * stores and processes channel data
  * @class Channel
@@ -32,17 +29,6 @@ export class Channel {
     }
 
     /**
-     * build a room list packet for the user
-     * @param seq the packet's sequence number
-     * @returns the packet
-     */
-    public buildRoomListPacket(seq: number): Buffer {
-        const lobbyPacket: Buffer = new OutLobbyPacket(seq).joinRoom()
-        const listPacket: Buffer = new OutRoomListPacket(seq).getFullList(this.rooms)
-        return Buffer.concat([lobbyPacket, listPacket])
-    }
-
-    /**
      * get an existing room by its id
      * @param id the desired room's id
      * @returns the room's object if found, otherwise null
@@ -63,8 +49,8 @@ export class Channel {
      * @returns the created room
      */
     public createRoom(host: User, options?: IRoomOptions): Room {
-        this.rooms.push(
-            new Room(this.nextRoomId++, host, this, Channel.onEmptyRoomCallback, options))
+        const newRoom: Room = new Room(this.nextRoomId++, host, this, Channel.onEmptyRoomCallback, options)
+        this.rooms.push(newRoom)
         return this.rooms[this.rooms.length - 1]
     }
 

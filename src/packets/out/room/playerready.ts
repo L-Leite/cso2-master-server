@@ -3,7 +3,7 @@ import { OutPacketBase } from 'packets/out/packet'
 import { RoomReadyStatus } from 'room/room'
 
 /**
- * Sub structure of Room packet
+ * sends the ready status of an user
  * @class OutRoomPlayerReady
  */
 export class OutRoomPlayerReady {

@@ -6,8 +6,7 @@ import { PacketString } from 'packets/packetstring'
 import { User } from 'user/user'
 
 /**
- * Sub structure of UserInfo packet
- * Stores full information about an user
+ * sends out an user's data
  * @class UserInfoFullUpdate
  */
 export class UserInfoFullUpdate {

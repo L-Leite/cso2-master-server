@@ -3,8 +3,8 @@ import { OutPacketBase } from 'packets/out/packet'
 import { User } from 'user/user'
 
 /**
- * Sub structure of Room packet
- * It's capable of changing multiple users team at once,
+ * sends out a new user's team
+ * it's capable of changing multiple users team at once,
  * but it's only changing one user at a time for now
  * @class OutRoomSetUserTeam
  */

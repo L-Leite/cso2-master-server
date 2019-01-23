@@ -5,10 +5,13 @@ import { User } from 'user/user'
 
 import { ChannelManager } from 'channel/channelmanager'
 
+import { HostPacketType } from 'packets/hostshared'
+
+import { InHostPacket } from 'packets/in/host'
+import { InHostPreloadInventory } from 'packets/in/host/preloadinventory'
 import { InLoginPacket } from 'packets/in/login'
 import { InVersionPacket } from 'packets/in/version'
 
-import { HostPacketType, InHostPacket } from 'packets/in/host'
 import { OutHostPacket } from 'packets/out/host'
 import { OutUserInfoPacket } from 'packets/out/userinfo'
 import { OutUserStartPacket } from 'packets/out/userstart'
@@ -33,36 +36,23 @@ export class UserManager {
      * @param server the instance to the server
      */
     public onLoginPacket(loginData: Buffer, sourceSocket: ExtendedSocket,
-                         channels: ChannelManager): boolean {
+                         channels: ChannelManager, holepunchPort: number): boolean {
         const loginPacket: InLoginPacket = new InLoginPacket(loginData)
 
         const newUser: User = this.loginUser(loginPacket.gameUsername,
             loginPacket.password, sourceSocket)
 
         if (newUser == null) {
-            console.warn('login failed for user ' + loginPacket.gameUsername
-                + ' uuid: ' + sourceSocket.uuid)
+            console.warn('login failed for user %s (uuid: %s)',
+                loginPacket.gameUsername, sourceSocket.uuid)
             return false
         }
 
-        console.log('user ' + loginPacket.gameUsername
-            + ' logged in, uuid: ' + sourceSocket.uuid)
+        console.log('user %s logged in (uuid: %s)',
+            loginPacket.gameUsername, sourceSocket.uuid)
 
-        const userStartReply: Buffer = new OutUserStartPacket(
-            newUser.userId,
-            loginPacket.gameUsername,
-            loginPacket.gameUsername,
-            sourceSocket.getSeq()).build()
-
-        const userInfoReply: Buffer =
-            new OutUserInfoPacket(sourceSocket.getSeq()).fullUserUpdate(newUser)
-
-        const serverListReply: Buffer =
-            channels.buildServerListPacket(sourceSocket.getSeq())
-
-        sourceSocket.send(userStartReply)
-        sourceSocket.send(userInfoReply)
-        sourceSocket.send(serverListReply)
+        this.sendUserInfoTo(newUser, holepunchPort)
+        channels.sendChannelListTo(newUser)
 
         return true
     }
@@ -78,15 +68,15 @@ export class UserManager {
         const user: User = this.getUserByUuid(sourceSocket.uuid)
 
         if (user == null) {
-            console.warn('Socket %s sent a host packet, but isn\'t logged in',
-                sourceSocket.uuid)
+            console.warn('Socket %s sent a host packet, but isn\'t logged in', sourceSocket.uuid)
         }
 
         switch (hostPacket.packetType) {
             case HostPacketType.OnGameEnd:
                 return this.onHostGameEnd(user)
             case HostPacketType.PreloadInventory:
-                return this.onHostPreloadInventory(hostPacket, user)
+                const preloadData: InHostPreloadInventory = new InHostPreloadInventory(hostPacket)
+                return this.onHostPreloadInventory(preloadData, user)
         }
 
         console.warn('UserManager::onHostPacket: unknown host packet type %i',
@@ -112,7 +102,7 @@ export class UserManager {
         return true
     }
 
-    public onHostPreloadInventory(hostPacket: InHostPacket, user: User): boolean {
+    public onHostPreloadInventory(preloadData: InHostPreloadInventory, user: User): boolean {
         const currentRoom: Room = user.currentRoom
 
         if (currentRoom == null) {
@@ -121,18 +111,13 @@ export class UserManager {
             return false
         }
 
-        const newEntityNum: number = hostPacket.preloadInventory.entityNum
-        const hostSocket: ExtendedSocket = currentRoom.host.socket
+        const newEntityNum: number = preloadData.entityNum
+
+        currentRoom.setUserEntityNum(user, newEntityNum)
+        this.sendPreloadInventoryTo(user, newEntityNum)
 
         console.log('Setting user "%s"\'s entity num as %i in room %s',
             user.userName, newEntityNum, currentRoom.settings.roomName)
-
-        currentRoom.setUserEntityNum(user, newEntityNum)
-
-        const reply: Buffer =
-            new OutHostPacket(hostSocket.getSeq()).preloadInventory(newEntityNum)
-
-        hostSocket.send(reply)
 
         return true
     }
@@ -144,7 +129,7 @@ export class UserManager {
 
         // i think the client ignores the hash string
         const versionReply: Buffer = new OutVersionPacket(
-            false, '6246015df9a7d1f7311f888e7e861f18', sourceSocket.getSeq()).build()
+            false, '6246015df9a7d1f7311f888e7e861f18', sourceSocket).build()
 
         sourceSocket.send(versionReply)
 
@@ -208,7 +193,37 @@ export class UserManager {
         }
     }
 
-    private cleanUpUser(user: User) {
+    /**
+     * send an user's info to itself
+     * @param user the target user
+     */
+    private sendUserInfoTo(user: User, holepunchPort: number): void {
+        const userStartReply: Buffer = new OutUserStartPacket(
+            user.userId, user.userName, user.userName, holepunchPort, user.socket).build()
+
+        const userInfoReply: Buffer =
+            new OutUserInfoPacket(user.socket).fullUserUpdate(user)
+
+        user.socket.send(userStartReply)
+        user.socket.send(userInfoReply)
+    }
+
+    /**
+     * send the user an entity's info
+     * @param user the target user
+     */
+    private sendPreloadInventoryTo(user: User, entityNum: number): void {
+        const reply: Buffer =
+            new OutHostPacket(user.socket).preloadInventory(entityNum)
+
+        user.socket.send(reply)
+    }
+
+    /**
+     * if the user was in a room, tell it that the user has logged disconnected
+     * @param user the target user
+     */
+    private cleanUpUser(user: User): void {
         if (user.currentRoom) {
             user.currentRoom.removeUser(user)
         }

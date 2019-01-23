@@ -1,7 +1,7 @@
 import { InPacketBase } from 'packets/in/packet'
 
 /**
- * Sub structure of Room packet
+ * incoming user request to create a new room
  * @class InRoomNewRequest
  */
 export class InRoomNewRequest {

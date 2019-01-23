@@ -1,7 +1,7 @@
 import { OutPacketBase } from 'packets/out/packet'
 
 /**
- * Sub structure of Room packet
+ * sends out who's the new host of a room
  * @class OutRoomSetHost
  */
 export class OutRoomSetHost {

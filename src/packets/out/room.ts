@@ -17,6 +17,8 @@ import { OutRoomSetHost } from 'packets/out/room/sethost'
 import { OutRoomSetUserTeam } from 'packets/out/room/setuserteam'
 import { OutRoomUpdateSettings } from 'packets/out/room/updatesettings'
 
+import { ExtendedSocket } from 'extendedsocket'
+
 enum OutRoomPacketType {
     CreateAndJoin = 0,
     PlayerJoin = 1,
@@ -34,25 +36,20 @@ enum OutRoomPacketType {
  * @class OutRoomPacket
  */
 export class OutRoomPacket extends OutPacketBase {
-    constructor(seq: number) {
-        super()
-        this.sequence = seq
-        this.id = PacketId.Room
+    constructor(socket: ExtendedSocket) {
+        super(socket, PacketId.Room)
     }
 
     public createAndJoin(roomInfo: Room): Buffer {
         this.outStream = new WritableStreamBuffer(
-            { initialSize: 100, incrementAmount: 20 })
+            { initialSize: 200, incrementAmount: 20 })
 
         this.buildHeader()
         this.writeUInt8(OutRoomPacketType.CreateAndJoin)
 
         new OutRoomCreateAndJoin(roomInfo).build(this)
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 
     public playerJoin(user: User, teamNum: RoomTeamNum): Buffer {
@@ -64,10 +61,7 @@ export class OutRoomPacket extends OutPacketBase {
 
         new OutRoomPlayerJoin(user, teamNum).build(this)
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 
     public playerLeave(userId: number): Buffer {
@@ -79,10 +73,7 @@ export class OutRoomPacket extends OutPacketBase {
 
         new OutRoomPlayerLeave(userId).build(this)
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 
     public setUserReadyStatus(user: User, readyStatus: RoomReadyStatus): Buffer {
@@ -94,10 +85,7 @@ export class OutRoomPacket extends OutPacketBase {
 
         new OutRoomPlayerReady(user.userId, readyStatus).build(this)
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 
     public updateSettings(newSettings: NewRoomSettings): Buffer {
@@ -109,10 +97,7 @@ export class OutRoomPacket extends OutPacketBase {
 
         new OutRoomUpdateSettings(newSettings).build(this)
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 
     public setHost(user: User): Buffer {
@@ -124,13 +109,10 @@ export class OutRoomPacket extends OutPacketBase {
 
         new OutRoomSetHost(user.userId).build(this)
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 
-    public SetGameResult(): Buffer {
+    public setGameResult(): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 30, incrementAmount: 15 })
 
@@ -139,10 +121,7 @@ export class OutRoomPacket extends OutPacketBase {
 
         new OutRoomGameResult().build(this)
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 
     public progressCountdown(countdown: number): Buffer {
@@ -154,10 +133,7 @@ export class OutRoomPacket extends OutPacketBase {
 
         new OutRoomCountdown(true, countdown).build(this)
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 
     public stopCountdown(): Buffer {
@@ -169,10 +145,7 @@ export class OutRoomPacket extends OutPacketBase {
 
         new OutRoomCountdown(false).build(this)
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 
     public setUserTeam(user: User, teamNum: number): Buffer {
@@ -184,9 +157,6 @@ export class OutRoomPacket extends OutPacketBase {
 
         new OutRoomSetUserTeam(user, teamNum).build(this)
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 }

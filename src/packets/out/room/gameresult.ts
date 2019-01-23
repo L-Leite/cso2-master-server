@@ -4,7 +4,7 @@ import { Uint64LE } from 'int64-buffer'
 import { PacketString } from 'packets/packetstring'
 
 /**
- * Sub structure of Room packet
+ * sends an user the match's end result
  * @class OutRoomGameResult
  */
 export class OutRoomGameResult {

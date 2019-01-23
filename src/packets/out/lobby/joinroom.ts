@@ -1,7 +1,7 @@
 import { OutPacketBase } from 'packets/out/packet'
 
 /**
- * Sub structure of Lobby packet
+ * something needed to go with the joinroom info
  * @class LobbyJoinRoom
  */
 export class LobbyJoinRoom {

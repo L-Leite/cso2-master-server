@@ -4,8 +4,7 @@ import { PacketString } from 'packets/packetstring'
 import { Channel } from 'channel/channel'
 
 /**
- * Sub structure of ServerList sub structure
- * Has information about a server channel
+ * sends out a channel info to an user
  * @class ServerListChannelInfo
  */
 export class ServerListChannelInfo {

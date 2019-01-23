@@ -7,8 +7,7 @@ import { User } from 'user/user'
 import { RoomTeamNum } from 'room/room'
 
 /**
- * Sub structure of Room packet
- * Stores network related info about an user
+ * shared room user structure
  * @class OutRoomPlayerNetInfo
  */
 export class OutRoomPlayerNetInfo {

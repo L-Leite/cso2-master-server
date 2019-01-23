@@ -2,6 +2,7 @@ import net from 'net'
 
 import { PacketLogger } from 'packetlogger'
 
+const MIN_SEQUENCE: number = 1
 const MAX_SEQUENCE: number = 255
 
 /**
@@ -25,7 +26,7 @@ export class ExtendedSocket extends net.Socket {
     /**
      * returns the current sequence and increments it
      */
-    public getSeq(): number {
+    public getNextSeq(): number {
         // don't overflow the sequence
         if (this.seq > MAX_SEQUENCE) {
             this.resetReq()
@@ -35,16 +36,17 @@ export class ExtendedSocket extends net.Socket {
     }
 
     /**
-     * get the current sequence for the packet logger
-     * TODO: find a better way to do this
+     * get the current sequence
      */
-    public loggerGetSeq(): number {
+    public getCurSeq(): number {
         return this.seq
     }
 
-    /** sets the sequence to the start */
+    /**
+     * sets the sequence to the start
+     */
     public resetReq(): void {
-        this.seq = 1
+        this.seq = MIN_SEQUENCE
     }
 
     /**

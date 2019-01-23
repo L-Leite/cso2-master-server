@@ -3,7 +3,7 @@ import { InPacketBase } from 'packets/in/packet'
 import { RoomTeamNum } from 'room/room'
 
 /**
- * Sub structure of Room packet
+ * request of an user to change team
  * @class InRoomSetUserTeamRequest
  */
 export class InRoomSetUserTeamRequest {

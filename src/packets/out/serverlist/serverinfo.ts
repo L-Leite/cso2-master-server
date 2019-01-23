@@ -1,14 +1,12 @@
 import { OutPacketBase } from 'packets/out/packet'
 import { PacketString } from 'packets/packetstring'
 
-import { Channel } from 'channel/channel'
 import { ChannelServer } from 'channel/channelserver'
 
 import { ServerListChannelInfo } from 'packets/out/serverlist/channelinfo'
 
 /**
- * Sub structure of ServerList packet
- * Has information about a server and its channels
+ * sends out a channel server data to an user
  * @class ServerListServerInfo
  */
 export class ServerListServerInfo {

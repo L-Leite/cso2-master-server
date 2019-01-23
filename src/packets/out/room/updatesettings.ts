@@ -5,7 +5,7 @@ import { OutPacketBase } from 'packets/out/packet'
 import { NewRoomSettings } from 'room/newroomsettings'
 
 /**
- * Sub structure of Room packet
+ * sends out any updated room's settings
  * @class OutRoomUpdateSettings
  */
 export class OutRoomUpdateSettings {

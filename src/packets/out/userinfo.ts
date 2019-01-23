@@ -7,29 +7,26 @@ import { User } from 'user/user'
 
 import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 
+import { ExtendedSocket } from 'extendedsocket'
+
 /**
  * outgoing userinfo packet
  * @class OutUserInfoPacket
  */
 export class OutUserInfoPacket extends OutPacketBase {
-    constructor(seq: number) {
-        super()
-        this.sequence = seq
-        this.id = PacketId.UserInfo
+    constructor(socket: ExtendedSocket) {
+        super(socket, PacketId.UserInfo)
     }
 
     public fullUserUpdate(user: User): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 100, incrementAmount: 20 })
-        const fullUpdate: UserInfoFullUpdate = new UserInfoFullUpdate(user)
 
         this.buildHeader()
         this.writeUInt32(user.userId)
-        fullUpdate.build(this)
 
-        const resBuffer: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(resBuffer)
+        new UserInfoFullUpdate(user).build(this)
 
-        return resBuffer
+        return this.getData()
     }
 }

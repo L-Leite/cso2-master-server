@@ -18,10 +18,15 @@ program
   .option('-l, --log-packets', 'Log the incoming and outgoing packets')
   .parse(process.argv)
 
+/**
+ * the entry point of the server
+ */
 async function startServer() {
   let desiredIp: string = null
 
   // prefer the ip address argument over asking the user for it
+  // if it's wrong, the user will get an error when binding it later
+  // should that be validated in here?
   if (program.ipAddress) {
     desiredIp = program.ipAddress
   } else {

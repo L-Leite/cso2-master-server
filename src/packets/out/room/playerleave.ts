@@ -1,7 +1,7 @@
 import { OutPacketBase } from 'packets/out/packet'
 
 /**
- * Sub structure of Room packet
+ * tells a room's users that someone left the room
  * @class OutRoomPlayerLeave
  */
 export class OutRoomPlayerLeave {

@@ -1,6 +1,7 @@
 import { Int64BE, Int64LE, Uint64BE, Uint64LE } from 'int64-buffer'
 
-import { PacketId, PacketSignature } from 'packets/definitions'
+import { PacketBaseShared } from 'packets/packetbaseshared'
+
 import { PacketLongString } from 'packets/packetlongstring'
 import { PacketString } from 'packets/packetstring'
 
@@ -14,37 +15,41 @@ import { PacketString } from 'packets/packetstring'
  *                 of the base packet
  * @class InPacketBase
  */
-export class InPacketBase {
-    public static headerLength: number = 4
-    // start of the packet structure
-    public signature: number
-    public sequence: number
-    public length: number
-    public id: PacketId
-    // end of the packet structure
+export class InPacketBase extends PacketBaseShared {
+    // the received packet's data
     protected packetData: Buffer
-    // the current offset to the buffer
+    // the current offset to the buffer packetData
     private curOffset: number
+    // was the packet processed sucessfully?
+    private parsedSuccessfully: boolean
 
     constructor(data: Buffer) {
+        super()
         this.packetData = data
         this.curOffset = 0
-        this.parse()
+
+        try {
+            this.parse()
+            this.parsedSuccessfully = true
+        } catch (error) {
+            console.warn('Error parsing packet: %s', error)
+            this.parsedSuccessfully = false
+        }
     }
 
     /**
-     * is the packet signature good?
-     * @returns true if yes, otherwise false
+     * @returns the packet's data
      */
-    public isValid(): boolean {
-        return this.signature === PacketSignature
-    }
-
-    /**
-     * returns the packet's data
-     */
-    public getData() {
+    public getData(): Buffer {
         return this.packetData
+    }
+
+    /**
+     * was the packet parsed succesfully?
+     * @returns true if so, false if not
+     */
+    public isParsed(): boolean {
+        return this.parsedSuccessfully
     }
 
     /**
@@ -165,7 +170,6 @@ export class InPacketBase {
      * @returns the read bytes
      */
     public readString(): string {
-        // let's make sure that the size is present
         if (this.canReadBytes(1) === false) {
             throw new Error('Data buffer is too small')
         }
@@ -182,7 +186,6 @@ export class InPacketBase {
      * @returns the read bytes
      */
     public readLongString(): string {
-        // let's make sure that the size is present
         if (this.canReadBytes(2) === false) {
             throw new Error('Data buffer is too small')
         }
@@ -215,8 +218,7 @@ export class InPacketBase {
         this.signature = this.readUInt8()
 
         if (this.isValid() === false) {
-            // throw new Error('This is not a packet')
-            console.warn('This is not a packet')
+            throw new Error('This is not a packet. Signature: ' + this.signature)
         }
 
         this.sequence = this.readUInt8()

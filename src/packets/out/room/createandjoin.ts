@@ -3,15 +3,14 @@ import { Uint64LE } from 'int64-buffer'
 import { OutPacketBase } from 'packets/out/packet'
 import { PacketString } from 'packets/packetstring'
 
-import { Room, RoomTeamNum } from 'room/room'
+import { Room } from 'room/room'
 import { User } from 'user/user'
 
 import { OutRoomPlayerNetInfo } from 'packets/out/room/playernetinfo'
 import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 
 /**
- * Sub structure of Room packet
- * Stores information used to create a new room
+ * sends the newly created room information to an user
  * @class OutRoomCreateAndJoin
  */
 export class OutRoomCreateAndJoin {

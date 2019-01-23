@@ -1,8 +1,7 @@
 import { OutPacketBase } from 'packets/out/packet'
 
 /**
- * Sub structure of Host packet
- * Stores information to start a room's match
+ * tells a host to start a match
  * @class OutHostGameStart
  */
 export class OutHostGameStart {

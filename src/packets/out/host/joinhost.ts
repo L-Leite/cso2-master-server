@@ -3,8 +3,7 @@ import { Uint64LE } from 'int64-buffer'
 import { OutPacketBase } from 'packets/out/packet'
 
 /**
- * Sub structure of Host packet
- * joins a host's match
+ * tells an user to join a host's match
  * @class OutHostJoinHost
  */
 export class OutHostJoinHost {

@@ -7,6 +7,8 @@ import { ChannelServer } from 'channel/channelserver'
 
 import { ServerListServerInfo } from 'packets/out/serverlist/serverinfo'
 
+import { ExtendedSocket } from 'extendedsocket'
+
 /**
  * outgoing userstart packet
  * Structure:
@@ -21,10 +23,8 @@ import { ServerListServerInfo } from 'packets/out/serverlist/serverinfo'
 export class OutServerListPacket extends OutPacketBase {
     private serverNum: number
     private servers: ServerListServerInfo[]
-    constructor(seq: number, channelServers: ChannelServer[]) {
-        super()
-        this.sequence = seq
-        this.id = PacketId.ServerList
+    constructor(channelServers: ChannelServer[], socket: ExtendedSocket) {
+        super(socket, PacketId.ServerList)
 
         this.serverNum = channelServers.length
         this.servers = []
@@ -38,7 +38,7 @@ export class OutServerListPacket extends OutPacketBase {
      */
     public build(): Buffer {
         this.outStream = new WritableStreamBuffer(
-            { initialSize: 20, incrementAmount: 4 })
+            { initialSize: 60, incrementAmount: 12 })
 
         this.buildHeader()
         this.writeUInt8(this.serverNum)
@@ -46,9 +46,6 @@ export class OutServerListPacket extends OutPacketBase {
             server.build(this)
         }
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 }

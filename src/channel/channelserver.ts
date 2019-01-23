@@ -1,8 +1,5 @@
 import { Channel } from 'channel/channel'
 
-import { ExtendedSocket } from 'extendedsocket'
-import { ServerInstance } from 'serverinstance'
-
 /**
  * Represents a channel "server"
  * Stores its name and a list of channels

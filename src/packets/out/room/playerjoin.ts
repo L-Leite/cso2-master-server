@@ -8,8 +8,7 @@ import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 import { RoomTeamNum } from 'room/room'
 
 /**
- * Sub structure of Room packet
- * Stores information of a new room player
+ * tells the room users about a new member
  * @class OutRoomPlayerJoin
  */
 export class OutRoomPlayerJoin {

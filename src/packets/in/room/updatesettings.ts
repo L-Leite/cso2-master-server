@@ -3,7 +3,7 @@ import { Uint64LE } from 'int64-buffer'
 import { InPacketBase } from 'packets/in/packet'
 
 /**
- * Sub structure of Room packet
+ * a host's request to change a room's settings
  * @class InRoomUpdateSettings
  */
 export class InRoomUpdateSettings {

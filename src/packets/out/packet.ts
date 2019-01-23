@@ -1,9 +1,13 @@
 import { Int64BE, Int64LE, Uint64BE, Uint64LE } from 'int64-buffer'
 import { WritableStreamBuffer } from 'stream-buffers'
 
-import { PacketSignature } from 'packets/definitions'
+import { PacketBaseShared } from 'packets/packetbaseshared'
+
+import { PacketId, PacketSignature } from 'packets/definitions'
 import { PacketLongString } from 'packets/packetlongstring'
 import { PacketString } from 'packets/packetstring'
+
+import { ExtendedSocket } from 'extendedsocket'
 
 /**
  * The outgoing TCP packet's base
@@ -16,39 +20,35 @@ import { PacketString } from 'packets/packetstring'
  *                 of the base packet
  * @class OutPacketBase
  */
-export abstract class OutPacketBase {
-
-    /**
-     * once we are done inserting data, calculate the packet size
-     * and write it to the packet header
-     */
-    protected static setPacketLength(packet: Buffer): void {
-        packet.writeUInt16LE(packet.byteLength - 4, 2)
-    }
-
-    public id: number
-    protected sequence: number
+export abstract class OutPacketBase extends PacketBaseShared {
     protected outStream: WritableStreamBuffer
 
-    /**
-     * returns the packet's data
-     */
-    public getData(): Buffer {
-        return this.outStream.getContents()
+    constructor(socket: ExtendedSocket, id: PacketId) {
+        super()
+        this.sequence = socket.getNextSeq()
+        this.id = id
     }
 
     /**
-     * builds the packet with data provided by us
+     * calculate the packet size, write it to the packet header
+     * and then return the packet's data
+     * @returns the new packet's data
      */
-    // public abstract build(): Buffer
+    public getData(): Buffer {
+        const newPacket: Buffer = this.outStream.getContents()
+        const dataLen: number = newPacket.byteLength - OutPacketBase.headerLength
+        newPacket.writeUInt16LE(dataLen, 2)
+        return newPacket
+    }
 
     /**
      * writes a signed byte to the end of the packet's stream buffer
      * @param val the signed byte to write
      */
     public writeInt8(val: number): void {
-        this.outStream.write(
-            this.SignedToBuffer(val, 1))
+        const buf: Buffer = new Buffer(1)
+        buf.writeInt8(val as number, 0)
+        this.outStream.write(buf)
     }
 
     /**
@@ -57,8 +57,13 @@ export abstract class OutPacketBase {
      * @param littleEndian should the bytes be written in little endian?
      */
     public writeInt16(val: number, littleEndian: boolean = true): void {
-        this.outStream.write(
-            this.SignedToBuffer(val, 2, littleEndian))
+        const buf: Buffer = new Buffer(2)
+        if (littleEndian) {
+            buf.writeInt16LE(val as number, 0)
+        } else {
+            buf.writeInt16BE(val as number, 0)
+        }
+        this.outStream.write(buf)
     }
 
     /**
@@ -67,8 +72,13 @@ export abstract class OutPacketBase {
      * @param littleEndian should the bytes be written in little endian?
      */
     public writeInt32(val: number, littleEndian: boolean = true): void {
-        this.outStream.write(
-            this.SignedToBuffer(val, 4, littleEndian))
+        const buf: Buffer = new Buffer(4)
+        if (littleEndian) {
+            buf.writeInt32LE(val as number, 0)
+        } else {
+            buf.writeInt32BE(val as number, 0)
+        }
+        this.outStream.write(buf)
     }
 
     /**
@@ -77,8 +87,13 @@ export abstract class OutPacketBase {
      * @param littleEndian should the bytes be written in little endian?
      */
     public writeInt64(val: Int64LE | Int64BE, littleEndian: boolean = true): void {
-        this.outStream.write(
-            this.SignedToBuffer(val, 8, littleEndian))
+        let buf: Buffer = null
+        if (littleEndian) {
+            buf = (val as Int64LE).toBuffer()
+        } else {
+            buf = (val as Int64BE).toBuffer()
+        }
+        this.outStream.write(buf)
     }
 
     /**
@@ -86,8 +101,9 @@ export abstract class OutPacketBase {
      * @param val the unsigned byte to write
      */
     public writeUInt8(val: number): void {
-        this.outStream.write(
-            this.UnsignedToBuffer(val, 1))
+        const buf: Buffer = new Buffer(1)
+        buf.writeUInt8(val as number, 0)
+        this.outStream.write(buf)
     }
 
     /**
@@ -96,8 +112,13 @@ export abstract class OutPacketBase {
      * @param littleEndian should the bytes be written in little endian?
      */
     public writeUInt16(val: number, littleEndian: boolean = true): void {
-        this.outStream.write(
-            this.UnsignedToBuffer(val, 2, littleEndian))
+        const buf: Buffer = new Buffer(2)
+        if (littleEndian) {
+            buf.writeUInt16LE(val as number, 0)
+        } else {
+            buf.writeUInt16BE(val as number, 0)
+        }
+        this.outStream.write(buf)
     }
 
     /**
@@ -106,8 +127,13 @@ export abstract class OutPacketBase {
      * @param littleEndian should the bytes be written in little endian?
      */
     public writeUInt32(val: number, littleEndian: boolean = true): void {
-        this.outStream.write(
-            this.UnsignedToBuffer(val, 4, littleEndian))
+        const buf: Buffer = new Buffer(4)
+        if (littleEndian) {
+            buf.writeUInt32LE(val as number, 0)
+        } else {
+            buf.writeUInt32BE(val as number, 0)
+        }
+        this.outStream.write(buf)
     }
 
     /**
@@ -116,8 +142,13 @@ export abstract class OutPacketBase {
      * @param littleEndian should the bytes be written in little endian?
      */
     public writeUInt64(val: Uint64LE | Uint64BE, littleEndian: boolean = true): void {
-        this.outStream.write(
-            this.UnsignedToBuffer(val, 8, littleEndian))
+        let buf: Buffer = null
+        if (littleEndian) {
+            buf = (val as Uint64LE).toBuffer()
+        } else {
+            buf = (val as Uint64BE).toBuffer()
+        }
+        this.outStream.write(buf)
     }
 
     public writeLongString(str: PacketLongString): void {
@@ -136,85 +167,5 @@ export abstract class OutPacketBase {
         this.writeUInt8(this.sequence)
         this.writeUInt16(0)
         this.writeUInt8(this.id)
-    }
-
-    /**
-     * converts a signed number to a buffer of a respective length
-     * @param val the number value to convert
-     * @param length the length of the number in bytes
-     * @param littleEndian should the number be written in little endian
-     */
-    private SignedToBuffer(
-        val: number | Int64LE | Int64BE,
-        length: number, littleEndian: boolean = true): Buffer {
-        const buf: Buffer = new Buffer(length)
-        switch (length) {
-            case 1:
-                buf.writeInt8(val as number, 0)
-                break
-            case 2:
-                if (littleEndian) {
-                    buf.writeInt16LE(val as number, 0)
-                } else {
-                    buf.writeInt16BE(val as number, 0)
-                }
-                break
-            case 4:
-                if (littleEndian) {
-                    buf.writeInt32LE(val as number, 0)
-                } else {
-                    buf.writeInt32BE(val as number, 0)
-                }
-                break
-            case 8:
-                if (littleEndian) {
-                    return (val as Int64LE).toBuffer()
-                } else {
-                    return (val as Int64BE).toBuffer()
-                }
-            default:
-                throw new Error('Unknown value length used!')
-        }
-        return buf
-    }
-
-    /**
-     * converts an unsigned number to a buffer of a respective length
-     * @param val the number value to convert
-     * @param length the length of the number in bytes
-     * @param littleEndian should the number be written in little endian
-     */
-    private UnsignedToBuffer(
-        val: number | Uint64LE | Uint64BE,
-        length: number, littleEndian: boolean = true): Buffer {
-        const buf: Buffer = new Buffer(length)
-        switch (length) {
-            case 1:
-                buf.writeUInt8(val as number, 0)
-                break
-            case 2:
-                if (littleEndian) {
-                    buf.writeUInt16LE(val as number, 0)
-                } else {
-                    buf.writeUInt16BE(val as number, 0)
-                }
-                break
-            case 4:
-                if (littleEndian) {
-                    buf.writeUInt32LE(val as number, 0)
-                } else {
-                    buf.writeUInt32BE(val as number, 0)
-                }
-                break
-            case 8:
-                if (littleEndian) {
-                    return (val as Uint64LE).toBuffer()
-                } else {
-                    return (val as Uint64BE).toBuffer()
-                }
-            default:
-                throw new Error('Unknown value length used!')
-        }
-        return buf
     }
 }

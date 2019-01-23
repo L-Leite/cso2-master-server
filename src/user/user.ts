@@ -11,7 +11,6 @@ export class User {
     public userId: number
 
     public externalIpAddress: string
-    public port: number
 
     public externalClientPort: number
     public externalServerPort: number
@@ -39,11 +38,10 @@ export class User {
         this.userId = userId
 
         this.externalIpAddress = socket.remoteAddress
-        this.port = 0
-
         this.externalClientPort = 0
         this.externalServerPort = 0
         this.externalTvPort = 0
+
         this.localIpAddress = ''
         this.localClientPort = 0
         this.localServerPort = 0
@@ -62,7 +60,7 @@ export class User {
         this.assists = 3
     }
 
-    public setCurrentChannel(channelServerIndex: number, channelIndex: number): void {
+    public setCurrentChannelIndex(channelServerIndex: number, channelIndex: number): void {
         this.currentChannelServerIndex = channelServerIndex
         this.currentChannelIndex = channelIndex
     }

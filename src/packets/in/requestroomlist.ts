@@ -1,7 +1,7 @@
 import { InPacketBase } from 'packets/in/packet'
 
 /**
- * incoming roomlist request packet
+ * an user's request for a channel's rooms
  * @class InRequestRoomListPacket
  */
 export class InRequestRoomListPacket extends InPacketBase {

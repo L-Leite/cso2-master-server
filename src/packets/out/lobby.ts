@@ -5,6 +5,8 @@ import { OutPacketBase } from 'packets/out/packet'
 
 import { LobbyJoinRoom } from 'packets/out/lobby/joinroom'
 
+import { ExtendedSocket } from 'extendedsocket'
+
 enum OutLobbyType {
     JoinRoom = 1,
     UpdateUserInfo = 2,
@@ -15,24 +17,19 @@ enum OutLobbyType {
  * @class OutLobbyPacket
  */
 export class OutLobbyPacket extends OutPacketBase {
-    constructor(seq: number) {
-        super()
-        this.sequence = seq
-        this.id = PacketId.Lobby
+    constructor(socket: ExtendedSocket) {
+        super(socket, PacketId.Lobby)
     }
 
     public joinRoom(): Buffer {
         this.outStream = new WritableStreamBuffer(
-            { initialSize: 10, incrementAmount: 10 })
+            { initialSize: 16, incrementAmount: 4 })
 
         this.buildHeader()
         this.writeUInt8(OutLobbyType.JoinRoom)
 
         new LobbyJoinRoom(0, 2, 4).build(this)
 
-        const res: Buffer = this.outStream.getContents()
-        OutPacketBase.setPacketLength(res)
-
-        return res
+        return this.getData()
     }
 }

@@ -6,7 +6,7 @@ export enum RoomCountdownType {
 }
 
 /**
- * Sub structure of Room packet
+ * contains the countdown of a room, according to its host
  * @class InRoomCountdown
  */
 export class InRoomCountdown {

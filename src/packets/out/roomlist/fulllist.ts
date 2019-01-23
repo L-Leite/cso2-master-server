@@ -5,8 +5,7 @@ import { RoomListRoomData } from 'packets/out/roomlist/roomdata'
 import { Room } from 'room/room'
 
 /**
- * Sub structure of RoomList packet
- * send the full info about a room list
+ * sends out channel's rooms to an user
  * @class RoomListFullList
  */
 export class RoomListFullList {
