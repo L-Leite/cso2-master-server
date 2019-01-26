@@ -1,15 +1,13 @@
 import { Channel } from 'channel/channel'
 import { User } from 'user/user'
 
-import { ExtendedSocket } from 'extendedsocket'
-
+import { NewRoomSettings } from 'room/newroomsettings'
 import { RoomSettings } from 'room/roomsettings'
+import { RoomUser } from 'room/roomuser'
 
 import { OutHostPacket } from 'packets/out/host'
 import { OutRoomPacket } from 'packets/out/room'
 import { OutUdpPacket } from 'packets/out/udp'
-
-import { NewRoomSettings } from 'room/newroomsettings'
 
 export enum RoomTeamNum {
     Unknown = 0,
@@ -119,6 +117,11 @@ export interface IRoomOptions {
     hltvEnabled?: number
 }
 
+export enum RoomStatus {
+    Waiting = 1,
+    Ingame = 2,
+}
+
 const defaultCountdownNum: number = 7
 const invalidEntityNum: number = -1
 
@@ -128,12 +131,12 @@ export class Room {
 
     public host: User
     public users: User[]
-    public userTeam: Map<number, RoomTeamNum>
-    public userReadyStatus: Map<number, RoomReadyStatus>
-    public userEntityNum: Map<number, number>
+    public usersInfo: Map<User, RoomUser>
 
     private emptyRoomCallback: (emptyRoom: Room, channel: Channel) => void
     private parentChannel: Channel
+
+    private status: RoomStatus
 
     private countingDown: boolean
     private countdown: number
@@ -144,14 +147,14 @@ export class Room {
         this.id = roomId
         this.host = host
 
-        this.userTeam = new Map<number, RoomTeamNum>()
-        this.userReadyStatus = new Map<number, RoomReadyStatus>()
-        this.userEntityNum = new Map<number, number>()
+        this.usersInfo = new Map<User, RoomUser>()
 
         this.parentChannel = parentChannel
         this.emptyRoomCallback = emptyRoomCallback
 
         this.settings = new RoomSettings(options)
+
+        this.status = RoomStatus.Waiting
 
         this.countingDown = false
         this.countdown = defaultCountdownNum
@@ -201,10 +204,38 @@ export class Room {
      * @param user the user object to add
      */
     public addUser(user: User): void {
+        const userData: RoomUser = new RoomUser(this.findDesirableTeamNum(),
+            RoomReadyStatus.No, invalidEntityNum)
         this.users.push(user)
-        this.userTeam.set(user.userId, this.findDesirableTeamNum())
-        this.userReadyStatus.set(user.userId, RoomReadyStatus.No)
-        this.userEntityNum.set(user.userId, invalidEntityNum)
+        this.usersInfo.set(user, userData)
+    }
+
+    /**
+     * remove an user from a room
+     * @param targetUser the user object to remove
+     */
+    public removeUser(targetUser: User): void {
+        for (const user of this.users) {
+            if (user === targetUser) {
+                this.onUserRemoved(user)
+                this.users.splice(this.users.indexOf(user), 1)
+                return
+            }
+        }
+    }
+
+    /**
+     * remove an user from a room by its user id
+     * @param targetUser the user's id to remove
+     */
+    public removeUserById(userId: number): void {
+        for (const user of this.users) {
+            if (user.userId === userId) {
+                this.onUserRemoved(user)
+                this.users.splice(this.users.indexOf(user), 1)
+                return
+            }
+        }
     }
 
     /**
@@ -215,7 +246,8 @@ export class Room {
         let trNum: number = 0
         let ctNum: number = 0
 
-        for (const team of this.userTeam.values()) {
+        for (const userData of this.usersInfo.values()) {
+            const team: RoomTeamNum = userData.team
             if (team === RoomTeamNum.Terrorist) {
                 trNum++
             } else if (team === RoomTeamNum.CounterTerrorist) {
@@ -241,7 +273,7 @@ export class Room {
             console.warn('getUserTeam: user not found!')
             return RoomTeamNum.Unknown
         }
-        return this.userTeam.get(user.userId)
+        return this.usersInfo.get(user).team
     }
 
     /**
@@ -265,7 +297,8 @@ export class Room {
      */
     public getNumOfRealCts(): number {
         let numCt: number = 0
-        for (const team of this.userTeam.values()) {
+        for (const userData of this.usersInfo.values()) {
+            const team: RoomTeamNum = userData.team
             if (team === RoomTeamNum.CounterTerrorist) {
                 numCt++
             }
@@ -279,7 +312,8 @@ export class Room {
      */
     public getNumOfRealTerrorists(): number {
         let numTerrorists: number = 0
-        for (const team of this.userTeam.values()) {
+        for (const userData of this.usersInfo.values()) {
+            const team: RoomTeamNum = userData.team
             if (team === RoomTeamNum.Terrorist) {
                 numTerrorists++
             }
@@ -315,7 +349,7 @@ export class Room {
             console.warn('getUserReady: user not found!')
             return RoomReadyStatus.No
         }
-        return this.userReadyStatus.get(user.userId)
+        return this.usersInfo.get(user).ready
     }
 
     /**
@@ -327,7 +361,7 @@ export class Room {
             console.warn('isUserReady: user not found!')
             return false
         }
-        return this.userReadyStatus.get(user.userId) === RoomReadyStatus.Yes
+        return this.usersInfo.get(user).ready === RoomReadyStatus.Yes
     }
 
     /**
@@ -350,7 +384,7 @@ export class Room {
      * @returns the user's entity number
      */
     public getUserEntityNum(user: User): number {
-        const result = this.userEntityNum.get(user.userId)
+        const result = this.usersInfo.get(user).entityNum
 
         if (result == null) {
             console.warn('Room::getUserEntityNum: user %s did not set its entity id',
@@ -373,36 +407,7 @@ export class Room {
             return
         }
 
-        this.userEntityNum.set(user.userId, entityNum)
-    }
-
-    /**
-     * remove an user from a room
-     * @param targetUser the user object to remove
-     */
-    public removeUser(targetUser: User): void {
-        for (const user of this.users) {
-            if (user === targetUser) {
-                const userId = user.userId
-                this.users.splice(this.users.indexOf(user), 1)
-                this.onUserRemoved(userId)
-                return
-            }
-        }
-    }
-
-    /**
-     * remove an user from a room by its user id
-     * @param targetUser the user's id to remove
-     */
-    public removeUserById(userId: number): void {
-        for (const user of this.users) {
-            if (user.userId === userId) {
-                this.users.splice(this.users.indexOf(user), 1)
-                this.onUserRemoved(userId)
-                return
-            }
-        }
+        this.usersInfo.get(user).entityNum = entityNum
     }
 
     /**
@@ -415,7 +420,7 @@ export class Room {
             console.warn('setUserToTeam: user not found!')
             return
         }
-        this.userTeam.set(user.userId, newTeam)
+        this.usersInfo.get(user).team = newTeam
     }
 
     /**
@@ -435,12 +440,37 @@ export class Room {
             return
         }
 
-        const curStatus: RoomReadyStatus = this.userReadyStatus.get(user.userId)
+        const userInfo: RoomUser = this.usersInfo.get(user)
+        const curStatus: RoomReadyStatus = userInfo.ready
         const newStatus: RoomReadyStatus =
             curStatus === RoomReadyStatus.No
                 ? RoomReadyStatus.Yes : RoomReadyStatus.No
-        this.userReadyStatus.set(user.userId, newStatus)
+        userInfo.ready = newStatus
         return newStatus
+    }
+
+    /**
+     * get's a room's status
+     * @returns the room's status
+     */
+    public getStatus(): RoomStatus {
+        return this.status
+    }
+
+    /**
+     * set a room's status
+     * @param newStatus the new room's status
+     */
+    public setStatus(newStatus: RoomStatus): void {
+        this.status = newStatus
+    }
+
+    /**
+     * is the countdown request user a host and can it start a global countdown?
+     * @param user the user that requested the countdown
+     */
+    public canCountdown(user: User): boolean {
+        return user === this.host && this.status === RoomStatus.Waiting
     }
 
     /**
@@ -448,7 +478,6 @@ export class Room {
      * the room's host must send countdown requests in order to progress it
      * TODO: maybe do the countdown without depending on the room's host
      * @param hostNextNum the host's next countdown number
-     * @returns the next countdown number saved in the server
      */
     public progressCountdown(hostNextNum: number): void {
         if (this.countdown > defaultCountdownNum
@@ -479,7 +508,7 @@ export class Room {
      * checks if a room's game countdown is in progress
      * @returns true if it's in progress, false if not
      */
-    public isCountdownInProgress(): boolean {
+    public isGlobalCountdownInProgress(): boolean {
         return this.countingDown
     }
 
@@ -675,7 +704,7 @@ export class Room {
     }
 
     /**
-     * sends the countdown number or stops it to the user
+     * sends the global countdown number or stops it to the user
      * @param user the user to send the countdown to
      * @param shouldCountdown should the countdown continue
      */
@@ -694,17 +723,14 @@ export class Room {
     /**
      * ends a room's match and sends the players to the result window
      */
-    public setGameEnd(): void {
+    public sendGameEnd(user: User): void {
         // TODO: set game end to ingame users only
-        for (const user of this.users) {
-            const userSocket: ExtendedSocket = user.socket
-            const stopReply: Buffer =
-                new OutHostPacket(userSocket).hostStop()
-            userSocket.send(stopReply)
-            const resultReply: Buffer =
-                new OutRoomPacket(userSocket).setGameResult()
-            userSocket.send(resultReply)
-        }
+        const stopReply: Buffer =
+            new OutHostPacket(user.socket).hostStop()
+        const resultReply: Buffer =
+            new OutRoomPacket(user.socket).setGameResult()
+        user.socket.send(stopReply)
+        user.socket.send(resultReply)
     }
 
     /**
@@ -713,12 +739,11 @@ export class Room {
      * else, find a new host
      * @param userId the user's id
      */
-    private onUserRemoved(userId: number): void {
+    private onUserRemoved(user: User): void {
         if (this.users.length !== 0) {
             this.findAndUpdateNewHost()
-            this.userTeam.delete(userId)
-            this.userReadyStatus.delete(userId)
-            this.sendRemovedUser(userId)
+            this.usersInfo.delete(user)
+            this.sendRemovedUser(user)
         } else {
             this.emptyRoomCallback(this, this.parentChannel)
         }
@@ -728,10 +753,10 @@ export class Room {
      * inform the users about an user being removed
      * @param userId the removed user's ID
      */
-    private sendRemovedUser(userId: number) {
+    private sendRemovedUser(deletedUser: User) {
         for (const user of this.users) {
             const reply: Buffer =
-                new OutRoomPacket(user.socket).playerLeave(userId);
+                new OutRoomPacket(user.socket).playerLeave(deletedUser.userId);
             user.socket.send(reply)
         }
     }

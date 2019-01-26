@@ -2,7 +2,7 @@ import { Channel } from 'channel/channel'
 import { ChannelServer } from 'channel/channelserver'
 
 import { NewRoomSettings } from 'room/newroomsettings'
-import { Room, RoomReadyStatus } from 'room/room'
+import { Room, RoomReadyStatus, RoomStatus } from 'room/room'
 
 import { User } from 'user/user'
 import { UserManager } from 'user/usermanager'
@@ -290,7 +290,7 @@ export class ChannelManager {
         }
 
         if (currentRoom.isUserReady(user)
-            && currentRoom.isCountdownInProgress()) {
+            && currentRoom.isGlobalCountdownInProgress()) {
             return false
         }
 
@@ -316,7 +316,7 @@ export class ChannelManager {
             return false
         }
 
-        if (currentRoom.isCountdownInProgress()) {
+        if (currentRoom.isGlobalCountdownInProgress()) {
             console.warn('user "%s" tried toggle ready status, although it isn\'t in any', user.userName)
             return false
         }
@@ -345,42 +345,62 @@ export class ChannelManager {
     /**
      * called when the user (must be host) requests to start the game
      * after the countdown is complete
-     * @param host the user itself
+     * @param user the user itself
      * @returns true if successful
      */
-    private onGameStartRequest(host: User): boolean {
-        const currentRoom: Room = host.currentRoom
+    private onGameStartRequest(user: User): boolean {
+        const currentRoom: Room = user.currentRoom
 
         if (currentRoom == null) {
-            console.warn('user "%s" tried to start a room\'s match, although it isn\'t in any', host.userName)
+            console.warn('user "%s" tried to start a room\'s match, although it isn\'t in any', user.userName)
             return false
         }
 
-        if (host !== currentRoom.host) {
-            console.warn('user "%s" tried to start a room\'s match, although it isn\'t the host.'
-                + 'room name "%s" room id: %i',
-                host.userName, currentRoom.settings.roomName, currentRoom.id)
-            return false
+        // if started by the host
+        if (user === currentRoom.host) {
+            this.handleHostGameStart(currentRoom)
+            return true
+        } else if (currentRoom.getStatus() === RoomStatus.Ingame) {
+            this.handleUserGameStart(user, currentRoom)
+            return true
         }
 
-        // reset countdown for a next match
-        currentRoom.stopCountdown()
+        console.warn('user "%s" tried to start a room\'s match, although it isn\'t the host.'
+            + 'room name "%s" room id: %i',
+            user.userName, currentRoom.settings.roomName, currentRoom.id)
 
-        currentRoom.recurseUsers((u: User): void => {
-            if (u !== host
-                && currentRoom.isUserReady(u) === true) {
-                currentRoom.sendConnectHostTo(u, host)
-                currentRoom.sendGuestDataTo(host, u)
+        return false
+    }
+
+    private handleHostGameStart(room: Room): void {
+        const host: User = room.host
+
+        room.stopCountdown()
+        room.setStatus(RoomStatus.Ingame)
+
+        room.recurseNonHostUsers((u: User): void => {
+            if (room.isUserReady(u) === true) {
+                room.sendConnectHostTo(u, host)
+                room.sendGuestDataTo(host, u)
             }
         })
 
-        currentRoom.sendStartMatchTo(host)
+        room.sendStartMatchTo(host)
 
         console.log('host "%s" started room "%s"\'s (id: %i) match on map %i and gamemode %i',
-            host.userName, currentRoom.settings.roomName, currentRoom.id,
-            currentRoom.settings.mapId, currentRoom.settings.gameModeId)
+            host.userName, room.settings.roomName, room.id,
+            room.settings.mapId, room.settings.gameModeId)
+    }
 
-        return true
+    private handleUserGameStart(user: User, room: Room): void {
+        const host: User = room.host
+
+        room.sendConnectHostTo(user, host)
+        room.sendGuestDataTo(host, user)
+
+        console.log('user "%s" joining room "%s"\'(id: %i) match hosted by "%s" on map %i and gamemode %i',
+            user.userName, room.settings.roomName, room.id, host.userName,
+            room.settings.mapId, room.settings.gameModeId)
     }
 
     /**
@@ -404,7 +424,7 @@ export class ChannelManager {
             return false
         }
 
-        if (currentRoom.isCountdownInProgress()) {
+        if (currentRoom.isGlobalCountdownInProgress()) {
             console.warn('user "%s" tried to update a room\'s settings, although a countdown is in progress.'
                 + 'room name "%s" room id: %i',
                 user.userName, currentRoom.settings.roomName, currentRoom.id)
@@ -483,34 +503,34 @@ export class ChannelManager {
      * called when the user (must be host) requests to start
      * counting down until the game starts
      * @param countdownReq the parsed Room packet
-     * @param user the user itself
+     * @param host the user itself
      * @returns true if successful
      */
-    private onGameStartToggleRequest(countdownReq: InRoomCountdown, user: User): boolean {
-        const currentRoom: Room = user.currentRoom
+    private onGameStartToggleRequest(countdownReq: InRoomCountdown, host: User): boolean {
+        const currentRoom: Room = host.currentRoom
 
         if (currentRoom == null) {
-            console.warn('user "%s" tried to toggle a room\'s game start countdown, although it isn\'t in any',
-                user.userName)
+            console.warn('host "%s" tried to toggle a room\'s game start countdown, although it isn\'t in any',
+                host.userName)
             return false
         }
 
-        if (user !== currentRoom.host) {
-            console.warn('user "%s" tried to toggle a room\'s game start countdown, although it isn\'t the host.'
+        if (host !== currentRoom.host) {
+            console.warn('host "%s" tried to toggle a room\'s game start countdown, although it isn\'t the host.'
                 + 'room name "%s" room id: %i',
-                user.userName, currentRoom.settings.roomName, currentRoom.id)
-            return false
-        }
-
-        if (currentRoom.canStartGame() === false) {
-            console.warn('user "%s" tried to toggle a room\'s game start countdown, although it can\'t start. '
-                + 'room name "%s" room id: %i',
-                user.userName, currentRoom.settings.roomName, currentRoom.id)
+                host.userName, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
         const shouldCountdown: boolean = countdownReq.shouldCountdown()
         const count: number = countdownReq.count
+
+        if (currentRoom.canStartGame() === false) {
+            console.warn('user "%s" tried to toggle a room\'s game start countdown, although it can\'t start. '
+                + 'room name "%s" room id: %i',
+                host.userName, currentRoom.settings.roomName, currentRoom.id)
+            return false
+        }
 
         if (shouldCountdown) {
             currentRoom.progressCountdown(count)
@@ -521,7 +541,7 @@ export class ChannelManager {
             currentRoom.stopCountdown()
 
             console.log('host "%s" canceled room "%s"\'s (id %i) countdown',
-                user.userName, currentRoom.settings.roomName, currentRoom.id)
+                host.userName, currentRoom.settings.roomName, currentRoom.id)
         }
 
         currentRoom.recurseUsers((u: User): void => {

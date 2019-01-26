@@ -3,7 +3,7 @@ import { Uint64LE } from 'int64-buffer'
 import { OutPacketBase } from 'packets/out/packet'
 import { PacketString } from 'packets/packetstring'
 
-import { Room } from 'room/room'
+import { Room, RoomStatus } from 'room/room'
 import { User } from 'user/user'
 
 import { OutRoomPlayerNetInfo } from 'packets/out/room/playernetinfo'
@@ -67,7 +67,7 @@ export class OutRoomCreateAndJoin {
     private unk19: number
     // end of flags & 0x2000
     // flags & 0x4000
-    private unk20: number
+    private status: RoomStatus
     // end of flags & 0x4000
     // flags & 0x8000
     private unk21: number
@@ -145,16 +145,16 @@ export class OutRoomCreateAndJoin {
     private numOfPlayers: number
     private users: User[]
 
-    constructor(roomInfo: Room) {
-        this.room = roomInfo
+    constructor(room: Room) {
+        this.room = room
 
-        this.roomHostId = roomInfo.host.userId
+        this.roomHostId = room.host.userId
         this.unk01 = 2
         this.unk02 = 2
-        this.roomId = roomInfo.id
+        this.roomId = room.id
         this.unk04 = 5
         this.roomFlags = new Uint64LE('FFFFFFFFFFFFFFFF', 16)
-        this.roomName = new PacketString(roomInfo.settings.roomName)
+        this.roomName = new PacketString(room.settings.roomName)
         this.unk05 = 0
         this.unk06 = 0
         this.unk07 = 0
@@ -162,16 +162,16 @@ export class OutRoomCreateAndJoin {
         this.unk09 = new PacketString('')
         this.unk10 = 0
         this.unk11 = 1
-        this.gameModeId = roomInfo.settings.gameModeId
-        this.mapId = roomInfo.settings.mapId
+        this.gameModeId = room.settings.gameModeId
+        this.mapId = room.settings.mapId
         this.unk13 = 0
         this.unk14 = 1
-        this.winLimit = roomInfo.settings.winLimit
-        this.killLimit = roomInfo.settings.killLimit
+        this.winLimit = room.settings.winLimit
+        this.killLimit = room.settings.killLimit
         this.unk17 = 1
         this.unk18 = 0xA
         this.unk19 = 0
-        this.unk20 = 0
+        this.status = room.getStatus()
         this.unk21 = 0
         this.unk22 = 0
         this.unk23 = 0
@@ -201,7 +201,7 @@ export class OutRoomCreateAndJoin {
         this.unk37 = 0
         this.unk38 = 0
         this.unk39 = 1
-        this.unk40 = 0
+        this.unk40 = (room.getStatus() === RoomStatus.Ingame) as unknown as number
         this.unk41 = 0x3E80
         this.unk42 = 0
         this.unk43 = 0
@@ -209,8 +209,8 @@ export class OutRoomCreateAndJoin {
         this.unk45 = 0
         this.unk46 = 3
 
-        this.numOfPlayers = roomInfo.users.length
-        this.users = roomInfo.users
+        this.numOfPlayers = room.users.length
+        this.users = room.users
     }
     public build(outPacket: OutPacketBase): void {
 
@@ -256,7 +256,7 @@ export class OutRoomCreateAndJoin {
 
         outPacket.writeUInt8(this.unk19)
 
-        outPacket.writeUInt8(this.unk20)
+        outPacket.writeUInt8(this.status)
 
         outPacket.writeUInt8(this.unk21)
         outPacket.writeUInt8(this.unk22)

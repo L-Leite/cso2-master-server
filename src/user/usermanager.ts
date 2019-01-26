@@ -1,6 +1,6 @@
 import { ExtendedSocket } from 'extendedsocket'
 
-import { Room } from 'room/room'
+import { Room, RoomStatus } from 'room/room'
 import { User } from 'user/user'
 
 import { ChannelManager } from 'channel/channelmanager'
@@ -97,7 +97,11 @@ export class UserManager {
         console.log('Ending game for room "%s" (room id %i)',
             currentRoom.settings.roomName, currentRoom.id)
 
-        currentRoom.setGameEnd()
+        currentRoom.setStatus(RoomStatus.Waiting)
+
+        currentRoom.recurseUsers((u: User): void => {
+            currentRoom.sendGameEnd(u)
+        })
 
         return true
     }

@@ -2,7 +2,7 @@ import { Uint64LE } from 'int64-buffer'
 
 import { PacketString } from 'packets/packetstring'
 
-import { Room } from 'room/room'
+import { Room, RoomStatus } from 'room/room'
 
 import { OutPacketBase } from 'packets/out/packet'
 
@@ -65,7 +65,7 @@ export class RoomListRoomData {
     private unk21: number
     // end flags & 0x2000
     // flags & 0x4000
-    private unk22: number
+    private roomStatus: RoomStatus
     // end flags & 0x4000
     // flags & 0x8000
     private enableBots: number
@@ -151,7 +151,7 @@ export class RoomListRoomData {
         this.unk19 = 5
         this.unk20 = 0
         this.unk21 = 5
-        this.unk22 = 2
+        this.roomStatus = room.getStatus()
         this.enableBots = room.settings.enableBots
         this.unk24 = 0
         this.startMoney = room.settings.startMoney
@@ -199,7 +199,7 @@ export class RoomListRoomData {
         outPacket.writeUInt8(this.unk19)
         outPacket.writeUInt8(this.unk20)
         outPacket.writeUInt8(this.unk21)
-        outPacket.writeUInt8(this.unk22)
+        outPacket.writeUInt8(this.roomStatus)
         outPacket.writeUInt8(this.enableBots)
         outPacket.writeUInt8(this.unk24)
         outPacket.writeUInt16(this.startMoney)
