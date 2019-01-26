@@ -180,7 +180,7 @@ export class ServerInstance {
             return
         }
 
-        if (packet.portId == null) {
+        if (packet.isHeartbeat()) {
             return
         }
 

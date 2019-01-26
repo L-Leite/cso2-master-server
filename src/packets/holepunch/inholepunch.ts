@@ -58,6 +58,11 @@ export class InHolepunchPacketUdp {
         }
 
         if (this.isHeartbeat()) {
+            // this.userId = this.packetData.readUInt32LE(curOffset)
+            // curOffset += 4
+
+            // keep alive packet, to be reversed?
+        } else {
             this.userId = this.readUInt32()
             this.portId = this.readUInt16()
 
@@ -67,11 +72,6 @@ export class InHolepunchPacketUdp {
             this.ipAddress = ip.fromLong(fixedIp)
 
             this.port = this.readUInt16()
-        } else {
-            // this.userId = this.packetData.readUInt32LE(curOffset)
-            // curOffset += 4
-
-            // keep alive packet, to be reversed?
         }
     }
 
