@@ -51,13 +51,13 @@ export class User {
         this.currentChannelIndex = 0
 
         this.userName = userName
-        this.level = 2
+        this.level = 1
         this.curExp = new Uint64LE(0)
         this.maxExp = new Uint64LE(1000)
-        this.wins = 4
-        this.kills = 2
-        this.deaths = 1
-        this.assists = 3
+        this.wins = 0
+        this.kills = 0
+        this.deaths = 0
+        this.assists = 0
     }
 
     public setCurrentChannelIndex(channelServerIndex: number, channelIndex: number): void {
