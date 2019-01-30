@@ -54,6 +54,11 @@ export class ExtendedSocket extends net.Socket {
      * @param buffer the data to write
      */
     public send(buffer: Buffer): boolean {
+        if (this.destroyed === true) {
+            console.warn('ExtendedSocket::send: tried to send with a broken socket. This is most likely a bug')
+            return
+        }
+
         if (this.packetDumper) {
             this.packetDumper.dumpOut(buffer, this)
         }

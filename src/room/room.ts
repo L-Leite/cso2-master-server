@@ -217,22 +217,9 @@ export class Room {
     public removeUser(targetUser: User): void {
         for (const user of this.users) {
             if (user === targetUser) {
-                this.onUserRemoved(user)
+                this.usersInfo.delete(user)
                 this.users.splice(this.users.indexOf(user), 1)
-                return
-            }
-        }
-    }
-
-    /**
-     * remove an user from a room by its user id
-     * @param targetUser the user's id to remove
-     */
-    public removeUserById(userId: number): void {
-        for (const user of this.users) {
-            if (user.userId === userId) {
                 this.onUserRemoved(user)
-                this.users.splice(this.users.indexOf(user), 1)
                 return
             }
         }
@@ -741,9 +728,8 @@ export class Room {
      */
     private onUserRemoved(user: User): void {
         if (this.users.length !== 0) {
-            this.findAndUpdateNewHost()
-            this.usersInfo.delete(user)
             this.sendRemovedUser(user)
+            this.findAndUpdateNewHost()
         } else {
             this.emptyRoomCallback(this, this.parentChannel)
         }
