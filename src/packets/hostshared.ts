@@ -7,5 +7,7 @@ export enum HostPacketType {
     // logging packet types
     OnGameEnd = 21,
 
-    PreloadInventory = 101, // there are 2 or 3 other host packet types that send this
+    SetInventory = 101, // there are 2 or 3 other host packet types that send this
+    SetLoadout = 107,
+    SetBuyMenu = 111,
 }

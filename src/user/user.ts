@@ -6,6 +6,8 @@ import { Room } from 'room/room'
 
 import { ExtendedSocket } from 'extendedsocket'
 
+import { UserInventory } from 'user/userinventory'
+
 export class User {
     public socket: ExtendedSocket
     public userId: number
@@ -33,6 +35,8 @@ export class User {
     public deaths: number
     public assists: number
 
+    public inventory: UserInventory
+
     constructor(socket: ExtendedSocket, userId: number, userName: string) {
         this.socket = socket
         this.userId = userId
@@ -58,6 +62,8 @@ export class User {
         this.kills = 0
         this.deaths = 0
         this.assists = 0
+
+        this.inventory = new UserInventory()
     }
 
     public setCurrentChannelIndex(channelServerIndex: number, channelIndex: number): void {

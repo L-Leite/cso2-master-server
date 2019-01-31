@@ -123,7 +123,6 @@ export enum RoomStatus {
 }
 
 const defaultCountdownNum: number = 7
-const invalidEntityNum: number = -1
 
 export class Room {
     public id: number
@@ -205,7 +204,7 @@ export class Room {
      */
     public addUser(user: User): void {
         const userData: RoomUser = new RoomUser(this.findDesirableTeamNum(),
-            RoomReadyStatus.No, invalidEntityNum)
+            RoomReadyStatus.No)
         this.users.push(user)
         this.usersInfo.set(user, userData)
     }
@@ -362,39 +361,6 @@ export class Room {
             }
         }
         return true
-    }
-
-    /**
-     * gives an user's entity number in a room match
-     * if the user hasn't set the entity number, returns 'invalidEntityNum' (-1)
-     * @param user the target user
-     * @returns the user's entity number
-     */
-    public getUserEntityNum(user: User): number {
-        const result = this.usersInfo.get(user).entityNum
-
-        if (result == null) {
-            console.warn('Room::getUserEntityNum: user %s did not set its entity id',
-                user.userName)
-            return invalidEntityNum
-        }
-
-        return result
-    }
-
-    /**
-     * sets an user ingame entity number
-     * @param user the target user
-     * @param entityNum the new entity number
-     */
-    public setUserEntityNum(user: User, entityNum: number): void {
-        if (this.hasUser(user) === false) {
-            console.warn('Room::setUserEntityNum: user %s isn\'t in room %s',
-                user.userName, this.settings.roomName)
-            return
-        }
-
-        this.usersInfo.get(user).entityNum = entityNum
     }
 
     /**

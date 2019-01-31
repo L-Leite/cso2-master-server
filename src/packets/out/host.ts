@@ -5,13 +5,16 @@ import { OutPacketBase } from 'packets/out/packet'
 import { PacketId } from 'packets/definitions'
 import { HostPacketType } from 'packets/hostshared'
 
-import { OutHostGameStart } from 'packets/out/host/gamestart'
-import { OutHostJoinHost } from 'packets/out/host/joinhost'
-import { OutHostPreloadInventory } from 'packets/out/host/preloadinventory'
-
 import { User } from 'user/user'
+import { UserLoadout } from 'user/userloadout'
 
 import { ExtendedSocket } from 'extendedsocket'
+
+import { OutHostGameStart } from 'packets/out/host/gamestart'
+import { OutHostSetInventory } from 'packets/out/host/inventory'
+import { OutHostJoinHost } from 'packets/out/host/joinhost'
+import { OutHostBuyMenu } from './host/buymenu';
+import { OutHostLoadout } from './host/loadout'
 
 /**
  * outgoing room host information
@@ -66,14 +69,42 @@ export class OutHostPacket extends OutPacketBase {
         return this.getData()
     }
 
-    public preloadInventory(entityNum: number): Buffer {
+    public setInventory(userId: number, weapons: number[]): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 80, incrementAmount: 20 })
 
         this.buildHeader()
-        this.writeUInt8(HostPacketType.PreloadInventory)
+        this.writeUInt8(HostPacketType.SetInventory)
 
-        new OutHostPreloadInventory(entityNum).build(this)
+        new OutHostSetInventory(userId, weapons).build(this)
+
+        return this.getData()
+    }
+
+    public setLoadout(user: User): Buffer {
+        this.outStream = new WritableStreamBuffer(
+            { initialSize: 80, incrementAmount: 20 })
+
+        this.buildHeader()
+        this.writeUInt8(HostPacketType.SetLoadout)
+
+        new OutHostLoadout(user.userId, user.inventory.ctModelItem,
+            user.inventory.terModelItem, user.inventory.headItem,
+            user.inventory.gloveItem, user.inventory.backItem,
+            user.inventory.stepsItem, user.inventory.cardItem,
+            user.inventory.sprayItem, user.inventory.loadouts).build(this)
+
+        return this.getData()
+    }
+
+    public setBuyMenu(user: User): Buffer {
+        this.outStream = new WritableStreamBuffer(
+            { initialSize: 80, incrementAmount: 20 })
+
+        this.buildHeader()
+        this.writeUInt8(HostPacketType.SetBuyMenu)
+
+        new OutHostBuyMenu(user.userId, user.inventory.buymenu).build(this)
 
         return this.getData()
     }

@@ -1,6 +1,6 @@
 {
   "name": "cso2-master-server",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "repository": "github:Ochii/cso2-master-server",
   "description": "A master server for Nexon's Counter-Strike: Online 2",
   "author": "Luís Leite",
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@types/ip": "0.0.31",
-    "@types/node": "^10.12.18",
+    "@types/node": "^10.12.20",
     "@types/stream-buffers": "^3.0.2",
     "@types/uuid": "^3.4.4",
     "ts-node": "^7.0.1",
