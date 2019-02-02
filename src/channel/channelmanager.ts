@@ -144,6 +144,13 @@ export class ChannelManager {
         user.socket.send(list)
     }
 
+    public sendRoomListTo(user: User, channel: Channel): void {
+        const lobbyReply: Buffer = new OutLobbyPacket(user.socket).joinRoom()
+        const roomListReply: Buffer = new OutRoomListPacket(user.socket).getFullList(channel.rooms)
+        user.socket.send(lobbyReply)
+        user.socket.send(roomListReply)
+    }
+
     /**
      * sets an user's current channel
      * @param user the target user
@@ -151,14 +158,8 @@ export class ChannelManager {
      * @param channelServer the channel's channelServer
      */
     private setUserChannel(user: User, channel: Channel, channelServer: ChannelServer) {
-        const socket: ExtendedSocket = user.socket
-
         user.setCurrentChannelIndex(channelServer.index, channel.index)
-
-        const lobbyReply: Buffer = new OutLobbyPacket(socket).joinRoom()
-        const roomListReply: Buffer = new OutRoomListPacket(socket).getFullList(channel.rooms)
-        socket.send(lobbyReply)
-        socket.send(roomListReply)
+        this.sendRoomListTo(user, channel)
     }
 
     /**
@@ -172,6 +173,15 @@ export class ChannelManager {
             }
         }
         return null
+    }
+
+    /**
+     * returns a channel object by its channel index and channel server index
+     * @param channelIndex the channel's index
+     * @param channelServerIndex the channel's channel server index
+     */
+    private getChannel(channelIndex: number, channelServerIndex: number): Channel {
+        return this.getServerByIndex(channelServerIndex).getChannelByIndex(channelIndex)
     }
 
     /**
@@ -299,6 +309,9 @@ export class ChannelManager {
 
         console.log('user "%s" left a room. room name: "%s" room id: %i',
             user.userName, currentRoom.settings.roomName, currentRoom.id)
+
+        this.sendRoomListTo(user,
+            this.getChannel(user.currentChannelIndex, user.currentChannelServerIndex))
 
         return true
     }
