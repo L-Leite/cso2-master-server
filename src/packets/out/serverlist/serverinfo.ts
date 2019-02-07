@@ -10,17 +10,17 @@ import { ServerListChannelInfo } from 'packets/out/serverlist/channelinfo'
  * @class ServerListServerInfo
  */
 export class ServerListServerInfo {
-    private unk00: number
-    private unk01: number
-    private unk02: number
+    private serverIndex: number
+    private serverStatus: number
+    private serverType: number
     private serverName: PacketString
     private channelCount: number
     private channels: ServerListChannelInfo[]
 
     constructor(channelServer: ChannelServer) {
-        this.unk00 = 1
-        this.unk01 = 1
-        this.unk02 = 3
+        this.serverIndex = 1
+        this.serverStatus = 1
+        this.serverType = 3
         this.serverName = new PacketString(channelServer.name)
         this.channelCount = channelServer.channels.length
         this.channels = []
@@ -30,9 +30,9 @@ export class ServerListServerInfo {
     }
 
     public build(outPacket: OutPacketBase): void {
-        outPacket.writeUInt8(this.unk00)
-        outPacket.writeUInt8(this.unk01)
-        outPacket.writeUInt8(this.unk02)
+        outPacket.writeUInt8(this.serverIndex)
+        outPacket.writeUInt8(this.serverStatus)
+        outPacket.writeUInt8(this.serverType)
         outPacket.writeString(this.serverName)
         outPacket.writeUInt8(this.channelCount)
         for (const channel of this.channels) {
