@@ -78,8 +78,8 @@ export class ServerInstance {
 
         this.server.on('connection', (socket: net.Socket) => {
             this.onServerConnection(socket)
-        }).on('end', () => {
-            this.onServerEnd()
+        }).on('close', () => {
+            this.onServerClose()
         }).on('error', (err: Error) => {
             this.onServerError(err)
         }).on('listening', () => {
@@ -139,8 +139,9 @@ export class ServerInstance {
     /**
      * Called when the server stops
      */
-    private onServerEnd(): void {
-        console.log('server ended')
+    private onServerClose(): void {
+        console.log('server closed')
+        this.holepunchServer.close()
     }
 
     /**
