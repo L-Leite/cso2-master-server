@@ -10,8 +10,8 @@ import { Uint64LE } from 'int64-buffer'
 export class OutInventoryItem extends OutInventoryBaseItem {
     private unk06: Uint64LE
 
-    constructor(itemNum: number, itemId: number) {
-        super(itemNum, itemId)
+    constructor(itemNum: number, itemId: number, itemCount: number) {
+        super(itemNum, itemId, itemCount)
         this.unk06 = new Uint64LE(0)
     }
 

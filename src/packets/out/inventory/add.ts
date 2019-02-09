@@ -3,6 +3,8 @@ import { OutInventoryItem } from 'packets/out/inventory/item'
 
 import { OutPacketBase } from 'packets/out/packet'
 
+import { UserInventoryItem } from 'user/userinventoryitem'
+
 /**
  * same as OutInventoryCreate
  * was used to add the base weapons (glock, usp, scout, ...)
@@ -12,12 +14,12 @@ import { OutPacketBase } from 'packets/out/packet'
 export class OutInventoryAdd {
     private items: OutInventoryBaseItem[]
 
-    constructor(items: number[]) {
+    constructor(items: UserInventoryItem[]) {
         this.items = []
 
         let curItem: number = 0
         for (const item of items) {
-            this.items.push(new OutInventoryItem(curItem++, item))
+            this.items.push(new OutInventoryItem(curItem++, item.id, item.count))
         }
     }
 

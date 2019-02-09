@@ -6,6 +6,8 @@ import { OutPacketBase } from 'packets/out/packet'
 import { OutInventoryAdd } from 'packets/out/inventory/add'
 import { OutInventoryCreate } from 'packets/out/inventory/create'
 
+import { UserInventoryItem } from 'user/userinventoryitem'
+
 import { ExtendedSocket } from 'extendedsocket'
 
 /**
@@ -17,7 +19,7 @@ export class OutInventoryPacket extends OutPacketBase {
         super(socket, null)
     }
 
-    public createInventory(items: number[]): Buffer {
+    public createInventory(items: UserInventoryItem[]): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 80, incrementAmount: 20 })
 
@@ -29,7 +31,7 @@ export class OutInventoryPacket extends OutPacketBase {
         return this.getData()
     }
 
-    public addInventory(items: number[]): Buffer {
+    public addInventory(items: UserInventoryItem[]): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 80, incrementAmount: 20 })
 

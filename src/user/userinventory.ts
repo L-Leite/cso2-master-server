@@ -1,8 +1,9 @@
 import { UserBuyMenu } from 'user/userbuymenu'
+import { UserInventoryItem } from 'user/userinventoryitem'
 import { UserLoadout } from 'user/userloadout'
 
 export class UserInventory {
-    public items: number[]
+    public items: UserInventoryItem[]
 
     public ctModelItem: number
     public terModelItem: number
@@ -45,74 +46,86 @@ export class UserInventory {
         this.items = this.getUserInventory().concat(this.getDefaultInventory())
     }
 
-    public getUserInventory(): number[] {
-        const userInv: number[] = []
+    public getUserInventory(): UserInventoryItem[] {
+        const userInv: UserInventoryItem[] = []
 
         // characters
         for (let i = 1005; i <= 1058; i++) {
-            userInv.push(i)
+            UserInventoryItem.pushItem(userInv, i)
         }
 
         // unlockable weapons
-        userInv.push(1, 5, 7, 9, 10, 11, 12, 16, 17, 20, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33)
+        const unlockables: number[] = [1, 5, 7, 9, 10, 11, 12, 16, 17, 20, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33]
+        for (const unlock of unlockables) {
+            UserInventoryItem.pushItem(userInv, unlock)
+        }
         for (let i = 44; i <= 163; i++) {
-            userInv.push(i)
+            UserInventoryItem.pushItem(userInv, i)
         }
 
         // zombie crush skills
-        for (let i = 2019; i <= 2028; i++) {
-            userInv.push(i)
+        /*for (let i = 2019; i <= 2023; i++) {
+            UserInventoryItem.pushItem(userInv, i)
+        }*/
+
+        UserInventoryItem.pushItem(userInv, 2019, 3)
+        UserInventoryItem.pushItem(userInv, 2020, 50)
+        for (let i = 2021; i <= 2023; i++) {
+            UserInventoryItem.pushItem(userInv, i)
         }
 
         // weapon skins
         for (let i = 5042; i <= 5370; i++) {
-            userInv.push(i)
+            UserInventoryItem.pushItem(userInv, i)
         }
-        userInv.push(5997)
+        UserInventoryItem.pushItem(userInv, 5997)
 
         // hats
         for (let i = 10001; i <= 10133; i++) {
-            userInv.push(i)
+            UserInventoryItem.pushItem(userInv, i)
         }
 
         // backpacks
         for (let i = 20001; i <= 20107; i++) {
-            userInv.push(i)
+            UserInventoryItem.pushItem(userInv, i)
         }
 
         // gloves
         for (let i = 30001; i <= 30027; i++) {
-            userInv.push(i)
+            UserInventoryItem.pushItem(userInv, i)
         }
 
         // footsteps
         for (let i = 40001; i <= 40025; i++) {
-            userInv.push(i)
+            UserInventoryItem.pushItem(userInv, i)
         }
 
         // sprays
         for (let i = 42001; i <= 42020; i++) {
-            userInv.push(i)
+            UserInventoryItem.pushItem(userInv, i)
         }
 
         // hide props
         for (let i = 49001; i <= 49010; i++) {
-            userInv.push(i)
+            UserInventoryItem.pushItem(userInv, i)
         }
-        userInv.push(49999)
+        UserInventoryItem.pushItem(userInv, 49999)
 
         // cards
         for (let i = 60001; i <= 60004; i++) {
-            userInv.push(i)
+            UserInventoryItem.pushItem(userInv, i)
         }
 
         return userInv
     }
 
-    public getDefaultInventory(): number[] {
-        const defaultInv: number[] = []
-        defaultInv.push(2, 3, 4, 6, 8, 13, 14, 15, 18, 19, 21, 23, 27, 34, 36, 37,
-            80, 128, 101, 1001, 1002, 1003, 1004, 49009, 49004)
+    public getDefaultInventory(): UserInventoryItem[] {
+        const defaultInv: UserInventoryItem[] = []
+        const defaults: number[] = [2, 3, 4, 6, 8, 13, 14, 15, 18, 19, 21, 23, 27, 34, 36, 37,
+            80, 128, 101, 1001, 1002, 1003, 1004, 49009, 49004]
+        for (const def of defaults) {
+            UserInventoryItem.pushItem(defaultInv, def)
+        }
         return defaultInv
     }
 

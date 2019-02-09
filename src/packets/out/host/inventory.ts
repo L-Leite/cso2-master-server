@@ -1,5 +1,7 @@
 import { OutPacketBase } from 'packets/out/packet'
 
+import { UserInventoryItem } from 'user/userinventoryitem'
+
 /**
  * sends an user's inventory to a host
  * @class OutHostPreloadInventory
@@ -12,15 +14,13 @@ export class OutHostSetInventory {
 
     // these are unconfirmed
     private numOfItems: number
-    private items: number[]
-    private itemsQuant: number[]
+    private items: UserInventoryItem[]
 
-    constructor(userId: number, items: number[]) {
+    constructor(userId: number, items: UserInventoryItem[]) {
         this.userId = userId
         this.unk00 = 0
 
         this.items = items
-        this.itemsQuant = []
         this.numOfItems = this.items.length
     }
 
@@ -30,12 +30,9 @@ export class OutHostSetInventory {
 
         outPacket.writeUInt16(this.numOfItems)
 
-        for (let i: number = 0; i < this.numOfItems; i++) {
-            const item: number = this.items[i]
-            const quant: number = 1 // this.itemQuant[i]
-
-            outPacket.writeUInt32(item)
-            outPacket.writeUInt16(quant)
+        for (const item of this.items) {
+            outPacket.writeUInt32(item.id)
+            outPacket.writeUInt16(item.count)
         }
     }
 }

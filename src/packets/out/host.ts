@@ -6,15 +6,15 @@ import { PacketId } from 'packets/definitions'
 import { HostPacketType } from 'packets/hostshared'
 
 import { User } from 'user/user'
-import { UserLoadout } from 'user/userloadout'
+import { UserInventoryItem } from 'user/userinventoryitem'
 
 import { ExtendedSocket } from 'extendedsocket'
 
+import { OutHostBuyMenu } from 'packets/out/host/buymenu'
 import { OutHostGameStart } from 'packets/out/host/gamestart'
 import { OutHostSetInventory } from 'packets/out/host/inventory'
 import { OutHostJoinHost } from 'packets/out/host/joinhost'
-import { OutHostBuyMenu } from './host/buymenu';
-import { OutHostLoadout } from './host/loadout'
+import { OutHostLoadout } from 'packets/out/host/loadout'
 
 /**
  * outgoing room host information
@@ -69,14 +69,14 @@ export class OutHostPacket extends OutPacketBase {
         return this.getData()
     }
 
-    public setInventory(userId: number, weapons: number[]): Buffer {
+    public setInventory(userId: number, items: UserInventoryItem[]): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 80, incrementAmount: 20 })
 
         this.buildHeader()
         this.writeUInt8(HostPacketType.SetInventory)
 
-        new OutHostSetInventory(userId, weapons).build(this)
+        new OutHostSetInventory(userId, items).build(this)
 
         return this.getData()
     }
