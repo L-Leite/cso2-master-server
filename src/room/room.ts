@@ -454,6 +454,21 @@ export class Room {
      * @returns the current room countdown number
      */
     public getCountdown(): number {
+        if (this.countingDown === false) {
+            console.warn('getCountdown: tried to get countdown without counting down'
+                + 'this is most likely a bug')
+            return 0
+        }
+
+        // make sure the countdown is inbounds
+        if (this.countdown > defaultCountdownNum
+            || this.countdown < 0) {
+            console.warn(
+                'getCountdown: our countdown is out of bounds. it\'s %i',
+                this.countdown)
+            this.countdown = 0
+        }
+
         return this.countdown
     }
 
