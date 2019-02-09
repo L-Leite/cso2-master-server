@@ -53,9 +53,14 @@ export class UserInventory {
             userInv.push(i)
         }
 
-        // other weapons
+        // unlockable weapons
         userInv.push(1, 5, 7, 9, 10, 11, 12, 16, 17, 20, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33)
         for (let i = 44; i <= 163; i++) {
+            userInv.push(i)
+        }
+
+        // zombie crush skills
+        for (let i = 2019; i <= 2028; i++) {
             userInv.push(i)
         }
 
