@@ -101,7 +101,17 @@ export class RoomSettings {
             this.startMoney = newSettings.startMoney
         }
         if (newSettings.maxPlayers != null) {
+            // reset bot number to 4 for each team when max players is changed
+            // and the old max players value is bigger than the new one
+            // this stops overflowing the max player number (where bots are included)
+            if (this.maxPlayers > newSettings.maxPlayers) {
+                if (this.botEnabled) {
+                    this.numCtBots = this.numTrBots = 4
+                }
+            }
+
             this.maxPlayers = newSettings.maxPlayers
+
         }
         if (newSettings.respawnTime != null) {
             this.respawnTime = newSettings.respawnTime
