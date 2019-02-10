@@ -259,7 +259,15 @@ export class Room {
             console.warn('getUserTeam: user not found!')
             return RoomTeamNum.Unknown
         }
-        return this.usersInfo.get(user).team
+
+        const info: RoomUser = this.usersInfo.get(user)
+
+        if (info == null) {
+            console.warn('getUserTeam: user "%s" room info not found!', user.userName)
+            return RoomTeamNum.Unknown
+        }
+
+        return info.team
     }
 
     /**
