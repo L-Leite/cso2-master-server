@@ -13,13 +13,13 @@ Used by this [client launcher](https://github.com/Ochii/cso2-launcher/).
 To run the server, you need:
 
 - [Node.js](https://nodejs.org/) (version 10 or better);
-- [A server build](https://github.com/Ochii/cso2-master-server/releases/latest).
+- A server build. You can download [prebuilt files here](https://github.com/Ochii/cso2-master-server/releases/latest) or you can [build it yourself](#building).
 
-Then, in a terminal instance:
+Then, in a terminal instance inside the server's directory, do:
 
 ```sh
-npm install --only=production # installs the required dependencies
-npm run start # starts the server
+npm install --only=production # installs the required dependencies (minimal dependencies)
+npm run start # starts the prebuilt server
 ```
 
 By the default, the server **will ask you which network interface to listen on**.
@@ -28,11 +28,12 @@ See the [command line arguments](#command-line-arguments) for more options.
 
 ## Building
 
-In a terminal instance:
+After downloading the source code, go to a terminal instance, inside the source code's directory and:
 
 ```sh
-npm install # installs the required dependencies (includes dev dependencies)
+npm install # installs the required dependencies
 npm run build # builds the server
+npm run start # starts the fresh server build
 ```
 
 ### Command line arguments
@@ -51,6 +52,10 @@ You can report a bug or look at list of known bugs at [issues](https://github.co
 ## Pull requests
 
 If you have any improvements that you would like to share or suggest about, have a look at [pull requests](https://github.com/Ochii/cso2-master-server/pulls).
+
+## Contributors
+
+- [JusicP](https://github.com/JusicP)
 
 ## License
 
