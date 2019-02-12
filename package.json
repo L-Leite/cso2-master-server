@@ -1,6 +1,6 @@
 {
   "name": "cso2-master-server",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "repository": "github:Ochii/cso2-master-server",
   "description": "A master server for Nexon's Counter-Strike: Online 2",
   "author": "Luís Leite",
@@ -11,7 +11,8 @@
     "build": "npm run tslint && npm run build-ts",
     "build-ts": "tsc",
     "watch-ts": "tsc -w",
-    "tslint": "tslint -c tslint.json -p tsconfig.json"
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "write-version": "cross-var \"echo $npm_package_version > version.txt\""
   },
   "dependencies": {
     "app-module-path": "^2.2.0",
@@ -29,6 +30,7 @@
     "@types/node": "^10.12.24",
     "@types/stream-buffers": "^3.0.2",
     "@types/uuid": "^3.4.4",
+    "cross-var": "^1.1.0",
     "ts-node": "^7.0.1",
     "tslint": "^5.12.1",
     "typescript": "^3.3.3"

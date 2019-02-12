@@ -336,6 +336,11 @@ export class ChannelManager {
 
         const readyStatus: RoomReadyStatus = currentRoom.toggleUserReadyStatus(user)
 
+        if (readyStatus == null) {
+            console.warn('failed to set user "%s"\'sready status')
+            return false
+        }
+
         // inform every user in the room of the changes
         currentRoom.recurseUsers((u: User): void => {
             currentRoom.sendUserReadyStatusTo(u, user)

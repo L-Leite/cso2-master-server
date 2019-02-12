@@ -340,10 +340,18 @@ export class Room {
      */
     public getUserReadyStatus(user: User): RoomReadyStatus {
         if (this.hasUser(user) === false) {
-            console.warn('getUserReady: user not found!')
-            return RoomReadyStatus.No
+            console.warn('getUserReady: user "%s" not found!', user.userName)
+            return null
         }
-        return this.usersInfo.get(user).ready
+
+        const userInfo: RoomUser = this.usersInfo.get(user)
+
+        if (userInfo == null) {
+            console.warn('toggleUserReadyStatus: couldnt get "%s"\'s userinfo', user.userName)
+            return null
+        }
+
+        return userInfo.ready
     }
 
     /**
@@ -352,10 +360,18 @@ export class Room {
      */
     public isUserReady(user: User): boolean {
         if (this.hasUser(user) === false) {
-            console.warn('isUserReady: user not found!')
-            return false
+            console.warn('isUserReady: user "%s" not found!', user.userName)
+            return null
         }
-        return this.usersInfo.get(user).ready === RoomReadyStatus.Yes
+
+        const userInfo: RoomUser = this.usersInfo.get(user)
+
+        if (userInfo == null) {
+            console.warn('isUserReady: couldnt get "%s"\'s userinfo', user.userName)
+            return null
+        }
+
+        return userInfo.ready === RoomReadyStatus.Yes
     }
 
     /**
@@ -378,10 +394,18 @@ export class Room {
      */
     public setUserToTeam(user: User, newTeam: RoomTeamNum): void {
         if (this.hasUser(user) === false) {
-            console.warn('setUserToTeam: user not found!')
+            console.warn('setUserToTeam: user "%s" not found!', user.userName)
             return
         }
-        this.usersInfo.get(user).team = newTeam
+
+        const userInfo: RoomUser = this.usersInfo.get(user)
+
+        if (userInfo == null) {
+            console.warn('setUserToTeam: couldnt get "%s"\'s userinfo', user.userName)
+            return null
+        }
+
+        userInfo.team = newTeam
     }
 
     /**
@@ -393,15 +417,21 @@ export class Room {
     public toggleUserReadyStatus(user: User): RoomReadyStatus {
         if (this.hasUser(user) === false) {
             console.warn('toggleUserReadyStatus: user not found!')
-            return
+            return null
         }
 
         if (user === this.host) {
             console.warn('toggleUserReadyStatus: host tried to toggle ready')
-            return
+            return null
         }
 
         const userInfo: RoomUser = this.usersInfo.get(user)
+
+        if (userInfo == null) {
+            console.warn('toggleUserReadyStatus: couldnt get userinfo')
+            return null
+        }
+
         const curStatus: RoomReadyStatus = userInfo.ready
         const newStatus: RoomReadyStatus =
             curStatus === RoomReadyStatus.No
@@ -581,6 +611,13 @@ export class Room {
      */
     public sendRoomSettingsTo(user: User): void {
         const newSettings: NewRoomSettings = NewRoomSettings.fromRoom(this)
+
+        if (newSettings == null) {
+            console.warn('sendRoomSettingsTo: couldnt get room "%s"\'s new settings for user "%s"',
+                this.settings.roomName, user.userName)
+            return null
+        }
+
         const reply: Buffer = new OutRoomPacket(user.socket).updateSettings(newSettings)
         user.socket.send(reply)
     }
@@ -601,6 +638,13 @@ export class Room {
      */
     public sendPlayerReadyStatusTo(user: User, player: User): void {
         const status: RoomReadyStatus = this.getUserReadyStatus(player)
+
+        if (status == null) {
+            console.warn('sendPlayerReadyStatusTo: couldnt get user "%s"\'s status (room "%s" room id %i)',
+                user.userName, this.settings.roomName, this.id)
+            return null
+        }
+
         const reply: Buffer = new OutRoomPacket(user.socket).setUserReadyStatus(player, status)
         user.socket.send(reply)
     }
@@ -612,6 +656,13 @@ export class Room {
      */
     public sendNewUserTo(user: User, newUser: User): void {
         const team: RoomTeamNum = this.getUserTeam(newUser)
+
+        if (status == null) {
+            console.warn('sendNewUserTo: couldnt get user "%s"\'s team (room "%s" room id %i)',
+                user.userName, this.settings.roomName, this.id)
+            return null
+        }
+
         const playerReply: Buffer = new OutRoomPacket(user.socket).playerJoin(newUser, team)
         user.socket.send(playerReply)
     }
@@ -623,6 +674,13 @@ export class Room {
      */
     public sendUserReadyStatusTo(user: User, player: User): void {
         const ready: RoomReadyStatus = this.getUserReadyStatus(player)
+
+        if (status == null) {
+            console.warn('sendUserReadyStatusTo: couldnt get user "%s"\'s status (room "%s" room id %i)',
+                user.userName, this.settings.roomName, this.id)
+            return null
+        }
+
         const reply: Buffer = new OutRoomPacket(user.socket).setUserReadyStatus(player, ready)
         user.socket.send(reply)
     }
