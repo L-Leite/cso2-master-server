@@ -18,7 +18,7 @@ jobs:
         - npm run write-version
         # setup vars
         - export GIT_COMMIT_HASH=$(git rev-parse --short=8 HEAD)
-        - export GIT_BRANCH=$(git branch | grep \* | cut -d ' ' -f2)        
+        - export GIT_BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}       
         - export SERVER_VERSION=$(cat version.txt)
         - export NEW_TAG="$SERVER_VERSION-$GIT_COMMIT_HASH-$GIT_BRANCH"
         - git tag $NEW_TAG
