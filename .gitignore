@@ -78,3 +78,6 @@ typings/
 
 # logged packets
 /packets/
+
+# version generated
+version.txt
