@@ -336,7 +336,7 @@ export class ChannelManager {
         const readyStatus: RoomReadyStatus = currentRoom.toggleUserReadyStatus(user)
 
         if (readyStatus == null) {
-            console.warn('failed to set user "%s"\'sready status')
+            console.warn('failed to set user "%s"\'sready status', user.userName)
             return false
         }
 

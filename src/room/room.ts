@@ -482,11 +482,11 @@ export class Room {
             this.countingDown = true
         }
 
-        if (this.countdown !== hostNextNum) {
-            console.warn('Room: host\'s countdown does not match ours')
-        }
-
         this.countdown--
+
+        if (this.countdown !== hostNextNum) {
+            console.warn('Room: host\'s countdown does not match ours. ours %i host %i', this.countdown, hostNextNum)
+        }
     }
 
     /**
