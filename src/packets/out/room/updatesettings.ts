@@ -115,7 +115,7 @@ export class OutRoomUpdateSettings {
             const botEnabled: number = this.settings.areBotsEnabled as unknown as number
             outPacket.writeUInt8(botEnabled)
 
-            if (this.settings.areBotsEnabled === true) {
+            if (botEnabled === 1) {
                 outPacket.writeUInt8(this.settings.botDifficulty)
                 outPacket.writeUInt8(this.settings.numCtBots)
                 outPacket.writeUInt8(this.settings.numTrBots)
