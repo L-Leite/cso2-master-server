@@ -784,7 +784,7 @@ export class Room {
     public sendNewUserTo(user: User, newUser: User): void {
         const team: RoomTeamNum = this.getUserTeam(newUser)
 
-        if (status == null) {
+        if (team == null) {
             console.warn('sendNewUserTo: couldnt get user "%s"\'s team (room "%s" room id %i)',
                 user.userName, this.settings.roomName, this.id)
             return null
@@ -802,7 +802,7 @@ export class Room {
     public sendUserReadyStatusTo(user: User, player: User): void {
         const ready: RoomReadyStatus = this.getUserReadyStatus(player)
 
-        if (status == null) {
+        if (ready == null) {
             console.warn('sendUserReadyStatusTo: couldnt get user "%s"\'s status (room "%s" room id %i)',
                 user.userName, this.settings.roomName, this.id)
             return null
