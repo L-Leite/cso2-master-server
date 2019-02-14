@@ -64,7 +64,7 @@ export class InRoomUpdateSettings {
     public multiMaps: number[]
     // end of flags & 0x20000
     // flags & 0x40000
-    public teamBalance: number
+    public teamBalanceType: number
     // end of flags & 0x40000
     // flags & 0x80000
     public unk29: number
@@ -204,7 +204,7 @@ export class InRoomUpdateSettings {
             }
         }
         if (lowFlag & 0x40000) {
-            this.teamBalance = inPacket.readUInt8()
+            this.teamBalanceType = inPacket.readUInt8()
         }
         if (lowFlag & 0x80000) {
             this.unk29 = inPacket.readUInt8()

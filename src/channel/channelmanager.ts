@@ -1,7 +1,6 @@
 import { Channel } from 'channel/channel'
 import { ChannelServer } from 'channel/channelserver'
 
-import { NewRoomSettings } from 'room/newroomsettings'
 import { Room, RoomReadyStatus, RoomStatus } from 'room/room'
 
 import { User } from 'user/user'
@@ -449,12 +448,11 @@ export class ChannelManager {
             return false
         }
 
-        const newSettings: NewRoomSettings = NewRoomSettings.from(newSettingsReq)
-        currentRoom.settings.update(newSettings)
+        currentRoom.updateSettings(newSettingsReq)
 
         // inform every user in the room of the changes
         currentRoom.recurseUsers((u: User): void => {
-            currentRoom.sendUpdateRoomSettingsTo(u, NewRoomSettings.fromRoom(currentRoom))
+            currentRoom.sendRoomSettingsTo(u)
         })
 
         console.log('host "%s" updated room "%s"\'s settings (id: %i)',

@@ -1,9 +1,10 @@
 import { Channel } from 'channel/channel'
 import { User } from 'user/user'
 
-import { NewRoomSettings } from 'room/newroomsettings'
 import { RoomSettings } from 'room/roomsettings'
 import { RoomUser } from 'room/roomuser'
+
+import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
 
 import { OutHostPacket } from 'packets/out/host'
 import { OutRoomPacket } from 'packets/out/room'
@@ -323,7 +324,7 @@ export class Room {
     public getNumOfReadyPlayers(): number {
         let botPlayers: number = this.settings.numCtBots + this.settings.numTrBots
 
-        if (this.settings.teamBalance === RoomTeamBalance.WithBots) {
+        if (this.settings.teamBalanceType === RoomTeamBalance.WithBots) {
             const numCts: number = this.getNumOfRealCts()
             const numTer: number = this.getNumOfRealTerrorists()
 
@@ -606,28 +607,154 @@ export class Room {
     }
 
     /**
+     * update room's settings
+     * it's in Room instead of RoomSettings so we can read the room's data
+     * @param newSettings the requested new room's settings
+     */
+    public updateSettings(newSettings: InRoomUpdateSettings): void {
+        if (newSettings.roomName != null) {
+            this.settings.roomName = newSettings.roomName
+        }
+        if (newSettings.gameModeId != null) {
+            this.settings.gameModeId = newSettings.gameModeId
+        }
+        if (newSettings.mapId != null) {
+            this.settings.mapId = newSettings.mapId
+        }
+        if (newSettings.killLimit != null) {
+            this.settings.killLimit = newSettings.killLimit
+        }
+        if (newSettings.winLimit != null) {
+            this.settings.winLimit = newSettings.winLimit
+        }
+        if (newSettings.startMoney != null) {
+            this.settings.startMoney = newSettings.startMoney
+        }
+        if (newSettings.maxPlayers != null) {
+            this.updateMaxPlayers(newSettings.maxPlayers)
+        }
+        if (newSettings.respawnTime != null) {
+            this.settings.respawnTime = newSettings.respawnTime
+        }
+        if (newSettings.changeTeams != null) {
+            this.settings.changeTeams = newSettings.changeTeams
+        }
+        if (newSettings.forceCamera != null) {
+            this.settings.forceCamera = newSettings.forceCamera
+        }
+        if (newSettings.teamBalanceType != null) {
+            this.settings.teamBalanceType = newSettings.teamBalanceType
+        }
+        if (newSettings.weaponRestrictions != null) {
+            this.settings.weaponRestrictions = newSettings.weaponRestrictions
+        }
+        if (newSettings.hltvEnabled != null) {
+            this.settings.hltvEnabled = newSettings.hltvEnabled
+        }
+        if (newSettings.mapCycleType != null) {
+            this.settings.mapCycleType = newSettings.mapCycleType
+        }
+        if (newSettings.multiMaps != null) {
+            this.settings.multiMaps = newSettings.multiMaps
+        }
+        // which flag enabled this?
+        /*if (newSettings.nextMapEnabled != null) {
+            this.settings.nextMapEnabled = newSettings.nextMapEnabled
+        }*/
+        if (newSettings.botEnabled != null) {
+            this.updateBotEnabled(newSettings.botEnabled, newSettings.botDifficulty,
+                newSettings.numCtBots, newSettings.numTrBots)
+        }
+
+        if (newSettings.unk00 != null) {
+            this.settings.unk00 = newSettings.unk00
+        }
+        if (newSettings.unk01 != null) {
+            this.settings.unk01 = newSettings.unk01
+        }
+        if (newSettings.unk02 != null) {
+            this.settings.unk02 = newSettings.unk02
+        }
+        if (newSettings.unk03 != null) {
+            this.settings.unk03 = newSettings.unk03
+        }
+        if (newSettings.unk09 != null) {
+            this.settings.unk09 = newSettings.unk09
+        }
+        if (newSettings.unk10 != null) {
+            this.settings.unk10 = newSettings.unk10
+        }
+        if (newSettings.unk13 != null) {
+            this.settings.unk13 = newSettings.unk13
+        }
+        if (newSettings.unk17 != null) {
+            this.settings.unk17 = newSettings.unk17
+        }
+        if (newSettings.unk18 != null) {
+            this.settings.unk18 = newSettings.unk18
+        }
+        if (newSettings.unk20 != null) {
+            this.settings.unk20 = newSettings.unk20
+        }
+        if (newSettings.unk21 != null) {
+            this.settings.unk21 = newSettings.unk21
+        }
+        if (newSettings.unk23 != null) {
+            this.settings.unk23 = newSettings.unk23
+        }
+        if (newSettings.unk24 != null) {
+            this.settings.unk24 = newSettings.unk24
+        }
+        if (newSettings.unk25 != null) {
+            this.settings.unk25 = newSettings.unk25
+        }
+        if (newSettings.unk29 != null) {
+            this.settings.unk29 = newSettings.unk29
+        }
+        if (newSettings.unk30 != null) {
+            this.settings.unk30 = newSettings.unk30
+        }
+        if (newSettings.unk31 != null) {
+            this.settings.unk31 = newSettings.unk31
+        }
+        if (newSettings.unk32 != null) {
+            this.settings.unk32 = newSettings.unk32
+        }
+        if (newSettings.unk33 != null) {
+            this.settings.unk33 = newSettings.unk33
+        }
+        if (newSettings.unk35 != null) {
+            this.settings.unk35 = newSettings.unk35
+        }
+        if (newSettings.unk36 != null) {
+            this.settings.unk36 = newSettings.unk36
+        }
+        if (newSettings.unk37 != null) {
+            this.settings.unk37 = newSettings.unk37
+        }
+        if (newSettings.unk38 != null) {
+            this.settings.unk38 = newSettings.unk38
+        }
+        if (newSettings.unk39 != null) {
+            this.settings.unk39 = newSettings.unk39
+        }
+        if (newSettings.unk40 != null) {
+            this.settings.unk40 = newSettings.unk40
+        }
+        if (newSettings.unk43 != null) {
+            this.settings.unk43 = newSettings.unk43
+        }
+        if (newSettings.unk45 != null) {
+            this.settings.unk45 = newSettings.unk45
+        }
+    }
+
+    /**
      * send to the user the room's settings
      * @param user the target user
      */
     public sendRoomSettingsTo(user: User): void {
-        const newSettings: NewRoomSettings = NewRoomSettings.fromRoom(this)
-
-        if (newSettings == null) {
-            console.warn('sendRoomSettingsTo: couldnt get room "%s"\'s new settings for user "%s"',
-                this.settings.roomName, user.userName)
-            return null
-        }
-
-        const reply: Buffer = new OutRoomPacket(user.socket).updateSettings(newSettings)
-        user.socket.send(reply)
-    }
-
-    /**
-     * send to the user updated room's settings
-     * @param user the target user
-     */
-    public sendUpdateRoomSettingsTo(user: User, newSettings: NewRoomSettings): void {
-        const reply: Buffer = new OutRoomPacket(user.socket).updateSettings(newSettings)
+        const reply: Buffer = new OutRoomPacket(user.socket).updateSettings(this.settings)
         user.socket.send(reply)
     }
 
@@ -765,6 +892,43 @@ export class Room {
             new OutRoomPacket(user.socket).setGameResult()
         user.socket.send(stopReply)
         user.socket.send(resultReply)
+    }
+
+    /**
+     * handle max players setting's update event
+     * @param newMaxPlayers the requested new max players number
+     */
+    private updateMaxPlayers(newMaxPlayers: number): void {
+        // reset bot number to 4 for each team when max players is changed
+        // and the old max players value is bigger than the new one
+        // this stops overflowing the max player number (where bots are included)
+        if (this.settings.maxPlayers > newMaxPlayers) {
+            if (this.settings.areBotsEnabled) {
+                this.settings.numCtBots = this.settings.numTrBots = 4
+            }
+        }
+
+        this.settings.maxPlayers = newMaxPlayers
+    }
+
+    /**
+     * handle bot enabled setting's update event
+     * @param newMaxPlayers should enable the bots?
+     */
+    private updateBotEnabled(botEnabled: number, botDifficulty: number,
+                             ctBots: number, terBots: number): void {
+        const isBotEnabled: boolean = botEnabled as unknown as boolean
+        this.settings.areBotsEnabled = isBotEnabled
+
+        if (isBotEnabled) {
+            this.settings.botDifficulty = botDifficulty
+            this.settings.numCtBots = ctBots
+            this.settings.numTrBots = terBots
+        } else {
+            this.settings.botDifficulty = 0
+            this.settings.numCtBots = 0
+            this.settings.numTrBots = 0
+        }
     }
 
     /**

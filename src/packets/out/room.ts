@@ -3,7 +3,6 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
 
-import { NewRoomSettings } from 'room/newroomsettings'
 import { Room, RoomReadyStatus, RoomTeamNum } from 'room/room'
 import { User } from 'user/user'
 
@@ -18,6 +17,7 @@ import { OutRoomSetUserTeam } from 'packets/out/room/setuserteam'
 import { OutRoomUpdateSettings } from 'packets/out/room/updatesettings'
 
 import { ExtendedSocket } from 'extendedsocket'
+import { RoomSettings } from 'room/roomsettings';
 
 enum OutRoomPacketType {
     CreateAndJoin = 0,
@@ -88,7 +88,7 @@ export class OutRoomPacket extends OutPacketBase {
         return this.getData()
     }
 
-    public updateSettings(newSettings: NewRoomSettings): Buffer {
+    public updateSettings(newSettings: RoomSettings): Buffer {
         this.outStream = new WritableStreamBuffer(
             { initialSize: 30, incrementAmount: 15 })
 
