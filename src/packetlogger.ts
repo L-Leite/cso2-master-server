@@ -88,7 +88,7 @@ export class PacketLogger {
         const packetPath: string = this.outPath +
             sourceSocket.uuid +
             '_' +
-            padNumber(packet.sequence) +
+            padNumber(sourceSocket.getRealSeq()) +
             '-' +
             packet.id +
             '.bin'

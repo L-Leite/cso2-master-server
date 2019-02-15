@@ -2,7 +2,7 @@ import net from 'net'
 
 import { PacketLogger } from 'packetlogger'
 
-const MIN_SEQUENCE: number = 1
+const MIN_SEQUENCE: number = 0
 const MAX_SEQUENCE: number = 255
 
 /**
@@ -19,8 +19,10 @@ export class ExtendedSocket extends net.Socket {
 
     // an uuid to identify the socket
     public uuid: string
-    // the current packet sequence
+    // the current packet sequence (1 byte long)
     private seq: number
+    // the real current packet sequence, used by logger
+    private realSeq: number
     private packetDumper: PacketLogger
 
     /**
@@ -32,6 +34,7 @@ export class ExtendedSocket extends net.Socket {
             this.resetReq()
         }
 
+        this.realSeq++
         return this.seq++
     }
 
@@ -40,6 +43,13 @@ export class ExtendedSocket extends net.Socket {
      */
     public getCurSeq(): number {
         return this.seq
+    }
+
+    /**
+     * get the current real sequence
+     */
+    public getRealSeq(): number {
+        return this.realSeq
     }
 
     /**
