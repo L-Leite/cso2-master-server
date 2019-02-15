@@ -53,6 +53,10 @@ export class RoomSettings {
     public unk45: number
 
     constructor(options?: IRoomOptions) {
+        if (options == null) {
+            return
+        }
+
         this.roomName = options.roomName ? options.roomName : 'Some room'
         this.gameModeId = options.gameModeId ? options.gameModeId : 0
         this.mapId = options.mapId ? options.mapId : 1

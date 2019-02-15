@@ -448,11 +448,11 @@ export class ChannelManager {
             return false
         }
 
-        currentRoom.updateSettings(newSettingsReq)
+        const updatedSettings = currentRoom.updateSettings(newSettingsReq)
 
         // inform every user in the room of the changes
         currentRoom.recurseUsers((u: User): void => {
-            currentRoom.sendRoomSettingsTo(u)
+            currentRoom.sendUpdateRoomSettingsTo(u, updatedSettings)
         })
 
         console.log('host "%s" updated room "%s"\'s settings (id: %i)',
