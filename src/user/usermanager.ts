@@ -118,8 +118,10 @@ export class UserManager {
             currentRoom.settings.roomName, currentRoom.id)
 
         currentRoom.setStatus(RoomStatus.Waiting)
+        currentRoom.resetIngameUsersReadyStatus()
 
         currentRoom.recurseUsers((u: User): void => {
+            currentRoom.sendRoomUsersReadyStatusTo(u)
             currentRoom.sendGameEnd(u)
         })
 

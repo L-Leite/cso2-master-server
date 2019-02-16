@@ -442,6 +442,25 @@ export class Room {
     }
 
     /**
+     * resets the ready status of ingame users
+     * @returns true if reset successfully, false if not
+     */
+    public resetIngameUsersReadyStatus(): boolean {
+        for (const user of this.users) {
+            const userInfo: RoomUser = this.usersInfo.get(user)
+
+            if (userInfo == null) {
+                console.warn('resetIngameUsersReadyStatus: couldnt get userinfo')
+                return false
+            }
+
+            userInfo.ready = RoomReadyStatus.No
+        }
+
+        return true
+    }
+
+    /**
      * get's a room's status
      * @returns the room's status
      */
@@ -815,24 +834,6 @@ export class Room {
     }
 
     /**
-     * send the room's data to the user that joined the room
-     * @param user the player to send the other player's ready status
-     * @param player the player whose ready status will be sent
-     */
-    public sendPlayerReadyStatusTo(user: User, player: User): void {
-        const status: RoomReadyStatus = this.getUserReadyStatus(player)
-
-        if (status == null) {
-            console.warn('sendPlayerReadyStatusTo: couldnt get user "%s"\'s status (room "%s" room id %i)',
-                user.userName, this.settings.roomName, this.id)
-            return null
-        }
-
-        const reply: Buffer = new OutRoomPacket(user.socket).setUserReadyStatus(player, status)
-        user.socket.send(reply)
-    }
-
-    /**
      * tell the user about a new user in the room
      * @param user the player to send the other player's ready status
      * @param newUser the player whose ready status will be sent
@@ -851,7 +852,7 @@ export class Room {
     }
 
     /**
-     * tell the user about a new user in the room
+     * send an user's ready status to another user
      * @param user the player to send the other player's ready status
      * @param player the player whose ready status will be sent
      */
@@ -866,6 +867,16 @@ export class Room {
 
         const reply: Buffer = new OutRoomPacket(user.socket).setUserReadyStatus(player, ready)
         user.socket.send(reply)
+    }
+
+    /**
+     * send everyone's ready status to an user
+     * @param targetUser the user to send the info to
+     */
+    public sendRoomUsersReadyStatusTo(targetUser: User): void {
+        this.recurseUsers((u: User): void => {
+            this.sendUserReadyStatusTo(targetUser, u)
+        })
     }
 
     /**

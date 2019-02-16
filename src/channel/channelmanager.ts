@@ -274,7 +274,7 @@ export class ChannelManager {
         // tell other room members about the new addition
         desiredRoom.recurseUsers((u: User): void => {
             if (u !== user) {
-                desiredRoom.sendPlayerReadyStatusTo(user, u)
+                desiredRoom.sendUserReadyStatusTo(user, u)
                 desiredRoom.sendNewUserTo(u, user)
             }
         })
