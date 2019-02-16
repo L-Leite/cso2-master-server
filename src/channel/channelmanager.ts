@@ -328,11 +328,6 @@ export class ChannelManager {
             return false
         }
 
-        if (currentRoom.isGlobalCountdownInProgress()) {
-            console.warn('user "%s" tried toggle ready status, although it isn\'t in any', user.userName)
-            return false
-        }
-
         const readyStatus: RoomReadyStatus = currentRoom.toggleUserReadyStatus(user)
 
         if (readyStatus == null) {
@@ -394,9 +389,12 @@ export class ChannelManager {
 
         room.stopCountdown()
         room.setStatus(RoomStatus.Ingame)
+        room.setUserIngame(host, true)
 
         room.recurseNonHostUsers((u: User): void => {
+            room.sendRoomStatusTo(u)
             if (room.isUserReady(u) === true) {
+                room.setUserIngame(u, true)
                 room.sendConnectHostTo(u, host)
                 room.sendGuestDataTo(host, u)
             }
@@ -412,6 +410,8 @@ export class ChannelManager {
     private handleUserGameStart(user: User, room: Room): void {
         const host: User = room.host
 
+        room.sendRoomStatusTo(user)
+        room.setUserIngame(user, true)
         room.sendConnectHostTo(user, host)
         room.sendGuestDataTo(host, user)
 

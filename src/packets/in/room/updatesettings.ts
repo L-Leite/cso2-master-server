@@ -2,6 +2,8 @@ import { Uint64LE } from 'int64-buffer'
 
 import { InPacketBase } from 'packets/in/packet'
 
+import { RoomStatus } from 'room/room'
+
 /**
  * a host's request to change a room's settings
  * @class InRoomUpdateSettings
@@ -48,7 +50,7 @@ export class InRoomUpdateSettings {
     public weaponRestrictions: number
     // end of flags & 0x2000
     // flags & 0x4000
-    public unk20: number
+    public status: RoomStatus
     // end of flags & 0x4000
     // flags & 0x8000
     public unk21: number
@@ -103,7 +105,7 @@ export class InRoomUpdateSettings {
     public unk39: number
     // end of flags & 0x20000000
     // flags & 0x40000000
-    public unk40: number
+    public isIngame: boolean
     // end of flags & 0x40000000
     // flags & 0x80000000
     public startMoney: number
@@ -185,7 +187,7 @@ export class InRoomUpdateSettings {
             this.weaponRestrictions = inPacket.readUInt8()
         }
         if (lowFlag & 0x4000) {
-            this.unk20 = inPacket.readUInt8()
+            this.status = inPacket.readUInt8()
         }
         if (lowFlag & 0x8000) {
             this.unk21 = inPacket.readUInt8()
@@ -252,7 +254,7 @@ export class InRoomUpdateSettings {
         }
 
         if (lowFlag & 0x40000000) {
-            this.unk40 = inPacket.readUInt8()
+            this.isIngame = inPacket.readUInt8() as unknown as boolean
         }
 
         if (lowFlag & 0x80000000) {

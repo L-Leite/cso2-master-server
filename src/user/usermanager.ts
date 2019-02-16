@@ -121,8 +121,12 @@ export class UserManager {
         currentRoom.resetIngameUsersReadyStatus()
 
         currentRoom.recurseUsers((u: User): void => {
+            currentRoom.sendRoomStatusTo(u)
             currentRoom.sendRoomUsersReadyStatusTo(u)
-            currentRoom.sendGameEnd(u)
+            if (currentRoom.isUserIngame(u) === true) {
+                currentRoom.sendGameEnd(u)
+                currentRoom.setUserIngame(u, false)
+            }
         })
 
         return true

@@ -1,4 +1,4 @@
-import { IRoomOptions, RoomGamemode, RoomTeamBalance } from 'room/room'
+import { IRoomOptions, RoomGamemode, RoomStatus, RoomTeamBalance } from 'room/room'
 
 export class RoomSettings {
     public roomName: string
@@ -16,6 +16,7 @@ export class RoomSettings {
     public respawnTime: number
     public teamBalanceType: RoomTeamBalance
     public weaponRestrictions: number
+    public status: RoomStatus
     public hltvEnabled: number
     public mapCycleType: number
     public multiMaps: number[]
@@ -23,6 +24,7 @@ export class RoomSettings {
     public botDifficulty: number
     public numCtBots: number
     public numTrBots: number
+    public isIngame: boolean
 
     public unk00: number
     public unk01: number
@@ -33,7 +35,6 @@ export class RoomSettings {
     public unk13: number
     public unk17: number
     public unk18: number
-    public unk20: number
     public unk21: number
     public unk23: number
     public unk24: number
@@ -48,7 +49,6 @@ export class RoomSettings {
     public unk37: number
     public unk38: number
     public unk39: number
-    public unk40: number
     public unk43: number
     public unk45: number
 
@@ -72,6 +72,7 @@ export class RoomSettings {
         this.respawnTime = options.respawnTime ? options.respawnTime : 3
         this.teamBalanceType = options.teamBalance ? options.teamBalance : 0
         this.weaponRestrictions = options.weaponRestrictions ? options.weaponRestrictions : 0
+        this.status = RoomStatus.Waiting
         this.hltvEnabled = options.hltvEnabled ? options.hltvEnabled : 0
         this.mapCycleType = 1
         this.multiMaps = []
@@ -79,5 +80,6 @@ export class RoomSettings {
         this.numCtBots = 0
         this.numTrBots = 0
         this.botDifficulty = 0
+        this.isIngame = false
     }
 }

@@ -76,7 +76,7 @@ export class OutRoomUpdateSettings {
             outPacket.writeUInt8(this.settings.weaponRestrictions)
         }
         if (lowFlag & 0x4000) {
-            outPacket.writeUInt8(this.settings.unk20)
+            outPacket.writeUInt8(this.settings.status)
         }
         if (lowFlag & 0x8000) {
             outPacket.writeUInt8(this.settings.unk21)
@@ -143,7 +143,7 @@ export class OutRoomUpdateSettings {
         }
 
         if (lowFlag & 0x40000000) {
-            outPacket.writeUInt8(this.settings.unk40)
+            outPacket.writeUInt8(this.settings.isIngame as unknown as number)
         }
 
         if (lowFlag & 0x80000000) {
@@ -219,7 +219,7 @@ export class OutRoomUpdateSettings {
         if (this.settings.weaponRestrictions != null) {
             lowFlag |= 0x2000
         }
-        if (this.settings.unk20 != null) {
+        if (this.settings.status != null) {
             lowFlag |= 0x4000
         }
         if (this.settings.unk21 != null
@@ -276,7 +276,7 @@ export class OutRoomUpdateSettings {
             lowFlag |= 0x20000000
         }
 
-        if (this.settings.unk40 != null) {
+        if (this.settings.isIngame != null) {
             lowFlag |= 0x40000000
         }
 

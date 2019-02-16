@@ -136,8 +136,6 @@ export class Room {
     private emptyRoomCallback: (emptyRoom: Room, channel: Channel) => void
     private parentChannel: Channel
 
-    private status: RoomStatus
-
     private countingDown: boolean
     private countdown: number
 
@@ -153,8 +151,6 @@ export class Room {
         this.emptyRoomCallback = emptyRoomCallback
 
         this.settings = new RoomSettings(options)
-
-        this.status = RoomStatus.Waiting
 
         this.countingDown = false
         this.countdown = defaultCountdownNum
@@ -376,6 +372,26 @@ export class Room {
     }
 
     /**
+     * is the user ingame?
+     * @param user the target user
+     */
+    public isUserIngame(user: User): boolean {
+        if (this.hasUser(user) === false) {
+            console.warn('isUserIngame: user "%s" not found!', user.userName)
+            return false
+        }
+
+        const userInfo: RoomUser = this.usersInfo.get(user)
+
+        if (userInfo == null) {
+            console.warn('isUserIngame: couldnt get "%s"\'s userinfo', user.userName)
+            return false
+        }
+
+        return userInfo.isIngame
+    }
+
+    /**
      * checks if the room's users are ready
      * @returns true if everyone is ready, false if not
      */
@@ -407,6 +423,27 @@ export class Room {
         }
 
         userInfo.team = newTeam
+    }
+
+    /**
+     * set's an user's ingame status
+     * @param user the target user
+     * @param ingame the new ingame status
+     */
+    public setUserIngame(user: User, ingame: boolean): void {
+        if (this.hasUser(user) === false) {
+            console.warn('setUserIngame: user "%s" not found!', user.userName)
+            return
+        }
+
+        const userInfo: RoomUser = this.usersInfo.get(user)
+
+        if (userInfo == null) {
+            console.warn('setUserIngame: couldnt get "%s"\'s userinfo', user.userName)
+            return null
+        }
+
+        userInfo.isIngame = ingame
     }
 
     /**
@@ -465,7 +502,7 @@ export class Room {
      * @returns the room's status
      */
     public getStatus(): RoomStatus {
-        return this.status
+        return this.settings.status
     }
 
     /**
@@ -473,15 +510,8 @@ export class Room {
      * @param newStatus the new room's status
      */
     public setStatus(newStatus: RoomStatus): void {
-        this.status = newStatus
-    }
-
-    /**
-     * is the countdown request user a host and can it start a global countdown?
-     * @param user the user that requested the countdown
-     */
-    public canCountdown(user: User): boolean {
-        return user === this.host && this.status === RoomStatus.Waiting
+        this.settings.status = newStatus
+        this.settings.isIngame = newStatus === RoomStatus.Ingame
     }
 
     /**
@@ -743,9 +773,9 @@ export class Room {
             this.settings.unk18 = newSettings.unk18
             updatedSet.unk18 = newSettings.unk18
         }
-        if (newSettings.unk20 != null) {
-            this.settings.unk20 = newSettings.unk20
-            updatedSet.unk20 = newSettings.unk20
+        if (newSettings.status != null) {
+            this.settings.status = newSettings.status
+            updatedSet.status = newSettings.status
         }
         if (newSettings.unk21 != null) {
             this.settings.unk21 = newSettings.unk21
@@ -803,9 +833,9 @@ export class Room {
             this.settings.unk39 = newSettings.unk39
             updatedSet.unk39 = newSettings.unk39
         }
-        if (newSettings.unk40 != null) {
-            this.settings.unk40 = newSettings.unk40
-            updatedSet.unk40 = newSettings.unk40
+        if (newSettings.isIngame != null) {
+            this.settings.isIngame = newSettings.isIngame
+            updatedSet.isIngame = newSettings.isIngame
         }
         if (newSettings.unk43 != null) {
             this.settings.unk43 = newSettings.unk43
@@ -959,6 +989,20 @@ export class Room {
             new OutRoomPacket(user.socket).setGameResult()
         user.socket.send(stopReply)
         user.socket.send(resultReply)
+    }
+
+    /**
+     * send an user its current room's status
+     * @param user the target user
+     */
+    public sendRoomStatusTo(user: User): void {
+        const settings: RoomSettings = new RoomSettings()
+        settings.status = this.settings.status
+        settings.isIngame = this.settings.isIngame
+
+        const statusReply: Buffer =
+            new OutRoomPacket(user.socket).updateSettings(settings)
+        user.socket.send(statusReply)
     }
 
     /**
