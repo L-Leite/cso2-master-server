@@ -194,6 +194,13 @@ export class ChannelManager {
         if (user.currentRoom) {
             console.warn('user "%s" tried to create a new room, while in an existing one'
                 + 'current room: "%s" (id: %i)', user.userName, user.currentRoom.settings.roomName, user.currentRoom.id)
+
+            // tell the user to rejoin its own room
+            // this tried to mitigate the 'ghost rooms' issue
+            // (where the host's client left the room, but it's still in the room for the server)
+            // TODO: find a better way to detect this
+            user.currentRoom.sendJoinNewRoom(user)
+
             return false
         }
 
