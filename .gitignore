@@ -81,3 +81,6 @@ typings/
 
 # version generated
 version.txt
+
+# ignore vscode config files
+/.vscode/
