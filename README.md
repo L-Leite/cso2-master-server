@@ -6,7 +6,7 @@ A master server for Nexon's Counter-Strike: Online 2 written in Typescript on to
 
 Used by this [client launcher](https://github.com/Ochii/cso2-launcher/).
 
-**Any help** towards the project is welcome and appreciated.
+If you **wish to help** then please read the [contributing guide](https://github.com/Ochii/cso2-master-server/blob/master/.github/PULL_REQUEST_TEMPLATE.md) to know how.
 
 ## Running
 
@@ -44,14 +44,6 @@ Options:
 - ```-p, --port-master [port]``` (*optional*) The server's (TCP) port (default: 30001)
 - ```-P, --port-holepunch [port]``` (*optional*) The server's holepunch (UDP) port (default: 30002)
 - ```-l, --log-packets``` (*optional*) Log the incoming and outgoing packets
-
-## Bug reporting
-
-You can report a bug or look at list of known bugs at [issues](https://github.com/Ochii/cso2-master-server/issues).
-
-## Pull requests
-
-If you have any improvements that you would like to share or suggest about, have a look at [pull requests](https://github.com/Ochii/cso2-master-server/pulls).
 
 ## Contributors
 
