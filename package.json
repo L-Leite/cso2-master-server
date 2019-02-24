@@ -27,12 +27,12 @@
   "devDependencies": {
     "@types/ip": "0.0.31",
     "@types/mongodb": "^3.1.19",
-    "@types/node": "^10.12.26",
+    "@types/node": "^10.12.27",
     "@types/stream-buffers": "^3.0.2",
     "@types/uuid": "^3.4.4",
     "cross-var": "^1.1.0",
     "ts-node": "^7.0.1",
-    "tslint": "^5.12.1",
-    "typescript": "^3.3.3"
+    "tslint": "^5.13.0",
+    "typescript": "^3.3.3333"
   }
 }
