@@ -46,7 +46,7 @@ export abstract class OutPacketBase extends PacketBaseShared {
      * @param val the signed byte to write
      */
     public writeInt8(val: number): void {
-        const buf: Buffer = new Buffer(1)
+        const buf: Buffer = Buffer.alloc(1)
         buf.writeInt8(val as number, 0)
         this.outStream.write(buf)
     }
@@ -57,7 +57,7 @@ export abstract class OutPacketBase extends PacketBaseShared {
      * @param littleEndian should the bytes be written in little endian?
      */
     public writeInt16(val: number, littleEndian: boolean = true): void {
-        const buf: Buffer = new Buffer(2)
+        const buf: Buffer = Buffer.alloc(2)
         if (littleEndian) {
             buf.writeInt16LE(val as number, 0)
         } else {
@@ -72,7 +72,7 @@ export abstract class OutPacketBase extends PacketBaseShared {
      * @param littleEndian should the bytes be written in little endian?
      */
     public writeInt32(val: number, littleEndian: boolean = true): void {
-        const buf: Buffer = new Buffer(4)
+        const buf: Buffer = Buffer.alloc(4)
         if (littleEndian) {
             buf.writeInt32LE(val as number, 0)
         } else {
@@ -101,7 +101,7 @@ export abstract class OutPacketBase extends PacketBaseShared {
      * @param val the unsigned byte to write
      */
     public writeUInt8(val: number): void {
-        const buf: Buffer = new Buffer(1)
+        const buf: Buffer = Buffer.alloc(1)
         buf.writeUInt8(val as number, 0)
         this.outStream.write(buf)
     }
@@ -112,7 +112,7 @@ export abstract class OutPacketBase extends PacketBaseShared {
      * @param littleEndian should the bytes be written in little endian?
      */
     public writeUInt16(val: number, littleEndian: boolean = true): void {
-        const buf: Buffer = new Buffer(2)
+        const buf: Buffer = Buffer.alloc(2)
         if (littleEndian) {
             buf.writeUInt16LE(val as number, 0)
         } else {
@@ -127,7 +127,7 @@ export abstract class OutPacketBase extends PacketBaseShared {
      * @param littleEndian should the bytes be written in little endian?
      */
     public writeUInt32(val: number, littleEndian: boolean = true): void {
-        const buf: Buffer = new Buffer(4)
+        const buf: Buffer = Buffer.alloc(4)
         if (littleEndian) {
             buf.writeUInt32LE(val as number, 0)
         } else {
