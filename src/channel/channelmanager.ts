@@ -190,16 +190,15 @@ export class ChannelManager {
      * @returns true if successful
      */
     private onNewRoomRequest(newRoomReq: InRoomNewRequest, user: User): boolean {
-        // don't allow the user to create a new room while in another one
+        // if the user wants to create a new room, let it
+        // this will remove the user from its current room
+        // it should help mitigating the 'ghost room' issue,
+        // where a room has users that aren't in it on the client's side
         if (user.currentRoom) {
             console.warn('user "%s" tried to create a new room, while in an existing one'
                 + 'current room: "%s" (id: %i)', user.userName, user.currentRoom.settings.roomName, user.currentRoom.id)
 
-            // tell the user to rejoin its own room
-            // this tried to mitigate the 'ghost rooms' issue
-            // (where the host's client left the room, but it's still in the room for the server)
-            // TODO: find a better way to detect this
-            user.currentRoom.sendJoinNewRoom(user)
+            user.currentRoom.removeUser(user)
 
             return false
         }
