@@ -199,6 +199,7 @@ export class ChannelManager {
                 + 'current room: "%s" (id: %i)', user.userName, user.currentRoom.settings.roomName, user.currentRoom.id)
 
             user.currentRoom.removeUser(user)
+            user.currentRoom = null
 
             return false
         }
