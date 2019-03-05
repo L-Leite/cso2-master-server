@@ -240,6 +240,17 @@ export class Room {
             }
         }
 
+        //
+        // send new players to the host's team, if bot mode is enabled
+        //
+        if (this.settings.areBotsEnabled) {
+            // make sure there is at least one human player
+            if (trNum + ctNum > 0) {
+                const hostTeamNum: RoomTeamNum = this.getUserTeam(this.host)
+                return hostTeamNum
+            }
+        }
+
         if (trNum < ctNum) {
             return RoomTeamNum.Terrorist
         } else {
@@ -955,10 +966,22 @@ export class Room {
      * send a new player's team to an user
      * @param user the target user
      * @param player the user who changed its team
+     * @param newTeamNum the player's new team number
      */
     public sendTeamChangeTo(user: User, player: User, newTeamNum: RoomTeamNum): void {
         const reply: Buffer = new OutRoomPacket(user.socket).setUserTeam(player, newTeamNum)
         user.socket.send(reply)
+    }
+
+    /**
+     * send a new player's team to everyone in the room
+     * @param player the user who changed its team
+     * @param newTeamNum the player's new team number
+     */
+    public sendTeamChangeGlobal(player: User, newTeamNum: RoomTeamNum): void {
+        this.recurseUsers((u: User) => {
+            this.sendTeamChangeTo(u, player, newTeamNum)
+        })
     }
 
     /**
@@ -1035,6 +1058,22 @@ export class Room {
             this.settings.botDifficulty = botDifficulty
             this.settings.numCtBots = ctBots
             this.settings.numTrBots = terBots
+
+            //
+            // set everyone to the host's team if bot mode is enabled
+            //
+            const hostTeamNum: RoomTeamNum = this.getUserTeam(this.host)
+
+            this.recurseNonHostUsers((u: User): void => {
+                const curUserTeamNum: RoomTeamNum = this.getUserTeam(u)
+
+                if (curUserTeamNum !== hostTeamNum) {
+                    this.setUserToTeam(u, hostTeamNum)
+
+                    // tell everyone the new user's team
+                    this.sendTeamChangeGlobal(u, hostTeamNum)
+                }
+            })
         } else {
             this.settings.botDifficulty = 0
             this.settings.numCtBots = 0

@@ -509,11 +509,24 @@ export class ChannelManager {
             return false
         }
 
+        if (currentRoom.settings.areBotsEnabled
+            && user !== currentRoom.host) {
+            console.warn('user "%s" tried change team in a room when bot mode is enabled, but its not the host.'
+                + 'room name "%s" room id: %i',
+                user.userName, currentRoom.settings.roomName, currentRoom.id)
+            return false
+        }
+
         currentRoom.setUserToTeam(user, setTeamReq.newTeam)
 
         // inform every user in the room of the changes
         currentRoom.recurseUsers((u: User): void => {
             currentRoom.sendTeamChangeTo(u, user, setTeamReq.newTeam)
+
+            if (currentRoom.settings.areBotsEnabled) {
+                currentRoom.setUserToTeam(u, setTeamReq.newTeam)
+                currentRoom.sendTeamChangeGlobal(u, setTeamReq.newTeam)
+            }
         })
 
         console.log('user "%s" changed to team %i. room name "%s" room id: %i',
