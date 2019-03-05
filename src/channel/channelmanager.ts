@@ -476,10 +476,11 @@ export class ChannelManager {
     private onCloseResultRequest(user: User): boolean {
         const currentRoom: Room = user.currentRoom
 
-        if (currentRoom == null) {
+        // allow the user to close the result window if its not in a room, for whatever reason
+        /*if (currentRoom == null) {
             console.warn('user "%s" tried to close game result window, although it isn\'t in any', user.userName)
             return false
-        }
+        }*/
 
         currentRoom.sendCloseResultWindow(user)
 
