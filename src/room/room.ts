@@ -1051,7 +1051,11 @@ export class Room {
     private onUserRemoved(user: User): void {
         if (this.users.length !== 0) {
             this.sendRemovedUser(user)
-            this.findAndUpdateNewHost()
+
+            // if the host leaves, assign someone else as the new host
+            if (user === this.host) {
+                this.findAndUpdateNewHost()
+            }
         } else {
             this.emptyRoomCallback(this, this.parentChannel)
         }
