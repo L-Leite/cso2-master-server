@@ -347,10 +347,10 @@ export class ChannelManager {
             currentRoom.sendUserReadyStatusTo(u, user)
         })
 
-        if (readyStatus === RoomReadyStatus.Yes) {
+        if (readyStatus === RoomReadyStatus.Ready) {
             console.log('user "%s" readied in room "%s" (id %i)',
                 user.userName, currentRoom.settings.roomName, currentRoom.id)
-        } else if (readyStatus === RoomReadyStatus.No) {
+        } else if (readyStatus === RoomReadyStatus.NotReady) {
             console.log('user "%s" unreadied in room "%s" (id %i)',
                 user.userName, currentRoom.settings.roomName, currentRoom.id)
         } else {
@@ -407,6 +407,8 @@ export class ChannelManager {
             }
         })
 
+        room.sendBroadcastReadyStatus()
+
         room.sendStartMatchTo(host)
 
         console.log('host "%s" started room "%s"\'s (id: %i) match on map %i and gamemode %i',
@@ -421,6 +423,8 @@ export class ChannelManager {
         room.setUserIngame(user, true)
         room.sendConnectHostTo(user, host)
         room.sendGuestDataTo(host, user)
+
+        room.sendBroadcastReadyStatus()
 
         console.log('user "%s" joining room "%s"\'(id: %i) match hosted by "%s" on map %i and gamemode %i',
             user.userName, room.settings.roomName, room.id, host.userName,

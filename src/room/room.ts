@@ -17,9 +17,9 @@ export enum RoomTeamNum {
 }
 
 export enum RoomReadyStatus {
-    No = 0,
-    Unknown = 1, // readies the player, but you can't unready
-    Yes = 2,
+    NotReady = 0,
+    Ingame = 1,
+    Ready = 2,
 }
 
 // pasted from scripts/cso2_modlist.csv
@@ -201,7 +201,7 @@ export class Room {
      */
     public addUser(user: User): void {
         const userData: RoomUser = new RoomUser(this.findDesirableTeamNum(),
-            RoomReadyStatus.No)
+            RoomReadyStatus.NotReady)
         this.users.push(user)
         this.usersInfo.set(user, userData)
     }
@@ -379,7 +379,7 @@ export class Room {
             return null
         }
 
-        return userInfo.ready === RoomReadyStatus.Yes
+        return userInfo.ready === RoomReadyStatus.Ready
     }
 
     /**
@@ -455,6 +455,7 @@ export class Room {
         }
 
         userInfo.isIngame = ingame
+        userInfo.ready = ingame ? RoomReadyStatus.Ingame : RoomReadyStatus.NotReady
     }
 
     /**
@@ -483,8 +484,8 @@ export class Room {
 
         const curStatus: RoomReadyStatus = userInfo.ready
         const newStatus: RoomReadyStatus =
-            curStatus === RoomReadyStatus.No
-                ? RoomReadyStatus.Yes : RoomReadyStatus.No
+            curStatus === RoomReadyStatus.NotReady
+                ? RoomReadyStatus.Ready : RoomReadyStatus.NotReady
         userInfo.ready = newStatus
         return newStatus
     }
@@ -502,7 +503,7 @@ export class Room {
                 return false
             }
 
-            userInfo.ready = RoomReadyStatus.No
+            userInfo.ready = RoomReadyStatus.NotReady
         }
 
         return true
@@ -917,6 +918,15 @@ export class Room {
     public sendRoomUsersReadyStatusTo(targetUser: User): void {
         this.recurseUsers((u: User): void => {
             this.sendUserReadyStatusTo(targetUser, u)
+        })
+    }
+
+    /**
+     * send everyone everyone's ready status
+     */
+    public sendBroadcastReadyStatus(): void {
+        this.recurseUsers((u: User): void => {
+            this.sendRoomUsersReadyStatusTo(u)
         })
     }
 

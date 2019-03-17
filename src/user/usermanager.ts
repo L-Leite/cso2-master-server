@@ -129,6 +129,8 @@ export class UserManager {
             }
         })
 
+        currentRoom.sendBroadcastReadyStatus()
+
         return true
     }
 
