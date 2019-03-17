@@ -165,7 +165,7 @@ export class Room {
      */
     public getNumOfPlayers(): number {
         const realPlayers: number = this.users.length
-        const botPlayers: number = this.settings.numCtBots + this.settings.numTrBots
+        const botPlayers: number = this.getNumOfBotCts() + this.getNumOfBotTerrorists()
         return realPlayers + botPlayers
     }
 
@@ -174,6 +174,23 @@ export class Room {
      * @returns the free player slots
      */
     public getFreeSlots(): number {
+        if (this.settings.areBotsEnabled === true) {
+            const hostTeam: RoomTeamNum = this.getUserTeam(this.host)
+
+            let botsInHostTeam: number = 0
+            let humansInHostTeam: number = 0
+
+            if (hostTeam === RoomTeamNum.CounterTerrorist) {
+                botsInHostTeam = this.getNumOfBotCts()
+                humansInHostTeam = this.getNumOfRealCts()
+            } else if (hostTeam === RoomTeamNum.Terrorist) {
+                botsInHostTeam = this.getNumOfBotTerrorists()
+                humansInHostTeam = this.getNumOfRealTerrorists()
+            }
+
+            return botsInHostTeam - humansInHostTeam
+        }
+
         const availableSlots: number = this.settings.maxPlayers - this.getNumOfPlayers()
         return availableSlots >= 0 ? availableSlots : 0
     }
@@ -322,6 +339,20 @@ export class Room {
         }
 
         return numTerrorists
+    }
+
+    /**
+     * @returns the ammount of bots in the counter terrorist team
+     */
+    public getNumOfBotCts(): number {
+        return this.settings.numCtBots - this.getNumOfRealCts()
+    }
+
+    /**
+     * @returns the ammount of bots in the terrorist team
+     */
+    public getNumOfBotTerrorists(): number {
+        return this.settings.numTrBots - this.getNumOfRealTerrorists()
     }
 
     /**
@@ -743,7 +774,7 @@ export class Room {
         if (newSettings.botEnabled != null) {
             this.updateBotEnabled(newSettings.botEnabled, newSettings.botDifficulty,
                 newSettings.numCtBots, newSettings.numTrBots)
-            updatedSet.areBotsEnabled = newSettings.botEnabled as unknown as boolean
+            updatedSet.areBotsEnabled = !!newSettings.botEnabled
             updatedSet.botDifficulty = newSettings.botDifficulty
             updatedSet.numCtBots = newSettings.numCtBots
             updatedSet.numTrBots = newSettings.numTrBots
@@ -1061,10 +1092,9 @@ export class Room {
      */
     private updateBotEnabled(botEnabled: number, botDifficulty: number,
                              ctBots: number, terBots: number): void {
-        const isBotEnabled: boolean = botEnabled as unknown as boolean
-        this.settings.areBotsEnabled = isBotEnabled
+        this.settings.areBotsEnabled = !!botEnabled
 
-        if (isBotEnabled) {
+        if (this.settings.areBotsEnabled) {
             this.settings.botDifficulty = botDifficulty
             this.settings.numCtBots = ctBots
             this.settings.numTrBots = terBots
