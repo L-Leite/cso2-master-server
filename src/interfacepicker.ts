@@ -87,12 +87,12 @@ export async function getOrAskNetIntf(): Promise<INetIntf> {
             choice = await readChoiceFromConsole()
         } catch (error) {
             console.error(error)
-            process.exit(1)
+            return null
         }
 
         if (choice < 0 || choice >= interfaces.length) {
             console.error('The user did not enter a number, exiting...')
-            process.exit(1)
+            return null
         } else {
             chosenIntf = interfaces[choice]
         }
@@ -103,4 +103,28 @@ export async function getOrAskNetIntf(): Promise<INetIntf> {
 
     console.log('Using interface %s (%s)', chosenIntf.name, chosenIntf.net.address)
     return chosenIntf
+}
+
+/**
+ * tries to find the user's desired interface from our interface list
+ * and returns it
+ * @param desiredIntf the user's desired interface
+ */
+export function getNetIntf(desiredIntf: string): INetIntf {
+    const interfaces: INetIntf[] = getAvailableInterfaces()
+
+    if (interfaces.length === 0) {
+        console.error('Could not find any valid network interface!')
+        return null
+    }
+
+    for (const intf of interfaces) {
+        if (intf.name === desiredIntf) {
+            console.log('Using interface %s (%s)', intf.name, intf.net.address)
+            return intf
+        }
+    }
+
+    console.error('The user requested an invalid interface...')
+    return null
 }
