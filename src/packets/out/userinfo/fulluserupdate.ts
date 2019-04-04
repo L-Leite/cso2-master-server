@@ -421,3 +421,4 @@ export class UserInfoFullUpdate {
         outPacket.writeUInt8(this.unk84)
     }
 }
+
