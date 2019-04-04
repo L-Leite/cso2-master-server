@@ -154,7 +154,7 @@ export class UserInventory {
 
         this.loadouts[loadout].items[slot] = itemId
     }
-    
+
     // block something that shouldn't be there
     // (not including weapon skins, decorations, etc can be fix on client)
     public BlockItems(id: number): boolean {
