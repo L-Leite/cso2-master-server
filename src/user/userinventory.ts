@@ -18,28 +18,28 @@ export class UserInventory {
     public loadouts: UserLoadout[]
 
     constructor() {
-        this.ctModelItem = 1033
-        this.terModelItem = 1034
-        this.headItem = 10062
-        this.gloveItem = 30018
-        this.backItem = 20042
+        this.ctModelItem = 1047
+        this.terModelItem = 1048
+        this.headItem = 0
+        this.gloveItem = 0
+        this.backItem = 0
         this.stepsItem = 0
-        this.sprayItem = 42003
+        this.sprayItem = 42001
 
         this.buymenu = new UserBuyMenu()
-        this.buymenu.pistols = [5271, 5245, 5358, 5288, 106, 5119, 5121, 5360, 5294]
-        this.buymenu.shotguns = [5130, 5181, 5157, 5282, 5286, 5343, 5264, 5265, 5230]
-        this.buymenu.smgs = [5251, 5295, 162, 5132, 5346, 5320, 5287, 5321, 5310]
-        this.buymenu.rifles = [5136, 5142, 45, 46, 5218, 5240, 5259, 5309, 5370]
-        this.buymenu.snipers = [5133, 5118, 5216, 86, 5338, 5241, 5225, 5369, 5244]
-        this.buymenu.machineguns = [5125, 5289, 5226, 5332, 5352, 5363, 5311, 5260, 5234]
-        this.buymenu.melees = [5353, 5362, 5330, 5303, 5304, 5305, 5365, 5231, 5232]
+        this.buymenu.pistols = [5280, 5279, 5337, 5356, 5294, 5360, 5262, 103, 106]
+        this.buymenu.shotguns = [5130, 5293, 5306, 5261, 5242, 5264, 5265, 5230, 137]
+        this.buymenu.smgs = [5251, 5295, 5238, 5320, 5285, 5347, 5310, 162, 105]
+        this.buymenu.rifles = [46, 45, 5296, 5184, 5355, 113, 102, 161, 157]
+        this.buymenu.snipers = [5133, 5118, 5206, 5241, 5225, 146, 125, 160, 163]
+        this.buymenu.machineguns = [5125, 5314, 5260, 87, 5332, 5366, 5276, 5233, 159]
+        this.buymenu.melees = [79, 5232, 84, 5221, 5304, 5330, 5253, 5231, 5353]
         this.buymenu.equipment = [36, 37, 23, 4, 8, 34, 0, 0, 0]
 
         this.loadouts = [
-            new UserLoadout(5218, 5288, 84, 4, 23, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            new UserLoadout(5319, 5131, 5353, 4, 23, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            new UserLoadout(5220, 5337, 5253, 4, 23, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            new UserLoadout(5336, 5356, 5330, 4, 23, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            new UserLoadout(5285, 5294, 5231, 4, 23, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+            new UserLoadout(5206, 5356, 5365, 4, 23, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
         ]
 
         this.items = []
@@ -60,6 +60,9 @@ export class UserInventory {
             UserInventoryItem.pushItem(userInv, unlock)
         }
         for (let i = 44; i <= 163; i++) {
+            if (this.BlockItems(i)) {
+              continue
+            }
             UserInventoryItem.pushItem(userInv, i)
         }
 
@@ -76,6 +79,9 @@ export class UserInventory {
 
         // weapon skins
         for (let i = 5042; i <= 5370; i++) {
+            if (this.BlockItems(i)) {
+              continue
+            }
             UserInventoryItem.pushItem(userInv, i)
         }
         UserInventoryItem.pushItem(userInv, 5997)
@@ -147,6 +153,29 @@ export class UserInventory {
         }
 
         this.loadouts[loadout].items[slot] = itemId
+    }
+    
+    // block something that shouldn't be there
+    // (not including weapon skins, decorations, etc can be fix on client)
+    public BlockItems(id: number): boolean {
+        switch (id) {
+            case 56:
+            case 58:
+            case 69:
+            case 107:
+            case 117:
+            case 134:
+            case 139:
+            case 5172:
+            case 5173:
+            case 5174:
+            case 5227:
+            case 5228:
+            case 5229:
+              return true
+            default:
+            return false
+        }
     }
 
     /**
