@@ -652,6 +652,7 @@ export class Room {
                 if (this.getNumOfReadyPlayers() < 2) {
                     return false
                 }
+                break
             case RoomGamemode.giant:
             case RoomGamemode.hide:
             case RoomGamemode.hide2:
@@ -670,6 +671,7 @@ export class Room {
                 if (this.getNumOfReadyRealPlayers() < 2) {
                     return false
                 }
+                break
         }
 
         return true
