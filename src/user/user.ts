@@ -30,6 +30,8 @@ export class User {
     public level: number
     public curExp: Uint64LE
     public maxExp: Uint64LE
+    public rank: number
+    public viplevel: number
     public wins: number
     public kills: number
     public deaths: number
@@ -55,13 +57,15 @@ export class User {
         this.currentChannelIndex = 0
 
         this.userName = userName
-        this.level = 1
-        this.curExp = new Uint64LE(0)
-        this.maxExp = new Uint64LE(1000)
+        this.level = Math.floor(Math.random() * Math.floor(100))
+        this.rank = Math.floor(Math.random() * Math.floor(21))
+        this.viplevel = Math.floor(Math.random() * Math.floor(7))
+        this.curExp = new Uint64LE(Math.floor(Math.random() * Math.floor(1000000)))
+        this.maxExp = new Uint64LE(1000000)
         this.wins = 0
-        this.kills = 0
-        this.deaths = 0
-        this.assists = 0
+        this.kills = Math.floor(Math.random() * Math.floor(100000))
+        this.deaths = Math.floor(Math.random() * Math.floor(100000))
+        this.assists = Math.floor(Math.random() * Math.floor(100000))
 
         this.inventory = new UserInventory()
     }

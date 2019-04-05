@@ -630,6 +630,20 @@ export class Room {
             case RoomGamemode.deathmatch:
             case RoomGamemode.original:
             case RoomGamemode.originalmr:
+            case RoomGamemode.casualbomb:
+            case RoomGamemode.casualoriginal:
+            case RoomGamemode.eventmod01:
+            case RoomGamemode.eventmod02:
+            case RoomGamemode.diy:
+            case RoomGamemode.campaign1:
+            case RoomGamemode.campaign2:
+            case RoomGamemode.campaign3:
+            case RoomGamemode.campaign4:
+            case RoomGamemode.campaign5:
+            case RoomGamemode.tdm_small:
+            case RoomGamemode.de_small:
+            case RoomGamemode.madcity:
+            case RoomGamemode.madcity_team:
             case RoomGamemode.gunteamdeath:
             case RoomGamemode.gunteamdeath_re:
             case RoomGamemode.stealth:
@@ -638,13 +652,14 @@ export class Room {
                 if (this.getNumOfReadyPlayers() < 2) {
                     return false
                 }
-                break
             case RoomGamemode.giant:
             case RoomGamemode.hide:
             case RoomGamemode.hide2:
+            case RoomGamemode.hide_match:
             case RoomGamemode.hide_origin:
             case RoomGamemode.hide_Item:
             case RoomGamemode.hide_multi:
+            case RoomGamemode.ghost:
             case RoomGamemode.pig:
             case RoomGamemode.tag:
             case RoomGamemode.zombie:
@@ -655,13 +670,6 @@ export class Room {
                 if (this.getNumOfReadyRealPlayers() < 2) {
                     return false
                 }
-                break
-            case RoomGamemode.z_scenario_side:
-            case RoomGamemode.endless_wave:
-            case RoomGamemode.play_ground:
-            case RoomGamemode.practice:
-            default:
-                break
         }
 
         return true

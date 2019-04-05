@@ -27,7 +27,7 @@ export class UserInfoFullUpdate {
     private unk03: number
     // end of flag & 0x8
     // flag & 0x10
-    private unk04: number
+    private rank: number
     private unk05: number
     // end of flag & 0x10
     // flag & 0x20
@@ -122,7 +122,7 @@ export class UserInfoFullUpdate {
     private unk60: number
     // end of flag & 0x400000
     // flag & 0x800000
-    private unk61: number
+    private icon: number
     // end of flag & 0x800000
     // flag & 0x1000000
     private unk62: number
@@ -131,9 +131,9 @@ export class UserInfoFullUpdate {
     private unk63: number[] // it must always be 0x80 long
     // end of flag & 0x2000000
     // flag & 0x4000000
-    private unk64: number
-    private unk65: number
-    private unk66: number
+    private vip: number
+    private viplevel: number
+    private vipexp: number
     // end of flag & 0x4000000
     // flag & 0x8000000
     private unk67: number
@@ -171,7 +171,7 @@ export class UserInfoFullUpdate {
         this.curExp = user.curExp
         this.maxExp = user.maxExp
         this.unk03 = 0x0313
-        this.unk04 = 0
+        this.rank = user.rank
         this.unk05 = 0
         this.unk06 = new Uint64LE(0x7AF3)
         this.unk07 = 0x0A
@@ -248,7 +248,7 @@ export class UserInfoFullUpdate {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
         this.unk60 = 0xA5C8
-        this.unk61 = 0x03ED
+        this.icon = 1006
         this.unk62 = 0
         this.unk63 = [0x00, 0x00, 0x18, 0x08, 0x00, 0x00, 0x00, 0x00, 0x42, 0x02,
             0x18, 0xC0, 0x09, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -261,9 +261,9 @@ export class UserInfoFullUpdate {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3E, 0x00, 0x00]
-        this.unk64 = 0
-        this.unk65 = 0
-        this.unk66 = 0
+        this.vip = 1
+        this.viplevel = user.viplevel
+        this.vipexp = 180000
         this.unk67 = 0
         this.unk68 = new Uint64LE(0x02FB)
         this.unk69 = new Uint64LE(0x19AC)
@@ -302,7 +302,7 @@ export class UserInfoFullUpdate {
         outPacket.writeUInt64(this.maxExp)
         outPacket.writeUInt32(this.unk03)
 
-        outPacket.writeUInt8(this.unk04)
+        outPacket.writeUInt8(this.rank)
         outPacket.writeUInt8(this.unk05)
 
         outPacket.writeUInt64(this.unk06)
@@ -386,7 +386,7 @@ export class UserInfoFullUpdate {
         }
         outPacket.writeUInt32(this.unk60)
 
-        outPacket.writeUInt16(this.unk61)
+        outPacket.writeUInt16(this.icon)
 
         outPacket.writeUInt16(this.unk62)
 
@@ -394,9 +394,9 @@ export class UserInfoFullUpdate {
             outPacket.writeUInt8(elem)
         }
 
-        outPacket.writeUInt8(this.unk64)
-        outPacket.writeUInt8(this.unk65)
-        outPacket.writeUInt32(this.unk66)
+        outPacket.writeUInt8(this.vip)
+        outPacket.writeUInt8(this.viplevel)
+        outPacket.writeUInt32(this.vipexp)
 
         outPacket.writeUInt32(this.unk67)
 
