@@ -31,7 +31,7 @@ export class User {
     public curExp: Uint64LE
     public maxExp: Uint64LE
     public rank: number
-    public viplevel: number
+    public vipLevel: number
     public wins: number
     public kills: number
     public deaths: number
@@ -59,7 +59,7 @@ export class User {
         this.userName = userName
         this.level = Math.floor(Math.random() * Math.floor(100))
         this.rank = Math.floor(Math.random() * Math.floor(21))
-        this.viplevel = Math.floor(Math.random() * Math.floor(7))
+        this.vipLevel = Math.floor(Math.random() * Math.floor(7))
         this.curExp = new Uint64LE(Math.floor(Math.random() * Math.floor(1000000)))
         this.maxExp = new Uint64LE(1000000)
         this.wins = 0

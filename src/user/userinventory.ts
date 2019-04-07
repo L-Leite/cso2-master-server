@@ -60,8 +60,8 @@ export class UserInventory {
             UserInventoryItem.pushItem(userInv, unlock)
         }
         for (let i = 44; i <= 163; i++) {
-            if (this.BlockItems(i)) {
-              continue
+            if (this.isItemBlacklisted(i)) {
+                continue
             }
             UserInventoryItem.pushItem(userInv, i)
         }
@@ -79,8 +79,8 @@ export class UserInventory {
 
         // weapon skins
         for (let i = 5042; i <= 5370; i++) {
-            if (this.BlockItems(i)) {
-              continue
+            if (this.isItemBlacklisted(i)) {
+                continue
             }
             UserInventoryItem.pushItem(userInv, i)
         }
@@ -155,9 +155,13 @@ export class UserInventory {
         this.loadouts[loadout].items[slot] = itemId
     }
 
-    // block something that shouldn't be there
-    // (not including weapon skins, decorations, etc can be fix on client)
-    public BlockItems(id: number): boolean {
+    /**
+     * check if the item shouldn't be in the inventory
+     * (weapon skins, cosmetics, etc are fine)
+     * @param id the item ID to check
+     * @returns true if it's banned, false if not
+     */
+    public isItemBlacklisted(id: number): boolean {
         switch (id) {
             case 56:
             case 58:
@@ -172,9 +176,9 @@ export class UserInventory {
             case 5227:
             case 5228:
             case 5229:
-              return true
+                return true
             default:
-            return false
+                return false
         }
     }
 
