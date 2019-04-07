@@ -11,7 +11,6 @@ export class RoomSettings {
     public forceCamera: number
     public nextMapEnabled: number
     public changeTeams: number
-    public enableBots: number
     public difficulty: number
     public respawnTime: number
     public teamBalanceType: RoomTeamBalance
@@ -66,7 +65,7 @@ export class RoomSettings {
         this.forceCamera = options.forceCamera ? options.forceCamera : 1
         this.nextMapEnabled = options.nextMapEnabled ? options.nextMapEnabled : 0
         this.changeTeams = options.changeTeams ? options.changeTeams : 0
-        this.enableBots = options.enableBots ? options.enableBots : 0
+        this.areBotsEnabled = options.enableBots ? true : false
         this.difficulty = options.difficulty ? options.difficulty : 0
         this.maxPlayers = options.enableBots ? 8 : 16
         this.respawnTime = options.respawnTime ? options.respawnTime : 3
@@ -76,7 +75,6 @@ export class RoomSettings {
         this.hltvEnabled = options.hltvEnabled ? options.hltvEnabled : 0
         this.mapCycleType = 1
         this.multiMaps = []
-        this.areBotsEnabled = false
         this.numCtBots = 0
         this.numTrBots = 0
         this.botDifficulty = 0

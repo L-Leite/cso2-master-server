@@ -110,7 +110,7 @@ export interface IRoomOptions {
     forceCamera?: number,
     nextMapEnabled?: number,
     changeTeams?: number,
-    enableBots?: number,
+    enableBots?: boolean,
     difficulty?: number
     respawnTime?: number
     teamBalance?: number

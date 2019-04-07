@@ -2,7 +2,7 @@ import { WritableStreamBuffer } from 'stream-buffers'
 
 import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
-import { RoomListFullList } from 'packets/out/roomlist/fulllist'
+import { RoomListCollection } from 'packets/out/roomlist/collection'
 
 import { Room } from 'room/room'
 
@@ -28,7 +28,7 @@ export class OutRoomListPacket extends OutPacketBase {
         this.buildHeader()
         this.writeUInt8(OutRoomListType.SendFullRoomList)
 
-        new RoomListFullList(rooms).build(this)
+        new RoomListCollection(rooms).build(this)
 
         return this.getData()
     }

@@ -10,7 +10,7 @@ import { OutPacketBase } from 'packets/out/packet'
  * shared room structure, used by room list
  * @class RoomListRoomData
  */
-export class RoomListRoomData {
+export class RoomListItem {
     private id: number
     private flags: Uint64LE
     // flags & 0x1
@@ -58,8 +58,11 @@ export class RoomListRoomData {
     private unk19: number
     // end flags & 0x800
     // flags & 0x1000
-    private unk20: number // if nonzero, the next comment would be true
-    // four variable arrays would be here
+    private unk20: number
+    private unk2001: number
+    private unk2002: number
+    private unk2003: number
+    private unk2004: number
     // end flags & 0x1000
     // flags & 0x2000
     private unk21: number
@@ -68,7 +71,7 @@ export class RoomListRoomData {
     private roomStatus: RoomStatus
     // end flags & 0x4000
     // flags & 0x8000
-    private enableBots: number
+    private areBotsEnabled: number
     // end flags & 0x8000
     // flags & 0x10000
     private unk24: number
@@ -97,10 +100,7 @@ export class RoomListRoomData {
     private forceCamera: number
     // end flags & 0x800000
     // flags & 0x1000000
-    private botEnabled: number
-    private botDifficulty: number
-    private numCtBots: number
-    private numTrBots: number
+    private unk31: number
     // end flags & 0x1000000
     // flags & 0x2000000
     private unk35: number
@@ -112,14 +112,14 @@ export class RoomListRoomData {
     private changeTeams: number
     // end flags & 0x8000000
     // flags & 0x10000000
-    private unk38: number
+    private areFlashesDisabled: number
     // end flags & 0x10000000
     // flags & 0x20000000
-    private unk39: number
+    private canSpec: number
     // end flags & 0x20000000
     // flags & 0x40000000
-    private unk40: number
-    private unk41: number
+    private isVipRoom: number
+    private vipRoomLevel: number
     // end flags & 0x40000000
     // flags & 0x80000000
     private difficulty: number
@@ -151,8 +151,8 @@ export class RoomListRoomData {
         this.unk19 = 5
         this.unk20 = 0
         this.unk21 = 5
-        this.roomStatus = room.getStatus()
-        this.enableBots = room.settings.enableBots
+        this.roomStatus = room.settings.status
+        this.areBotsEnabled = room.settings.areBotsEnabled ? 1 : 0
         this.unk24 = 0
         this.startMoney = room.settings.startMoney
         this.unk26 = 0
@@ -163,14 +163,14 @@ export class RoomListRoomData {
         this.winLimit = room.settings.winLimit
         this.killLimit = room.settings.killLimit
         this.forceCamera = room.settings.forceCamera
-        this.botEnabled = 4
+        this.unk31 = 4
         this.unk35 = 0
         this.nextMapEnabled = room.settings.nextMapEnabled
         this.changeTeams = room.settings.changeTeams
-        this.unk38 = 0
-        this.unk39 = 0
-        this.unk40 = 0
-        this.unk41 = 1
+        this.areFlashesDisabled = 0
+        this.canSpec = 0
+        this.isVipRoom = room.host.vipLevel !== 0 ? 1 : 0
+        this.vipRoomLevel = room.host.vipLevel
         this.difficulty = room.settings.difficulty
     }
 
@@ -198,9 +198,15 @@ export class RoomListRoomData {
         outPacket.writeUInt16(this.unk18)
         outPacket.writeUInt8(this.unk19)
         outPacket.writeUInt8(this.unk20)
+        if (this.unk20 === 1) {
+            outPacket.writeUInt32(this.unk2001)
+            outPacket.writeUInt8(this.unk2002)
+            outPacket.writeUInt32(this.unk2003)
+            outPacket.writeUInt8(this.unk2004)
+        }
         outPacket.writeUInt8(this.unk21)
         outPacket.writeUInt8(this.roomStatus)
-        outPacket.writeUInt8(this.enableBots)
+        outPacket.writeUInt8(this.areBotsEnabled)
         outPacket.writeUInt8(this.unk24)
         outPacket.writeUInt16(this.startMoney)
         outPacket.writeUInt8(this.unk26)
@@ -211,19 +217,14 @@ export class RoomListRoomData {
         outPacket.writeUInt8(this.winLimit)
         outPacket.writeUInt16(this.killLimit)
         outPacket.writeUInt8(this.forceCamera)
-        outPacket.writeUInt8(this.botEnabled)
-        if (this.botEnabled === 1) {
-            outPacket.writeUInt8(this.botDifficulty)
-            outPacket.writeUInt8(this.numCtBots)
-            outPacket.writeUInt8(this.numTrBots)
-        }
+        outPacket.writeUInt8(this.unk31)
         outPacket.writeUInt8(this.unk35)
         outPacket.writeUInt8(this.nextMapEnabled)
         outPacket.writeUInt8(this.changeTeams)
-        outPacket.writeUInt8(this.unk38)
-        outPacket.writeUInt8(this.unk39)
-        outPacket.writeUInt8(this.unk40)
-        outPacket.writeUInt8(this.unk41)
+        outPacket.writeUInt8(this.areFlashesDisabled)
+        outPacket.writeUInt8(this.canSpec)
+        outPacket.writeUInt8(this.isVipRoom)
+        outPacket.writeUInt8(this.vipRoomLevel)
         outPacket.writeUInt8(this.difficulty)
     }
 }
