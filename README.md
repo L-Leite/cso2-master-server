@@ -6,7 +6,7 @@ A master server for Nexon's Counter-Strike: Online 2 written in Typescript on to
 
 Used by this [client launcher](https://github.com/Ochii/cso2-launcher/).
 
-If you **wish to help** then please read the [contributing guide](https://github.com/Ochii/cso2-master-server/blob/master/.github/PULL_REQUEST_TEMPLATE.md) to know how.
+**You can no longer use this by itself**, see [cso2-master-services](https://github.com/Ochii/cso2-master-services) for more information.
 
 ## Running
 
@@ -36,7 +36,26 @@ npm run build # builds the server
 npm run start # starts the fresh server build
 ```
 
+## Starting the master server
+
+You can start the master server with:
+
+```sh
+# environment variables
+export USERSERVICE_HOST=127.0.0.1 # the user service's host
+export USERSERVICE_PORT=30100 # the user service's port
+export INVSERVICE_HOST=127.0.0.1 # the inventory service's host
+export INVSERVICE_PORT=30101 # the inventory service's port
+
+# starts the master server
+node dist/server.js
+```
+
+You **must** set those environment variables, or the service will not start.
+
 ### Command line arguments
+
+**These are deprecated, and will be removed soon.**
 
 Options:
 
@@ -45,9 +64,16 @@ Options:
 - ```-P, --port-holepunch [port]``` (*optional*) The server's holepunch (UDP) port (default: 30002)
 - ```-l, --log-packets``` (*optional*) Log the incoming and outgoing packets
 
+## Pull requests
+
+Pull requests are very much welcome.
+
+Please read the [contributing guide](https://github.com/Ochii/cso2-master-service/blob/master/.github/PULL_REQUEST_TEMPLATE.md) before contributing.
+
 ## Contributors
 
 - [JusicP](https://github.com/JusicP)
+- [dounai2333](https://github.com/dounai2333)
 
 ## License
 
