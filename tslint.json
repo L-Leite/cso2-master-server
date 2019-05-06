@@ -11,6 +11,8 @@
         "semicolon": [
             false,
             "never"
-        ]
+        ],
+        "object-literal-sort-keys": false,
+        "no-unused-variable": true
     }
 }
