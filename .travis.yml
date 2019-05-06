@@ -5,7 +5,7 @@ node_js:
 - "11"
 cache: npm
 script:
-  - npm run build
+  - gulp build
 jobs:
   include:
     - stage: GitHub Release
