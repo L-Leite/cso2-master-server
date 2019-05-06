@@ -1,6 +1,6 @@
 import { IRoomOptions, Room } from 'room/room'
 
-import { User } from 'user/user'
+import { ExtendedSocket } from 'extendedsocket'
 
 /**
  * stores and processes channel data
@@ -44,12 +44,14 @@ export class Channel {
 
     /**
      * add a room to the channel
-     * @param host the room's host user
+     * @param hostUserId the room's host's user ID
+     * @param hostConn the host's connection object
      * @param options the room's parameters
      * @returns the created room
      */
-    public createRoom(host: User, options?: IRoomOptions): Room {
-        const newRoom: Room = new Room(this.nextRoomId++, host, this, Channel.onEmptyRoomCallback, options)
+    public createRoom(hostUserId: number, hostConn: ExtendedSocket, options?: IRoomOptions): Room {
+        const newRoom: Room = new Room(this.nextRoomId++, hostUserId, hostConn,
+            this, Channel.onEmptyRoomCallback, options)
         this.rooms.push(newRoom)
         return this.rooms[this.rooms.length - 1]
     }

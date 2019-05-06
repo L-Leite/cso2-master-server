@@ -1,35 +1,108 @@
-import { Uint64LE } from 'int64-buffer'
+import LRU from 'lru-cache'
+import superagent from 'superagent'
 
-import { HolepunchType } from 'packets/holepunch/inholepunch'
+import { userSvcAuthority, UserSvcPing } from 'authorities'
 
-import { Room } from 'room/room'
-
-import { ExtendedSocket } from 'extendedsocket'
-
-import { UserInventory } from 'user/userinventory'
-
+/**
+ * represents an user account
+ */
 export class User {
-    public socket: ExtendedSocket
+    /**
+     * create an user
+     * @param username the new user's name
+     * @param playername the user's ingame player name
+     * @param password the user's account password
+     * @returns true if successful, false if not
+     */
+    // TODO: delete this?
+    public static async create(username: string, playername: string, password: string): Promise<boolean> {
+        try {
+            const res: superagent.Response = await superagent
+                .post('http://' + userSvcAuthority() + '/users/')
+                .send({
+                    username,
+                    playername,
+                    password,
+                })
+                .accept('json')
+            return res.status === 200
+        } catch (error) {
+            console.error(error)
+            UserSvcPing.checkNow()
+            return false
+        }
+    }
+
+    /**
+     * get an user's by its ID
+     * @param userId the user's ID
+     * @returns the user object if found, null otherwise
+     */
+    public static async get(userId: number): Promise<User> {
+        try {
+            let session: User = userCache.get(userId)
+
+            if (session != null) {
+                return session
+            }
+
+            if (UserSvcPing.isAlive() === false) {
+                return null
+            }
+
+            const res: superagent.Response = await superagent
+                .get('http://' + userSvcAuthority() + '/users/' + userId)
+                .accept('json')
+            if (res.status === 200) {
+                // HACK to get methods working
+                session = new User()
+                Object.assign(session, res.body)
+                userCache.set(session.userId, session)
+                return session
+            }
+            return null
+        } catch (error) {
+            console.error(error)
+            UserSvcPing.checkNow()
+            return null
+        }
+    }
+
+    /**
+     * get an user's by its name
+     * @param userName the target's user name
+     */
+    public static async getByName(userName: string): Promise<User> {
+        try {
+            if (UserSvcPing.isAlive() === false) {
+                return null
+            }
+
+            const res: superagent.Response = await superagent
+                .get('http://' + userSvcAuthority() + '/users/byname/' + userName)
+                .accept('json')
+            if (res.status === 200) {
+                // HACK to get, methods working
+                const newBody: User = new User()
+                Object.assign(newBody, res.body)
+                return newBody
+            } else {
+                return null
+            }
+        } catch (error) {
+            console.error(error)
+            UserSvcPing.checkNow()
+            return null
+        }
+    }
+
     public userId: number
-
-    public externalIpAddress: string
-
-    public externalClientPort: number
-    public externalServerPort: number
-    public externalTvPort: number
-    public localIpAddress: string
-    public localClientPort: number
-    public localServerPort: number
-    public localTvPort: number
-
-    public currentChannelServerIndex: number
-    public currentChannelIndex: number
-    public currentRoom: Room
-
     public userName: string
+    public playerName: string
     public level: number
-    public curExp: Uint64LE
-    public maxExp: Uint64LE
+    public avatar: number
+    public curExp: number
+    public maxExp: number
     public rank: number
     public vipLevel: number
     public wins: number
@@ -37,61 +110,13 @@ export class User {
     public deaths: number
     public assists: number
 
-    public inventory: UserInventory
-
-    constructor(socket: ExtendedSocket, userId: number, userName: string) {
-        this.socket = socket
-        this.userId = userId
-
-        this.externalIpAddress = socket.remoteAddress
-        this.externalClientPort = 0
-        this.externalServerPort = 0
-        this.externalTvPort = 0
-
-        this.localIpAddress = ''
-        this.localClientPort = 0
-        this.localServerPort = 0
-        this.localTvPort = 0
-
-        this.currentChannelServerIndex = 0
-        this.currentChannelIndex = 0
-
-        this.userName = userName
-        this.level = Math.floor(Math.random() * Math.floor(100))
-        this.rank = Math.floor(Math.random() * Math.floor(21))
-        this.vipLevel = Math.floor(Math.random() * Math.floor(7))
-        this.curExp = new Uint64LE(Math.floor(Math.random() * Math.floor(1000000)))
-        this.maxExp = new Uint64LE(1000000)
-        this.wins = 0
-        this.kills = Math.floor(Math.random() * Math.floor(100000))
-        this.deaths = Math.floor(Math.random() * Math.floor(100000))
-        this.assists = Math.floor(Math.random() * Math.floor(100000))
-
-        this.inventory = new UserInventory()
-    }
-
-    public setCurrentChannelIndex(channelServerIndex: number, channelIndex: number): void {
-        this.currentChannelServerIndex = channelServerIndex
-        this.currentChannelIndex = channelIndex
-    }
-
-    public updateHolepunch(portId: number, localPort: number,
-                           externalPort: number): number {
-        switch (portId) {
-            case HolepunchType.Client:
-                this.localClientPort = localPort
-                this.externalClientPort = externalPort
-                return 0
-            case HolepunchType.Server:
-                this.localServerPort = localPort
-                this.externalServerPort = externalPort
-                return 1
-            case HolepunchType.SourceTV:
-                this.localTvPort = localPort
-                this.externalTvPort = externalPort
-                return 2
-            default:
-                return -1
-        }
+    /**
+     * is the user a VIP?
+     * @returns true if so, false if not
+     */
+    public isVip(): boolean {
+        return this.vipLevel !== 0
     }
 }
+
+const userCache = new LRU<number, User>({ max: 100, maxAge: 1000 * 15 })

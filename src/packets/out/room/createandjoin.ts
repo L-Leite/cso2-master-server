@@ -4,324 +4,161 @@ import { OutPacketBase } from 'packets/out/packet'
 import { PacketString } from 'packets/packetstring'
 
 import { Room, RoomStatus } from 'room/room'
-import { User } from 'user/user'
 
 import { OutRoomPlayerNetInfo } from 'packets/out/room/playernetinfo'
 import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 
 /**
  * sends the newly created room information to an user
- * @class OutRoomCreateAndJoin
  */
 export class OutRoomCreateAndJoin {
-    private room: Room
-    private roomHostId: number
-    private unk01: number
-    private unk02: number
-    private roomId: number
-    private unk04: number
-    private roomFlags: Uint64LE
-    // flags & 0x1
-    private roomName: PacketString
-    // end of flags & 0x1
-    // flags & 0x2
-    private unk05: number
-    // end of flags & 0x2
-    // flags & 0x4
-    private unk06: number
-    private unk07: number
-    private unk08: number
-    // end of flags & 0x4
-    // flags & 0x8
-    private unk09: PacketString
-    // end of flags & 0x8
-    // flags & 0x10
-    private unk10: number
-    // end of flags & 0x10
-    // flags & 0x20
-    private unk11: number
-    // end of flags & 0x20
-    // flags & 0x40
-    private gameModeId: number
-    // end of flags & 0x40
-    // flags & 0x80
-    private mapId: number
-    private unk13: number
-    // end of flags & 0x80
-    // flags & 0x100
-    private unk14: number
-    // end of flags & 0x100
-    // flags & 0x200
-    private winLimit: number
-    // end of flags & 0x200
-    // flags & 0x400
-    private killLimit: number
-    // end of flags & 0x400
-    // flags & 0x800
-    private unk17: number
-    // end of flags & 0x800
-    // flags & 0x1000
-    private unk18: number
-    // end of flags & 0x1000
-    // flags & 0x2000
-    private unk19: number
-    // end of flags & 0x2000
-    // flags & 0x4000
-    private status: RoomStatus
-    // end of flags & 0x4000
-    // flags & 0x8000
-    private unk21: number
-    private unk22: number
-    private unk23: number
-    private unk24: number
-    // end of flags & 0x8000
-    // flags & 0x10000
-    private unk25: number
-    // end of flags & 0x10000
-    // flags & 0x20000
-    private unk26: number
-    private unk27: number[]
-    // end of flags & 0x20000
-    // flags & 0x40000
-    private unk28: number
-    // end of flags & 0x40000
-    // flags & 0x80000
-    private unk29: number
-    // end of flags & 0x80000
-    // flags & 0x100000
-    private unk30: number
-    // end of flags & 0x100000
-    // flags & 0x20000
-    private unk31: number
-    // end of flags & 0x200000
-    // flags & 0x400000
-    private unk32: number
-    // end of flags & 0x400000
-    // flags & 0x800000
-    private unk33: number
-    // end of flags & 0x800000
-    // flags & 0x1000000
-    private botEnabled: number // if == 1, it can have 3 more bytes
-    private botDifficulty: number
-    private numCtBots: number
-    private numTrBots: number
-    // end of flags & 0x1000000
-    // flags & 0x2000000
-    private unk35: number
-    // end of flags & 0x2000000
-    // flags & 0x4000000
-    private unk36: number
-    // end of flags & 0x4000000
-    // flags & 0x8000000
-    private unk37: number
-    // end of flags & 0x8000000
-    // flags & 0x10000000
-    private unk38: number
-    // end of flags & 0x10000000
-    // flags & 0x20000000
-    private unk39: number
-    // end of flags & 0x20000000
-    // flags & 0x40000000
-    private unk40: number
-    // end of flags & 0x40000000
-    // flags & 0x80000000
-    private unk41: number
-    // end of flags & 0x80000000
-    // flags & 0x100000000
-    private unk42: number
-    // end of flags & 0x100000000
-    // flags & 0x200000000
-    private unk43: number
-    // end of flags & 0x200000000
-    // flags & 0x400000000
-    private unk44: number
-    // end of flags & 0x400000000
-    // flags & 0x800000000
-    private unk45: number
-    // end of flags & 0x800000000
-    // flags & 0x1000000000
-    private unk46: number
-    // end of flags & 0x1000000000
-    private numOfPlayers: number
-    private users: User[]
+    public static async build(room: Room, outPacket: OutPacketBase): Promise<void> {
+        outPacket.writeUInt32(room.host.userId) // roomHostId
 
-    constructor(room: Room) {
-        this.room = room
+        outPacket.writeUInt8(2) // unk01
+        outPacket.writeUInt8(2) // unk02
 
-        this.roomHostId = room.host.userId
-        this.unk01 = 2
-        this.unk02 = 2
-        this.roomId = room.id
-        this.unk04 = 5
-        this.roomFlags = new Uint64LE('FFFFFFFFFFFFFFFF', 16)
-        this.roomName = new PacketString(room.settings.roomName)
-        this.unk05 = 0
-        this.unk06 = 0
-        this.unk07 = 0
-        this.unk08 = 0
-        this.unk09 = new PacketString('')
-        this.unk10 = 0
-        this.unk11 = 1
-        this.gameModeId = room.settings.gameModeId
-        this.mapId = room.settings.mapId
-        this.unk13 = 0
-        this.unk14 = 1
-        this.winLimit = room.settings.winLimit
-        this.killLimit = room.settings.killLimit
-        this.unk17 = 1
-        this.unk18 = 0xA
-        this.unk19 = 0
-        this.status = room.getStatus()
-        this.unk21 = 0
-        this.unk22 = 0
-        this.unk23 = 0
-        this.unk24 = 0
-        this.unk25 = 0x5A
-        this.unk26 = 0
-        this.unk27 = []
-        /*for (let i = 0; i < this.unk26; i++) {
-            add to this.unk27
-        }*/
-        this.unk28 = 1
-        this.unk29 = 0
-        this.unk30 = 0
-        this.unk31 = 1
-        this.unk32 = 1
-        this.unk33 = 0
-        this.botEnabled = 0
+        outPacket.writeUInt16(room.id) // roomId
 
-        if (this.botEnabled) {
-            this.botDifficulty = 0
-            this.numCtBots = 0
-            this.numTrBots = 0
-        }
-
-        this.unk35 = 0
-        this.unk36 = 0
-        this.unk37 = 0
-        this.unk38 = 0
-        this.unk39 = 1
-        this.unk40 = (room.getStatus() === RoomStatus.Ingame) as unknown as number
-        this.unk41 = 0x3E80
-        this.unk42 = 0
-        this.unk43 = 0
-        this.unk44 = 0
-        this.unk45 = 0
-        this.unk46 = 3
-
-        this.numOfPlayers = room.users.length
-        this.users = room.users
-    }
-    public build(outPacket: OutPacketBase): void {
-
-        outPacket.writeUInt32(this.roomHostId)
-
-        outPacket.writeUInt8(this.unk01)
-        outPacket.writeUInt8(this.unk02)
-
-        outPacket.writeUInt16(this.roomId)
-
-        outPacket.writeUInt8(this.unk04)
+        outPacket.writeUInt8(5) // unk04
 
         // special class start?
-        outPacket.writeUInt64(this.roomFlags)
-        outPacket.writeString(this.roomName)
-
-        outPacket.writeUInt8(this.unk05)
-
-        outPacket.writeUInt8(this.unk06)
-        outPacket.writeUInt32(this.unk07)
-        outPacket.writeUInt32(this.unk08)
-
-        outPacket.writeString(this.unk09)
-
-        outPacket.writeUInt16(this.unk10)
-
-        outPacket.writeUInt8(this.unk11)
-
-        outPacket.writeUInt8(this.gameModeId)
-
-        outPacket.writeUInt8(this.mapId)
-        outPacket.writeUInt8(this.unk13)
-
-        outPacket.writeUInt8(this.unk14)
-
-        outPacket.writeUInt8(this.winLimit)
-
-        outPacket.writeUInt16(this.killLimit)
-
-        outPacket.writeUInt8(this.unk17)
-
-        outPacket.writeUInt8(this.unk18)
-
-        outPacket.writeUInt8(this.unk19)
-
-        outPacket.writeUInt8(this.status)
-
-        outPacket.writeUInt8(this.unk21)
-        outPacket.writeUInt8(this.unk22)
-        outPacket.writeUInt8(this.unk23)
-        outPacket.writeUInt8(this.unk24)
-
-        outPacket.writeUInt8(this.unk25)
-
-        outPacket.writeUInt8(this.unk26)
-        for (const iterator of this.unk27) {
+        // flags & 0x1
+        outPacket.writeUInt64(new Uint64LE('FFFFFFFFFFFFFFFF', 16)) // roomFlags
+        outPacket.writeString(new PacketString(room.settings.roomName)) // roomName
+        // end of flags & 0x1
+        // flags & 0x2
+        outPacket.writeUInt8(0) // unk05
+        // end of flags & 0x2
+        // flags & 0x4
+        outPacket.writeUInt8(0) // unk06
+        outPacket.writeUInt32(0) // unk07
+        outPacket.writeUInt32(0) // unk08
+        // end of flags & 0x4
+        // flags & 0x8
+        outPacket.writeString(new PacketString(null)) // unk09
+        // end of flags & 0x8
+        // flags & 0x10
+        outPacket.writeUInt16(0) // unk10
+        // end of flags & 0x10
+        // flags & 0x20
+        outPacket.writeUInt8(1) // unk11
+        // end of flags & 0x20
+        // flags & 0x40
+        outPacket.writeUInt8(room.settings.gameModeId) // gameModeId
+        // end of flags & 0x40
+        // flags & 0x80
+        outPacket.writeUInt8(room.settings.mapId) // mapId
+        outPacket.writeUInt8(0) // unk13
+        // end of flags & 0x80
+        // flags & 0x100
+        outPacket.writeUInt8(1) // unk14
+        // end of flags & 0x100
+        // flags & 0x200
+        outPacket.writeUInt8(room.settings.winLimit) // winLimit
+        // end of flags & 0x200
+        // flags & 0x400
+        outPacket.writeUInt16(room.settings.killLimit) // killLimit
+        // end of flags & 0x400
+        // flags & 0x800
+        outPacket.writeUInt8(1) // unk17
+        // end of flags & 0x800
+        // flags & 0x1000
+        outPacket.writeUInt8(10) // unk18
+        // end of flags & 0x1000
+        // flags & 0x2000
+        outPacket.writeUInt8(0) // unk19
+        // end of flags & 0x2000
+        // flags & 0x4000
+        outPacket.writeUInt8(room.getStatus()) // status
+        // end of flags & 0x4000
+        // flags & 0x8000
+        outPacket.writeUInt8(0) // unk21
+        outPacket.writeUInt8(0) // unk22
+        outPacket.writeUInt8(0) // unk23
+        outPacket.writeUInt8(0) // unk24
+        // end of flags & 0x8000
+        // flags & 0x10000
+        outPacket.writeUInt8(90) // unk25
+        // end of flags & 0x10000
+        // flags & 0x20000
+        const unk27: number[] = [] // unk27
+        outPacket.writeUInt8(unk27.length) // countOfUnk27
+        for (const iterator of unk27) {
             outPacket.writeUInt8(iterator)
         }
-
-        outPacket.writeUInt8(this.unk28)
-
-        outPacket.writeUInt8(this.unk29)
-
-        outPacket.writeUInt8(this.unk30)
-
-        outPacket.writeUInt8(this.unk31)
-
-        outPacket.writeUInt8(this.unk32)
-
-        outPacket.writeUInt8(this.unk33)
-
+        // end of flags & 0x20000
+        // flags & 0x40000
+        outPacket.writeUInt8(1) // unk28
+        // end of flags & 0x40000
+        // flags & 0x80000
+        outPacket.writeUInt8(0) // unk29
+        // end of flags & 0x80000
+        // flags & 0x100000
+        outPacket.writeUInt8(0) // unk30
+        // end of flags & 0x100000
+        // flags & 0x20000
+        outPacket.writeUInt8(1) // unk31
+        // end of flags & 0x200000
+        // flags & 0x400000
+        outPacket.writeUInt8(1) // unk32
+        // end of flags & 0x400000
+        // flags & 0x800000
+        outPacket.writeUInt8(0) // unk33
+        // end of flags & 0x800000
+        // flags & 0x1000000
         // if == 1, it can have 3 more bytes
-        outPacket.writeUInt8(this.botEnabled)
-
-        if (this.botEnabled) {
-            outPacket.writeUInt8(this.botDifficulty)
-            outPacket.writeUInt8(this.numCtBots)
-            outPacket.writeUInt8(this.numTrBots)
+        outPacket.writeUInt8(room.settings.areBotsEnabled ? 1 : 0) // botEnabled
+        if (room.settings.areBotsEnabled) {
+            outPacket.writeUInt8(room.settings.botDifficulty) // botDifficulty
+            outPacket.writeUInt8(room.settings.numCtBots) // numCtBots
+            outPacket.writeUInt8(room.settings.numTrBots) // numTrBots
         }
-
-        outPacket.writeUInt8(this.unk35)
-
-        outPacket.writeUInt8(this.unk36)
-
-        outPacket.writeUInt8(this.unk37)
-
-        outPacket.writeUInt8(this.unk38)
-
-        outPacket.writeUInt8(this.unk39)
-
-        outPacket.writeUInt8(this.unk40)
-
-        outPacket.writeUInt16(this.unk41)
-
-        outPacket.writeUInt8(this.unk42)
-
-        outPacket.writeUInt8(this.unk43)
-
-        outPacket.writeUInt8(this.unk44)
-
-        outPacket.writeUInt8(this.unk45)
-
-        outPacket.writeUInt8(this.unk46)
+        // end of flags & 0x1000000
+        // flags & 0x2000000
+        outPacket.writeUInt8(0) // unk35
+        // end of flags & 0x2000000
+        // flags & 0x4000000
+        outPacket.writeUInt8(0) // unk36
+        // end of flags & 0x4000000
+        // flags & 0x8000000
+        outPacket.writeUInt8(0) // unk37
+        // end of flags & 0x8000000
+        // flags & 0x10000000
+        outPacket.writeUInt8(0) // unk38
+        // end of flags & 0x10000000
+        // flags & 0x20000000
+        outPacket.writeUInt8(0) // unk39
+        // end of flags & 0x20000000
+        // flags & 0x40000000
+        outPacket.writeUInt8(room.getStatus() === RoomStatus.Ingame ? 1 : 0) // isInGame
+        // end of flags & 0x40000000
+        // flags & 0x80000000
+        outPacket.writeUInt16(16000) // unk41
+        // end of flags & 0x80000000
+        // flags & 0x100000000
+        outPacket.writeUInt8(0) // unk42
+        // end of flags & 0x100000000
+        // flags & 0x200000000
+        outPacket.writeUInt8(0) // unk43
+        // end of flags & 0x200000000
+        // flags & 0x400000000
+        outPacket.writeUInt8(0) // unk44
+        // end of flags & 0x400000000
+        // flags & 0x800000000
+        outPacket.writeUInt8(0) // unk45
+        // end of flags & 0x800000000
+        // flags & 0x1000000000
+        outPacket.writeUInt8(3) // unk46
+        // end of flags & 0x1000000000
         // special class end?
 
-        outPacket.writeUInt8(this.numOfPlayers)
+        outPacket.writeUInt8(room.usersInfo.length) // numOfPlayers
 
-        for (const user of this.users) {
+        for (const user of room.usersInfo) {
             outPacket.writeUInt32(user.userId)
-            new OutRoomPlayerNetInfo(user, this.room.getUserTeam(user)).build(outPacket)
-            new UserInfoFullUpdate(user).build(outPacket)
+            OutRoomPlayerNetInfo.build(user.userId, room.getUserTeam(user.userId), outPacket)
+            await UserInfoFullUpdate.build(user.userId, outPacket)
         }
     }
 }

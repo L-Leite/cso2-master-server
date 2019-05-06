@@ -1,9 +1,6 @@
 import fs from 'fs'
 import path from 'path'
 
-import { ExtendedSocket } from 'extendedsocket'
-import { InPacketBase } from 'packets/in/packet'
-
 function padNumber(n: number): string {
     return n > 9 ? '' + n : '0' + n
 }
@@ -13,8 +10,6 @@ function padNumber(n: number): string {
  * @class PacketLogger
  */
 export class PacketLogger {
-    private static curPacket = 0
-
     private static clearDirectory(dir: string): void {
         const files: string[] = fs.readdirSync(dir)
 
@@ -61,16 +56,11 @@ export class PacketLogger {
      * logs incoming packet
      * @param inPacket the packet to log
      */
-    public dumpIn(inPacket: InPacketBase, sourceSocket: ExtendedSocket): void {
-        const packetPath: string = this.inPath +
-            sourceSocket.uuid +
-            '_' +
-            padNumber(inPacket.sequence) +
-            '-' +
-            inPacket.id +
-            '.bin'
+    public dumpIn(connUuid: string, seq: number, packetId: number, packetData: Buffer): void {
+        const packetPath: string
+            = this.inPath + connUuid + '_' + padNumber(seq) + '-' + packetId + '.bin'
 
-        fs.writeFileSync(packetPath, inPacket.getData(), {
+        fs.writeFileSync(packetPath, packetData, {
             encoding: 'binary',
             flag: 'w',
         })
@@ -78,24 +68,19 @@ export class PacketLogger {
 
     /**
      * logs outgoing packet
-     * @param outData the packet data to log
+     * @param outPacket the packet data to log
      */
-    public dumpOut(outData: Buffer, sourceSocket: ExtendedSocket) {
+    public dumpOut(connUuid: string, seq: number, packetId: number, packetData: Buffer) {
         // parse the out packet as an in packet
         // the header is the same
-        const packet: InPacketBase = new InPacketBase(outData)
+        const packetPath: string
+            = this.outPath + connUuid + '_' + padNumber(seq) + '-' + packetId + '.bin'
 
-        const packetPath: string = this.outPath +
-            sourceSocket.uuid +
-            '_' +
-            padNumber(sourceSocket.getRealSeq()) +
-            '-' +
-            packet.id +
-            '.bin'
-
-        fs.writeFileSync(packetPath, packet.getData(), {
-            encoding: 'binary',
-            flag: 'w',
-        })
+        fs.writeFile(packetPath, packetData, { encoding: 'binary', flag: 'w' },
+            (err) => {
+                if (err) {
+                    console.error(err)
+                }
+            })
     }
 }

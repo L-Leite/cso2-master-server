@@ -7,8 +7,6 @@ import { PacketId, PacketSignature } from 'packets/definitions'
 import { PacketLongString } from 'packets/packetlongstring'
 import { PacketString } from 'packets/packetstring'
 
-import { ExtendedSocket } from 'extendedsocket'
-
 /**
  * The outgoing TCP packet's base
  * Same as the incoming TCP packet base
@@ -20,12 +18,12 @@ import { ExtendedSocket } from 'extendedsocket'
  *                 of the base packet
  * @class OutPacketBase
  */
-export abstract class OutPacketBase extends PacketBaseShared {
+export class OutPacketBase extends PacketBaseShared {
     protected outStream: WritableStreamBuffer
 
-    constructor(socket: ExtendedSocket, id: PacketId) {
+    constructor(id: PacketId) {
         super()
-        this.sequence = socket.getNextSeq()
+        this.sequence = null
         this.id = id
     }
 

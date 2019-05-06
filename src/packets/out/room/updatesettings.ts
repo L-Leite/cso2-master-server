@@ -11,14 +11,145 @@ import { RoomSettings } from 'room/roomsettings'
  * @class OutRoomUpdateSettings
  */
 export class OutRoomUpdateSettings {
-    private settings: RoomSettings
+    public static getFlags(settings: RoomSettings): Uint64LE {
+        let lowFlag: number = 0
+        let highFlag: number = 0
 
-    constructor(newSettings: RoomSettings) {
-        this.settings = newSettings
+        /* tslint:disable: no-bitwise */
+        if (settings.roomName != null) {
+            lowFlag |= 0x1
+        }
+        if (settings.unk00 != null) {
+            lowFlag |= 0x2
+        }
+        if (settings.unk01 != null && settings.unk02 != null && settings.unk03 != null) {
+            lowFlag |= 0x4
+        }
+        if (settings.unk09 != null) {
+            lowFlag |= 0x8
+        }
+        if (settings.unk10 != null) {
+            lowFlag |= 0x10
+        }
+        if (settings.forceCamera != null) {
+            lowFlag |= 0x20
+        }
+        if (settings.gameModeId != null) {
+            lowFlag |= 0x40
+        }
+        if (settings.mapId != null && settings.unk13 != null) {
+            lowFlag |= 0x80
+        }
+        if (settings.maxPlayers != null) {
+            lowFlag |= 0x100
+        }
+        if (settings.winLimit != null) {
+            lowFlag |= 0x200
+        }
+        if (settings.killLimit != null) {
+            lowFlag |= 0x400
+        }
+        if (settings.unk17 != null) {
+            lowFlag |= 0x800
+        }
+        if (settings.unk18 != null) {
+            lowFlag |= 0x1000
+        }
+        if (settings.weaponRestrictions != null) {
+            lowFlag |= 0x2000
+        }
+        if (settings.status != null) {
+            lowFlag |= 0x4000
+        }
+        if (settings.unk21 != null
+            && settings.mapCycleType != null
+            && settings.unk23 != null
+            && settings.unk24 != null) {
+            lowFlag |= 0x8000
+        }
+        if (settings.unk25 != null) {
+            lowFlag |= 0x10000
+        }
+        if (settings.multiMaps != null) {
+            lowFlag |= 0x20000
+        }
+        if (settings.teamBalanceType != null) {
+            lowFlag |= 0x40000
+        }
+        if (settings.unk29 != null) {
+            lowFlag |= 0x80000
+        }
+        if (settings.unk30 != null) {
+            lowFlag |= 0x100000
+        }
+        if (settings.unk31 != null) {
+            lowFlag |= 0x200000
+        }
+        if (settings.unk32 != null) {
+            lowFlag |= 0x400000
+        }
+        if (settings.unk33 != null) {
+            lowFlag |= 0x800000
+        }
+        if (settings.areBotsEnabled != null) {
+            lowFlag |= 0x1000000
+        }
+
+        if (settings.unk35 != null) {
+            lowFlag |= 0x2000000
+        }
+
+        if (settings.unk36 != null) {
+            lowFlag |= 0x4000000
+        }
+
+        if (settings.unk37 != null) {
+            lowFlag |= 0x8000000
+        }
+
+        if (settings.unk38 != null) {
+            lowFlag |= 0x10000000
+        }
+
+        if (settings.unk39 != null) {
+            lowFlag |= 0x20000000
+        }
+
+        if (settings.isIngame != null) {
+            lowFlag |= 0x40000000
+        }
+
+        if (settings.startMoney != null) {
+            lowFlag |= 0x80000000
+        }
+
+        if (settings.changeTeams != null) {
+            highFlag |= 0x1
+        }
+
+        if (settings.unk43 != null) {
+            highFlag |= 0x2
+        }
+
+        if (settings.hltvEnabled != null) {
+            highFlag |= 0x4
+        }
+
+        if (settings.unk45 != null) {
+            highFlag |= 0x8
+        }
+
+        if (settings.respawnTime != null) {
+            highFlag |= 0x10
+        }
+        /* tslint:enable: no-bitwise */
+
+        const flags: Uint64LE = new Uint64LE(highFlag, lowFlag)
+        return flags
     }
 
-    public build(outPacket: OutPacketBase): void {
-        const flags: Uint64LE = this.getFlags()
+    public static build(settings: RoomSettings, outPacket: OutPacketBase): void {
+        const flags: Uint64LE = this.getFlags(settings)
 
         outPacket.writeUInt64(flags)
 
@@ -31,281 +162,144 @@ export class OutRoomUpdateSettings {
         // disable linter bitwise restrictions so we can check the flags
         /* tslint:disable: no-bitwise */
         if (lowFlag & 0x1) {
-            outPacket.writeString(new PacketString(this.settings.roomName))
+            outPacket.writeString(new PacketString(settings.roomName))
         }
         if (lowFlag & 0x2) {
-            outPacket.writeUInt8(this.settings.unk00)
+            outPacket.writeUInt8(settings.unk00)
         }
         if (lowFlag & 0x4) {
-            outPacket.writeUInt8(this.settings.unk01)
-            outPacket.writeUInt32(this.settings.unk02)
-            outPacket.writeUInt32(this.settings.unk03)
+            outPacket.writeUInt8(settings.unk01)
+            outPacket.writeUInt32(settings.unk02)
+            outPacket.writeUInt32(settings.unk03)
         }
         if (lowFlag & 0x8) {
-            outPacket.writeString(new PacketString(this.settings.unk09))
+            outPacket.writeString(new PacketString(settings.unk09))
         }
         if (lowFlag & 0x10) {
-            outPacket.writeUInt16(this.settings.unk10)
+            outPacket.writeUInt16(settings.unk10)
         }
         if (lowFlag & 0x20) {
-            outPacket.writeUInt8(this.settings.forceCamera)
+            outPacket.writeUInt8(settings.forceCamera)
         }
         if (lowFlag & 0x40) {
-            outPacket.writeUInt8(this.settings.gameModeId)
+            outPacket.writeUInt8(settings.gameModeId)
         }
         if (lowFlag & 0x80) {
-            outPacket.writeUInt8(this.settings.mapId)
-            outPacket.writeUInt8(this.settings.unk13)
+            outPacket.writeUInt8(settings.mapId)
+            outPacket.writeUInt8(settings.unk13)
         }
         if (lowFlag & 0x100) {
-            outPacket.writeUInt8(this.settings.maxPlayers)
+            outPacket.writeUInt8(settings.maxPlayers)
         }
         if (lowFlag & 0x200) {
-            outPacket.writeUInt8(this.settings.winLimit)
+            outPacket.writeUInt8(settings.winLimit)
         }
         if (lowFlag & 0x400) {
-            outPacket.writeUInt16(this.settings.killLimit)
+            outPacket.writeUInt16(settings.killLimit)
         }
         if (lowFlag & 0x800) {
-            outPacket.writeUInt8(this.settings.unk17)
+            outPacket.writeUInt8(settings.unk17)
         }
         if (lowFlag & 0x1000) {
-            outPacket.writeUInt8(this.settings.unk18)
+            outPacket.writeUInt8(settings.unk18)
         }
         if (lowFlag & 0x2000) {
-            outPacket.writeUInt8(this.settings.weaponRestrictions)
+            outPacket.writeUInt8(settings.weaponRestrictions)
         }
         if (lowFlag & 0x4000) {
-            outPacket.writeUInt8(this.settings.status)
+            outPacket.writeUInt8(settings.status)
         }
         if (lowFlag & 0x8000) {
-            outPacket.writeUInt8(this.settings.unk21)
-            outPacket.writeUInt8(this.settings.mapCycleType)
-            outPacket.writeUInt8(this.settings.unk23)
-            outPacket.writeUInt8(this.settings.unk24)
+            outPacket.writeUInt8(settings.unk21)
+            outPacket.writeUInt8(settings.mapCycleType)
+            outPacket.writeUInt8(settings.unk23)
+            outPacket.writeUInt8(settings.unk24)
         }
         if (lowFlag & 0x10000) {
-            outPacket.writeUInt8(this.settings.unk25)
+            outPacket.writeUInt8(settings.unk25)
         }
         if (lowFlag & 0x20000) {
-            outPacket.writeUInt8(this.settings.multiMaps.length)
-            for (const map of this.settings.multiMaps) {
+            outPacket.writeUInt8(settings.multiMaps.length)
+            for (const map of settings.multiMaps) {
                 outPacket.writeUInt8(map)
             }
         }
         if (lowFlag & 0x40000) {
-            outPacket.writeUInt8(this.settings.teamBalanceType)
+            outPacket.writeUInt8(settings.teamBalanceType)
         }
         if (lowFlag & 0x80000) {
-            outPacket.writeUInt8(this.settings.unk29)
+            outPacket.writeUInt8(settings.unk29)
         }
         if (lowFlag & 0x100000) {
-            outPacket.writeUInt8(this.settings.unk30)
+            outPacket.writeUInt8(settings.unk30)
         }
         if (lowFlag & 0x200000) {
-            outPacket.writeUInt8(this.settings.unk31)
+            outPacket.writeUInt8(settings.unk31)
         }
         if (lowFlag & 0x400000) {
-            outPacket.writeUInt8(this.settings.unk32)
+            outPacket.writeUInt8(settings.unk32)
         }
         if (lowFlag & 0x800000) {
-            outPacket.writeUInt8(this.settings.unk33)
+            outPacket.writeUInt8(settings.unk33)
         }
         if (lowFlag & 0x1000000) {
-            const botEnabled: number = this.settings.areBotsEnabled as unknown as number
+            const botEnabled: number = settings.areBotsEnabled as unknown as number
             outPacket.writeUInt8(botEnabled)
 
-            if (this.settings.areBotsEnabled === true) {
-                outPacket.writeUInt8(this.settings.botDifficulty)
-                outPacket.writeUInt8(this.settings.numCtBots)
-                outPacket.writeUInt8(this.settings.numTrBots)
+            if (settings.areBotsEnabled === true) {
+                outPacket.writeUInt8(settings.botDifficulty)
+                outPacket.writeUInt8(settings.numCtBots)
+                outPacket.writeUInt8(settings.numTrBots)
             }
         }
 
         if (lowFlag & 0x2000000) {
-            outPacket.writeUInt8(this.settings.unk35)
+            outPacket.writeUInt8(settings.unk35)
         }
 
         if (lowFlag & 0x4000000) {
-            outPacket.writeUInt8(this.settings.unk36)
+            outPacket.writeUInt8(settings.unk36)
         }
 
         if (lowFlag & 0x8000000) {
-            outPacket.writeUInt8(this.settings.unk37)
+            outPacket.writeUInt8(settings.unk37)
         }
 
         if (lowFlag & 0x10000000) {
-            outPacket.writeUInt8(this.settings.unk38)
+            outPacket.writeUInt8(settings.unk38)
         }
 
         if (lowFlag & 0x20000000) {
-            outPacket.writeUInt8(this.settings.unk39)
+            outPacket.writeUInt8(settings.unk39)
         }
 
         if (lowFlag & 0x40000000) {
-            outPacket.writeUInt8(this.settings.isIngame as unknown as number)
+            outPacket.writeUInt8(settings.isIngame as unknown as number)
         }
 
         if (lowFlag & 0x80000000) {
-            outPacket.writeUInt16(this.settings.startMoney)
+            outPacket.writeUInt16(settings.startMoney)
         }
 
         if (highFlag & 0x1) {
-            outPacket.writeUInt8(this.settings.changeTeams)
+            outPacket.writeUInt8(settings.changeTeams)
         }
 
         if (highFlag & 0x2) {
-            outPacket.writeUInt8(this.settings.unk43)
+            outPacket.writeUInt8(settings.unk43)
         }
 
         if (highFlag & 0x4) {
-            outPacket.writeUInt8(this.settings.hltvEnabled)
+            outPacket.writeUInt8(settings.hltvEnabled)
         }
 
         if (highFlag & 0x8) {
-            outPacket.writeUInt8(this.settings.unk45)
+            outPacket.writeUInt8(settings.unk45)
         }
 
         if (highFlag & 0x10) {
-            outPacket.writeUInt8(this.settings.respawnTime)
+            outPacket.writeUInt8(settings.respawnTime)
         }
         /* tslint:enable: no-bitwise */
-    }
-
-    public getFlags(): Uint64LE {
-        let lowFlag: number = 0
-        let highFlag: number = 0
-
-        /* tslint:disable: no-bitwise */
-        if (this.settings.roomName != null) {
-            lowFlag |= 0x1
-        }
-        if (this.settings.unk00 != null) {
-            lowFlag |= 0x2
-        }
-        if (this.settings.unk01 != null && this.settings.unk02 != null && this.settings.unk03 != null) {
-            lowFlag |= 0x4
-        }
-        if (this.settings.unk09 != null) {
-            lowFlag |= 0x8
-        }
-        if (this.settings.unk10 != null) {
-            lowFlag |= 0x10
-        }
-        if (this.settings.forceCamera != null) {
-            lowFlag |= 0x20
-        }
-        if (this.settings.gameModeId != null) {
-            lowFlag |= 0x40
-        }
-        if (this.settings.mapId != null && this.settings.unk13 != null) {
-            lowFlag |= 0x80
-        }
-        if (this.settings.maxPlayers != null) {
-            lowFlag |= 0x100
-        }
-        if (this.settings.winLimit != null) {
-            lowFlag |= 0x200
-        }
-        if (this.settings.killLimit != null) {
-            lowFlag |= 0x400
-        }
-        if (this.settings.unk17 != null) {
-            lowFlag |= 0x800
-        }
-        if (this.settings.unk18 != null) {
-            lowFlag |= 0x1000
-        }
-        if (this.settings.weaponRestrictions != null) {
-            lowFlag |= 0x2000
-        }
-        if (this.settings.status != null) {
-            lowFlag |= 0x4000
-        }
-        if (this.settings.unk21 != null
-            && this.settings.mapCycleType != null
-            && this.settings.unk23 != null
-            && this.settings.unk24 != null) {
-            lowFlag |= 0x8000
-        }
-        if (this.settings.unk25 != null) {
-            lowFlag |= 0x10000
-        }
-        if (this.settings.multiMaps != null) {
-            lowFlag |= 0x20000
-        }
-        if (this.settings.teamBalanceType != null) {
-            lowFlag |= 0x40000
-        }
-        if (this.settings.unk29 != null) {
-            lowFlag |= 0x80000
-        }
-        if (this.settings.unk30 != null) {
-            lowFlag |= 0x100000
-        }
-        if (this.settings.unk31 != null) {
-            lowFlag |= 0x200000
-        }
-        if (this.settings.unk32 != null) {
-            lowFlag |= 0x400000
-        }
-        if (this.settings.unk33 != null) {
-            lowFlag |= 0x800000
-        }
-        if (this.settings.areBotsEnabled != null) {
-            lowFlag |= 0x1000000
-        }
-
-        if (this.settings.unk35 != null) {
-            lowFlag |= 0x2000000
-        }
-
-        if (this.settings.unk36 != null) {
-            lowFlag |= 0x4000000
-        }
-
-        if (this.settings.unk37 != null) {
-            lowFlag |= 0x8000000
-        }
-
-        if (this.settings.unk38 != null) {
-            lowFlag |= 0x10000000
-        }
-
-        if (this.settings.unk39 != null) {
-            lowFlag |= 0x20000000
-        }
-
-        if (this.settings.isIngame != null) {
-            lowFlag |= 0x40000000
-        }
-
-        if (this.settings.startMoney != null) {
-            lowFlag |= 0x80000000
-        }
-
-        if (this.settings.changeTeams != null) {
-            highFlag |= 0x1
-        }
-
-        if (this.settings.unk43 != null) {
-            highFlag |= 0x2
-        }
-
-        if (this.settings.hltvEnabled != null) {
-            highFlag |= 0x4
-        }
-
-        if (this.settings.unk45 != null) {
-            highFlag |= 0x8
-        }
-
-        if (this.settings.respawnTime != null) {
-            highFlag |= 0x10
-        }
-        /* tslint:enable: no-bitwise */
-
-        const flags: Uint64LE = new Uint64LE(highFlag, lowFlag)
-        return flags
     }
 }

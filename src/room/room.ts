@@ -1,5 +1,6 @@
 import { Channel } from 'channel/channel'
-import { User } from 'user/user'
+
+import { ExtendedSocket } from 'extendedsocket'
 
 import { RoomSettings } from 'room/roomsettings'
 import { RoomUser } from 'room/roomuser'
@@ -9,6 +10,7 @@ import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
 import { OutHostPacket } from 'packets/out/host'
 import { OutRoomPacket } from 'packets/out/room'
 import { OutUdpPacket } from 'packets/out/udp'
+import { UserSession } from 'user/usersession'
 
 export enum RoomTeamNum {
     Unknown = 0,
@@ -126,12 +128,19 @@ export enum RoomStatus {
 const defaultCountdownNum: number = 7
 
 export class Room {
+    /**
+     * tell the user to close the game result window
+     * @param conn the user's connection
+     */
+    public static sendCloseResultWindow(conn: ExtendedSocket): void {
+        conn.send(OutHostPacket.leaveResultWindow())
+    }
+
     public id: number
     public settings: RoomSettings
 
-    public host: User
-    public users: User[]
-    public usersInfo: Map<User, RoomUser>
+    public host: RoomUser
+    public usersInfo: RoomUser[]
 
     private emptyRoomCallback: (emptyRoom: Room, channel: Channel) => void
     private parentChannel: Channel
@@ -139,13 +148,12 @@ export class Room {
     private countingDown: boolean
     private countdown: number
 
-    constructor(roomId: number, host: User, parentChannel: Channel,
+    constructor(roomId: number, hostUserId: number, hostConn: ExtendedSocket, parentChannel: Channel,
                 emptyRoomCallback?: (emptyRoom: Room, channel: Channel) => void,
                 options?: IRoomOptions) {
         this.id = roomId
-        this.host = host
 
-        this.usersInfo = new Map<User, RoomUser>()
+        this.usersInfo = []
 
         this.parentChannel = parentChannel
         this.emptyRoomCallback = emptyRoomCallback
@@ -155,8 +163,7 @@ export class Room {
         this.countingDown = false
         this.countdown = defaultCountdownNum
 
-        this.users = []
-        this.addUser(host)
+        this.host = this.addUser(hostUserId, hostConn)
     }
 
     /**
@@ -164,7 +171,7 @@ export class Room {
      * @returns the ammount of players
      */
     public getNumOfPlayers(): number {
-        const realPlayers: number = this.users.length
+        const realPlayers: number = this.usersInfo.length
         const botPlayers: number = this.getNumOfBotCts() + this.getNumOfBotTerrorists()
         return realPlayers + botPlayers
     }
@@ -175,7 +182,7 @@ export class Room {
      */
     public getFreeSlots(): number {
         if (this.settings.areBotsEnabled === true) {
-            const hostTeam: RoomTeamNum = this.getUserTeam(this.host)
+            const hostTeam: RoomTeamNum = this.host.team
 
             let botsInHostTeam: number = 0
             let humansInHostTeam: number = 0
@@ -205,34 +212,34 @@ export class Room {
 
     /**
      * is the user in the room?
-     * @param user the user objects to find
+     * @param userId the user ID to find
      * @returns true the user is found, false if not
      */
-    public hasUser(user: User): boolean {
-        return this.users.find((u: User) => u === user) != null
+    public hasUser(userId: number): boolean {
+        return this.getRoomUser(userId) != null
     }
 
     /**
      * add an user to a room
-     * @param user the user object to add
+     * @param userId the target user's ID
+     * @returns the created user's room data
      */
-    public addUser(user: User): void {
-        const userData: RoomUser = new RoomUser(this.findDesirableTeamNum(),
-            RoomReadyStatus.NotReady)
-        this.users.push(user)
-        this.usersInfo.set(user, userData)
+    public addUser(userId: number, connection: ExtendedSocket): RoomUser {
+        const userData: RoomUser = new RoomUser(userId, connection,
+            this.findDesirableTeamNum(), RoomReadyStatus.NotReady)
+        this.usersInfo.push(userData)
+        return userData
     }
 
     /**
      * remove an user from a room
-     * @param targetUser the user object to remove
+     * @param userId the user to be removed ID
      */
-    public removeUser(targetUser: User): void {
-        for (const user of this.users) {
-            if (user === targetUser) {
-                this.usersInfo.delete(user)
-                this.users.splice(this.users.indexOf(user), 1)
-                this.onUserRemoved(user)
+    public removeUser(userId: number): void {
+        for (const info of this.usersInfo) {
+            if (info.userId === userId) {
+                this.usersInfo.splice(this.usersInfo.indexOf(info), 1)
+                this.onUserRemoved(info.userId)
                 return
             }
         }
@@ -263,7 +270,7 @@ export class Room {
         if (this.settings.areBotsEnabled) {
             // make sure there is at least one human player
             if (trNum + ctNum > 0) {
-                const hostTeamNum: RoomTeamNum = this.getUserTeam(this.host)
+                const hostTeamNum: RoomTeamNum = this.host.team
                 return hostTeamNum
             }
         }
@@ -277,18 +284,13 @@ export class Room {
 
     /**
      * returns an user's current team
-     * @param user the user's object
+     * @param userId the target user's ID
      */
-    public getUserTeam(user: User): RoomTeamNum {
-        if (this.hasUser(user) === false) {
-            console.warn('getUserTeam: user not found!')
-            return RoomTeamNum.Unknown
-        }
-
-        const info: RoomUser = this.usersInfo.get(user)
+    public getUserTeam(userId: number): RoomTeamNum {
+        const info: RoomUser = this.getRoomUser(userId)
 
         if (info == null) {
-            console.warn('getUserTeam: user "%s" room info not found!', user.userName)
+            console.warn('getUserTeam: userId %i not found', userId)
             return RoomTeamNum.Unknown
         }
 
@@ -301,9 +303,9 @@ export class Room {
      */
     public getNumOfReadyRealPlayers(): number {
         let numReadyPlayers: number = 0
-        for (const user of this.users) {
-            if (this.isUserReady(user) === true
-                || user === this.host) {
+        for (const info of this.usersInfo) {
+            if (info.isReady() === true
+                || info === this.host) {
                 numReadyPlayers++
             }
         }
@@ -374,40 +376,33 @@ export class Room {
     }
 
     /**
-     * returns an user's ready status
-     * @param user the user's object
+     * get's an user's room information through its ID
+     * @param userId the target user's ID
+     * @returns the user's room info if found, else it returns null
      */
-    public getUserReadyStatus(user: User): RoomReadyStatus {
-        if (this.hasUser(user) === false) {
-            console.warn('getUserReady: user "%s" not found!', user.userName)
-            return null
-        }
-
-        const userInfo: RoomUser = this.usersInfo.get(user)
-
-        if (userInfo == null) {
-            console.warn('toggleUserReadyStatus: couldnt get "%s"\'s userinfo', user.userName)
-            return null
-        }
-
-        return userInfo.ready
+    public getRoomUser(userId: number): RoomUser {
+        return this.usersInfo.find((u: RoomUser) => u.userId === userId)
     }
 
     /**
-     * returns true if an user is ready, false if not
-     * @param user the user's object
+     * returns an user's ready status
+     * @param userId the target user's ID
      */
-    public isUserReady(user: User): boolean {
-        if (this.hasUser(user) === false) {
-            console.warn('isUserReady: user "%s" not found!', user.userName)
-            return null
-        }
+    public getUserReadyStatus(user: RoomUser): RoomReadyStatus {
+        return user.ready
+    }
 
-        const userInfo: RoomUser = this.usersInfo.get(user)
+    /**
+     * checks if an user is ready
+     * @param userId the target user's ID
+     * @returns true if an user is ready, false if not
+     */
+    public isUserReady(userId: number): boolean {
+        const userInfo: RoomUser = this.getRoomUser(userId)
 
         if (userInfo == null) {
-            console.warn('isUserReady: couldnt get "%s"\'s userinfo', user.userName)
-            return null
+            console.warn('isUserReady: couldnt get user\'s room data (userId: %i)', userId)
+            return false
         }
 
         return userInfo.ready === RoomReadyStatus.Ready
@@ -417,20 +412,8 @@ export class Room {
      * is the user ingame?
      * @param user the target user
      */
-    public isUserIngame(user: User): boolean {
-        if (this.hasUser(user) === false) {
-            console.warn('isUserIngame: user "%s" not found!', user.userName)
-            return false
-        }
-
-        const userInfo: RoomUser = this.usersInfo.get(user)
-
-        if (userInfo == null) {
-            console.warn('isUserIngame: couldnt get "%s"\'s userinfo', user.userName)
-            return false
-        }
-
-        return userInfo.isIngame
+    public isUserIngame(user: RoomUser): boolean {
+        return user.isIngame
     }
 
     /**
@@ -438,8 +421,8 @@ export class Room {
      * @returns true if everyone is ready, false if not
      */
     public isRoomReady(): boolean {
-        for (const user of this.users) {
-            if (this.isUserReady(user) === false) {
+        for (const info of this.usersInfo) {
+            if (info.isReady() === false) {
                 return false
             }
         }
@@ -447,24 +430,16 @@ export class Room {
     }
 
     /**
-     * swaps an user to the opposite team
-     * @param user the user's object
+     * set's an user's current team number and sends it to everyone in the room
+     * @param user the target user's ID
      * @param newTeam the user's new team
      */
-    public setUserToTeam(user: User, newTeam: RoomTeamNum): void {
-        if (this.hasUser(user) === false) {
-            console.warn('setUserToTeam: user "%s" not found!', user.userName)
-            return
-        }
+    public updateUserTeam(userId: number, newTeam: RoomTeamNum): void {
+        const user: RoomUser = this.getRoomUser(userId)
+        user.team = newTeam
 
-        const userInfo: RoomUser = this.usersInfo.get(user)
-
-        if (userInfo == null) {
-            console.warn('setUserToTeam: couldnt get "%s"\'s userinfo', user.userName)
-            return null
-        }
-
-        userInfo.team = newTeam
+        // inform every user in the room of the changes
+        this.broadcastNewUserTeamNum(userId, newTeam)
     }
 
     /**
@@ -472,41 +447,24 @@ export class Room {
      * @param user the target user
      * @param ingame the new ingame status
      */
-    public setUserIngame(user: User, ingame: boolean): void {
-        if (this.hasUser(user) === false) {
-            console.warn('setUserIngame: user "%s" not found!', user.userName)
-            return
-        }
-
-        const userInfo: RoomUser = this.usersInfo.get(user)
-
-        if (userInfo == null) {
-            console.warn('setUserIngame: couldnt get "%s"\'s userinfo', user.userName)
-            return null
-        }
-
-        userInfo.isIngame = ingame
-        userInfo.ready = ingame ? RoomReadyStatus.Ingame : RoomReadyStatus.NotReady
+    public setUserIngame(user: RoomUser, ingame: boolean): void {
+        user.isIngame = ingame
+        user.ready = ingame ? RoomReadyStatus.Ingame : RoomReadyStatus.NotReady
     }
 
     /**
      * toggles the user's room ready status
-     * @param user the user's object
+     * @param userId the target user's ID
      * @param newStatus the user's new ready status
      * @returns the new ready state
      */
-    public toggleUserReadyStatus(user: User): RoomReadyStatus {
-        if (this.hasUser(user) === false) {
-            console.warn('toggleUserReadyStatus: user not found!')
-            return null
-        }
-
-        if (user === this.host) {
+    public toggleUserReadyStatus(userId: number): RoomReadyStatus {
+        if (userId === this.host.userId) {
             console.warn('toggleUserReadyStatus: host tried to toggle ready')
             return null
         }
 
-        const userInfo: RoomUser = this.usersInfo.get(user)
+        const userInfo: RoomUser = this.getRoomUser(userId)
 
         if (userInfo == null) {
             console.warn('toggleUserReadyStatus: couldnt get userinfo')
@@ -526,15 +484,13 @@ export class Room {
      * @returns true if reset successfully, false if not
      */
     public resetIngameUsersReadyStatus(): boolean {
-        for (const user of this.users) {
-            const userInfo: RoomUser = this.usersInfo.get(user)
-
-            if (userInfo == null) {
+        for (const user of this.usersInfo) {
+            if (user == null) {
                 console.warn('resetIngameUsersReadyStatus: couldnt get userinfo')
                 return false
             }
 
-            userInfo.ready = RoomReadyStatus.NotReady
+            user.ready = RoomReadyStatus.NotReady
         }
 
         return true
@@ -620,6 +576,25 @@ export class Room {
     }
 
     /**
+     * ends a match and sends players to the match results screen
+     */
+    public endGame(): void {
+        this.setStatus(RoomStatus.Waiting)
+        this.resetIngameUsersReadyStatus()
+
+        this.recurseUsers((u: RoomUser): void => {
+            this.sendRoomStatusTo(u)
+            this.sendRoomUsersReadyStatusTo(u)
+            if (this.isUserIngame(u) === true) {
+                this.sendGameEnd(u)
+                this.setUserIngame(u, false)
+            }
+        })
+
+        this.sendBroadcastReadyStatus()
+    }
+
+    /**
      * can we start counting down until the game start?
      * @returns true if we can countdown, else false
      */
@@ -681,8 +656,8 @@ export class Room {
      * loop through all the players
      * @param fn the func to call in each user
      */
-    public recurseUsers(fn: (user: User) => void): void {
-        for (const user of this.users) {
+    public recurseUsers(fn: (u: RoomUser) => void): void {
+        for (const user of this.usersInfo) {
             fn(user)
         }
     }
@@ -691,8 +666,8 @@ export class Room {
      * loop through all the non host players
      * @param fn the func to call in each user
      */
-    public recurseNonHostUsers(fn: (user: User) => void): void {
-        for (const user of this.users) {
+    public recurseNonHostUsers(fn: (u: RoomUser) => void): void {
+        for (const user of this.usersInfo) {
             if (user !== this.host) {
                 fn(user)
             }
@@ -701,19 +676,18 @@ export class Room {
 
     /**
      * send the room's data to the user that joined the room
-     * @param user the new user
+     * @param userId the new user's ID
      */
-    public sendJoinNewRoom(user: User): void {
-        const reply: Buffer = new OutRoomPacket(user.socket).createAndJoin(this)
-        user.socket.send(reply)
+    public async sendJoinNewRoom(userId: number): Promise<void> {
+        const user: RoomUser = this.getRoomUser(userId)
+        user.conn.send(await OutRoomPacket.createAndJoin(this))
     }
 
     /**
-     * update room's settings
-     * it's in Room instead of RoomSettings so we can read the room's data
+     * update room's settings and broadcast them to everyone in it
      * @param newSettings the requested new room's settings
      */
-    public updateSettings(newSettings: InRoomUpdateSettings): RoomSettings {
+    public updateSettings(newSettings: InRoomUpdateSettings): void {
         const updatedSet: RoomSettings = new RoomSettings()
 
         if (newSettings.roomName != null) {
@@ -899,21 +873,21 @@ export class Room {
             updatedSet.unk45 = newSettings.unk45
         }
 
-        return updatedSet
+        // inform every user in the room of the changes
+        this.broadcastNewRoomSettings(updatedSet)
     }
 
     /**
      * send to the user the room's settings
      * @param user the target user
      */
-    public sendRoomSettingsTo(user: User): void {
-        const reply: Buffer = new OutRoomPacket(user.socket).updateSettings(this.settings)
-        user.socket.send(reply)
+    public sendRoomSettingsTo(userId: number): void {
+        const user: RoomUser = this.getRoomUser(userId)
+        user.conn.send(OutRoomPacket.updateSettings(this.settings))
     }
 
-    public sendUpdateRoomSettingsTo(user: User, updatedSettings: RoomSettings): void {
-        const reply: Buffer = new OutRoomPacket(user.socket).updateSettings(updatedSettings)
-        user.socket.send(reply)
+    public sendUpdateRoomSettingsTo(user: RoomUser, updatedSettings: RoomSettings): void {
+        user.conn.send(OutRoomPacket.updateSettings(updatedSettings))
     }
 
     /**
@@ -921,17 +895,113 @@ export class Room {
      * @param user the player to send the other player's ready status
      * @param newUser the player whose ready status will be sent
      */
-    public sendNewUserTo(user: User, newUser: User): void {
-        const team: RoomTeamNum = this.getUserTeam(newUser)
+    public sendNewUserTo(user: RoomUser, newUser: RoomUser): void {
+        const team: RoomTeamNum = newUser.team
 
         if (team == null) {
-            console.warn('sendNewUserTo: couldnt get user "%s"\'s team (room "%s" room id %i)',
-                user.userName, this.settings.roomName, this.id)
+            console.warn('sendNewUserTo: couldnt get user team (userId: %i room "%s" room id %i)',
+                user.userId, this.settings.roomName, this.id)
             return null
         }
 
-        const playerReply: Buffer = new OutRoomPacket(user.socket).playerJoin(newUser, team)
-        user.socket.send(playerReply)
+        user.conn.send(OutRoomPacket.playerJoin(newUser.userId, team))
+    }
+
+    /**
+     * send a new player's ready status to everyone
+     * also sends everyone's ready status to the new player
+     * @param userId the new player's user ID
+     */
+    public updateNewPlayerReadyStatus(userId: number): void {
+        const target: RoomUser = this.getRoomUser(userId)
+        this.recurseUsers((u: RoomUser): void => {
+            // send everyone's status to the new user
+            this.sendUserReadyStatusTo(target, u)
+
+            if (u !== target) {
+                // tell other room members about the new addition
+                this.sendNewUserTo(u, target)
+                this.sendUserReadyStatusTo(u, target)
+            }
+        })
+    }
+
+    public hostGameStart(): void {
+        this.stopCountdown()
+        this.setStatus(RoomStatus.Ingame)
+        this.setUserIngame(this.host, true)
+
+        this.recurseNonHostUsers((u: RoomUser): void => {
+            this.sendRoomStatusTo(u)
+            if (u.isReady()) {
+                this.setUserIngame(u, true)
+                this.sendConnectHostTo(u, this.host)
+                this.sendGuestDataTo(this.host, u)
+            }
+        })
+
+        this.sendBroadcastReadyStatus()
+
+        this.sendStartMatchTo(this.host)
+    }
+
+    public guestGameJoin(guestUserId: number): void {
+        const guest: RoomUser = this.getRoomUser(guestUserId)
+
+        this.sendRoomStatusTo(guest)
+        this.setUserIngame(guest, true)
+        this.sendConnectHostTo(guest, this.host)
+        this.sendGuestDataTo(this.host, guest)
+
+        this.sendBroadcastReadyStatus()
+    }
+
+    /**
+     * send an user's updated ready status to everyone else
+     * @param sourceUserId the user ID of the player who updated their ready status
+     */
+    public broadcastNewUserReadyStatus(sourceUserId: number): void {
+        const sourceUser: RoomUser = this.getRoomUser(sourceUserId)
+        this.recurseUsers((u: RoomUser): void => {
+            this.sendUserReadyStatusTo(u, sourceUser)
+        })
+    }
+
+    /**
+     * sends updated room settings to everyone in the room
+     * @param updatedSettings the updated room's settings
+     */
+    public broadcastNewRoomSettings(updatedSettings: RoomSettings): void {
+        this.recurseUsers((u: RoomUser): void => {
+            this.sendUpdateRoomSettingsTo(u, updatedSettings)
+        })
+    }
+
+    /**
+     * sends everyone a new user's team number
+     * @param sourceUserId the user whose team number changed
+     * @param newTeamNum the new team number
+     */
+    public broadcastNewUserTeamNum(sourceUserId: number, newTeamNum: RoomTeamNum): void {
+        const sourceUser: RoomUser = this.getRoomUser(sourceUserId)
+        this.recurseUsers((u: RoomUser): void => {
+            this.sendTeamChangeTo(u, sourceUser, newTeamNum)
+
+            if (this.settings.areBotsEnabled) {
+                u.team = newTeamNum
+                this.sendTeamChangeGlobal(u, newTeamNum)
+            }
+        })
+    }
+
+    /**
+     * sends everyone in the room the room's countdown
+     * @param shouldCountdown should the countdown continue?
+     */
+    public broadcastCountdown(shouldCountdown: boolean): void {
+        this.recurseUsers((u: RoomUser): void => {
+            this.sendCountdownTo(u, shouldCountdown)
+        })
     }
 
     /**
@@ -939,25 +1009,24 @@ export class Room {
      * @param user the player to send the other player's ready status
      * @param player the player whose ready status will be sent
      */
-    public sendUserReadyStatusTo(user: User, player: User): void {
-        const ready: RoomReadyStatus = this.getUserReadyStatus(player)
+    public sendUserReadyStatusTo(user: RoomUser, player: RoomUser): void {
+        const ready: RoomReadyStatus = player.ready
 
         if (ready == null) {
-            console.warn('sendUserReadyStatusTo: couldnt get user "%s"\'s status (room "%s" room id %i)',
-                user.userName, this.settings.roomName, this.id)
+            console.warn('sendUserReadyStatusTo: couldnt get user status (userId: %i room "%s" room id %i)',
+                user.userId, this.settings.roomName, this.id)
             return null
         }
 
-        const reply: Buffer = new OutRoomPacket(user.socket).setUserReadyStatus(player, ready)
-        user.socket.send(reply)
+        user.conn.send(OutRoomPacket.setUserReadyStatus(player.userId, ready))
     }
 
     /**
      * send everyone's ready status to an user
      * @param targetUser the user to send the info to
      */
-    public sendRoomUsersReadyStatusTo(targetUser: User): void {
-        this.recurseUsers((u: User): void => {
+    public sendRoomUsersReadyStatusTo(targetUser: RoomUser): void {
+        this.recurseUsers((u: RoomUser): void => {
             this.sendUserReadyStatusTo(targetUser, u)
         })
     }
@@ -966,7 +1035,7 @@ export class Room {
      * send everyone everyone's ready status
      */
     public sendBroadcastReadyStatus(): void {
-        this.recurseUsers((u: User): void => {
+        this.recurseUsers((u: RoomUser): void => {
             this.sendRoomUsersReadyStatusTo(u)
         })
     }
@@ -976,12 +1045,16 @@ export class Room {
      * @param user the user that will connect to the host
      * @param host the host to connect to
      */
-    public sendConnectHostTo(user: User, host: User): void {
-        const hostData: Buffer = new OutUdpPacket(1, host.userId,
-            host.externalIpAddress, host.externalServerPort, user.socket).build()
-        const guestJoinHost: Buffer = new OutHostPacket(user.socket).joinHost(host)
-        user.socket.send(hostData)
-        user.socket.send(guestJoinHost)
+    public async sendConnectHostTo(user: RoomUser, host: RoomUser): Promise<void> {
+        const hostSession: UserSession = await UserSession.get(host.userId)
+
+        if (hostSession == null) {
+            return
+        }
+
+        user.conn.send(new OutUdpPacket(true, host.userId,
+            hostSession.externalNet.ipAddress, hostSession.externalNet.serverPort))
+        user.conn.send(OutHostPacket.joinHost(host.userId))
     }
 
     /**
@@ -989,28 +1062,23 @@ export class Room {
      * @param host the user hosting the match
      * @param guest the guest player joining the host's match
      */
-    public sendGuestDataTo(host: User, guest: User): void {
-        const guestData = new OutUdpPacket(0, guest.userId,
-            guest.externalIpAddress, guest.externalClientPort, host.socket).build()
-        host.socket.send(guestData)
+    public async sendGuestDataTo(host: RoomUser, guest: RoomUser): Promise<void> {
+        const guestSession: UserSession = await UserSession.get(host.userId)
+
+        if (guestSession == null) {
+            return
+        }
+
+        host.conn.send(new OutUdpPacket(false, guest.userId,
+            guestSession.externalNet.ipAddress, guestSession.externalNet.clientPort))
     }
 
     /**
      * tell the host to start the game match
      * @param host the game match's host
      */
-    public sendStartMatchTo(host: User): void {
-        const start: Buffer = new OutHostPacket(host.socket).gameStart(host)
-        host.socket.send(start)
-    }
-
-    /**
-     * tell the user to close the game result window
-     * @param user the target user
-     */
-    public sendCloseResultWindow(user: User): void {
-        const reply: Buffer = new OutHostPacket(user.socket).leaveResultWindow()
-        user.socket.send(reply)
+    public sendStartMatchTo(host: RoomUser): void {
+        host.conn.send(OutHostPacket.gameStart(host.userId))
     }
 
     /**
@@ -1019,9 +1087,8 @@ export class Room {
      * @param player the user who changed its team
      * @param newTeamNum the player's new team number
      */
-    public sendTeamChangeTo(user: User, player: User, newTeamNum: RoomTeamNum): void {
-        const reply: Buffer = new OutRoomPacket(user.socket).setUserTeam(player, newTeamNum)
-        user.socket.send(reply)
+    public sendTeamChangeTo(user: RoomUser, player: RoomUser, newTeamNum: RoomTeamNum): void {
+        user.conn.send(OutRoomPacket.setUserTeam(player.userId, newTeamNum))
     }
 
     /**
@@ -1029,8 +1096,8 @@ export class Room {
      * @param player the user who changed its team
      * @param newTeamNum the player's new team number
      */
-    public sendTeamChangeGlobal(player: User, newTeamNum: RoomTeamNum): void {
-        this.recurseUsers((u: User) => {
+    public sendTeamChangeGlobal(player: RoomUser, newTeamNum: RoomTeamNum): void {
+        this.recurseUsers((u: RoomUser) => {
             this.sendTeamChangeTo(u, player, newTeamNum)
         })
     }
@@ -1040,43 +1107,31 @@ export class Room {
      * @param user the user to send the countdown to
      * @param shouldCountdown should the countdown continue
      */
-    public sendCountdownTo(user: User, shouldCountdown: boolean): void {
-        let reply: Buffer = null
-
-        if (shouldCountdown) {
-            reply = new OutRoomPacket(user.socket).progressCountdown(this.getCountdown())
-        } else {
-            reply = new OutRoomPacket(user.socket).stopCountdown()
-        }
-
-        user.socket.send(reply)
+    public sendCountdownTo(user: RoomUser, shouldCountdown: boolean): void {
+        user.conn.send(shouldCountdown
+            ? OutRoomPacket.progressCountdown(this.getCountdown())
+            : OutRoomPacket.stopCountdown())
     }
 
     /**
      * ends a room's match and sends the players to the result window
      */
-    public sendGameEnd(user: User): void {
+    public sendGameEnd(user: RoomUser): void {
         // TODO: set game end to ingame users only
-        const stopReply: Buffer =
-            new OutHostPacket(user.socket).hostStop()
-        const resultReply: Buffer =
-            new OutRoomPacket(user.socket).setGameResult()
-        user.socket.send(stopReply)
-        user.socket.send(resultReply)
+        user.conn.send(OutHostPacket.hostStop())
+        user.conn.send(OutRoomPacket.setGameResult())
     }
 
     /**
      * send an user its current room's status
      * @param user the target user
      */
-    public sendRoomStatusTo(user: User): void {
+    public sendRoomStatusTo(user: RoomUser): void {
         const settings: RoomSettings = new RoomSettings()
         settings.status = this.settings.status
         settings.isIngame = this.settings.isIngame
 
-        const statusReply: Buffer =
-            new OutRoomPacket(user.socket).updateSettings(settings)
-        user.socket.send(statusReply)
+        user.conn.send(OutRoomPacket.updateSettings(settings))
     }
 
     /**
@@ -1112,13 +1167,13 @@ export class Room {
             //
             // set everyone to the host's team if bot mode is enabled
             //
-            const hostTeamNum: RoomTeamNum = this.getUserTeam(this.host)
+            const hostTeamNum: RoomTeamNum = this.host.team
 
-            this.recurseNonHostUsers((u: User): void => {
-                const curUserTeamNum: RoomTeamNum = this.getUserTeam(u)
+            this.recurseNonHostUsers((u: RoomUser): void => {
+                const curUserTeamNum: RoomTeamNum = this.getUserTeam(u.userId)
 
                 if (curUserTeamNum !== hostTeamNum) {
-                    this.setUserToTeam(u, hostTeamNum)
+                    u.team = hostTeamNum
 
                     // tell everyone the new user's team
                     this.sendTeamChangeGlobal(u, hostTeamNum)
@@ -1135,14 +1190,14 @@ export class Room {
      * called when an user is succesfully removed
      * if the room is empty, inform the channel to delete us
      * else, find a new host
-     * @param userId the user's id
+     * @param userId the target user's id
      */
-    private onUserRemoved(user: User): void {
-        if (this.users.length !== 0) {
-            this.sendRemovedUser(user)
+    private onUserRemoved(userId: number): void {
+        if (this.usersInfo.length !== 0) {
+            this.sendRemovedUser(userId)
 
             // if the host leaves, assign someone else as the new host
-            if (user === this.host) {
+            if (userId === this.host.userId) {
                 this.findAndUpdateNewHost()
             }
         } else {
@@ -1152,13 +1207,11 @@ export class Room {
 
     /**
      * inform the users about an user being removed
-     * @param userId the removed user's ID
+     * @param deletedUserId the removed user's ID
      */
-    private sendRemovedUser(deletedUser: User) {
-        for (const user of this.users) {
-            const reply: Buffer =
-                new OutRoomPacket(user.socket).playerLeave(deletedUser.userId);
-            user.socket.send(reply)
+    private sendRemovedUser(deletedUserId: number) {
+        for (const info of this.usersInfo) {
+            info.conn.send(OutRoomPacket.playerLeave(deletedUserId))
         }
     }
 
@@ -1166,13 +1219,11 @@ export class Room {
      * sets the new room host and tells the users about it
      * @param newHost the new host user
      */
-    private updateHost(newHost: User): void {
+    private updateHost(newHost: RoomUser): void {
         this.host = newHost
 
-        for (const user of this.users) {
-            const reply: Buffer =
-                new OutRoomPacket(user.socket).setHost(this.host)
-            user.socket.send(reply)
+        for (const user of this.usersInfo) {
+            user.conn.send(OutRoomPacket.setHost(this.host.userId))
         }
     }
 
@@ -1183,11 +1234,11 @@ export class Room {
      * @returns true if a new host was found, false if not
      */
     private findAndUpdateNewHost(): boolean {
-        if (this.users.length === 0) {
+        if (this.usersInfo.length === 0) {
             return false
         }
 
-        this.updateHost(this.users[0])
+        this.updateHost(this.usersInfo[0])
         return true
     }
 }

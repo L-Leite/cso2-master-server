@@ -1,9 +1,14 @@
+import net from 'net'
+import superagent from 'superagent'
+
 import { ExtendedSocket } from 'extendedsocket'
 
-import { Room, RoomStatus } from 'room/room'
+import { Channel } from 'channel/channel'
+import { Room } from 'room/room'
 
 import { User } from 'user/user'
-import { UserInventory } from './userinventory'
+import { UserInventory } from 'user/userinventory'
+import { UserSession } from 'user/usersession'
 
 import { ChannelManager } from 'channel/channelmanager'
 
@@ -11,61 +16,119 @@ import { FavoritePacketType } from 'packets/favoriteshared'
 import { HostPacketType } from 'packets/hostshared'
 
 import { InFavoritePacket } from 'packets/in/favorite'
+import { InFavoriteSetCosmetics } from 'packets/in/favorite/setcosmetics'
 import { InFavoriteSetLoadout } from 'packets/in/favorite/setloadout'
 import { InHostPacket } from 'packets/in/host'
 import { InHostSetBuyMenu } from 'packets/in/host/setbuymenu'
 import { InHostSetInventory } from 'packets/in/host/setinventory'
 import { InHostSetLoadout } from 'packets/in/host/setloadout'
 import { InLoginPacket } from 'packets/in/login'
-import { InVersionPacket } from 'packets/in/version'
 
-import { InFavoriteSetCosmetics } from 'packets/in/favorite/setcosmetics';
 import { OutFavoritePacket } from 'packets/out/favorite'
 import { OutHostPacket } from 'packets/out/host'
 import { OutInventoryPacket } from 'packets/out/inventory'
 import { OutOptionPacket } from 'packets/out/option'
 import { OutUserInfoPacket } from 'packets/out/userinfo'
 import { OutUserStartPacket } from 'packets/out/userstart'
-import { OutVersionPacket } from 'packets/out/version'
+
+import { userSvcAuthority, UserSvcPing } from 'authorities'
 
 /**
  * handles the user logic
  */
 export class UserManager {
-    private users: User[]
-    private nextUserId: number
 
-    constructor() {
-        this.users = []
-        this.nextUserId = 1
+    /**
+     * get the current room's object of an user's session
+     * @param session the target user's session
+     * @returns the room object if found, else it's null
+     */
+    public static getSessionCurRoom(session: UserSession): Room {
+        const channel: Channel =
+            ChannelManager.getChannel(session.currentChannelIndex, session.currentChannelServerIndex)
+
+        if (channel == null) {
+            return null
+        }
+
+        const currentRoom: Room = channel.getRoomById(session.currentRoomId)
+
+        if (currentRoom == null) {
+            return null
+        }
+
+        return currentRoom
+    }
+
+    /**
+     * validate an user's credentials
+     * @param username the user's name
+     * @param password the user's password
+     * @return a promise with the logged in user's ID, or zero if failed
+     */
+    public static async validateCredentials(username: string, password: string): Promise<number> {
+        try {
+            const res: superagent.Response = await superagent
+                .post('http://' + userSvcAuthority() + '/users/check')
+                .send({
+                    username,
+                    password,
+                })
+                .accept('json')
+            return res.status === 200 ? res.body.userId : 0
+        } catch (error) {
+            console.error(error)
+            UserSvcPing.checkNow()
+            return 0
+        }
     }
 
     /**
      * called when we receive a login request packet
      * @param loginData the login packet's data
-     * @param sourceSocket the client's socket
+     * @param connection the login requester's connection
      * @param server the instance to the server
      */
-    public onLoginPacket(loginData: Buffer, sourceSocket: ExtendedSocket,
-                         channels: ChannelManager, holepunchPort: number): boolean {
+    public static async onLoginPacket(loginData: Buffer, connection: ExtendedSocket,
+                                      holepunchPort: number): Promise<boolean> {
         const loginPacket: InLoginPacket = new InLoginPacket(loginData)
 
-        const newUser: User = this.loginUser(loginPacket.gameUsername,
-            loginPacket.password, sourceSocket)
+        let session: UserSession = await UserSession.create(loginPacket.gameUsername, loginPacket.password)
 
-        if (newUser == null) {
-            console.warn('login failed for user %s (uuid: %s)',
-                loginPacket.gameUsername, sourceSocket.uuid)
+        if (session == null) {
+            // try to delete any existing session first
+            const wasDeleted: boolean = await this.deleteSessionIfExists(loginPacket.gameUsername)
+
+            if (wasDeleted) {
+                session = await UserSession.create(loginPacket.gameUsername, loginPacket.password)
+            }
+
+            if (session == null || wasDeleted === false) {
+                // there wasn't any session, the user either doesn't exist or the credentials are bad
+                console.warn('Could not create session for user %s', loginPacket.gameUsername)
+                connection.end()
+                return false
+            }
+        }
+
+        console.log('user %s logged in (uuid: %s)', loginPacket.gameUsername, connection.uuid)
+
+        session.externalNet.ipAddress = (connection.address() as net.AddressInfo).address
+        session.update()
+
+        connection.setOwner(session.userId)
+
+        const user: User = await User.get(session.userId)
+
+        if (user == null) {
+            console.error('Couldn\'t get user ID %i\' information', session.userId)
+            connection.end()
             return false
         }
 
-        console.log('user %s logged in (uuid: %s)',
-            loginPacket.gameUsername, sourceSocket.uuid)
-
-        this.sendUserInfoTo(newUser, holepunchPort)
-        channels.sendChannelListTo(newUser)
-
-        this.sendUserInventory(newUser)
+        UserManager.sendUserInfoTo(session.userId, user.userName, user.playerName, connection, holepunchPort)
+        UserManager.sendInventory(session.userId, connection)
+        ChannelManager.sendChannelListTo(connection)
 
         return true
     }
@@ -73,30 +136,32 @@ export class UserManager {
     /**
      * handles the incoming host packets
      * @param packetData the host's packet data
-     * @param sourceSocket the client's socket
+     * @param connection the client's socket
      */
-    public onHostPacket(packetData: Buffer, sourceSocket: ExtendedSocket): boolean {
+    public static async onHostPacket(packetData: Buffer, connection: ExtendedSocket): Promise<boolean> {
         const hostPacket: InHostPacket = new InHostPacket(packetData)
 
-        const user: User = this.getUserByUuid(sourceSocket.uuid)
+        if (connection.hasOwner() === false) {
+            console.warn('connection %s sent a host packet without a session', connection.uuid)
+            return false
+        }
+
+        const user: User = await User.get(connection.getOwner())
 
         if (user == null) {
-            console.warn('Socket %s sent a host packet, but isn\'t logged in', sourceSocket.uuid)
+            console.error('couldn\'t get user %i from connection %s', connection.uuid)
             return false
         }
 
         switch (hostPacket.packetType) {
             case HostPacketType.OnGameEnd:
-                return this.onHostGameEnd(user)
+                return this.onHostGameEnd(connection)
             case HostPacketType.SetInventory:
-                const inventoryData: InHostSetInventory = new InHostSetInventory(hostPacket)
-                return this.onHostSetUserInventory(inventoryData, user)
+                return this.onHostSetUserInventory(hostPacket, connection)
             case HostPacketType.SetLoadout:
-                const loadoutData: InHostSetLoadout = new InHostSetLoadout(hostPacket)
-                return this.onHostSetUserLoadout(loadoutData, user)
+                return this.onHostSetUserLoadout(hostPacket, connection)
             case HostPacketType.SetBuyMenu:
-                const buyMenuData: InHostSetBuyMenu = new InHostSetBuyMenu(hostPacket)
-                return this.onHostSetUserBuyMenu(buyMenuData, user)
+                return this.onHostSetUserBuyMenu(hostPacket, connection)
         }
 
         console.warn('UserManager::onHostPacket: unknown host packet type %i',
@@ -105,146 +170,172 @@ export class UserManager {
         return false
     }
 
-    public onHostGameEnd(user: User): boolean {
-        const currentRoom: Room = user.currentRoom
+    public static async onHostSetUserInventory(hostPacket: InHostPacket, userConn: ExtendedSocket): Promise<boolean> {
+        const preloadData: InHostSetInventory = new InHostSetInventory(hostPacket)
+
+        const requesterId: number = userConn.getOwner()
+
+        const results: UserSession[] = await Promise.all([
+            UserSession.get(requesterId),
+            UserSession.get(preloadData.userId),
+        ])
+
+        const requesterSession: UserSession = results[0]
+        const targetSession: UserSession = results[1]
+
+        if (requesterSession == null) {
+            console.warn('Could not get user ID\'s %i session', requesterId)
+            return false
+        }
+
+        if (requesterSession.isInRoom() === false) {
+            console.warn('User ID %i tried to end a match without being in a room', requesterId)
+            return false
+        }
+
+        if (targetSession == null) {
+            console.warn('User ID %i tried to send its inventory to user ID %i whose session is null',
+                requesterId, preloadData.userId)
+            return false
+        }
+
+        const currentRoom: Room = UserManager.getSessionCurRoom(requesterSession)
 
         if (currentRoom == null) {
-            console.warn('User %s sent an host entity num packet without being in a room',
-                user.userName)
+            console.error('Tried to get user\'s %i room but it couldn\'t be found. room id: %i',
+                requesterSession.userId, currentRoom.id)
             return false
         }
 
-        console.log('Ending game for room "%s" (room id %i)',
-            currentRoom.settings.roomName, currentRoom.id)
+        if (currentRoom.host.userId !== requesterId) {
+            console.warn('User ID %i sent an user\'s inventory request without being the room\'s host.'
+                + 'Real host ID: %i room "%s" (id %i)',
+                requesterId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+            return false
+        }
 
-        currentRoom.setStatus(RoomStatus.Waiting)
-        currentRoom.resetIngameUsersReadyStatus()
+        await this.sendUserInventoryTo(requesterSession.userId, userConn, targetSession.userId)
 
-        currentRoom.recurseUsers((u: User): void => {
-            currentRoom.sendRoomStatusTo(u)
-            currentRoom.sendRoomUsersReadyStatusTo(u)
-            if (currentRoom.isUserIngame(u) === true) {
-                currentRoom.sendGameEnd(u)
-                currentRoom.setUserIngame(u, false)
-            }
-        })
-
-        currentRoom.sendBroadcastReadyStatus()
+        console.log('Sending user ID %i\'s inventory to host ID %i, room %s (room id %i)',
+            preloadData.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
 
         return true
     }
 
-    public onHostSetUserInventory(preloadData: InHostSetInventory, host: User): boolean {
-        const currentRoom: Room = host.currentRoom
+    public static async onHostSetUserLoadout(hostPacket: InHostPacket,
+                                             sourceConn: ExtendedSocket): Promise<boolean> {
+        const loadoutData: InHostSetLoadout = new InHostSetLoadout(hostPacket)
+
+        const requesterId: number = sourceConn.getOwner()
+
+        const results: UserSession[] = await Promise.all([
+            UserSession.get(requesterId),
+            UserSession.get(loadoutData.userId),
+        ])
+
+        const requesterSession: UserSession = results[0]
+        const targetSession: UserSession = results[1]
+
+        if (requesterSession == null) {
+            console.warn('Could not get user ID\'s %i session', requesterId)
+            return false
+        }
+
+        if (requesterSession.isInRoom() === false) {
+            console.warn('User ID %i tried to send loadout without being in a room', requesterId)
+            return false
+        }
+
+        if (targetSession == null) {
+            console.warn('User ID %i tried to send its loadout to user ID %i whose session is null',
+                requesterId, loadoutData.userId)
+            return false
+        }
+
+        const currentRoom: Room = this.getSessionCurRoom(requesterSession)
 
         if (currentRoom == null) {
-            console.warn('Host %s sent an user\'s inventory request without being in a room',
-                host.userName)
+            console.error('Tried to get user\'s %i room but it couldn\'t be found. room id: %i',
+                requesterSession.userId, currentRoom.id)
             return false
         }
 
-        if (currentRoom.host !== host) {
-            console.warn('Host %s sent an user\'s inventory request without being the room\'s host.'
-                + 'Real host: "%s" room "%s" (id %i)',
-                host.userName, currentRoom.host.userName, currentRoom.settings.roomName, currentRoom.id)
+        if (currentRoom.host.userId !== requesterSession.userId) {
+            console.warn('User ID %i sent an user\'s loadout request without being the room\'s host.'
+                + 'Real host ID: %i room "%s" (id %i)',
+                requesterSession.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
-        const userId: number = preloadData.userId
-        const user: User = this.getUserById(userId)
+        await this.sendUserLoadoutTo(sourceConn, targetSession.userId)
 
-        this.sendUserInventoryTo(host, user)
-
-        console.log('Sending user "%s"\'s inventory to host "%s", room %s (room id %i)',
-            host.userName, currentRoom.host.userName, currentRoom.settings.roomName, currentRoom.id)
+        console.log('Sending user ID %i\'s loadout to host ID %i, room %s (room id %i)',
+            requesterSession.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
 
         return true
     }
 
-    public onHostSetUserLoadout(loadoutData: InHostSetLoadout, host: User): boolean {
-        const currentRoom: Room = host.currentRoom
+    public static async onHostSetUserBuyMenu(hostPacket: InHostPacket, sourceConn: ExtendedSocket): Promise<boolean> {
+        const buyMenuData: InHostSetBuyMenu = new InHostSetBuyMenu(hostPacket)
+
+        const requesterId: number = sourceConn.getOwner()
+
+        const results: UserSession[] = await Promise.all([
+            UserSession.get(requesterId),
+            UserSession.get(buyMenuData.userId),
+        ])
+
+        const requesterSession: UserSession = results[0]
+        const targetSession: UserSession = results[1]
+
+        if (requesterSession == null) {
+            console.warn('Could not get user ID\'s %i session', requesterId)
+            return false
+        }
+
+        if (requesterSession.isInRoom() === false) {
+            console.warn('User ID %i tried to send buy menu without being in a room', requesterId)
+            return false
+        }
+
+        if (targetSession == null) {
+            console.warn('User ID %i tried to send its buy menu to user ID %i whose session is null',
+                requesterId, buyMenuData.userId)
+            return false
+        }
+
+        const currentRoom: Room = this.getSessionCurRoom(requesterSession)
 
         if (currentRoom == null) {
-            console.warn('Host %s sent an user\'s loadout request without being in a room',
-                host.userName)
+            console.error('Tried to get user\'s %i room but it couldn\'t be found. room id: %i',
+                requesterSession.userId, currentRoom.id)
             return false
         }
 
-        if (currentRoom.host !== host) {
-            console.warn('Host %s sent an user\'s loadout request without being the room\'s host.'
-                + 'Real host: "%s" room "%s" (id %i)',
-                host.userName, currentRoom.host.userName, currentRoom.settings.roomName, currentRoom.id)
+        if (currentRoom.host.userId !== requesterId) {
+            console.warn('User ID %i sent an user\'s buy menu request without being the room\'s host.'
+                + 'Real host ID: %i room "%s" (id %i)',
+                requesterId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
-        const userId: number = loadoutData.userId
-        const user: User = this.getUserById(userId)
+        await this.sendUserBuyMenuTo(sourceConn, targetSession.userId)
 
-        this.sendUserLoadoutTo(host, user)
-
-        console.log('Sending user "%s"\'s loadout to host "%s", room %s (room id %i)',
-            host.userName, currentRoom.host.userName, currentRoom.settings.roomName, currentRoom.id)
+        console.log('Sending user ID %i\'s buy menu to host ID %i, room %s (room id %i)',
+            requesterId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
 
         return true
     }
 
-    public onHostSetUserBuyMenu(buyMenuData: InHostSetBuyMenu, host: User): boolean {
-        const currentRoom: Room = host.currentRoom
-
-        if (currentRoom == null) {
-            console.warn('Host %s sent an user\'s buy menu request without being in a room',
-                host.userName)
-            return false
-        }
-
-        if (currentRoom.host !== host) {
-            console.warn('Host %s sent an user\'s buy menu request without being the room\'s host.'
-                + 'Real host: "%s" room "%s" (id %i)',
-                host.userName, currentRoom.host.userName, currentRoom.settings.roomName, currentRoom.id)
-            return false
-        }
-
-        const userId: number = buyMenuData.userId
-        const user: User = this.getUserById(userId)
-
-        this.sendUserBuyMenuTo(host, user)
-
-        console.log('Sending user "%s"\'s buy menu to host "%s", room %s (room id %i)',
-            host.userName, currentRoom.host.userName, currentRoom.settings.roomName, currentRoom.id)
-
-        return true
-    }
-
-    public onVersionPacket(versionData: Buffer, sourceSocket: ExtendedSocket): boolean {
-        const versionPacket: InVersionPacket = new InVersionPacket(versionData)
-        console.log(sourceSocket.uuid + ' sent a version packet. clientHash: '
-            + versionPacket.clientHash)
-
-        // i think the client ignores the hash string
-        const versionReply: Buffer = new OutVersionPacket(
-            false, '6246015df9a7d1f7311f888e7e861f18', sourceSocket).build()
-
-        sourceSocket.send(versionReply)
-
-        return true
-    }
-
-    public onFavoritePacket(favoriteData: Buffer, sourceSocket: ExtendedSocket): boolean {
+    public static async onFavoritePacket(favoriteData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
         const favPacket: InFavoritePacket = new InFavoritePacket(favoriteData)
-        const user: User = this.getUserByUuid(sourceSocket.uuid)
-
-        if (user == null) {
-            console.warn('Uuid %s sent a favorite packet without login', sourceSocket.uuid)
-            return false
-        }
 
         switch (favPacket.packetType) {
             case FavoritePacketType.SetLoadout:
-                const loadoutData: InFavoriteSetLoadout = new InFavoriteSetLoadout(favPacket)
-                return this.onFavoriteSetLoadout(loadoutData, user)
+                return this.onFavoriteSetLoadout(favPacket, sourceConn)
             case FavoritePacketType.SetCosmetics:
                 const cosmeticsData: InFavoriteSetCosmetics = new InFavoriteSetCosmetics(favPacket)
-                return this.onFavoriteSetCosmetics(cosmeticsData, user)
+                return this.onFavoriteSetCosmetics(cosmeticsData, sourceConn)
         }
 
         console.warn('UserManager::onFavoritePacket: unknown host packet type %i',
@@ -253,100 +344,130 @@ export class UserManager {
         return false
     }
 
-    public onFavoriteSetLoadout(loadoutData: InFavoriteSetLoadout, user: User): boolean {
+    public static async onFavoriteSetLoadout(favPacket: InFavoritePacket,
+                                             sourceConn: ExtendedSocket): Promise<boolean> {
+        const loadoutData: InFavoriteSetLoadout = new InFavoriteSetLoadout(favPacket)
+
+        const session: UserSession = await UserSession.get(sourceConn.getOwner())
+
+        if (session == null) {
+            console.warn('Could not get user ID %i\'s session', sourceConn.getOwner())
+            return false
+        }
+
         const loadoutNum: number = loadoutData.loadout
         const slot: number = loadoutData.weaponSlot
         const itemId: number = loadoutData.itemId
 
-        console.log('Setting user "%s"\'s new weapon %i to slot %i in loadout %i',
-            user.userName, itemId, slot, loadoutNum)
+        console.log('Setting user ID %i\'s new weapon %i to slot %i in loadout %i',
+            session.currentRoomId, itemId, slot, loadoutNum)
 
-        user.inventory.setLoadoutWeapon(loadoutNum, slot, itemId)
+        await UserInventory.setLoadoutWeapon(session.userId, loadoutNum, slot, itemId)
 
         return true
     }
 
-    public onFavoriteSetCosmetics(cosmeticsData: InFavoriteSetCosmetics, user: User): boolean {
+    public static async onFavoriteSetCosmetics(cosmeticsData: InFavoriteSetCosmetics,
+                                               sourceConn: ExtendedSocket): Promise<boolean> {
+        const session: UserSession = await UserSession.get(sourceConn.getOwner())
+
+        if (session == null) {
+            console.warn('Could not get user ID %i\'s session', sourceConn.getOwner())
+            return false
+        }
+
         const slot: number = cosmeticsData.slot
         const itemId: number = cosmeticsData.itemId
 
-        console.log('Setting user "%s"\'s new cosmetic %i to slot %i',
-            user.userName, itemId, slot)
+        console.log('Setting user ID %i\'s new cosmetic %i to slot %i',
+            session.userId, itemId, slot)
 
-        user.inventory.setCosmetic(slot, itemId)
+        await UserInventory.setCosmeticSlot(session.userId, slot, itemId)
 
         return true
     }
 
-    public loginUser(userName: string, password: string, sourceSocket: ExtendedSocket): User {
-        return this.addUser(userName, sourceSocket)
-    }
+    public static async onHostGameEnd(userConn: ExtendedSocket): Promise<boolean> {
+        const session: UserSession = await UserSession.get(userConn.getOwner())
 
-    public isUuidLoggedIn(uuid: string): boolean {
-        return this.getUserByUuid(uuid) != null
-    }
-
-    public addUser(userName: string, socket: ExtendedSocket): User {
-        const newUser: User = new User(socket, this.nextUserId++, userName)
-        this.users.push(newUser)
-        return newUser
-    }
-
-    public getUserById(userId: number): User {
-        for (const user of this.users) {
-            if (user.userId === userId) {
-                return user
-            }
+        if (session == null) {
+            console.warn('Could not get user ID\'s %i session', userConn.getOwner())
+            return false
         }
-        return null
-    }
 
-    public getUserByUuid(uuid: string): User {
-        for (const user of this.users) {
-            if (user.socket.uuid === uuid) {
-                return user
-            }
+        if (session.isInRoom() === false) {
+            console.warn('User ID %i tried to end a match without being in a room', userConn.getOwner())
+            return false
         }
-        return null
-    }
 
-    public removeUser(targetUser: User): void {
-        this.cleanUpUser(targetUser)
-        this.users.splice(this.users.indexOf(targetUser), 1)
-    }
+        const currentRoom: Room = UserManager.getSessionCurRoom(session)
 
-    public removeUserById(userId: number): void {
-        for (const user of this.users) {
-            if (user.userId === userId) {
-                this.cleanUpUser(user)
-                this.users.splice(this.users.indexOf(user), 1)
-                return
-            }
+        if (currentRoom == null) {
+            console.error('Tried to get user\'s %i room but it couldn\'t be found. room id: %i',
+                session.userId, currentRoom.id)
+            return false
         }
+
+        console.log('Ending game for room "%s" (room id %i)',
+            currentRoom.settings.roomName, currentRoom.id)
+
+        await currentRoom.endGame()
+
+        return true
     }
 
-    public removeUserByUuid(uuid: string): void {
-        for (const user of this.users) {
-            if (user.socket.uuid === uuid) {
-                this.cleanUpUser(user)
-                this.users.splice(this.users.indexOf(user), 1)
-                return
-            }
+    /**
+     * delete an user's session by the username if it exists
+     * @param username the username of the session's owner
+     * @returns true if deleted successfully, false if not
+     */
+    private static async deleteSessionIfExists(username: string): Promise<boolean> {
+        const user: User = await User.getByName(username)
+
+        if (user == null) {
+            return false
         }
+
+        return UserSession.delete(user.userId)
+    }
+
+    /**
+     * send an user's info to itself
+     * @param userId the target user's ID
+     * @param userName the target user's name
+     * @param playerName the target user's ingame name
+     * @param conn the target user's connection
+     * @param holepunchPort the master server's UDP holepunching port
+     */
+    private static async sendUserInfoTo(userId: number, userName: string, playerName: string,
+                                        conn: ExtendedSocket, holepunchPort: number): Promise<void> {
+        conn.send(new OutUserStartPacket(userId, userName, playerName, holepunchPort))
+        conn.send(await OutUserInfoPacket.fullUserUpdate(userId))
     }
 
     /**
      * sends an user's inventory to itself
-     * @param user the target user
+     * @param userId the target user's ID
+     * @param conn the target user's connection
      */
-    private sendUserInventory(user: User): void {
-        const inventory: UserInventory = user.inventory
-        const userInvReply: Buffer =
-            new OutInventoryPacket(user.socket).createInventory(inventory.getUserInventory())
-        user.socket.send(userInvReply)
-        const defaultInvReply: Buffer =
-            new OutInventoryPacket(user.socket).addInventory(inventory.getDefaultInventory())
-        user.socket.send(defaultInvReply)
+    private static async sendInventory(userId: number, conn: ExtendedSocket): Promise<void> {
+        const [inventory, cosmetics, loadouts, buyMenu] = await Promise.all([
+            UserInventory.getInventory(userId),
+            UserInventory.getCosmetics(userId),
+            UserInventory.getAllLoadouts(userId),
+            UserInventory.getBuyMenu(userId),
+        ])
+
+        if (inventory == null || cosmetics == null
+            || loadouts == null || buyMenu == null) {
+            return
+        }
+
+        conn.send(OutInventoryPacket.createInventory(inventory.items))
+        /*const defaultInvReply: Buffer =
+            new OutInventoryPacket(conn).addInventory(inventory.getDefaultInventory())
+        conn.send(defaultInvReply)*/
+
         // TO BE REVERSED
         const unlockReply: Buffer = Buffer.from([0x55, 0x19, 0x5F, 0x05, 0x5A, 0x01, 0x4B, 0x00, 0x01, 0x00, 0x00,
             0x00, 0x0B, 0x00, 0x00, 0x00, 0x01, 0xE8, 0x03, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x0C, 0x00,
@@ -435,76 +556,42 @@ export class UserManager {
             0x14, 0x00, 0x00, 0x00, 0x15, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 0x19, 0x00, 0x00, 0x00,
             0x1A, 0x00, 0x00, 0x00, 0x1C, 0x00, 0x00, 0x00, 0x6C, 0xBF, 0x00, 0x00, 0x71, 0xBF, 0x00, 0x00,
             0x42, 0x00, 0x00, 0x00, 0x94, 0x01, 0x00, 0x00])
-        unlockReply.writeUInt8(user.socket.getNextSeq(), 1)
-        user.socket.send(unlockReply)
-        const favCosmeticsReply: Buffer =
-            new OutFavoritePacket(user.socket).setCosmetics(inventory.ctModelItem,
-                inventory.terModelItem, inventory.headItem, inventory.gloveItem,
-                inventory.backItem, inventory.stepsItem, inventory.cardItem,
-                inventory.sprayItem)
-        user.socket.send(favCosmeticsReply)
-        const buf5: Buffer = new OutFavoritePacket(user.socket).setLoadout(inventory.loadouts)
-        user.socket.send(buf5)
-        const buyMenuReply: Buffer =
-           new OutOptionPacket(user.socket).setBuyMenu(user.inventory.buymenu)
-        user.socket.send(buyMenuReply)
-    }
-
-    /**
-     * send an user's info to itself
-     * @param user the target user
-     */
-    private sendUserInfoTo(user: User, holepunchPort: number): void {
-        const userStartReply: Buffer = new OutUserStartPacket(
-            user.userId, user.userName, user.userName, holepunchPort, user.socket).build()
-
-        const userInfoReply: Buffer =
-            new OutUserInfoPacket(user.socket).fullUserUpdate(user)
-
-        user.socket.send(userStartReply)
-        user.socket.send(userInfoReply)
+        conn.sendBuffer(unlockReply)
+        conn.send(OutFavoritePacket.setCosmetics(cosmetics.ctItem, cosmetics.terItem,
+                cosmetics.headItem, cosmetics.gloveItem, cosmetics.backItem, cosmetics.stepsItem,
+                cosmetics.cardItem, cosmetics.sprayItem))
+        conn.send(OutFavoritePacket.setLoadout(loadouts))
+        conn.send(OutOptionPacket.setBuyMenu(buyMenu))
     }
 
     /**
      * send the host an user's inventory
-     * @param host the host to send the data to
-     * @param targetUser the target user
+     * @param hostUserId the target host's user ID
+     * @param hostConn the target host's connection
+     * @param targetUserId the target user's ID session
      */
-    private sendUserInventoryTo(host: User, targetUser: User): void {
-        const reply: Buffer =
-            new OutHostPacket(host.socket).setInventory(targetUser.userId, host.inventory.items)
-        host.socket.send(reply)
+    private static async sendUserInventoryTo(hostUserId: number, hostConn: ExtendedSocket,
+                                             targetUserId: number): Promise<void> {
+        const inventory: UserInventory = await UserInventory.getInventory(hostUserId)
+        hostConn.send(OutHostPacket.setInventory(targetUserId, inventory.items))
     }
 
     /**
      * send the host an user's loadout
-     * @param host the host to send the data to
-     * @param targetUser the target user
+     * @param hostConn the target host's connection
+     * @param targetUserId the target user's ID session
      */
-    private sendUserLoadoutTo(host: User, targetUser: User): void {
-        const reply: Buffer =
-            new OutHostPacket(host.socket).setLoadout(targetUser)
-        host.socket.send(reply)
+    private static async sendUserLoadoutTo(hostConn: ExtendedSocket, targetUserId: number): Promise<void> {
+        hostConn.send(await OutHostPacket.setLoadout(targetUserId))
     }
 
     /**
      * send the host an user's loadout
-     * @param host the host to send the data to
-     * @param targetUser the target user
+     * @param hostUserId the target host's user ID
+     * @param hostConn the target host's connection
+     * @param targetUserId the target user's ID session
      */
-    private sendUserBuyMenuTo(host: User, targetUser: User): void {
-        const reply: Buffer =
-            new OutHostPacket(host.socket).setBuyMenu(targetUser)
-        host.socket.send(reply)
-    }
-
-    /**
-     * if the user was in a room, tell it that the user has logged disconnected
-     * @param user the target user
-     */
-    private cleanUpUser(user: User): void {
-        if (user.currentRoom) {
-            user.currentRoom.removeUser(user)
-        }
+    private static async sendUserBuyMenuTo(hostConn: ExtendedSocket, targetUserId: number): Promise<void> {
+        hostConn.send(await OutHostPacket.setBuyMenu(targetUserId))
     }
 }

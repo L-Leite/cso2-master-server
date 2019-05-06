@@ -8,38 +8,39 @@ import { OutInventoryCreate } from 'packets/out/inventory/create'
 
 import { UserInventoryItem } from 'user/userinventoryitem'
 
-import { ExtendedSocket } from 'extendedsocket'
-
 /**
  * outgoing room information
  * @class OutInventoryPacket
  */
 export class OutInventoryPacket extends OutPacketBase {
-    constructor(socket: ExtendedSocket) {
-        super(socket, null)
-    }
+    public static createInventory(items: UserInventoryItem[]): OutInventoryPacket {
+        const packet: OutInventoryPacket = new OutInventoryPacket()
 
-    public createInventory(items: UserInventoryItem[]): Buffer {
-        this.outStream = new WritableStreamBuffer(
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 80, incrementAmount: 20 })
 
-        this.id = PacketId.Inventory_Create
-        this.buildHeader()
+        packet.id = PacketId.Inventory_Create
+        packet.buildHeader()
 
-        new OutInventoryCreate(items).build(this)
+        OutInventoryCreate.build(items, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public addInventory(items: UserInventoryItem[]): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static addInventory(items: UserInventoryItem[]): OutInventoryPacket {
+        const packet: OutInventoryPacket = new OutInventoryPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 80, incrementAmount: 20 })
 
-        this.id = PacketId.Inventory_Add
-        this.buildHeader()
+        packet.id = PacketId.Inventory_Add
+        packet.buildHeader()
 
-        new OutInventoryAdd(items).build(this)
+        OutInventoryAdd.build(items, packet)
 
-        return this.getData()
+        return packet
+    }
+    constructor() {
+        super(null)
     }
 }

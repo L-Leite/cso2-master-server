@@ -1,8 +1,8 @@
+import { Uint64LE } from 'int64-buffer'
+
 import { OutInventoryBaseItem } from 'packets/out/inventory/baseitem'
 
 import { OutPacketBase } from 'packets/out/packet'
-
-import { Uint64LE } from 'int64-buffer'
 
 /**
  * @class OutInventorySomething

@@ -4,7 +4,6 @@ import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
 
 import { Room, RoomReadyStatus, RoomTeamNum } from 'room/room'
-import { User } from 'user/user'
 
 import { OutRoomCountdown } from 'packets/out/room/countdown'
 import { OutRoomCreateAndJoin } from 'packets/out/room/createandjoin'
@@ -16,8 +15,7 @@ import { OutRoomSetHost } from 'packets/out/room/sethost'
 import { OutRoomSetUserTeam } from 'packets/out/room/setuserteam'
 import { OutRoomUpdateSettings } from 'packets/out/room/updatesettings'
 
-import { ExtendedSocket } from 'extendedsocket'
-import { RoomSettings } from 'room/roomsettings';
+import { RoomSettings } from 'room/roomsettings'
 
 enum OutRoomPacketType {
     CreateAndJoin = 0,
@@ -36,127 +34,145 @@ enum OutRoomPacketType {
  * @class OutRoomPacket
  */
 export class OutRoomPacket extends OutPacketBase {
-    constructor(socket: ExtendedSocket) {
-        super(socket, PacketId.Room)
-    }
+    public static async createAndJoin(room: Room): Promise<OutRoomPacket> {
+        const packet: OutRoomPacket = new OutRoomPacket()
 
-    public createAndJoin(roomInfo: Room): Buffer {
-        this.outStream = new WritableStreamBuffer(
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 200, incrementAmount: 20 })
 
-        this.buildHeader()
-        this.writeUInt8(OutRoomPacketType.CreateAndJoin)
+        packet.buildHeader()
+        packet.writeUInt8(OutRoomPacketType.CreateAndJoin)
 
-        new OutRoomCreateAndJoin(roomInfo).build(this)
+        await OutRoomCreateAndJoin.build(room, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public playerJoin(user: User, teamNum: RoomTeamNum): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static playerJoin(userId: number, teamNum: RoomTeamNum): OutRoomPacket {
+        const packet: OutRoomPacket = new OutRoomPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 60, incrementAmount: 15 })
 
-        this.buildHeader()
-        this.writeUInt8(OutRoomPacketType.PlayerJoin)
+        packet.buildHeader()
+        packet.writeUInt8(OutRoomPacketType.PlayerJoin)
 
-        new OutRoomPlayerJoin(user, teamNum).build(this)
+        OutRoomPlayerJoin.build(userId, teamNum, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public playerLeave(userId: number): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static playerLeave(userId: number): OutRoomPacket {
+        const packet: OutRoomPacket = new OutRoomPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 20, incrementAmount: 15 })
 
-        this.buildHeader()
-        this.writeUInt8(OutRoomPacketType.PlayerLeave)
+        packet.buildHeader()
+        packet.writeUInt8(OutRoomPacketType.PlayerLeave)
 
-        new OutRoomPlayerLeave(userId).build(this)
+        OutRoomPlayerLeave.build(userId, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public setUserReadyStatus(user: User, readyStatus: RoomReadyStatus): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static setUserReadyStatus(userId: number, readyStatus: RoomReadyStatus): OutRoomPacket {
+        const packet: OutRoomPacket = new OutRoomPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 20, incrementAmount: 15 })
 
-        this.buildHeader()
-        this.writeUInt8(OutRoomPacketType.SetPlayerReady)
+        packet.buildHeader()
+        packet.writeUInt8(OutRoomPacketType.SetPlayerReady)
 
-        new OutRoomPlayerReady(user.userId, readyStatus).build(this)
+        OutRoomPlayerReady.build(userId, readyStatus, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public updateSettings(newSettings: RoomSettings): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static updateSettings(newSettings: RoomSettings): OutRoomPacket {
+        const packet: OutRoomPacket = new OutRoomPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 30, incrementAmount: 15 })
 
-        this.buildHeader()
-        this.writeUInt8(OutRoomPacketType.UpdateSettings)
+        packet.buildHeader()
+        packet.writeUInt8(OutRoomPacketType.UpdateSettings)
 
-        new OutRoomUpdateSettings(newSettings).build(this)
+        OutRoomUpdateSettings.build(newSettings, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public setHost(user: User): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static setHost(userId: number): OutRoomPacket {
+        const packet: OutRoomPacket = new OutRoomPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 30, incrementAmount: 15 })
 
-        this.buildHeader()
-        this.writeUInt8(OutRoomPacketType.SetHost)
+        packet.buildHeader()
+        packet.writeUInt8(OutRoomPacketType.SetHost)
 
-        new OutRoomSetHost(user.userId).build(this)
+        OutRoomSetHost.build(userId, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public setGameResult(): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static setGameResult(): OutRoomPacket {
+        const packet: OutRoomPacket = new OutRoomPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 30, incrementAmount: 15 })
 
-        this.buildHeader()
-        this.writeUInt8(OutRoomPacketType.SetGameResult)
+        packet.buildHeader()
+        packet.writeUInt8(OutRoomPacketType.SetGameResult)
 
-        new OutRoomGameResult().build(this)
+        OutRoomGameResult.build(packet)
 
-        return this.getData()
+        return packet
     }
 
-    public progressCountdown(countdown: number): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static progressCountdown(countdown: number): OutRoomPacket {
+        const packet: OutRoomPacket = new OutRoomPacket()
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 20, incrementAmount: 15 })
 
-        this.buildHeader()
-        this.writeUInt8(OutRoomPacketType.Countdown)
+        packet.buildHeader()
+        packet.writeUInt8(OutRoomPacketType.Countdown)
 
-        new OutRoomCountdown(true, countdown).build(this)
+        OutRoomCountdown.build(true, countdown, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public stopCountdown(): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static stopCountdown(): OutRoomPacket {
+        const packet: OutRoomPacket = new OutRoomPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 20, incrementAmount: 15 })
 
-        this.buildHeader()
-        this.writeUInt8(OutRoomPacketType.Countdown)
+        packet.buildHeader()
+        packet.writeUInt8(OutRoomPacketType.Countdown)
 
-        new OutRoomCountdown(false).build(this)
+        OutRoomCountdown.build(false, null, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public setUserTeam(user: User, teamNum: number): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static setUserTeam(userId: number, teamNum: number): OutRoomPacket {
+        const packet: OutRoomPacket = new OutRoomPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 20, incrementAmount: 15 })
 
-        this.buildHeader()
-        this.writeUInt8(OutRoomPacketType.setUserTeam)
+        packet.buildHeader()
+        packet.writeUInt8(OutRoomPacketType.setUserTeam)
 
-        new OutRoomSetUserTeam(user, teamNum).build(this)
+        OutRoomSetUserTeam.build([userId], [teamNum], packet)
 
-        return this.getData()
+        return packet
+    }
+    constructor() {
+        super(PacketId.Room)
     }
 }

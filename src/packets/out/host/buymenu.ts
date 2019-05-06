@@ -2,43 +2,33 @@ import { OutPacketBase } from 'packets/out/packet'
 
 import { UserBuyMenu } from 'user/userbuymenu'
 
-import { OutOptionBuySubMenu } from '../option/buysubmenu'
-
 /**
  * sends an user's buy menu to a host
  * @class OutHostPreloadInventory
  */
 export class OutHostBuyMenu {
-    private userId: number
-    private buyMenuByteLength: number
-    private unk00: number
-    private submenues: OutOptionBuySubMenu[]
+    public static build(userId: number, buymenu: UserBuyMenu, outPacket: OutPacketBase): void {
+        outPacket.writeUInt32(userId)
+        outPacket.writeUInt16(369) // buy menu's byte length
+        outPacket.writeUInt8(0) // unk00
 
-    constructor(userId: number, buymenu: UserBuyMenu) {
-        this.userId = userId
-        this.buyMenuByteLength = 369
-
-        this.unk00 = 0
-
-        this.submenues = [
-            new OutOptionBuySubMenu(buymenu.pistols), // pistols
-            new OutOptionBuySubMenu(buymenu.shotguns), // shotguns
-            new OutOptionBuySubMenu(buymenu.smgs), // smgs
-            new OutOptionBuySubMenu(buymenu.rifles), // rifles
-            new OutOptionBuySubMenu(buymenu.snipers), // snipers
-            new OutOptionBuySubMenu(buymenu.machineguns), // machine guns
-            new OutOptionBuySubMenu(buymenu.melees), // melee weapons
-            new OutOptionBuySubMenu(buymenu.equipment), // equipment
-        ]
+        this.buildSubmenu(buymenu.pistols, outPacket)
+        this.buildSubmenu(buymenu.shotguns, outPacket)
+        this.buildSubmenu(buymenu.smgs, outPacket)
+        this.buildSubmenu(buymenu.rifles, outPacket)
+        this.buildSubmenu(buymenu.snipers, outPacket)
+        this.buildSubmenu(buymenu.machineguns, outPacket)
+        this.buildSubmenu(buymenu.melees, outPacket)
+        this.buildSubmenu(buymenu.equipment, outPacket)
     }
 
-    public build(outPacket: OutPacketBase): void {
-        outPacket.writeUInt32(this.userId)
-        outPacket.writeUInt16(this.buyMenuByteLength)
-        outPacket.writeUInt8(this.unk00)
+    public static buildSubmenu(items: number[], outPacket: OutPacketBase): void {
+        let curItem: number = 0
 
-        for (const submenu of this.submenues) {
-            submenu.build(outPacket)
+        outPacket.writeUInt8(items.length) // number of items in the submenu
+        for (const item of items) {
+            outPacket.writeUInt8(curItem++)
+            outPacket.writeUInt32(item)
         }
     }
 }

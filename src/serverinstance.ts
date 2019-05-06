@@ -1,21 +1,25 @@
 import dgram from 'dgram'
 import net from 'net'
-import uuidv4 from 'uuid/v4'
+import uuid from 'uuid/v4'
 
 import { ExtendedSocket } from 'extendedsocket'
 
 import { PacketId } from 'packets/definitions'
 import { InPacketBase } from 'packets/in/packet'
 
+// import { InVersionPacket } from 'packets/in/version'
+import { OutVersionPacket } from 'packets/out/version'
+
 import { InHolepunchPacketUdp } from 'packets/holepunch/inholepunch'
 import { OutHolepunchPacketUdp } from 'packets/holepunch/outholepunch'
 
-import { User } from 'user/user'
 import { UserManager } from 'user/usermanager'
 
 import { ChannelManager } from 'channel/channelmanager'
 
 import { PacketLogger } from 'packetlogger'
+
+import { UserSession } from 'user/usersession'
 
 /**
  * The welcome message sent to the client
@@ -30,29 +34,29 @@ export interface IServerOptions {
 }
 
 /**
- * Generates an uuid to identify the sockets
- * @returns an uuid string
- */
-function generateUuid(): string {
-    return uuidv4()
-}
-
-/**
  * Used to handle the server and sockets callbacks
  * It stores a list of the connected sockets
  * and a reference to our server instance
  * @class ServerManager
  */
 export class ServerInstance {
-    public users: UserManager
-    public channels: ChannelManager
+    private static onVersionPacket(versionData: Buffer, sourceConn: ExtendedSocket): boolean {
+        /*const versionPacket: InVersionPacket = new InVersionPacket(versionData)
+        console.log(sourceConn.uuid + ' sent a version packet. clientHash: '
+            + versionPacket.clientHash)*/
+
+        // i think the client ignores the hash string
+        sourceConn.send(new OutVersionPacket(
+            false, '6246015df9a7d1f7311f888e7e861f18'))
+
+        return true
+    }
 
     private server: net.Server
     private holepunchServer: dgram.Socket
     private masterPort: number
     private holepunchPort: number
     private hostname: string
-    private sockets: ExtendedSocket[]
 
     private packetLogging: PacketLogger
 
@@ -66,11 +70,7 @@ export class ServerInstance {
         this.hostname = options.hostname
 
         this.server = net.createServer()
-        this.holepunchServer = dgram.createSocket('udp4');
-        this.sockets = []
-
-        this.users = new UserManager()
-        this.channels = new ChannelManager()
+        this.holepunchServer = dgram.createSocket('udp4')
 
         if (options.shouldLogPackets) {
             this.packetLogging = new PacketLogger()
@@ -105,34 +105,32 @@ export class ServerInstance {
      * @param socket - the new connection's socket
      */
     private onServerConnection(socket: net.Socket): void {
-        const newSocket: ExtendedSocket = this.addSocket(socket)
+        const newConn: ExtendedSocket = this.addSocket(socket)
 
-        // welcome new client
-        newSocket.write(clientWelcomeMessage)
+        // welcome new connection
+        newConn.write(clientWelcomeMessage)
 
-        console.log('new client connected ' +
-            newSocket.remoteAddress + ':' + newSocket.remotePort +
-            ' uuid: ' + newSocket.uuid)
+        console.debug('new connection created, uuid ' + newConn.uuid)
 
         // setup socket callbacks
-        newSocket.on('data', (data: string) => {
-            this.onSocketData(newSocket, data)
+        newConn.on('data', (data: string) => {
+            this.onSocketData(newConn, data)
         })
 
-        newSocket.on('error', (err: Error) => {
-            this.onSocketError(newSocket, err)
+        newConn.on('error', (err: Error) => {
+            this.onSocketError(newConn, err)
         })
 
-        newSocket.on('close', (hadError: boolean) => {
-            this.onSocketClose(newSocket, hadError)
+        newConn.on('close', (hadError: boolean) => {
+            this.onSocketClose(newConn, hadError)
         })
 
-        newSocket.on('end', () => {
-            this.onSocketEnd(newSocket)
+        newConn.on('end', () => {
+            this.onSocketEnd(newConn)
         })
 
-        newSocket.on('timeout', () => {
-            this.onSocketTimeout(newSocket)
+        newConn.on('timeout', () => {
+            this.onSocketTimeout(newConn)
         })
     }
 
@@ -173,7 +171,7 @@ export class ServerInstance {
      * @param msg the received data
      * @param rinfo the sender's info
      */
-    private onHolepunchMessage(msg: Buffer, rinfo: net.AddressInfo): void {
+    private async onHolepunchMessage(msg: Buffer, rinfo: net.AddressInfo): Promise<void> {
         const packet: InHolepunchPacketUdp = new InHolepunchPacketUdp(msg)
 
         if (packet.isParsed() === false) {
@@ -185,22 +183,33 @@ export class ServerInstance {
             return
         }
 
-        const user: User = this.users.getUserById(packet.userId)
+        const session: UserSession = await UserSession.get(packet.userId)
 
-        if (user == null) {
-            console.warn('Tried to send hole punch packet to ' + packet.userId)
+        if (session == null) {
+            console.warn('Couldnt\'t get user ID %i\'s session when holepunching', packet.userId)
             return
         }
 
-        const portIndex = user.updateHolepunch(packet.portId, packet.port, rinfo.port)
+        if (session.externalNet.ipAddress !== rinfo.address) {
+            console.warn('Holepunch IP address is different from session\'s IP. Is someone spoofing packets?'
+                + 'userId: %i original IP: %s packet IP: %s',
+                packet.userId, session.externalNet.ipAddress, rinfo.address)
+            return
+        }
+
+        if (session.shouldUpdatePorts(packet.portId, packet.port, rinfo.port) === false) {
+            return
+        }
+
+        session.internalNet.ipAddress = packet.ipAddress
+        const portIndex = session.setHolepunch(packet.portId, packet.port, rinfo.port)
 
         if (portIndex === -1) {
             console.warn('Unknown hole punch port')
             return
         }
 
-        user.localIpAddress = packet.ipAddress
-        user.externalIpAddress = rinfo.address
+        session.update()
 
         const reply: Buffer = new OutHolepunchPacketUdp(portIndex).build()
         this.holepunchServer.send(reply, packet.port, packet.ipAddress)
@@ -208,17 +217,17 @@ export class ServerInstance {
 
     /**
      * Called when a socket receives data
-     * @param socket the client's socket
+     * @param conn the client's socket
      * @param data the data received from the client
      */
-    private onSocketData(socket: ExtendedSocket, data: string): void {
+    private async onSocketData(conn: ExtendedSocket, data: string): Promise<void> {
         // the data comes in as a string, so we need to convert it to a buffer
         const newData: Buffer = Buffer.from(data, 'hex')
         // process the received data
-        this.processPackets(newData, socket)
+        this.processPackets(newData, conn)
     }
 
-    private processPackets(packetData: Buffer, sourceSocket: ExtendedSocket) {
+    private processPackets(packetData: Buffer, conn: ExtendedSocket) {
         let curOffset: number = 0
         let curTotalLen: number = 0
 
@@ -229,7 +238,7 @@ export class ServerInstance {
             const curPacket: InPacketBase = new InPacketBase(pktBuffer)
             const totalPktLen = curPacket.length + InPacketBase.headerLength
 
-            this.onIncomingPacket(curPacket, sourceSocket)
+            this.onIncomingPacket(curPacket, conn)
 
             curTotalLen = totalPktLen
             curOffset += totalPktLen
@@ -238,38 +247,44 @@ export class ServerInstance {
 
     /**
      * hands the packet to the appropriate callback
-     * @param socket the client's socket
      * @param packet the packet received from the client
+     * @param connection represents a connection with the client
      * @returns true if successful, otherwise it failed
      */
-    private onIncomingPacket(packet: InPacketBase, sourceSocket: ExtendedSocket): boolean {
+    private onIncomingPacket(packet: InPacketBase, connection: ExtendedSocket): boolean {
         if (packet.isValid() === false) {
-            console.warn('bad packet from ' + sourceSocket.uuid)
+            console.warn('bad packet from ' + connection.uuid)
             return false
         }
 
         if (this.packetLogging) {
-            this.packetLogging.dumpIn(packet, sourceSocket)
+            this.packetLogging.dumpIn(connection.uuid, connection.getRealSeq(), packet.id, packet.getData())
         }
 
         switch (packet.id) {
             case PacketId.Version:
-                return this.users.onVersionPacket(packet.getData(), sourceSocket)
+                return ServerInstance.onVersionPacket(packet.getData(), connection)
             case PacketId.Login:
-                return this.users.onLoginPacket(packet.getData(), sourceSocket, this.channels, this.holepunchPort)
+                UserManager.onLoginPacket(packet.getData(), connection, this.holepunchPort)
+                return true
             case PacketId.RequestChannels:
-                return this.channels.onChannelListPacket(sourceSocket, this.users)
+                ChannelManager.onChannelListPacket(connection)
+                return true
             case PacketId.RequestRoomList:
-                return this.channels.onRoomListPacket(packet.getData(), sourceSocket, this.users)
+                ChannelManager.onRoomListPacket(packet.getData(), connection)
+                return true
             case PacketId.Room:
-                return this.channels.onRoomRequest(packet.getData(), sourceSocket, this.users)
+                ChannelManager.onRoomRequest(packet.getData(), connection)
+                return true
             case PacketId.Host:
-                return this.users.onHostPacket(packet.getData(), sourceSocket)
+                UserManager.onHostPacket(packet.getData(), connection)
+                return true
             case PacketId.Favorite:
-                return this.users.onFavoritePacket(packet.getData(), sourceSocket)
+                UserManager.onFavoritePacket(packet.getData(), connection)
+                return true
         }
 
-        console.warn('unknown packet id ' + packet.id + ' from ' + sourceSocket.uuid)
+        console.warn('unknown packet id ' + packet.id + ' from ' + connection.uuid)
         return false
     }
 
@@ -284,58 +299,48 @@ export class ServerInstance {
 
     /**
      * Called when a socket has an error
-     * @param socket the client's socket
+     * @param conn the client's connection
      * @param err the occured error
      */
-    private onSocketError(socket: ExtendedSocket, err: Error): void {
-        console.warn('socket ' + socket.uuid + ' had an error: ' + err)
-        this.users.removeUserByUuid(socket.uuid)
-        this.removeSocket(socket)
+    private onSocketError(conn: ExtendedSocket, err: Error): void {
+        console.warn('socket ' + conn.uuid + ' had an error: ' + err)
+        UserSession.delete(conn.getOwner())
     }
 
     /**
      * Called when a socket ends connection
-     * @param socket the client's socket
+     * @param conn the client's connection
      */
-    private onSocketEnd(socket: ExtendedSocket): void {
-        console.log('socket ' + socket.uuid + ' ended')
-        this.users.removeUserByUuid(socket.uuid)
-        this.removeSocket(socket)
+    private onSocketEnd(conn: ExtendedSocket): void {
+        console.log('socket ' + conn.uuid + ' ended')
+        UserSession.delete(conn.getOwner())
     }
 
     /**
      * Called when a socket times out
-     * @param socket the client's socket
+     * @param conn the client's socket
      */
-    private onSocketTimeout(socket: ExtendedSocket): void {
-        console.warn('socket ' + socket.uuid + ' timed out')
-        this.users.removeUserByUuid(socket.uuid)
-        this.removeSocket(socket)
+    private onSocketTimeout(conn: ExtendedSocket): void {
+        console.warn('socket ' + conn.uuid + ' timed out')
+        UserSession.delete(conn.getOwner())
     }
 
     /**
-     * prepare a client's socket with a sequence number and unique id
-     * and place it into the connected sockets list
-     * @param socket the client's socket
+     * prepare a client's connection with a sequence number and unique id
+     * and place it into the connection list
+     * @param conn the client's socket
      * @returns the placed socket
      */
-    private addSocket(socket: net.Socket): ExtendedSocket {
-        const newSocket: ExtendedSocket = ExtendedSocket.from(socket, this.packetLogging)
+    private addSocket(conn: net.Socket): ExtendedSocket {
+        const newConn: ExtendedSocket = ExtendedSocket.from(conn, this.packetLogging)
 
         // treat data as hexadecimal
-        newSocket.setEncoding('hex')
-        // give the socket an unique uuid
-        newSocket.uuid = generateUuid()
+        newConn.setEncoding('hex')
+        // give the connection an unique uuid
+        newConn.uuid = uuid()
         // init sequence number
-        newSocket.resetReq()
+        newConn.resetReq()
 
-        // add the socket to the socket list
-        this.sockets.push(newSocket)
-
-        return newSocket
-    }
-
-    private removeSocket(socket: ExtendedSocket): void {
-        this.sockets.splice(this.sockets.indexOf(socket), 1)
+        return newConn
     }
 }

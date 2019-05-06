@@ -3,8 +3,6 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
 
-import { ExtendedSocket } from 'extendedsocket'
-
 import { OutOptionBuyMenu } from 'packets/out/option/buymenu'
 
 import { UserBuyMenu } from 'user/userbuymenu'
@@ -18,19 +16,20 @@ enum OutOptionPacketType {
  * @class OutOptionPacket
  */
 export class OutOptionPacket extends OutPacketBase {
-    constructor(socket: ExtendedSocket) {
-        super(socket, PacketId.Option)
-    }
+    public static setBuyMenu(buyMenu: UserBuyMenu): OutOptionPacket {
+        const packet: OutOptionPacket = new OutOptionPacket()
 
-    public setBuyMenu(buymenu: UserBuyMenu): Buffer {
-        this.outStream = new WritableStreamBuffer(
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 40, incrementAmount: 15 })
 
-        this.buildHeader()
-        this.writeUInt8(OutOptionPacketType.SetBuyMenu)
+        packet.buildHeader()
+        packet.writeUInt8(OutOptionPacketType.SetBuyMenu)
 
-        new OutOptionBuyMenu(buymenu).build(this)
+        OutOptionBuyMenu.build(buyMenu, packet)
 
-        return this.getData()
+        return packet
+    }
+    constructor() {
+        super(PacketId.Option)
     }
 }

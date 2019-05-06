@@ -5,16 +5,8 @@ import { OutPacketBase } from 'packets/out/packet'
  * @class OutRoomSetHost
  */
 export class OutRoomSetHost {
-    private hostUserId: number
-    private unused: number
-
-    constructor(hostUserId: number) {
-        this.hostUserId = hostUserId
-        this.unused = 0
-    }
-
-    public build(outPacket: OutPacketBase): void {
-        outPacket.writeUInt32(this.hostUserId)
-        outPacket.writeUInt8(this.unused)
+    public static build(userId: number, outPacket: OutPacketBase): void {
+        outPacket.writeUInt32(userId)
+        outPacket.writeUInt8(0) // unused
     }
 }

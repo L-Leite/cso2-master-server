@@ -1,222 +1,472 @@
+import LRU from 'lru-cache'
+import superagent from 'superagent'
+
 import { UserBuyMenu } from 'user/userbuymenu'
+import { UserCosmetics } from 'user/usercosmetics'
 import { UserInventoryItem } from 'user/userinventoryitem'
 import { UserLoadout } from 'user/userloadout'
 
+import { inventorySvcAuthority, InventorySvcPing } from 'authorities'
+
 export class UserInventory {
-    public items: UserInventoryItem[]
+    /**
+     * creates a new inventory, including cosmetics, loadouts and a buy menu
+     * @param userId the new inventory owner's user ID
+     * @returns true if successful, false if not
+     */
+    public static async create(userId: number): Promise<boolean> {
+        if (InventorySvcPing.isAlive() === false) {
+            return false
+        }
 
-    public ctModelItem: number
-    public terModelItem: number
-    public headItem: number
-    public gloveItem: number
-    public backItem: number
-    public stepsItem: number
-    public cardItem: number
-    public sprayItem: number
-
-    public buymenu: UserBuyMenu
-    public loadouts: UserLoadout[]
-
-    constructor() {
-        this.ctModelItem = 1047
-        this.terModelItem = 1048
-        this.headItem = 0
-        this.gloveItem = 0
-        this.backItem = 0
-        this.stepsItem = 0
-        this.sprayItem = 42001
-
-        this.buymenu = new UserBuyMenu()
-        this.buymenu.pistols = [5280, 5279, 5337, 5356, 5294, 5360, 5262, 103, 106]
-        this.buymenu.shotguns = [5130, 5293, 5306, 5261, 5242, 5264, 5265, 5230, 137]
-        this.buymenu.smgs = [5251, 5295, 5238, 5320, 5285, 5347, 5310, 162, 105]
-        this.buymenu.rifles = [46, 45, 5296, 5184, 5355, 113, 102, 161, 157]
-        this.buymenu.snipers = [5133, 5118, 5206, 5241, 5225, 146, 125, 160, 163]
-        this.buymenu.machineguns = [5125, 5314, 5260, 87, 5332, 5366, 5276, 5233, 159]
-        this.buymenu.melees = [79, 5232, 84, 5221, 5304, 5330, 5253, 5231, 5353]
-        this.buymenu.equipment = [36, 37, 23, 4, 8, 34, 0, 0, 0]
-
-        this.loadouts = [
-            new UserLoadout(5336, 5356, 5330, 4, 23, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            new UserLoadout(5285, 5294, 5231, 4, 23, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-            new UserLoadout(5206, 5356, 5365, 4, 23, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+        const invPromises: Array<Promise<boolean>> = [
+            UserInventory.createInventory(userId),
+            UserInventory.createCosmetics(userId),
+            UserInventory.createBuyMenu(userId),
+            UserInventory.createLoadouts(userId),
         ]
 
-        this.items = []
-        this.items = this.getUserInventory().concat(this.getDefaultInventory())
+        const results: boolean[] = await Promise.all(invPromises)
+
+        // if results.includes returns false, then results doesn't have any false value
+        return results.includes(false) !== false
     }
 
-    public getUserInventory(): UserInventoryItem[] {
-        const userInv: UserInventoryItem[] = []
-
-        // characters
-        for (let i = 1005; i <= 1058; i++) {
-            UserInventoryItem.pushItem(userInv, i)
+    /**
+     * create inventory items for the owner user
+     * @param ownerId the future inventory owner's user ID
+     * @returns true if successful, false if not
+     */
+    public static async createInventory(ownerId: number): Promise<boolean> {
+        try {
+            const res: superagent.Response = await superagent
+                .post('http://' + inventorySvcAuthority() + '/inventory/' + ownerId)
+                .accept('json')
+            return res.status === 201
+        } catch (error) {
+            console.error(error)
+            InventorySvcPing.checkNow()
+            return false
         }
-
-        // unlockable weapons
-        const unlockables: number[] = [1, 5, 7, 9, 10, 11, 12, 16, 17, 20, 22, 24, 25, 26, 28, 29, 30, 31, 32, 33]
-        for (const unlock of unlockables) {
-            UserInventoryItem.pushItem(userInv, unlock)
-        }
-        for (let i = 44; i <= 163; i++) {
-            if (this.isItemBlacklisted(i)) {
-                continue
-            }
-            UserInventoryItem.pushItem(userInv, i)
-        }
-
-        // zombie crush skills
-        /*for (let i = 2019; i <= 2023; i++) {
-            UserInventoryItem.pushItem(userInv, i)
-        }*/
-
-        UserInventoryItem.pushItem(userInv, 2019, 3)
-        UserInventoryItem.pushItem(userInv, 2020, 50)
-        for (let i = 2021; i <= 2023; i++) {
-            UserInventoryItem.pushItem(userInv, i)
-        }
-
-        // weapon skins
-        for (let i = 5042; i <= 5370; i++) {
-            if (this.isItemBlacklisted(i)) {
-                continue
-            }
-            UserInventoryItem.pushItem(userInv, i)
-        }
-        UserInventoryItem.pushItem(userInv, 5997)
-
-        // hats
-        for (let i = 10001; i <= 10133; i++) {
-            UserInventoryItem.pushItem(userInv, i)
-        }
-
-        // backpacks
-        for (let i = 20001; i <= 20107; i++) {
-            UserInventoryItem.pushItem(userInv, i)
-        }
-
-        // gloves
-        for (let i = 30001; i <= 30027; i++) {
-            UserInventoryItem.pushItem(userInv, i)
-        }
-
-        // footsteps
-        for (let i = 40001; i <= 40025; i++) {
-            UserInventoryItem.pushItem(userInv, i)
-        }
-
-        // sprays
-        for (let i = 42001; i <= 42020; i++) {
-            UserInventoryItem.pushItem(userInv, i)
-        }
-
-        // hide props
-        for (let i = 49001; i <= 49010; i++) {
-            UserInventoryItem.pushItem(userInv, i)
-        }
-        UserInventoryItem.pushItem(userInv, 49999)
-
-        // cards
-        for (let i = 60001; i <= 60004; i++) {
-            UserInventoryItem.pushItem(userInv, i)
-        }
-
-        return userInv
     }
 
-    public getDefaultInventory(): UserInventoryItem[] {
-        const defaultInv: UserInventoryItem[] = []
-        const defaults: number[] = [2, 3, 4, 6, 8, 13, 14, 15, 18, 19, 21, 23, 27, 34, 36, 37,
-            80, 128, 101, 1001, 1002, 1003, 1004, 49009, 49004]
-        for (const def of defaults) {
-            UserInventoryItem.pushItem(defaultInv, def)
+    /**
+     * create cosmetic slots for the owner user
+     * @param ownerId the future cosmetics owner's user ID
+     * @returns true if successful, false if not
+     */
+    public static async createCosmetics(ownerId: number): Promise<boolean> {
+        try {
+            const res: superagent.Response = await superagent
+                .post('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
+                .accept('json')
+            return res.status === 201
+        } catch (error) {
+            console.error(error)
+            InventorySvcPing.checkNow()
+            return false
         }
-        return defaultInv
+    }
+
+    /**
+     * create loadouts for the owner user
+     * @param ownerId the future loadouts owner's user ID
+     * @returns true if successful, false if not
+     */
+    public static async createLoadouts(ownerId: number): Promise<boolean> {
+        try {
+            const res: superagent.Response = await superagent
+                .post('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/loadout')
+                .accept('json')
+            return res.status === 201
+        } catch (error) {
+            console.error(error)
+            InventorySvcPing.checkNow()
+            return false
+        }
+    }
+
+    /**
+     * create buy menu for the owner user
+     * @param ownerId the future buy menu owner's user ID
+     * @returns true if successful, false if not
+     */
+    public static async createBuyMenu(ownerId: number): Promise<boolean> {
+        try {
+            const res: superagent.Response = await superagent
+                .post('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .accept('json')
+            return res.status === 201
+        } catch (error) {
+            console.error(error)
+            InventorySvcPing.checkNow()
+            return null
+        }
+    }
+
+    /**
+     * get the inventory owner's items
+     * @param ownerId the inventory owner's user ID
+     */
+    public static async getInventory(ownerId: number): Promise<UserInventory> {
+        try {
+            const inventory: UserInventory = inventoryCache.get(ownerId)
+
+            if (inventory != null) {
+                return inventory
+            }
+
+            if (InventorySvcPing.isAlive() === false) {
+                return null
+            }
+
+            const res: superagent.Response = await superagent
+                .get('http://' + inventorySvcAuthority() + '/inventory/' + ownerId)
+                .accept('json')
+
+            if (res.status === 200) {
+                inventoryCache.set(ownerId, res.body)
+                return res.body
+            }
+
+            return null
+        } catch (error) {
+            console.error(error)
+            InventorySvcPing.checkNow()
+            return null
+        }
+    }
+
+    /**
+     * get an user's cosmetic items
+     * @param ownerId the cosmetics owner's user ID
+     */
+    public static async getCosmetics(ownerId: number): Promise<UserCosmetics> {
+        try {
+            const cosmetics: UserCosmetics = cosmeticsCache.get(ownerId)
+
+            if (cosmetics != null) {
+                return cosmetics
+            }
+
+            if (InventorySvcPing.isAlive() === false) {
+                return null
+            }
+
+            const res: superagent.Response = await superagent
+                .get('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
+                .accept('json')
+
+            if (res.status === 200) {
+                cosmeticsCache.set(ownerId, res.body)
+                return res.body
+            }
+
+            return null
+        } catch (error) {
+            console.error(error)
+            InventorySvcPing.checkNow()
+            return null
+        }
+    }
+
+    /**
+     * get an user's loadout
+     * @param ownerId the loadout owner's user ID
+     * @param loadoutNum the loadout's index number
+     */
+    public static async getLoadout(ownerId: number, loadoutNum: number): Promise<UserLoadout> {
+        try {
+            const res: superagent.Response = await superagent
+                .get('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/loadout')
+                .send({ loadoutNum })
+                .accept('json')
+            return res.status === 200 ? res.body : null
+        } catch (error) {
+            console.error(error)
+            InventorySvcPing.checkNow()
+            return null
+        }
+    }
+
+    /**
+     * get every loadout from an user
+     * @param ownerId the loadouts owner's user ID
+     */
+    public static async getAllLoadouts(ownerId: number): Promise<UserLoadout[]> {
+        let loadouts: UserLoadout[] = loadoutsCache.get(ownerId)
+
+        if (loadouts != null) {
+            return loadouts
+        }
+
+        if (InventorySvcPing.isAlive() === false) {
+            return null
+        }
+
+        const loadoutPromises: Array<Promise<UserLoadout>> = []
+
+        for (let i = 0; i < 3; i++) {
+            loadoutPromises.push(UserInventory.getLoadout(ownerId, i))
+        }
+
+        loadouts = await Promise.all(loadoutPromises)
+        loadoutsCache.set(ownerId, loadouts)
+        return loadouts
+    }
+
+    /**
+     * get an user's buy menu
+     * @param ownerId the buy menu owner's user ID
+     */
+    public static async getBuyMenu(ownerId: number): Promise<UserBuyMenu> {
+        try {
+            const buymenu: UserBuyMenu = buymenuCache.get(ownerId)
+
+            if (buymenu != null) {
+                return buymenu
+            }
+
+            if (InventorySvcPing.isAlive() === false) {
+                return null
+            }
+
+            const res: superagent.Response = await superagent
+                .get('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .accept('json')
+
+            if (res.status === 200) {
+                buymenuCache.set(ownerId, res.body)
+                return res.body
+            }
+
+            return null
+        } catch (error) {
+            console.error(error)
+            InventorySvcPing.checkNow()
+            return null
+        }
+    }
+
+    /**
+     * sets an user's cosmetic slot with a new item
+     * @param ownerId the cosmetics owner's user ID
+     * @param slot the cosmetic slot
+     * @param itemId the new cosmetic's item ID
+     */
+    public static async setCosmeticSlot(ownerId: number, slot: number, itemId: number): Promise<void> {
+        const params = UserInventory.buildSetCosmeticParams(ownerId, slot, itemId)
+        try {
+            const res: superagent.Response = await superagent
+                .put('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
+                .send(params)
+                .accept('json')
+
+            if (res.status === 200) {
+                cosmeticsCache.del(ownerId)
+                console.log('Set cosmetic item successfully')
+            }
+        } catch (error) {
+            console.error(error)
+            InventorySvcPing.checkNow()
+        }
     }
 
     /**
      * sets a loadout's weapon slot with a different we
+     * @param ownerId the loadout owner's user ID
      * @param loadout the loadout number
      * @param slot the weapon slot
      * @param itemId the new weapon's item id
      */
-    public setLoadoutWeapon(loadout: number, slot: number, itemId: number): void {
-        if (loadout > 2) {
-            console.warn('UserInventory::setLoadoutWeapon: invalid loadout %i', loadout)
-            return
-        }
+    public static async setLoadoutWeapon(ownerId: number, loadout: number,
+                                         slot: number, itemId: number): Promise<void> {
+        const params = UserInventory.buildSetLoadoutParams(ownerId, loadout, slot, itemId)
+        try {
+            const res: superagent.Response = await superagent
+                .put('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/loadout')
+                .send(params)
+                .accept('json')
 
-        if (slot > 6) {
-            console.warn('UserInventory::setLoadoutWeapon: invalid slot %i', slot)
-            return
-        }
-
-        this.loadouts[loadout].items[slot] = itemId
-    }
-
-    /**
-     * check if the item shouldn't be in the inventory
-     * (weapon skins, cosmetics, etc are fine)
-     * @param id the item ID to check
-     * @returns true if it's banned, false if not
-     */
-    public isItemBlacklisted(id: number): boolean {
-        switch (id) {
-            case 56:
-            case 58:
-            case 69:
-            case 107:
-            case 117:
-            case 134:
-            case 139:
-            case 5172:
-            case 5173:
-            case 5174:
-            case 5227:
-            case 5228:
-            case 5229:
-                return true
-            default:
-                return false
+            if (res.status === 200) {
+                loadoutsCache.del(ownerId)
+                console.log('Set loadout weapon successfully')
+            }
+        } catch (error) {
+            console.error(error)
+            InventorySvcPing.checkNow()
         }
     }
 
     /**
-     * sets an user's cosmetic
-     * @param slot the cosmetic slot
-     * @param itemId the new cosmetic id
+     * sets an user's buy menu column (such as the pistols column)
+     * @param ownerId the buy menu owner's user ID
+     * @param column the buy menu's column index
+     * @param items the new buy menu's column items
      */
-    public setCosmetic(slot: number, itemId: number): void {
-        // TODO: implement other cosmetics
+    public static async setBuyMenuColumn(ownerId: number, column: number, items: number[]): Promise<void> {
+        const params = UserInventory.buildSetBuyMenuParams(ownerId, column, items)
+        try {
+            const res: superagent.Response = await superagent
+                .put('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .send(params)
+                .accept('json')
+
+            if (res.status === 200) {
+                buymenuCache.del(ownerId)
+                console.log('Set buy menu column successfully')
+            }
+        } catch (error) {
+            console.error(error)
+            InventorySvcPing.checkNow()
+        }
+    }
+
+    private static buildSetCosmeticParams(userId: number, slot: number, itemId: number): any {
         switch (slot) {
             case 0:
-                this.ctModelItem = itemId
-                break
+                return {
+                    userId,
+                    ctItem: itemId,
+                }
             case 1:
-                this.terModelItem = itemId
-                break
+                return {
+                    userId,
+                    terItem: itemId,
+                }
             case 2:
-                this.headItem = itemId
-                break
+                return {
+                    userId,
+                    headItem: itemId,
+                }
             case 3:
-                this.gloveItem = itemId
-                break
+                return {
+                    userId,
+                    gloveItem: itemId,
+                }
             case 4:
-                this.backItem = itemId
-                break
+                return {
+                    userId,
+                    backItem: itemId,
+                }
             case 5:
-                this.stepsItem = itemId
-                break
+                return {
+                    userId,
+                    stepsItem: itemId,
+                }
             case 6:
-                this.cardItem = itemId
-                break
+                return {
+                    userId,
+                    cardItem: itemId,
+                }
             case 7:
-                this.sprayItem = itemId
-                break
-            default:
-                console.warn('UserInventory::setCosmetic: invalid slot %i', slot)
-                break
+                return {
+                    userId,
+                    sprayItem: itemId,
+                }
         }
+
+        console.error('Bad item slot for cosmetics')
+        return null
     }
+
+    private static buildSetLoadoutParams(userId: number, loadoutNum: number, slot: number, itemId: number): any {
+        switch (slot) {
+            case 0:
+                return {
+                    userId,
+                    loadoutNum,
+                    primary: itemId,
+                }
+            case 1:
+                return {
+                    userId,
+                    loadoutNum,
+                    secondary: itemId,
+                }
+            case 2:
+                return {
+                    userId,
+                    loadoutNum,
+                    melee: itemId,
+                }
+            case 3:
+                return {
+                    userId,
+                    loadoutNum,
+                    hegrenade: itemId,
+                }
+            case 4:
+                return {
+                    userId,
+                    loadoutNum,
+                    smoke: itemId,
+                }
+            case 5:
+                return {
+                    userId,
+                    loadoutNum,
+                    flash: itemId,
+                }
+        }
+
+        console.error('Bad item slot for loadout')
+        return null
+    }
+
+    private static buildSetBuyMenuParams(userId: number, slot: number, items: number[]): any {
+        switch (slot) {
+            case 0:
+                return {
+                    userId,
+                    pistols: items,
+                }
+            case 1:
+                return {
+                    userId,
+                    shotguns: items,
+                }
+            case 2:
+                return {
+                    userId,
+                    smgs: items,
+                }
+            case 3:
+                return {
+                    userId,
+                    rifles: items,
+                }
+            case 4:
+                return {
+                    userId,
+                    snipers: items,
+                }
+            case 5:
+                return {
+                    userId,
+                    machineguns: items,
+                }
+            case 6:
+                return {
+                    userId,
+                    melees: items,
+                }
+            case 7:
+                return {
+                    userId,
+                    equipment: items,
+                }
+        }
+
+        console.error('Bad column for buy menu')
+        return null
+    }
+
+    public ownerId: number
+    public items: UserInventoryItem[]
 }
+
+const inventoryCache = new LRU<number, UserInventory>({ max: 15, maxAge: 1000 * 15 })
+const cosmeticsCache = new LRU<number, UserCosmetics>({ max: 30, maxAge: 1000 * 15 })
+const loadoutsCache = new LRU<number, UserLoadout[]>({ max: 30, maxAge: 1000 * 15 })
+const buymenuCache = new LRU<number, UserBuyMenu>({ max: 30, maxAge: 1000 * 15 })

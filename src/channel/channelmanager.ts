@@ -3,8 +3,8 @@ import { ChannelServer } from 'channel/channelserver'
 
 import { Room, RoomReadyStatus, RoomStatus } from 'room/room'
 
-import { User } from 'user/user'
 import { UserManager } from 'user/usermanager'
+import { UserSession } from 'user/usersession'
 
 import { ExtendedSocket } from 'extendedsocket'
 
@@ -25,27 +25,13 @@ import { OutServerListPacket } from 'packets/out/serverlist'
  * @class ChannelManager
  */
 export class ChannelManager {
-    private channelServers: ChannelServer[]
-
-    constructor() {
-        this.channelServers = [new ChannelServer('Test server', 1, 1, 1)]
-    }
-
     /**
      * called when the user sends a RequestChannels packet
-     * @param sourceSocket the user's socket
-     * @param users the user manager object
+     * @param sourceConn the user's socket
      */
-    public onChannelListPacket(sourceSocket: ExtendedSocket, users: UserManager): boolean {
-        const user: User = users.getUserByUuid(sourceSocket.uuid)
-
-        if (user == null) {
-            console.warn('uuid "%s" tried to get channels without session', sourceSocket.uuid)
-            return false
-        }
-
-        console.log('user "%s" requested server list, sending...', user.userName)
-        this.sendChannelListTo(user)
+    public static async onChannelListPacket(sourceConn: ExtendedSocket): Promise<boolean> {
+        console.log('user ID %i requested server list', sourceConn.getOwner())
+        this.sendChannelListTo(sourceConn)
 
         return true
     }
@@ -53,43 +39,31 @@ export class ChannelManager {
     /**
      * called when the user sends a Room packet
      * @param reqData the packet's data
-     * @param sourceSocket the user's socket
+     * @param sourceConn the user's socket
      * @param users the user manager object
      */
-    public onRoomRequest(reqData: Buffer, sourceSocket: ExtendedSocket, users: UserManager): boolean {
-        const user: User = users.getUserByUuid(sourceSocket.uuid)
-
-        if (user == null) {
-            console.warn('uuid "%s" tried to get rooms without session', sourceSocket.uuid)
-            return false
-        }
-
+    public static async onRoomRequest(reqData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
         const roomPacket: InRoomPacket = new InRoomPacket(reqData)
 
         switch (roomPacket.packetType) {
             case InRoomType.NewRoomRequest:
-                const newRoomReq: InRoomNewRequest = new InRoomNewRequest(roomPacket)
-                return this.onNewRoomRequest(newRoomReq, user)
+                return this.onNewRoomRequest(roomPacket, sourceConn)
             case InRoomType.JoinRoomRequest:
-                const joinReq: InRoomJoinRequest = new InRoomJoinRequest(roomPacket)
-                return this.onJoinRoomRequest(joinReq, user)
+                return this.onJoinRoomRequest(roomPacket, sourceConn)
             case InRoomType.GameStartRequest:
-                return this.onGameStartRequest(user)
+                return this.onGameStartRequest(sourceConn)
             case InRoomType.LeaveRoomRequest:
-                return this.onLeaveRoomRequest(user)
+                return this.onLeaveRoomRequest(sourceConn)
             case InRoomType.ToggleReadyRequest:
-                return this.onToggleReadyRequest(user)
+                return this.onToggleReadyRequest(sourceConn)
             case InRoomType.UpdateSettings:
-                const newSettingsReq: InRoomUpdateSettings = new InRoomUpdateSettings(roomPacket)
-                return this.onRoomUpdateSettings(newSettingsReq, user)
+                return this.onRoomUpdateSettings(roomPacket, sourceConn)
             case InRoomType.OnCloseResultWindow:
-                return this.onCloseResultRequest(user)
+                return this.onCloseResultRequest(sourceConn)
             case InRoomType.SetUserTeamRequest:
-                const setTeamReq: InRoomSetUserTeamRequest = new InRoomSetUserTeamRequest(roomPacket)
-                return this.onSetTeamRequest(setTeamReq, user)
+                return this.onSetTeamRequest(roomPacket, sourceConn)
             case InRoomType.GameStartCountdownRequest:
-                const countdownReq: InRoomCountdown = new InRoomCountdown(roomPacket)
-                return this.onGameStartToggleRequest(countdownReq, user)
+                return this.onGameStartToggleRequest(roomPacket, sourceConn)
         }
 
         console.warn('Unknown room request %i', roomPacket.packetType)
@@ -103,11 +77,11 @@ export class ChannelManager {
      * @param sourceSocket the user's socket
      * @param users the user manager object
      */
-    public onRoomListPacket(packetData: Buffer, sourceSocket: ExtendedSocket, users: UserManager): boolean {
-        const user: User = users.getUserByUuid(sourceSocket.uuid)
+    public static async onRoomListPacket(packetData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
+        const session: UserSession = await UserSession.get(sourceConn.getOwner())
 
-        if (user == null) {
-            console.warn('uuid "%s" tried to get rooms without session', sourceSocket.uuid)
+        if (session == null) {
+            console.warn('Couldn\'t get user ID %i\'s session', sourceConn.getOwner())
             return false
         }
 
@@ -116,56 +90,65 @@ export class ChannelManager {
         const server: ChannelServer = this.getServerByIndex(listReq.channelServerIndex)
 
         if (server == null) {
-            console.warn('user "%s" requested room list, but it isn\'t in a channel server', user.userName)
+            console.warn('user ID %i requested room list, but it isn\'t in a channel server', sourceConn.getOwner())
             return false
         }
 
         const channel: Channel = server.getChannelByIndex(listReq.channelIndex)
 
         if (channel == null) {
-            console.warn('user "%s" requested room list, but it isn\'t in a channel', user.userName)
+            console.warn('user ID %i requested room list, but it isn\'t in a channel', sourceConn.getOwner())
             return false
         }
 
-        console.log('user "%s" requested room list successfully, sending it...', user.userName)
-        this.setUserChannel(user, channel, server)
+        console.log('user "%s" requested room list successfully, sending it...', sourceConn.getOwner())
+        this.setUserChannel(session, sourceConn, channel, server)
 
         return true
     }
 
     /**
-     * send the channel servers list data for the user
-     * @param user the target user
+     * send the channel servers list data for an user's connection
+     * @param conn the target user's connection
      */
-    public sendChannelListTo(user: User): void {
-        const list: Buffer =
-            new OutServerListPacket(this.channelServers, user.socket).build()
-        user.socket.send(list)
+    public static sendChannelListTo(conn: ExtendedSocket): void {
+        conn.send(new OutServerListPacket(this.channelServers))
     }
 
-    public sendRoomListTo(user: User, channel: Channel): void {
-        const lobbyReply: Buffer = new OutLobbyPacket(user.socket).joinRoom()
-        const roomListReply: Buffer = new OutRoomListPacket(user.socket).getFullList(channel.rooms)
-        user.socket.send(lobbyReply)
-        user.socket.send(roomListReply)
+    public static async sendRoomListTo(conn: ExtendedSocket, channel: Channel): Promise<void> {
+        conn.send(OutLobbyPacket.joinRoom())
+        conn.send(await OutRoomListPacket.getFullList(channel.rooms))
     }
 
     /**
+     * returns a channel object by its channel index and channel server index
+     * @param channelIndex the channel's index
+     * @param channelServerIndex the channel's channel server index
+     */
+    public static getChannel(channelIndex: number, channelServerIndex: number): Channel {
+        return ChannelManager.getServerByIndex(channelServerIndex).getChannelByIndex(channelIndex)
+    }
+
+    private static channelServers: ChannelServer[] = [new ChannelServer('Test server', 1, 1, 1)]
+
+    /**
      * sets an user's current channel
-     * @param user the target user
+     * @param session the target user's session
      * @param channel the target channel
      * @param channelServer the channel's channelServer
      */
-    private setUserChannel(user: User, channel: Channel, channelServer: ChannelServer) {
-        user.setCurrentChannelIndex(channelServer.index, channel.index)
-        this.sendRoomListTo(user, channel)
+    private static async setUserChannel(session: UserSession, conn: ExtendedSocket,
+                                        channel: Channel, channelServer: ChannelServer): Promise<void> {
+        session.setCurrentChannelIndex(channelServer.index, channel.index)
+        await session.update()
+        this.sendRoomListTo(conn, channel)
     }
 
     /**
      * get a channel server by its index
      * @param index the server index
      */
-    private getServerByIndex(index: number): ChannelServer {
+    private static getServerByIndex(index: number): ChannelServer {
         for (const server of this.channelServers) {
             if (server.index === index) {
                 return server
@@ -175,50 +158,52 @@ export class ChannelManager {
     }
 
     /**
-     * returns a channel object by its channel index and channel server index
-     * @param channelIndex the channel's index
-     * @param channelServerIndex the channel's channel server index
-     */
-    private getChannel(channelIndex: number, channelServerIndex: number): Channel {
-        return this.getServerByIndex(channelServerIndex).getChannelByIndex(channelIndex)
-    }
-
-    /**
      * called when the user requests to create a new room
-     * @param newRoomReq the parsed Room packet
-     * @param user the user itself
+     * @param roomPacket the incoming packet
+     * @param sourceConn the packet's source connection
      * @returns true if successful
      */
-    private onNewRoomRequest(newRoomReq: InRoomNewRequest, user: User): boolean {
+    private static async onNewRoomRequest(roomPacket: InRoomPacket, sourceConn: ExtendedSocket): Promise<boolean> {
+        const newRoomReq: InRoomNewRequest = new InRoomNewRequest(roomPacket)
+
+        const session: UserSession = await UserSession.get(sourceConn.getOwner())
+
+        if (session == null) {
+            console.warn('Could not get user ID %i\'s session', sourceConn.getOwner())
+            return false
+        }
+
         // if the user wants to create a new room, let it
         // this will remove the user from its current room
         // it should help mitigating the 'ghost room' issue,
         // where a room has users that aren't in it on the client's side
-        if (user.currentRoom) {
-            console.warn('user "%s" tried to create a new room, while in an existing one'
-                + 'current room: "%s" (id: %i)', user.userName, user.currentRoom.settings.roomName, user.currentRoom.id)
+        if (session.currentRoomId !== 0) {
+            const curRoom: Room = UserManager.getSessionCurRoom(session)
+            console.warn('user ID %i tried to create a new room, while in an existing one current room: "%s" (id: %i)',
+                session.currentRoomId, curRoom.settings.roomName, curRoom.id)
 
-            user.currentRoom.removeUser(user)
-            user.currentRoom = null
+            curRoom.removeUser(session.userId)
+            session.currentRoomId = 0
+            await session.update()
 
             return false
         }
 
-        const server: ChannelServer = this.getServerByIndex(user.currentChannelServerIndex)
+        const server: ChannelServer = this.getServerByIndex(session.currentChannelServerIndex)
 
         if (server == null) {
-            console.warn('user "%s" requested a new room, but it isn\'t in a channel server', user.userName)
+            console.warn('user ID %i requested a new room, but it isn\'t in a channel server', session.userId)
             return false
         }
 
-        const channel: Channel = server.getChannelByIndex(user.currentChannelIndex)
+        const channel: Channel = server.getChannelByIndex(session.currentChannelIndex)
 
         if (channel == null) {
-            console.warn('user "%s" requested a new room, but it isn\'t in a channel', user.userName)
+            console.warn('user ID %i  requested a new room, but it isn\'t in a channel', session.userId)
             return false
         }
 
-        const newRoom: Room = channel.createRoom(user, {
+        const newRoom: Room = channel.createRoom(session.userId, sourceConn, {
             gameModeId: newRoomReq.gameModeId,
             killLimit: newRoomReq.killLimit,
             mapId: newRoomReq.mapId,
@@ -226,140 +211,59 @@ export class ChannelManager {
             winLimit: newRoomReq.winLimit,
         })
 
-        user.currentRoom = newRoom
+        session.currentRoomId = newRoom.id
+        await session.update()
 
-        newRoom.sendJoinNewRoom(user)
-        newRoom.sendRoomSettingsTo(user)
+        newRoom.sendJoinNewRoom(session.userId)
+        newRoom.sendRoomSettingsTo(session.userId)
 
-        console.log('user "%s" created a new room. name: "%s" (id: %i)',
-            user.userName, newRoom.settings.roomName, newRoom.id)
+        console.log('user ID %i created a new room. name: "%s" (id: %i)',
+            session.userId, newRoom.settings.roomName, newRoom.id)
 
         return true
     }
 
     /**
      * called when the user requests to join an existing room
-     * @param joinReq the parsed Room packet
-     * @param user the user itself
+     * @param roomPacket the incoming packet
+     * @param sourceConn the packet's source connection
      * @returns true if successful
      */
-    private onJoinRoomRequest(joinReq: InRoomJoinRequest, user: User): boolean {
-        const server: ChannelServer = this.getServerByIndex(user.currentChannelServerIndex)
+    private static async onJoinRoomRequest(roomPacket: InRoomPacket, sourceConn: ExtendedSocket): Promise<boolean> {
+        const joinReq: InRoomJoinRequest = new InRoomJoinRequest(roomPacket)
 
-        if (server == null) {
-            console.warn('user "%s" tried to join a room, but it isn\'t in a channel server', user.userName)
+        const session: UserSession = await UserSession.get(sourceConn.getOwner())
+
+        if (session == null) {
+            console.warn('Could not get user ID %i\'s session', sourceConn.getOwner())
             return false
         }
 
-        const channel: Channel = server.getChannelByIndex(user.currentChannelIndex)
-
-        if (channel == null) {
-            console.warn('user "%s" tried to join a room, but it isn\'t in a channel', user.userName)
-            return false
-        }
-
-        const desiredRoom: Room = channel.getRoomById(joinReq.roomId)
+        const desiredRoom: Room = UserManager.getSessionCurRoom(session)
 
         if (desiredRoom == null) {
-            console.warn('user "%s" tried to join a non existing room. room id: %i',
-                user.userName, joinReq.roomId)
+            console.warn('user ID %i tried to join a non existing room. room id: %i',
+                sourceConn.getOwner(), joinReq.roomId)
             return false
         }
 
         if (desiredRoom.hasFreeSlots() === false) {
-            console.warn('user "%s" tried to join a full room. room name "%s" room id: %i',
-                user.userName, desiredRoom.settings.roomName, desiredRoom.id)
+            console.warn('user ID %i tried to join a full room. room name "%s" room id: %i',
+                sourceConn.getOwner(), desiredRoom.settings.roomName, desiredRoom.id)
             return false
         }
 
-        desiredRoom.addUser(user)
-        user.currentRoom = desiredRoom
+        desiredRoom.addUser(session.userId, sourceConn)
+        session.currentRoomId = desiredRoom.id
+        await session.update()
 
-        desiredRoom.sendJoinNewRoom(user)
-        desiredRoom.sendRoomSettingsTo(user)
+        desiredRoom.sendJoinNewRoom(session.userId)
+        desiredRoom.sendRoomSettingsTo(session.userId)
 
-        desiredRoom.recurseUsers((u: User): void => {
-            // send everyone's status to the new user
-            desiredRoom.sendUserReadyStatusTo(user, u)
+        desiredRoom.updateNewPlayerReadyStatus(session.userId)
 
-            if (u !== user) {
-                // tell other room members about the new addition
-                desiredRoom.sendNewUserTo(u, user)
-                desiredRoom.sendUserReadyStatusTo(u, user)
-            }
-        })
-
-        console.log('user "%s" joined a new room. room name: "%s" room id: %i',
-                    user.userName, desiredRoom.settings.roomName, desiredRoom.id)
-
-        return true
-    }
-
-    /**
-     * called when the user requests to leave the current room its in
-     * @param user the user itself
-     * @returns true if successful
-     */
-    private onLeaveRoomRequest(user: User): boolean {
-        const currentRoom: Room = user.currentRoom
-
-        if (currentRoom == null) {
-            console.warn('user "%s" tried to leave a room, although it isn\'t in any', user.userName)
-            return false
-        }
-
-        if (currentRoom.isUserReady(user)
-            && currentRoom.isGlobalCountdownInProgress()) {
-            return false
-        }
-
-        currentRoom.removeUser(user)
-        user.currentRoom = null
-
-        console.log('user "%s" left a room. room name: "%s" room id: %i',
-            user.userName, currentRoom.settings.roomName, currentRoom.id)
-
-        this.sendRoomListTo(user,
-            this.getChannel(user.currentChannelIndex, user.currentChannelServerIndex))
-
-        return true
-    }
-
-    /**
-     * called when the user requests to toggle ready status
-     * @param user the user itself
-     * @returns true if successful
-     */
-    private onToggleReadyRequest(user: User): boolean {
-        const currentRoom: Room = user.currentRoom
-
-        if (currentRoom == null) {
-            console.warn('user "%s" tried toggle ready status, although it isn\'t in any', user.userName)
-            return false
-        }
-
-        const readyStatus: RoomReadyStatus = currentRoom.toggleUserReadyStatus(user)
-
-        if (readyStatus == null) {
-            console.warn('failed to set user "%s"\'sready status', user.userName)
-            return false
-        }
-
-        // inform every user in the room of the changes
-        currentRoom.recurseUsers((u: User): void => {
-            currentRoom.sendUserReadyStatusTo(u, user)
-        })
-
-        if (readyStatus === RoomReadyStatus.Ready) {
-            console.log('user "%s" readied in room "%s" (id %i)',
-                user.userName, currentRoom.settings.roomName, currentRoom.id)
-        } else if (readyStatus === RoomReadyStatus.NotReady) {
-            console.log('user "%s" unreadied in room "%s" (id %i)',
-                user.userName, currentRoom.settings.roomName, currentRoom.id)
-        } else {
-            console.log('user "%s" did something with ready status. status: %i room \""%s"\" (id %i)',
-                user.userName, readyStatus, currentRoom.settings.roomName, currentRoom.id)
-        }
+        console.log('user id %i joined a room. room name: "%s" room id: %i',
+            sourceConn.getOwner(), desiredRoom.settings.roomName, desiredRoom.id)
 
         return true
     }
@@ -367,178 +271,230 @@ export class ChannelManager {
     /**
      * called when the user (must be host) requests to start the game
      * after the countdown is complete
-     * @param user the user itself
+     * @param sourceConn the source connection
      * @returns true if successful
      */
-    private onGameStartRequest(user: User): boolean {
-        const currentRoom: Room = user.currentRoom
+    private static async onGameStartRequest(sourceConn: ExtendedSocket): Promise<boolean> {
+        const session: UserSession = await UserSession.get(sourceConn.getOwner())
+
+        if (session == null) {
+            console.warn('Could not get user ID %i\'s session', sourceConn.getOwner())
+            return false
+        }
+
+        const currentRoom: Room = UserManager.getSessionCurRoom(session)
 
         if (currentRoom == null) {
-            console.warn('user "%s" tried to start a room\'s match, although it isn\'t in any', user.userName)
+            console.warn('user ID %i tried to start a room\'s match, although it isn\'t in any', sourceConn.getOwner())
             return false
         }
 
         // if started by the host
-        if (user === currentRoom.host) {
-            this.handleHostGameStart(currentRoom)
+        if (session.userId === currentRoom.host.userId) {
+            currentRoom.hostGameStart()
+            console.debug('host ID %i is starting a match in room "%s" (room id: %i)',
+                session.userId, currentRoom.settings.roomName, currentRoom.id)
             return true
         } else if (currentRoom.getStatus() === RoomStatus.Ingame) {
-            this.handleUserGameStart(user, currentRoom)
+            currentRoom.guestGameJoin(session.userId)
+            console.debug('user ID %i is joining a match in room "%s" (room id: %i)',
+                session.userId, currentRoom.settings.roomName, currentRoom.id)
             return true
         }
 
-        console.warn('user "%s" tried to start a room\'s match, although it isn\'t the host.'
+        console.warn('user ID %i tried to start a room\'s match, although it isn\'t the host.'
             + 'room name "%s" room id: %i',
-            user.userName, currentRoom.settings.roomName, currentRoom.id)
+            session.userId, currentRoom.settings.roomName, currentRoom.id)
 
         return false
     }
 
-    private handleHostGameStart(room: Room): void {
-        const host: User = room.host
+    /**
+     * called when the user requests to leave the current room its in
+     * @param sourceConn the source connection
+     * @returns true if successful
+     */
+    private static async onLeaveRoomRequest(sourceConn: ExtendedSocket): Promise<boolean> {
+        const session: UserSession = await UserSession.get(sourceConn.getOwner())
 
-        room.stopCountdown()
-        room.setStatus(RoomStatus.Ingame)
-        room.setUserIngame(host, true)
+        if (session == null) {
+            console.warn('Could not get user ID %i\'s session', sourceConn.getOwner())
+            return false
+        }
 
-        room.recurseNonHostUsers((u: User): void => {
-            room.sendRoomStatusTo(u)
-            if (room.isUserReady(u) === true) {
-                room.setUserIngame(u, true)
-                room.sendConnectHostTo(u, host)
-                room.sendGuestDataTo(host, u)
-            }
-        })
+        const currentRoom: Room = UserManager.getSessionCurRoom(session)
 
-        room.sendBroadcastReadyStatus()
+        if (currentRoom == null) {
+            console.warn('user ID %i tried to leave a room, although it isn\'t in any', sourceConn.getOwner())
+            return false
+        }
 
-        room.sendStartMatchTo(host)
+        if (currentRoom.isUserReady(session.userId)
+            && currentRoom.isGlobalCountdownInProgress()) {
+            return false
+        }
 
-        console.log('host "%s" started room "%s"\'s (id: %i) match on map %i and gamemode %i',
-            host.userName, room.settings.roomName, room.id,
-            room.settings.mapId, room.settings.gameModeId)
-    }
+        currentRoom.removeUser(session.userId)
+        session.currentRoomId = 0
+        await session.update()
 
-    private handleUserGameStart(user: User, room: Room): void {
-        const host: User = room.host
+        console.log('user ID %i left room "%s" (room id: %i)',
+            session.userId, currentRoom.settings.roomName, currentRoom.id)
 
-        room.sendRoomStatusTo(user)
-        room.setUserIngame(user, true)
-        room.sendConnectHostTo(user, host)
-        room.sendGuestDataTo(host, user)
+        this.sendRoomListTo(sourceConn,
+            this.getChannel(session.currentChannelIndex, session.currentChannelServerIndex))
 
-        room.sendBroadcastReadyStatus()
-
-        console.log('user "%s" joining room "%s"\'(id: %i) match hosted by "%s" on map %i and gamemode %i',
-            user.userName, room.settings.roomName, room.id, host.userName,
-            room.settings.mapId, room.settings.gameModeId)
+        return true
     }
 
     /**
-     * called when the user requests to update its current room settings
-     * @param newSettingsReq the parsed Room packet
-     * @param user the user itself
+     * called when the user requests to toggle ready status
+     * @param sourceConn the source connection
      * @returns true if successful
      */
-    private onRoomUpdateSettings(newSettingsReq: InRoomUpdateSettings, user: User): boolean {
-        const currentRoom: Room = user.currentRoom
+    private static async onToggleReadyRequest(sourceConn: ExtendedSocket): Promise<boolean> {
+        const session: UserSession = await UserSession.get(sourceConn.getOwner())
+
+        if (session == null) {
+            console.warn('Could not get user ID %i\'s session', sourceConn.getOwner())
+            return false
+        }
+
+        const currentRoom: Room = UserManager.getSessionCurRoom(session)
 
         if (currentRoom == null) {
-            console.warn('user "%s" tried to update a room\'s settings, although it isn\'t in any', user.userName)
+            console.warn('user ID %i tried toggle ready status, although it isn\'t in any room', session.userId)
             return false
         }
 
-        if (user !== currentRoom.host) {
-            console.warn('user "%s" tried to update a room\'s settings, although it isn\'t the host.'
-                + 'room name "%s" room id: %i',
-                user.userName, currentRoom.settings.roomName, currentRoom.id)
+        const readyStatus: RoomReadyStatus = currentRoom.toggleUserReadyStatus(session.userId)
+
+        if (readyStatus == null) {
+            console.warn('failed to set user ID %i\'s ready status', session.userId)
             return false
         }
-
-        if (currentRoom.isGlobalCountdownInProgress()) {
-            console.warn('user "%s" tried to update a room\'s settings, although a countdown is in progress.'
-                + 'room name "%s" room id: %i',
-                user.userName, currentRoom.settings.roomName, currentRoom.id)
-            return false
-        }
-
-        const updatedSettings = currentRoom.updateSettings(newSettingsReq)
 
         // inform every user in the room of the changes
-        currentRoom.recurseUsers((u: User): void => {
-            currentRoom.sendUpdateRoomSettingsTo(u, updatedSettings)
-        })
+        currentRoom.broadcastNewUserReadyStatus(session.userId)
 
-        console.log('host "%s" updated room "%s"\'s settings (id: %i)',
-            user.userName, currentRoom.settings.roomName, currentRoom.id)
+        if (readyStatus === RoomReadyStatus.Ready) {
+            console.log('user ID %i readied in room "%s" (id %i)',
+                session.userId, currentRoom.settings.roomName, currentRoom.id)
+        } else if (readyStatus === RoomReadyStatus.NotReady) {
+            console.log('user ID %i unreadied in room "%s" (id %i)',
+                session.userId, currentRoom.settings.roomName, currentRoom.id)
+        } else {
+            console.log('user ID %i did something with ready status. status: %i room \""%s"\" (id %i)',
+                session.userId, readyStatus, currentRoom.settings.roomName, currentRoom.id)
+        }
 
         return true
     }
 
     /**
      * called when the user requests to update its current room settings
-     * @param user the user itself
+     * @param roomPacket the incoming packet
+     * @param sourceConn the packet's source connection
      * @returns true if successful
      */
-    private onCloseResultRequest(user: User): boolean {
-        const currentRoom: Room = user.currentRoom
+    private static async onRoomUpdateSettings(roomPacket: InRoomPacket, sourceConn: ExtendedSocket): Promise<boolean> {
+        const newSettingsReq: InRoomUpdateSettings = new InRoomUpdateSettings(roomPacket)
 
-        // allow the user to close the result window if its not in a room, for whatever reason
-        /*if (currentRoom == null) {
-            console.warn('user "%s" tried to close game result window, although it isn\'t in any', user.userName)
+        const session: UserSession = await UserSession.get(sourceConn.getOwner())
+
+        if (session == null) {
+            console.warn('Could not get user ID %i\'s session', sourceConn.getOwner())
             return false
-        }*/
+        }
 
-        currentRoom.sendCloseResultWindow(user)
+        const currentRoom: Room = UserManager.getSessionCurRoom(session)
 
-        console.log('user "%s" closed game result window from room "%s"\'s (room id: %i)',
-            user.userName, currentRoom.settings.roomName, currentRoom.id)
+        if (currentRoom == null) {
+            console.warn('user ID %i tried to update a room\'s settings, although it isn\'t in any', session.userId)
+            return false
+        }
+
+        if (session.userId !== currentRoom.host.userId) {
+            console.warn('user ID %i tried to update a room\'s settings, although it isn\'t the host.'
+                + 'room name "%s" room id: %i',
+                session.userId, currentRoom.settings.roomName, currentRoom.id)
+            return false
+        }
+
+        if (currentRoom.isGlobalCountdownInProgress()) {
+            console.warn('user ID %i tried to update a room\'s settings, although a countdown is in progress.'
+                + 'room name "%s" room id: %i',
+                session.userId, currentRoom.settings.roomName, currentRoom.id)
+            return false
+        }
+
+        currentRoom.updateSettings(newSettingsReq)
+
+        console.log('host ID %i updated room "%s"\'s settings (room id: %i)',
+            session.userId, currentRoom.settings.roomName, currentRoom.id)
+
+        return true
+    }
+
+    /**
+     * called when the user requests to update its current room settings
+     * @param sourceConn the source connection
+     * @returns true if successful
+     */
+    private static async onCloseResultRequest(sourceConn: ExtendedSocket): Promise<boolean> {
+        if (sourceConn.hasOwner() === false) {
+            console.warn('Connection %s tried to close results window without owner', sourceConn.uuid)
+            return false
+        }
+
+        Room.sendCloseResultWindow(sourceConn)
+
+        console.log('user ID %i closed game result window', sourceConn.getOwner())
 
         return true
     }
 
     /**
      * called when the user requests to change team
-     * @param setTeamReq the parsed Room packet
-     * @param user the user itself
+     * @param roomPacket the incoming packet
+     * @param sourceConn the packet's source connection
      * @returns true if successful
      */
-    private onSetTeamRequest(setTeamReq: InRoomSetUserTeamRequest, user: User): boolean {
-        const currentRoom: Room = user.currentRoom
+    private static async onSetTeamRequest(roomPacket: InRoomPacket, sourceConn: ExtendedSocket): Promise<boolean> {
+        const setTeamReq: InRoomSetUserTeamRequest = new InRoomSetUserTeamRequest(roomPacket)
 
-        if (currentRoom == null) {
-            console.warn('user "%s" tried change team in a room, although it isn\'t in any', user.userName)
+        const session: UserSession = await UserSession.get(sourceConn.getOwner())
+
+        if (session == null) {
+            console.warn('Could not get user ID %i\'s session', sourceConn.getOwner())
             return false
         }
 
-        if (currentRoom.isUserReady(user)) {
-            console.warn('user "%s" tried change team in a room, although it\'s ready. room name "%s" room id: %i',
-                user.userName, currentRoom.settings.roomName, currentRoom.id)
+        const currentRoom: Room = UserManager.getSessionCurRoom(session)
+
+        if (currentRoom == null) {
+            console.warn('user ID %i tried change team in a room, although it isn\'t in any', session.userId)
+            return false
+        }
+
+        if (currentRoom.isUserReady(session.userId)) {
+            console.warn('user ID %i tried change team in a room, although it\'s ready. room name "%s" room id: %i',
+                session.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
         if (currentRoom.settings.areBotsEnabled
-            && user !== currentRoom.host) {
-            console.warn('user "%s" tried change team in a room when bot mode is enabled, but its not the host.'
+            && session.userId !== currentRoom.host.userId) {
+            console.warn('user ID %i tried change team in a room when bot mode is enabled, but its not the host.'
                 + 'room name "%s" room id: %i',
-                user.userName, currentRoom.settings.roomName, currentRoom.id)
+                session.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
-        currentRoom.setUserToTeam(user, setTeamReq.newTeam)
+        currentRoom.updateUserTeam(session.userId, setTeamReq.newTeam)
 
-        // inform every user in the room of the changes
-        currentRoom.recurseUsers((u: User): void => {
-            currentRoom.sendTeamChangeTo(u, user, setTeamReq.newTeam)
-
-            if (currentRoom.settings.areBotsEnabled) {
-                currentRoom.setUserToTeam(u, setTeamReq.newTeam)
-                currentRoom.sendTeamChangeGlobal(u, setTeamReq.newTeam)
-            }
-        })
-
-        console.log('user "%s" changed to team %i. room name "%s" room id: %i',
-            user.userName, setTeamReq.newTeam, currentRoom.settings.roomName, currentRoom.id)
+        console.log('user ID %i changed to team %i. room name "%s" room id: %i',
+            session.userId, setTeamReq.newTeam, currentRoom.settings.roomName, currentRoom.id)
 
         return true
     }
@@ -546,23 +502,33 @@ export class ChannelManager {
     /**
      * called when the user (must be host) requests to start
      * counting down until the game starts
-     * @param countdownReq the parsed Room packet
-     * @param host the user itself
+     * @param roomPacket the incoming packet
+     * @param sourceConn the packet's source connection
      * @returns true if successful
      */
-    private onGameStartToggleRequest(countdownReq: InRoomCountdown, host: User): boolean {
-        const currentRoom: Room = host.currentRoom
+    private static async onGameStartToggleRequest(roomPacket: InRoomPacket,
+                                                  sourceConn: ExtendedSocket): Promise<boolean> {
+        const countdownReq: InRoomCountdown = new InRoomCountdown(roomPacket)
 
-        if (currentRoom == null) {
-            console.warn('host "%s" tried to toggle a room\'s game start countdown, although it isn\'t in any',
-                host.userName)
+        const session: UserSession = await UserSession.get(sourceConn.getOwner())
+
+        if (session == null) {
+            console.warn('Could not get user ID %i\'s session', sourceConn.getOwner())
             return false
         }
 
-        if (host !== currentRoom.host) {
-            console.warn('host "%s" tried to toggle a room\'s game start countdown, although it isn\'t the host.'
+        const currentRoom: Room = UserManager.getSessionCurRoom(session)
+
+        if (currentRoom == null) {
+            console.warn('user ID %i tried to toggle a room\'s game start countdown, although it isn\'t in any',
+                session.userId)
+            return false
+        }
+
+        if (session.userId !== currentRoom.host.userId) {
+            console.warn('user ID %i tried to toggle a room\'s game start countdown, although it isn\'t the host.'
                 + 'room name "%s" room id: %i',
-                host.userName, currentRoom.settings.roomName, currentRoom.id)
+                session.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
@@ -570,27 +536,23 @@ export class ChannelManager {
         const count: number = countdownReq.count
 
         if (currentRoom.canStartGame() === false) {
-            console.warn('user "%s" tried to toggle a room\'s game start countdown, although it can\'t start. '
+            console.warn('user ID %i tried to toggle a room\'s game start countdown, although it can\'t start. '
                 + 'room name "%s" room id: %i',
-                host.userName, currentRoom.settings.roomName, currentRoom.id)
+                session.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
         if (shouldCountdown) {
             currentRoom.progressCountdown(count)
-
             console.log('room "%s"\'s (id %i) countdown is at %i (host says it\'s at %i)',
                 currentRoom.settings.roomName, currentRoom.id, currentRoom.getCountdown(), count)
         } else {
             currentRoom.stopCountdown()
-
-            console.log('host "%s" canceled room "%s"\'s (id %i) countdown',
-                host.userName, currentRoom.settings.roomName, currentRoom.id)
+            console.log('user ID %i canceled room "%s"\'s (id %i) countdown',
+                session.userId, currentRoom.settings.roomName, currentRoom.id)
         }
 
-        currentRoom.recurseUsers((u: User): void => {
-            currentRoom.sendCountdownTo(u, shouldCountdown)
-        })
+        currentRoom.broadcastCountdown(shouldCountdown)
 
         return true
     }

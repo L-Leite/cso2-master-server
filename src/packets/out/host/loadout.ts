@@ -1,5 +1,6 @@
 import { OutPacketBase } from 'packets/out/packet'
 
+import { UserCosmetics } from 'user/usercosmetics'
 import { UserLoadout } from 'user/userloadout'
 
 /**
@@ -7,77 +8,45 @@ import { UserLoadout } from 'user/userloadout'
  * @class OutHostPreloadInventory
  */
 export class OutHostLoadout {
-    private outPacket: OutPacketBase
-    private curItem: number
+    public static build(userId: number, cosmetics: UserCosmetics,
+                        loadouts: UserLoadout[], outPacket: OutPacketBase): void {
+        outPacket.writeUInt32(userId)
+        outPacket.writeUInt8(8) // num of cosmetics
 
-    private userId: number
+        let curItem: number = 0
 
-    // cosmetics
-    private ctClassItem: number
-    private terClassItem: number
-    private headItem: number
-    private gloveItem: number
-    private backItem: number
-    private stepsItem: number
-    private cardItem: number
-    private sprayItem: number
+        this.writeItem(cosmetics.ctItem, curItem++, outPacket)
+        this.writeItem(cosmetics.terItem, curItem++, outPacket)
+        this.writeItem(cosmetics.headItem, curItem++, outPacket)
+        this.writeItem(cosmetics.gloveItem, curItem++, outPacket)
+        this.writeItem(cosmetics.backItem, curItem++, outPacket)
+        this.writeItem(cosmetics.stepsItem, curItem++, outPacket)
+        this.writeItem(cosmetics.cardItem, curItem++, outPacket)
+        this.writeItem(cosmetics.sprayItem, curItem++, outPacket)
 
-    private loadouts: UserLoadout[]
+        outPacket.writeUInt8(3) // numOfLoadouts
 
-    private unk00: number
+        for (const loadout of loadouts) {
+            outPacket.writeInt8(16) // num of loadout slots
+            curItem = 0
 
-    constructor(userId: number, ctClassItem: number, terClassItem: number,
-                headItem: number, gloveItem: number, backItem: number,
-                stepsItem: number, cardItem: number, sprayItem: number,
-                loadouts: UserLoadout[]) {
-        this.outPacket = null
-        this.curItem = 0
-
-        this.userId = userId
-        this.ctClassItem = ctClassItem
-        this.terClassItem = terClassItem
-        this.headItem = headItem
-        this.gloveItem = gloveItem
-        this.backItem = backItem
-        this.stepsItem = stepsItem
-        this.cardItem = cardItem
-        this.sprayItem = sprayItem
-
-        this.loadouts = loadouts
-
-        this.unk00 = 0
-    }
-
-    public build(outPacket: OutPacketBase): void {
-        this.outPacket = outPacket
-
-        this.outPacket.writeUInt32(this.userId)
-        this.outPacket.writeUInt8(8) // num of cosmetics
-
-        this.writeItem(this.ctClassItem)
-        this.writeItem(this.terClassItem)
-        this.writeItem(this.headItem)
-        this.writeItem(this.gloveItem)
-        this.writeItem(this.backItem)
-        this.writeItem(this.stepsItem)
-        this.writeItem(this.cardItem)
-        this.writeItem(this.sprayItem)
-
-        this.outPacket.writeUInt8(this.loadouts.length)
-
-        for (const loadout of this.loadouts) {
-            this.outPacket.writeInt8(loadout.items.length)
-            this.curItem = 0
-            for (const item of loadout.items) {
-                this.writeItem(item)
+            this.writeItem(loadout.primary, curItem++, outPacket)
+            this.writeItem(loadout.secondary, curItem++, outPacket)
+            this.writeItem(loadout.melee, curItem++, outPacket)
+            this.writeItem(loadout.hegrenade, curItem++, outPacket)
+            this.writeItem(loadout.smoke, curItem++, outPacket)
+            this.writeItem(loadout.flash, curItem++, outPacket)
+            // TODO: do we need this?
+            while (curItem < 16) {
+                this.writeItem(0, curItem++, outPacket)
             }
         }
 
-        this.outPacket.writeUInt8(this.unk00)
+        outPacket.writeUInt8(0) // unk00
     }
 
-    private writeItem(itemNum: number): void {
-        this.outPacket.writeUInt8(this.curItem++)
-        this.outPacket.writeUInt32(itemNum)
+    private static writeItem(itemNum: number, curItem: number, outPacket: OutPacketBase): void {
+        outPacket.writeUInt8(curItem)
+        outPacket.writeUInt32(itemNum)
     }
 }

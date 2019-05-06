@@ -1,20 +1,9 @@
 export class UserInventoryItem {
+    public itemId: number
+    public ammount: number
 
-    /**
-     * push an item and its count to an array
-     * @param array the array to push to
-     * @param item the item's id
-     * @param count the item's ammount
-     */
-    public static pushItem(array: UserInventoryItem[], item: number, count: number = 1): void {
-        array.push(new UserInventoryItem(item, count))
-    }
-
-    public id: number
-    public count: number
-
-    constructor(id: number, count: number) {
-        this.id = id
-        this.count = count
+    constructor(itemId: number, ammount: number = 1) {
+        this.itemId = itemId
+        this.ammount = ammount
     }
 }

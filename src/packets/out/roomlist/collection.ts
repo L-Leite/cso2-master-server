@@ -8,21 +8,16 @@ import { Room } from 'room/room'
  * sends out channel's rooms to an user
  */
 export class RoomListCollection {
-    private roomCount: number
-    private rooms: RoomListItem[]
+    private rooms: Room[]
 
     constructor(rooms: Room[]) {
-        this.roomCount = rooms.length
-        this.rooms = []
-        for (const room of rooms) {
-            this.rooms.push(new RoomListItem(room))
-        }
+        this.rooms = rooms
     }
-    public build(outPacket: OutPacketBase): void {
-        outPacket.writeUInt16(this.roomCount)
+    public async build(outPacket: OutPacketBase): Promise<void> {
+        outPacket.writeUInt16(this.rooms.length)
 
         for (const room of this.rooms) {
-            room.build(outPacket)
+            new RoomListItem(room).build(outPacket)
         }
     }
 }

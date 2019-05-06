@@ -3,8 +3,6 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
 
-import { ExtendedSocket } from 'extendedsocket'
-
 import { UserLoadout } from 'user/userloadout'
 
 import { FavoritePacketType } from 'packets/favoriteshared'
@@ -17,34 +15,38 @@ import { OutFavoritePresetLoadout } from 'packets/out/favorite/presetloadout'
  * @class OutFavoritePacket
  */
 export class OutFavoritePacket extends OutPacketBase {
-    constructor(socket: ExtendedSocket) {
-        super(socket, PacketId.Favorite)
-    }
 
-    public setCosmetics(ctModelItem: number, terModelItem: number, headItem: number,
-                        gloveItem: number, backItem: number, stepsItem: number,
-                        cardItem: number, sprayItem: number): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static setCosmetics(ctModelItem: number, terModelItem: number, headItem: number,
+                               gloveItem: number, backItem: number, stepsItem: number,
+                               cardItem: number, sprayItem: number): OutFavoritePacket {
+        const packet: OutFavoritePacket = new OutFavoritePacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 40, incrementAmount: 15 })
 
-        this.buildHeader()
-        this.writeUInt8(FavoritePacketType.SetCosmetics)
+        packet.buildHeader()
+        packet.writeUInt8(FavoritePacketType.SetCosmetics)
 
-        new OutFavoriteCosmetics(ctModelItem, terModelItem,
-            headItem, gloveItem, backItem, stepsItem, cardItem, sprayItem).build(this)
+        OutFavoriteCosmetics.build(ctModelItem, terModelItem, headItem, gloveItem, backItem,
+            stepsItem, cardItem, sprayItem, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public setLoadout(loadout: UserLoadout[]): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static setLoadout(loadout: UserLoadout[]): OutFavoritePacket {
+        const packet: OutFavoritePacket = new OutFavoritePacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 40, incrementAmount: 15 })
 
-        this.buildHeader()
-        this.writeUInt8(FavoritePacketType.SetLoadout)
+        packet.buildHeader()
+        packet.writeUInt8(FavoritePacketType.SetLoadout)
 
-        new OutFavoritePresetLoadout(loadout).build(this)
+        OutFavoritePresetLoadout.build(loadout, packet)
 
-        return this.getData()
+        return packet
     }
-}
+    constructor() {
+        super(PacketId.Favorite)
+    }
+ }

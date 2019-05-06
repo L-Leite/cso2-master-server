@@ -7,6 +7,7 @@ import 'app-module-path/register'
 
 import program from 'commander'
 
+import { InventorySvcPing, UserSvcPing } from 'authorities';
 import { getNetIntf, getOrAskNetIntf, INetIntf } from 'interfacepicker'
 import { ServerInstance } from 'serverinstance'
 
@@ -19,10 +20,53 @@ program
   .option('-l, --log-packets', 'Log the incoming and outgoing packets')
   .parse(process.argv)
 
+function validateEnvVars(): void {
+  if (process.env.USERSERVICE_HOST == null) {
+    throw new Error('USERSERVICE_HOST environment variable is not set.');
+  }
+
+  if (process.env.USERSERVICE_PORT == null) {
+    throw new Error('USERSERVICE_PORT environment variable is not set.');
+  }
+
+  if (process.env.INVSERVICE_HOST == null) {
+    throw new Error('INVSERVICE_HOST environment variable is not set.');
+  }
+
+  if (process.env.INVSERVICE_PORT == null) {
+    throw new Error('INVSERVICE_PORT environment variable is not set.');
+  }
+}
+
+/**
+ * check if the required services are up on startup
+ * throws an error if a service is down
+ */
+async function checkServices(): Promise<void> {
+  await UserSvcPing.checkNow()
+
+  if (UserSvcPing.isAlive() === false) {
+    throw new Error('User service is offline');
+  }
+
+  console.log('User service at ' + UserSvcPing.getHost() + ' is online')
+
+  await InventorySvcPing.checkNow()
+
+  if (InventorySvcPing.isAlive() === false) {
+    throw new Error('Inventory service is offline');
+  }
+
+  console.log('Inventory service at ' + InventorySvcPing.getHost() + ' is online')
+}
+
 /**
  * the entry point of the server
  */
-async function startServer() {
+async function startServer(): Promise<void> {
+  validateEnvVars()
+  await checkServices()
+
   let desiredIp: string = null
 
   // fail if the user inputs both an ip address and an interface

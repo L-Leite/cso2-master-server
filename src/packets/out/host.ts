@@ -5,10 +5,8 @@ import { OutPacketBase } from 'packets/out/packet'
 import { PacketId } from 'packets/definitions'
 import { HostPacketType } from 'packets/hostshared'
 
-import { User } from 'user/user'
+import { UserInventory } from 'user/userinventory'
 import { UserInventoryItem } from 'user/userinventoryitem'
-
-import { ExtendedSocket } from 'extendedsocket'
 
 import { OutHostBuyMenu } from 'packets/out/host/buymenu'
 import { OutHostGameStart } from 'packets/out/host/gamestart'
@@ -21,91 +19,105 @@ import { OutHostLoadout } from 'packets/out/host/loadout'
  * @class OutHostPacket
  */
 export class OutHostPacket extends OutPacketBase {
-    constructor(socket: ExtendedSocket) {
-        super(socket, PacketId.Host)
-    }
 
-    public gameStart(host: User): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static gameStart(hostUserId: number): OutHostPacket {
+        const packet: OutHostPacket = new OutHostPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 12, incrementAmount: 4 })
 
-        this.buildHeader()
-        this.writeUInt8(HostPacketType.GameStart)
+        packet.buildHeader()
+        packet.writeUInt8(HostPacketType.GameStart)
 
-        new OutHostGameStart(host.userId).build(this)
+        OutHostGameStart.build(hostUserId, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public joinHost(host: User): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static joinHost(hostUserId: number): OutHostPacket {
+        const packet: OutHostPacket = new OutHostPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 20, incrementAmount: 4 })
 
-        this.buildHeader()
-        this.writeUInt8(HostPacketType.HostJoin)
+        packet.buildHeader()
+        packet.writeUInt8(HostPacketType.HostJoin)
 
-        new OutHostJoinHost(host.userId).build(this)
+        OutHostJoinHost.build(hostUserId, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public hostStop(): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static hostStop(): OutHostPacket {
+        const packet: OutHostPacket = new OutHostPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 8, incrementAmount: 4 })
 
-        this.buildHeader()
-        this.writeUInt8(HostPacketType.HostStop)
+        packet.buildHeader()
+        packet.writeUInt8(HostPacketType.HostStop)
 
-        return this.getData()
+        return packet
     }
 
-    public leaveResultWindow(): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static leaveResultWindow(): OutHostPacket {
+        const packet: OutHostPacket = new OutHostPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 8, incrementAmount: 4 })
 
-        this.buildHeader()
-        this.writeUInt8(HostPacketType.LeaveResultWindow)
+        packet.buildHeader()
+        packet.writeUInt8(HostPacketType.LeaveResultWindow)
 
-        return this.getData()
+        return packet
     }
 
-    public setInventory(userId: number, items: UserInventoryItem[]): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static setInventory(userId: number, items: UserInventoryItem[]): OutHostPacket {
+        const packet: OutHostPacket = new OutHostPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 80, incrementAmount: 20 })
 
-        this.buildHeader()
-        this.writeUInt8(HostPacketType.SetInventory)
+        packet.buildHeader()
+        packet.writeUInt8(HostPacketType.SetInventory)
 
-        new OutHostSetInventory(userId, items).build(this)
+        OutHostSetInventory.build(userId, items, packet)
 
-        return this.getData()
+        return packet
     }
 
-    public setLoadout(user: User): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static async setLoadout(userId: number): Promise<OutHostPacket> {
+        const packet: OutHostPacket = new OutHostPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 80, incrementAmount: 20 })
 
-        this.buildHeader()
-        this.writeUInt8(HostPacketType.SetLoadout)
+        packet.buildHeader()
+        packet.writeUInt8(HostPacketType.SetLoadout)
 
-        new OutHostLoadout(user.userId, user.inventory.ctModelItem,
-            user.inventory.terModelItem, user.inventory.headItem,
-            user.inventory.gloveItem, user.inventory.backItem,
-            user.inventory.stepsItem, user.inventory.cardItem,
-            user.inventory.sprayItem, user.inventory.loadouts).build(this)
+        const cosmeticsPromise = UserInventory.getCosmetics(userId)
+        const loadoutsPromise = UserInventory.getAllLoadouts(userId)
+        const results = await Promise.all([cosmeticsPromise, loadoutsPromise])
 
-        return this.getData()
+        OutHostLoadout.build(userId, results[0], results[1], packet)
+
+        return packet
     }
 
-    public setBuyMenu(user: User): Buffer {
-        this.outStream = new WritableStreamBuffer(
+    public static async setBuyMenu(userId: number): Promise<OutHostPacket> {
+        const packet: OutHostPacket = new OutHostPacket()
+
+        packet.outStream = new WritableStreamBuffer(
             { initialSize: 80, incrementAmount: 20 })
 
-        this.buildHeader()
-        this.writeUInt8(HostPacketType.SetBuyMenu)
+        packet.buildHeader()
+        packet.writeUInt8(HostPacketType.SetBuyMenu)
 
-        new OutHostBuyMenu(user.userId, user.inventory.buymenu).build(this)
+        OutHostBuyMenu.build(userId, await UserInventory.getBuyMenu(userId), packet)
 
-        return this.getData()
+        return packet
+    }
+    constructor() {
+        super(PacketId.Host)
     }
 }

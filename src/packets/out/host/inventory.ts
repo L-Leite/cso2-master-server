@@ -1,38 +1,21 @@
 import { OutPacketBase } from 'packets/out/packet'
-
 import { UserInventoryItem } from 'user/userinventoryitem'
 
 /**
  * sends an user's inventory to a host
- * @class OutHostPreloadInventory
  */
 export class OutHostSetInventory {
-    private userId: number
+    public static build(userId: number, items: UserInventoryItem[], outPacket: OutPacketBase): void {
+        outPacket.writeUInt32(userId)
 
-    // writes somewhere to CGameClient
-    private unk00: number
+         // writes somewhere to CGameClient
+        outPacket.writeUInt8(0) // unk00
 
-    // these are unconfirmed
-    private numOfItems: number
-    private items: UserInventoryItem[]
-
-    constructor(userId: number, items: UserInventoryItem[]) {
-        this.userId = userId
-        this.unk00 = 0
-
-        this.items = items
-        this.numOfItems = this.items.length
-    }
-
-    public build(outPacket: OutPacketBase): void {
-        outPacket.writeUInt32(this.userId)
-        outPacket.writeUInt8(this.unk00)
-
-        outPacket.writeUInt16(this.numOfItems)
-
-        for (const item of this.items) {
-            outPacket.writeUInt32(item.id)
-            outPacket.writeUInt16(item.count)
+        // these are unconfirmed
+        outPacket.writeUInt16(items.length) // numOfItems
+        for (const item of items) {
+            outPacket.writeUInt32(item.itemId)
+            outPacket.writeUInt16(item.ammount)
         }
     }
 }

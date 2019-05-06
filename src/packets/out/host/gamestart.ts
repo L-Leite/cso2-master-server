@@ -5,13 +5,7 @@ import { OutPacketBase } from 'packets/out/packet'
  * @class OutHostGameStart
  */
 export class OutHostGameStart {
-    private hostUserId: number
-
-    constructor(hostUserId: number) {
-        this.hostUserId = hostUserId
-    }
-
-    public build(outPacket: OutPacketBase): void {
-        outPacket.writeUInt32(this.hostUserId)
+    public static build(hostUserId: number, outPacket: OutPacketBase): void {
+        outPacket.writeUInt32(hostUserId)
     }
 }
