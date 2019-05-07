@@ -33,7 +33,7 @@ export class OutPacketBase extends PacketBaseShared {
      * @returns the new packet's data
      */
     public getData(): Buffer {
-        const newPacket: Buffer = this.outStream.getContents()
+        const newPacket: Buffer = this.outStream.getContents() as Buffer
         const dataLen: number = newPacket.byteLength - OutPacketBase.headerLength
         newPacket.writeUInt16LE(dataLen, 2)
         return newPacket
