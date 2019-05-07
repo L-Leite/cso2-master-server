@@ -38,35 +38,19 @@ function validateEnvVars(): void {
   }
 }
 
-/**
- * check if the required services are up on startup
- * throws an error if a service is down
- */
-async function checkServices(): Promise<void> {
-  await UserSvcPing.checkNow()
+async function checkServices(): Promise<boolean> {
+  await Promise.all([
+    UserSvcPing.checkNow(),
+    InventorySvcPing.checkNow(),
+  ])
 
-  if (UserSvcPing.isAlive() === false) {
-    throw new Error('User service is offline');
-  }
-
-  console.log('User service at ' + UserSvcPing.getHost() + ' is online')
-
-  await InventorySvcPing.checkNow()
-
-  if (InventorySvcPing.isAlive() === false) {
-    throw new Error('Inventory service is offline');
-  }
-
-  console.log('Inventory service at ' + InventorySvcPing.getHost() + ' is online')
+  return UserSvcPing.isAlive() && InventorySvcPing.isAlive()
 }
 
 /**
  * the entry point of the server
  */
 async function startServer(): Promise<void> {
-  validateEnvVars()
-  await checkServices()
-
   let desiredIp: string = null
 
   // fail if the user inputs both an ip address and an interface
@@ -116,4 +100,22 @@ async function startServer(): Promise<void> {
   masterServer.listen()
 }
 
-startServer()
+/**
+ * wait until the required services are online
+ */
+const loop: NodeJS.Timeout = setInterval(() => {
+  validateEnvVars()
+
+  if (checkServices()) {
+    console.warn('Connected to user and inventory services')
+    console.warn('User service is at ' + UserSvcPing.getHost())
+    console.warn('Inventory service is at ' + InventorySvcPing.getHost())
+    startServer()
+    clearInterval(loop)
+    return
+  }
+
+  console.warn('Could not connect to the services, waiting 5 seconds until another connection attempt')
+  console.warn('User service is ' + UserSvcPing.isAlive() ? 'online' : 'offline')
+  console.warn('Inventory service is ' + InventorySvcPing.isAlive() ? 'online' : 'offline')
+}, 1000 * 5)
