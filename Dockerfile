@@ -10,15 +10,14 @@ COPY package*.json ./
 COPY src ./src
 
 # get build files
+COPY gulpfile.js ./
 COPY ts*.json ./
 
 # install npm dependencies
 RUN npm ci
-RUN npm i -g typescript
+RUN npm i -g gulp
 
-RUN npm run build-ts
-
-# Bundle app source
-COPY . .
+# build app from source
+RUN gulp build
 
 CMD [ "node", "dist/server.js", "--interface", "eth0" ]
