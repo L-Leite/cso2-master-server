@@ -675,6 +675,18 @@ export class Room {
     }
 
     /**
+     * loop through all the non host players
+     * @param fn the func to call in each user
+     */
+    public async recurseNonHostUsersAsync(fn: (u: RoomUser) => Promise<void>): Promise<void> {
+        for (const user of this.usersInfo) {
+            if (user !== this.host) {
+                fn(user)
+            }
+        }
+    }
+
+    /**
      * send the room's data to the user that joined the room
      * @param userId the new user's ID
      */
@@ -895,7 +907,7 @@ export class Room {
      * @param user the player to send the other player's ready status
      * @param newUser the player whose ready status will be sent
      */
-    public sendNewUserTo(user: RoomUser, newUser: RoomUser): void {
+    public async sendNewUserTo(user: RoomUser, newUser: RoomUser): Promise<void> {
         const team: RoomTeamNum = newUser.team
 
         if (team == null) {
@@ -904,7 +916,7 @@ export class Room {
             return null
         }
 
-        user.conn.send(OutRoomPacket.playerJoin(newUser.userId, team))
+        user.conn.send(await OutRoomPacket.playerJoin(newUser.userId, team))
     }
 
     /**
@@ -926,17 +938,19 @@ export class Room {
         })
     }
 
-    public hostGameStart(): void {
+    public async hostGameStart(): Promise<void> {
         this.stopCountdown()
         this.setStatus(RoomStatus.Ingame)
         this.setUserIngame(this.host, true)
 
-        this.recurseNonHostUsers((u: RoomUser): void => {
+        this.recurseNonHostUsersAsync(async (u: RoomUser): Promise<void> => {
             this.sendRoomStatusTo(u)
             if (u.isReady()) {
                 this.setUserIngame(u, true)
-                this.sendConnectHostTo(u, this.host)
-                this.sendGuestDataTo(this.host, u)
+                await Promise.all([
+                    this.sendConnectHostTo(u, this.host),
+                    this.sendGuestDataTo(this.host, u)],
+                )
             }
         })
 
@@ -945,13 +959,15 @@ export class Room {
         this.sendStartMatchTo(this.host)
     }
 
-    public guestGameJoin(guestUserId: number): void {
+    public async guestGameJoin(guestUserId: number): Promise<void> {
         const guest: RoomUser = this.getRoomUser(guestUserId)
 
         this.sendRoomStatusTo(guest)
         this.setUserIngame(guest, true)
-        this.sendConnectHostTo(guest, this.host)
-        this.sendGuestDataTo(this.host, guest)
+        await Promise.all([
+            this.sendConnectHostTo(guest, this.host),
+            this.sendGuestDataTo(this.host, guest)],
+        )
 
         this.sendBroadcastReadyStatus()
     }

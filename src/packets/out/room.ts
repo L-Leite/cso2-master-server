@@ -48,7 +48,7 @@ export class OutRoomPacket extends OutPacketBase {
         return packet
     }
 
-    public static playerJoin(userId: number, teamNum: RoomTeamNum): OutRoomPacket {
+    public static async playerJoin(userId: number, teamNum: RoomTeamNum): Promise<OutRoomPacket> {
         const packet: OutRoomPacket = new OutRoomPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -57,7 +57,7 @@ export class OutRoomPacket extends OutPacketBase {
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.PlayerJoin)
 
-        OutRoomPlayerJoin.build(userId, teamNum, packet)
+        await OutRoomPlayerJoin.build(userId, teamNum, packet)
 
         return packet
     }

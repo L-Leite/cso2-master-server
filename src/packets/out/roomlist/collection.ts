@@ -17,7 +17,7 @@ export class RoomListCollection {
         outPacket.writeUInt16(this.rooms.length)
 
         for (const room of this.rooms) {
-            new RoomListItem(room).build(outPacket)
+            await new RoomListItem(room).build(outPacket)
         }
     }
 }
