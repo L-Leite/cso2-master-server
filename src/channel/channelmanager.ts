@@ -239,7 +239,15 @@ export class ChannelManager {
             return false
         }
 
-        const desiredRoom: Room = UserManager.getSessionCurRoom(session)
+        const channel: Channel = ChannelManager.getChannel(session.currentChannelIndex,
+            session.currentChannelServerIndex)
+
+        if (channel == null) {
+            console.warn('user ID %i tried to join a room, but it isn\'t in a channel', sourceConn.getOwner())
+            return false
+        }
+
+        const desiredRoom: Room = channel.getRoomById(joinReq.roomId)
 
         if (desiredRoom == null) {
             console.warn('user ID %i tried to join a non existing room. room id: %i',
