@@ -49,13 +49,13 @@ export class UserInfoFullUpdate {
         // end of flag & 0x20
         // flag & 0x40
         outPacket.writeUInt32(10) // played game
-        outPacket.writeUInt32(user.wins) // wins
+        outPacket.writeUInt32(user.wins) // wins (win rate = wins / player game)
         outPacket.writeUInt32(user.kills) // kills
-        outPacket.writeUInt32(80) // headshot rate (hs / kills)
+        outPacket.writeUInt32(80) // headshots (hs rate = hs / kills)
         outPacket.writeUInt32(user.deaths) // deaths
         outPacket.writeUInt32(user.assists) // assists
         outPacket.writeUInt16(10) // hit rate
-        outPacket.writeUInt32(0x290C) // played time (s)
+        outPacket.writeUInt32(86401) // played time (s)
         outPacket.writeUInt32(0) // unk15
         outPacket.writeUInt32(50) // unk16
         outPacket.writeUInt8(0) // unk17
@@ -74,10 +74,10 @@ export class UserInfoFullUpdate {
         outPacket.writeUInt32(0) // unk28
         outPacket.writeUInt32(0) // unk29
         outPacket.writeUInt32(0) // unk30
-        outPacket.writeString(new PacketString(null)) // unk31
+        outPacket.writeString(new PacketString('SSS')) // net cafe
         // end if flags & 0x80
         // flag & 0x100
-        outPacket.writeUInt32(5000) // cash
+        outPacket.writeUInt32(5000) // Cash
         outPacket.writeUInt32(0) // unk33
         // end of flag & 0x100
         // flag & 0x200
@@ -107,7 +107,7 @@ export class UserInfoFullUpdate {
         outPacket.writeUInt32(0) // unk45
         // end of flag & 0x1000
         // flag & 0x2000
-        outPacket.writeUInt32(0) // MPoint
+        outPacket.writeUInt32(50000) // MPoint
         outPacket.writeUInt64(new Uint64LE(0)) // unk47
         // end of flag & 0x2000
         // flag & 0x4000
@@ -144,8 +144,8 @@ export class UserInfoFullUpdate {
         // end of flag & 0x80000
         // flag & 0x100000
         outPacket.writeUInt32(7) // unk55
-        outPacket.writeUInt32(5) // best gamemode
-        outPacket.writeUInt32(9) // best map
+        outPacket.writeUInt32(1) // best gamemode
+        outPacket.writeUInt32(2) // best map
         // end of flag & 0x100000
         // flag & 0x200000
         outPacket.writeUInt16(0) // unk58
