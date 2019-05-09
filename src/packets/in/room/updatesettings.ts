@@ -120,7 +120,7 @@ export class InRoomUpdateSettings {
     public hltvEnabled: number
     // end of flags & 0x400000000
     // flags & 0x800000000
-    public unk45: number
+    public difficulty: number
     // end of flags & 0x800000000
     // flags & 0x1000000000
     public respawnTime: number
@@ -254,7 +254,7 @@ export class InRoomUpdateSettings {
         }
 
         if (lowFlag & 0x40000000) {
-            this.isIngame = inPacket.readUInt8() as unknown as boolean
+            this.isIngame = inPacket.readUInt8() === 1 ? true : false
         }
 
         if (lowFlag & 0x80000000) {
@@ -274,7 +274,7 @@ export class InRoomUpdateSettings {
         }
 
         if (highFlag & 0x8) {
-            this.unk45 = inPacket.readUInt8()
+            this.difficulty = inPacket.readUInt8()
         }
 
         if (highFlag & 0x10) {

@@ -146,7 +146,7 @@ export class OutRoomCreateAndJoin {
         outPacket.writeUInt8(0) // unk44
         // end of flags & 0x400000000
         // flags & 0x800000000
-        outPacket.writeUInt8(0) // unk45
+        outPacket.writeUInt8(0) // mapLevel
         // end of flags & 0x800000000
         // flags & 0x1000000000
         outPacket.writeUInt8(3) // unk46

@@ -700,193 +700,144 @@ export class Room {
      * @param newSettings the requested new room's settings
      */
     public updateSettings(newSettings: InRoomUpdateSettings): void {
-        const updatedSet: RoomSettings = new RoomSettings()
-
         if (newSettings.roomName != null) {
             this.settings.roomName = newSettings.roomName
-            updatedSet.roomName = newSettings.roomName
         }
         if (newSettings.gameModeId != null) {
             this.settings.gameModeId = newSettings.gameModeId
-            updatedSet.gameModeId = newSettings.gameModeId
         }
         if (newSettings.mapId != null) {
             this.settings.mapId = newSettings.mapId
-            updatedSet.mapId = newSettings.mapId
         }
         if (newSettings.killLimit != null) {
             this.settings.killLimit = newSettings.killLimit
-            updatedSet.killLimit = newSettings.killLimit
         }
         if (newSettings.winLimit != null) {
             this.settings.winLimit = newSettings.winLimit
-            updatedSet.winLimit = newSettings.winLimit
         }
         if (newSettings.startMoney != null) {
             this.settings.startMoney = newSettings.startMoney
-            updatedSet.startMoney = newSettings.startMoney
         }
         if (newSettings.maxPlayers != null) {
             this.updateMaxPlayers(newSettings.maxPlayers)
-            updatedSet.maxPlayers = newSettings.maxPlayers
         }
         if (newSettings.respawnTime != null) {
             this.settings.respawnTime = newSettings.respawnTime
-            updatedSet.respawnTime = newSettings.respawnTime
         }
         if (newSettings.changeTeams != null) {
             this.settings.changeTeams = newSettings.changeTeams
-            updatedSet.changeTeams = newSettings.changeTeams
         }
         if (newSettings.forceCamera != null) {
             this.settings.forceCamera = newSettings.forceCamera
-            updatedSet.forceCamera = newSettings.forceCamera
         }
         if (newSettings.teamBalanceType != null) {
             this.settings.teamBalanceType = newSettings.teamBalanceType
-            updatedSet.teamBalanceType = newSettings.teamBalanceType
         }
         if (newSettings.weaponRestrictions != null) {
             this.settings.weaponRestrictions = newSettings.weaponRestrictions
-            updatedSet.weaponRestrictions = newSettings.weaponRestrictions
         }
         if (newSettings.hltvEnabled != null) {
             this.settings.hltvEnabled = newSettings.hltvEnabled
-            updatedSet.hltvEnabled = newSettings.hltvEnabled
         }
         if (newSettings.mapCycleType != null) {
             this.settings.mapCycleType = newSettings.mapCycleType
-            updatedSet.mapCycleType = newSettings.mapCycleType
         }
         if (newSettings.multiMaps != null) {
             this.settings.multiMaps = newSettings.multiMaps
-            updatedSet.multiMaps = newSettings.multiMaps
         }
         // which flag enabled this?
         /*if (newSettings.nextMapEnabled != null) {
             this.settings.nextMapEnabled = newSettings.nextMapEnabled
-            updatedSet.nextMapEnabled = newSettings.nextMapEnabled
         }*/
         if (newSettings.botEnabled != null) {
             this.updateBotEnabled(newSettings.botEnabled, newSettings.botDifficulty,
                 newSettings.numCtBots, newSettings.numTrBots)
-            updatedSet.areBotsEnabled = !!newSettings.botEnabled
-            updatedSet.botDifficulty = newSettings.botDifficulty
-            updatedSet.numCtBots = newSettings.numCtBots
-            updatedSet.numTrBots = newSettings.numTrBots
         }
 
         if (newSettings.unk00 != null) {
             this.settings.unk00 = newSettings.unk00
-            updatedSet.unk00 = newSettings.unk00
         }
         if (newSettings.unk01 != null) {
             this.settings.unk01 = newSettings.unk01
-            updatedSet.unk01 = newSettings.unk01
         }
         if (newSettings.unk02 != null) {
             this.settings.unk02 = newSettings.unk02
-            updatedSet.unk02 = newSettings.unk02
         }
         if (newSettings.unk03 != null) {
             this.settings.unk03 = newSettings.unk03
-            updatedSet.unk03 = newSettings.unk03
         }
         if (newSettings.unk09 != null) {
             this.settings.unk09 = newSettings.unk09
-            updatedSet.unk09 = newSettings.unk09
         }
         if (newSettings.unk10 != null) {
             this.settings.unk10 = newSettings.unk10
-            updatedSet.unk10 = newSettings.unk10
         }
         if (newSettings.unk13 != null) {
             this.settings.unk13 = newSettings.unk13
-            updatedSet.unk13 = newSettings.unk13
         }
         if (newSettings.unk17 != null) {
             this.settings.unk17 = newSettings.unk17
-            updatedSet.unk17 = newSettings.unk17
         }
         if (newSettings.unk18 != null) {
             this.settings.unk18 = newSettings.unk18
-            updatedSet.unk18 = newSettings.unk18
         }
         if (newSettings.status != null) {
             this.settings.status = newSettings.status
-            updatedSet.status = newSettings.status
         }
         if (newSettings.unk21 != null) {
             this.settings.unk21 = newSettings.unk21
-            updatedSet.unk21 = newSettings.unk21
         }
         if (newSettings.unk23 != null) {
             this.settings.unk23 = newSettings.unk23
-            updatedSet.unk23 = newSettings.unk23
         }
         if (newSettings.unk24 != null) {
             this.settings.unk24 = newSettings.unk24
-            updatedSet.unk24 = newSettings.unk24
         }
         if (newSettings.unk25 != null) {
             this.settings.unk25 = newSettings.unk25
-            updatedSet.unk25 = newSettings.unk25
         }
         if (newSettings.unk29 != null) {
             this.settings.unk29 = newSettings.unk29
-            updatedSet.unk29 = newSettings.unk29
         }
         if (newSettings.unk30 != null) {
             this.settings.unk30 = newSettings.unk30
-            updatedSet.unk30 = newSettings.unk30
         }
         if (newSettings.unk31 != null) {
             this.settings.unk31 = newSettings.unk31
-            updatedSet.unk31 = newSettings.unk31
         }
         if (newSettings.unk32 != null) {
             this.settings.unk32 = newSettings.unk32
-            updatedSet.unk32 = newSettings.unk32
         }
         if (newSettings.unk33 != null) {
             this.settings.unk33 = newSettings.unk33
-            updatedSet.unk33 = newSettings.unk33
         }
         if (newSettings.unk35 != null) {
             this.settings.unk35 = newSettings.unk35
-            updatedSet.unk35 = newSettings.unk35
         }
         if (newSettings.unk36 != null) {
             this.settings.unk36 = newSettings.unk36
-            updatedSet.unk36 = newSettings.unk36
         }
         if (newSettings.unk37 != null) {
             this.settings.unk37 = newSettings.unk37
-            updatedSet.unk37 = newSettings.unk37
         }
         if (newSettings.unk38 != null) {
             this.settings.unk38 = newSettings.unk38
-            updatedSet.unk38 = newSettings.unk38
         }
         if (newSettings.unk39 != null) {
             this.settings.unk39 = newSettings.unk39
-            updatedSet.unk39 = newSettings.unk39
         }
         if (newSettings.isIngame != null) {
             this.settings.isIngame = newSettings.isIngame
-            updatedSet.isIngame = newSettings.isIngame
         }
         if (newSettings.unk43 != null) {
             this.settings.unk43 = newSettings.unk43
-            updatedSet.unk43 = newSettings.unk43
         }
-        if (newSettings.unk45 != null) {
-            this.settings.unk45 = newSettings.unk45
-            updatedSet.unk45 = newSettings.unk45
+        if (newSettings.difficulty != null) {
+            this.settings.difficulty = newSettings.difficulty
         }
 
         // inform every user in the room of the changes
-        this.broadcastNewRoomSettings(updatedSet)
+        this.broadcastNewRoomSettings()
     }
 
     /**
@@ -984,12 +935,11 @@ export class Room {
     }
 
     /**
-     * sends updated room settings to everyone in the room
-     * @param updatedSettings the updated room's settings
+     * sends updated room settings to everyone in it
      */
-    public broadcastNewRoomSettings(updatedSettings: RoomSettings): void {
+    public broadcastNewRoomSettings(): void {
         this.recurseUsers((u: RoomUser): void => {
-            this.sendUpdateRoomSettingsTo(u, updatedSettings)
+            this.sendUpdateRoomSettingsTo(u, this.settings)
         })
     }
 

@@ -135,7 +135,7 @@ export class OutRoomUpdateSettings {
             highFlag |= 0x4
         }
 
-        if (settings.unk45 != null) {
+        if (settings.difficulty != null) {
             highFlag |= 0x8
         }
 
@@ -294,7 +294,7 @@ export class OutRoomUpdateSettings {
         }
 
         if (highFlag & 0x8) {
-            outPacket.writeUInt8(settings.unk45)
+            outPacket.writeUInt8(settings.difficulty)
         }
 
         if (highFlag & 0x10) {

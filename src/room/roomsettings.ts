@@ -49,7 +49,6 @@ export class RoomSettings {
     public unk38: number
     public unk39: number
     public unk43: number
-    public unk45: number
 
     constructor(options?: IRoomOptions) {
         if (options == null) {
