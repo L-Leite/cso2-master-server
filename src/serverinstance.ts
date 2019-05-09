@@ -13,13 +13,12 @@ import { OutVersionPacket } from 'packets/out/version'
 import { InHolepunchPacketUdp } from 'packets/holepunch/inholepunch'
 import { OutHolepunchPacketUdp } from 'packets/holepunch/outholepunch'
 
-import { UserManager } from 'user/usermanager'
-
 import { ChannelManager } from 'channel/channelmanager'
+import { Room } from 'room/room'
+import { UserManager } from 'user/usermanager'
+import { UserSession } from 'user/usersession'
 
 import { PacketLogger } from 'packetlogger'
-
-import { UserSession } from 'user/usersession'
 
 /**
  * The welcome message sent to the client
@@ -290,11 +289,13 @@ export class ServerInstance {
 
     /**
      * Called when a socket closes connection
-     * @param socket the client's socket
+     * @param conn the client's connection
      * @param hadError true if it was closed because of an error
      */
-    private onSocketClose(socket: ExtendedSocket, hadError: boolean): void {
-        console.log('socket ' + socket.uuid + ' closed hadError: ' + hadError)
+    private async onSocketClose(conn: ExtendedSocket, hadError: boolean): Promise<void> {
+        console.log('socket ' + conn.uuid + ' closed hadError: ' + hadError)
+        await Room.cleanUpUser(conn.getOwner())
+        UserSession.delete(conn.getOwner())
     }
 
     /**
@@ -304,7 +305,6 @@ export class ServerInstance {
      */
     private onSocketError(conn: ExtendedSocket, err: Error): void {
         console.warn('socket ' + conn.uuid + ' had an error: ' + err)
-        UserSession.delete(conn.getOwner())
     }
 
     /**
@@ -313,7 +313,6 @@ export class ServerInstance {
      */
     private onSocketEnd(conn: ExtendedSocket): void {
         console.log('socket ' + conn.uuid + ' ended')
-        UserSession.delete(conn.getOwner())
     }
 
     /**
@@ -322,7 +321,7 @@ export class ServerInstance {
      */
     private onSocketTimeout(conn: ExtendedSocket): void {
         console.warn('socket ' + conn.uuid + ' timed out')
-        UserSession.delete(conn.getOwner())
+        conn.destroy(new Error('Connection timed out'))
     }
 
     /**

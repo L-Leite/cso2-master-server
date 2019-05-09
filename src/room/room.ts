@@ -2,11 +2,11 @@ import { Channel } from 'channel/channel'
 
 import { ExtendedSocket } from 'extendedsocket'
 
+import { ChannelManager } from 'channel/channelmanager'
 import { RoomSettings } from 'room/roomsettings'
 import { RoomUser } from 'room/roomuser'
 
 import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
-
 import { OutHostPacket } from 'packets/out/host'
 import { OutRoomPacket } from 'packets/out/room'
 import { OutUdpPacket } from 'packets/out/udp'
@@ -134,6 +134,39 @@ export class Room {
      */
     public static sendCloseResultWindow(conn: ExtendedSocket): void {
         conn.send(OutHostPacket.leaveResultWindow())
+    }
+
+    /**
+     * remove an user from its current room
+     * if the user isn't in a room then it won't do anything
+     * @param user the target user
+     * @returns true if successful or if not in a room, false if not
+     */
+    public static async cleanUpUser(userId: number): Promise<boolean> {
+        const session: UserSession = await UserSession.get(userId)
+
+        if (session.currentRoomId === 0) {
+            return true
+        }
+
+        const channel: Channel = ChannelManager.getChannel(
+            session.currentChannelIndex, session.currentChannelServerIndex)
+
+        if (channel == null) {
+            return false
+        }
+
+        const room: Room = channel.getRoomById(session.currentRoomId)
+
+        if (room == null) {
+            return false
+        }
+
+        room.removeUser(userId)
+
+        session.currentRoomId = 0
+
+        return await session.update()
     }
 
     public id: number
