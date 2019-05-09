@@ -1079,7 +1079,7 @@ export class Room {
      * @param guest the guest player joining the host's match
      */
     public async sendGuestDataTo(host: RoomUser, guest: RoomUser): Promise<void> {
-        const guestSession: UserSession = await UserSession.get(host.userId)
+        const guestSession: UserSession = await UserSession.get(guest.userId)
 
         if (guestSession == null) {
             return
