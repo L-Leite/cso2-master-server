@@ -37,9 +37,11 @@ export class UserSession {
 
             return null
         } catch (error) {
-            console.error(error)
+            if (error.status === 409) {
+                return null
+            }
             UserSvcPing.checkNow()
-            return null
+            throw error
         }
     }
 

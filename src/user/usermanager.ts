@@ -93,22 +93,13 @@ export class UserManager {
                                       holepunchPort: number): Promise<boolean> {
         const loginPacket: InLoginPacket = new InLoginPacket(loginData)
 
-        let session: UserSession = await UserSession.create(loginPacket.gameUsername, loginPacket.password)
+        const session: UserSession = await UserSession.create(loginPacket.gameUsername, loginPacket.password)
 
+        // if it fails, then the user either doesn't exist or the credentials are bad
         if (session == null) {
-            // try to delete any existing session first
-            const wasDeleted: boolean = await this.deleteSessionIfExists(loginPacket.gameUsername)
-
-            if (wasDeleted) {
-                session = await UserSession.create(loginPacket.gameUsername, loginPacket.password)
-            }
-
-            if (session == null || wasDeleted === false) {
-                // there wasn't any session, the user either doesn't exist or the credentials are bad
-                console.warn('Could not create session for user %s', loginPacket.gameUsername)
-                connection.end()
-                return false
-            }
+            console.warn('Could not create session for user %s', loginPacket.gameUsername)
+            connection.end()
+            return false
         }
 
         console.log('user %s logged in (uuid: %s)', loginPacket.gameUsername, connection.uuid)
@@ -414,21 +405,6 @@ export class UserManager {
         await currentRoom.endGame()
 
         return true
-    }
-
-    /**
-     * delete an user's session by the username if it exists
-     * @param username the username of the session's owner
-     * @returns true if deleted successfully, false if not
-     */
-    private static async deleteSessionIfExists(username: string): Promise<boolean> {
-        const user: User = await User.getByName(username)
-
-        if (user == null) {
-            return false
-        }
-
-        return UserSession.delete(user.userId)
     }
 
     /**
