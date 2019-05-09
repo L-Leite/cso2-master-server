@@ -38,6 +38,14 @@ npm run start # starts the fresh server build
 
 ## Starting the master server
 
+### With docker-compose
+
+Go to [cso2-master-services](https://github.com/Ochii/cso2-master-services) to learn how to start the master server with docker-compose.
+
+### By itself
+
+**You must have an user service and an inventory service running somewhere.**
+
 You can start the master server with:
 
 ```sh
