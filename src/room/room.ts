@@ -145,7 +145,7 @@ export class Room {
     public static async cleanUpUser(userId: number): Promise<boolean> {
         const session: UserSession = await UserSession.get(userId)
 
-        if (session.currentRoomId === 0) {
+        if (session.currentRoomId == null || session.currentRoomId === 0) {
             return true
         }
 
