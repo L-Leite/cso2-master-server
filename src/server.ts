@@ -14,7 +14,7 @@ import { ServerInstance } from 'serverinstance'
 let masterServer: ServerInstance = null
 
 program
-  .version('0.9.2')
+  .version('0.9.3')
   .option('-i, --ip-address [ip]', 'The IP address to be used by the server (don\'t use --interface with this)', null)
   .option('-I, --interface [intf]', 'The interface to be used by the server (don\'t use --ip-address with this)', null)
   .option('-p, --port-master [port]', 'The server\'s (TCP) port', 30001)
