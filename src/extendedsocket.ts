@@ -1,7 +1,7 @@
 import net from 'net'
 
 import { PacketLogger } from 'packetlogger'
-import { OutPacketBase } from 'packets/out/packet';
+import { OutPacketBase } from 'packets/out/packet'
 
 const MIN_SEQUENCE: number = 0
 const MAX_SEQUENCE: number = 255

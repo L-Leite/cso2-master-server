@@ -75,6 +75,9 @@ export class ServerInstance {
             this.packetLogging = new PacketLogger()
         }
 
+        // clean up any left over user sessions
+        UserSession.deleteAll()
+
         this.server.on('connection', (socket: net.Socket) => {
             this.onServerConnection(socket)
         }).on('close', () => {
@@ -97,6 +100,12 @@ export class ServerInstance {
     public listen(): void {
         this.server.listen(this.masterPort, this.hostname)
         this.holepunchServer.bind(this.holepunchPort, this.hostname)
+    }
+
+    public async stop(): Promise<void> {
+        await UserSession.deleteAll()
+        this.server.close()
+        process.exit(0)
     }
 
     /**
@@ -196,6 +205,9 @@ export class ServerInstance {
                 packet.userId, session.externalNet.ipAddress, rinfo.address)
             return
         }*/
+
+        console.warn('userId: %i original IP: %s packet IP: %s',
+            packet.userId, session.externalNet.ipAddress, rinfo.address)
 
         if (session.shouldUpdatePorts(packet.portId, packet.port, rinfo.port) === false) {
             return

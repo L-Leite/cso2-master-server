@@ -108,6 +108,29 @@ export class UserSession {
         }
     }
 
+    /**
+     * delete a session's by its owning user's ID
+     * @returns true if successful, null if not
+     */
+    public static async deleteAll(): Promise<boolean> {
+        try {
+            const res: superagent.Response = await superagent
+                .delete('http://' + userSvcAuthority() + '/users/session/all')
+                .accept('json')
+
+            if (res.status === 200) {
+                sessionCache.reset()
+                return true
+            }
+
+            return false
+        } catch (error) {
+            console.error(error)
+            UserSvcPing.checkNow()
+            return false
+        }
+    }
+
     public userId: number
 
     public externalNet: SessionNetworkInfo

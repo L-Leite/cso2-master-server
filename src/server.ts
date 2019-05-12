@@ -7,9 +7,11 @@ import 'app-module-path/register'
 
 import program from 'commander'
 
-import { InventorySvcPing, UserSvcPing } from 'authorities';
+import { InventorySvcPing, UserSvcPing } from 'authorities'
 import { getNetIntf, getOrAskNetIntf, INetIntf } from 'interfacepicker'
 import { ServerInstance } from 'serverinstance'
+
+let masterServer: ServerInstance = null
 
 program
   .version('0.9.2')
@@ -22,19 +24,19 @@ program
 
 function validateEnvVars(): void {
   if (process.env.USERSERVICE_HOST == null) {
-    throw new Error('USERSERVICE_HOST environment variable is not set.');
+    throw new Error('USERSERVICE_HOST environment variable is not set.')
   }
 
   if (process.env.USERSERVICE_PORT == null) {
-    throw new Error('USERSERVICE_PORT environment variable is not set.');
+    throw new Error('USERSERVICE_PORT environment variable is not set.')
   }
 
   if (process.env.INVSERVICE_HOST == null) {
-    throw new Error('INVSERVICE_HOST environment variable is not set.');
+    throw new Error('INVSERVICE_HOST environment variable is not set.')
   }
 
   if (process.env.INVSERVICE_PORT == null) {
-    throw new Error('INVSERVICE_PORT environment variable is not set.');
+    throw new Error('INVSERVICE_PORT environment variable is not set.')
   }
 }
 
@@ -90,7 +92,7 @@ async function startServer(): Promise<void> {
     desiredIp = intf.net.address
   }
 
-  const masterServer: ServerInstance = new ServerInstance({
+  masterServer = new ServerInstance({
     hostname: desiredIp,
     portHolepunch: program.portHolepunch,
     portMaster: program.portMaster,
@@ -119,3 +121,9 @@ const loop: NodeJS.Timeout = setInterval(() => {
   console.warn('User service is ' + UserSvcPing.isAlive() ? 'online' : 'offline')
   console.warn('Inventory service is ' + InventorySvcPing.isAlive() ? 'online' : 'offline')
 }, 1000 * 5)
+
+process.on('SIGINT', () => {
+  masterServer.stop()
+}).on('SIGTERM', () => {
+  masterServer.stop()
+})
