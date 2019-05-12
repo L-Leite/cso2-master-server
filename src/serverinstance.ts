@@ -189,17 +189,19 @@ export class ServerInstance {
             return
         }
 
-        if (session.externalNet.ipAddress !== rinfo.address) {
+        // FIX ME: temporary workaround because Docker sets the NAT IP address when creating a session in usermanager.ts
+        /*if (session.externalNet.ipAddress !== rinfo.address) {
             console.warn('Holepunch IP address is different from session\'s IP. Is someone spoofing packets?'
                 + 'userId: %i original IP: %s packet IP: %s',
                 packet.userId, session.externalNet.ipAddress, rinfo.address)
             return
-        }
+        }*/
 
         if (session.shouldUpdatePorts(packet.portId, packet.port, rinfo.port) === false) {
             return
         }
 
+        session.externalNet.ipAddress = rinfo.address
         session.internalNet.ipAddress = packet.ipAddress
         const portIndex = session.setHolepunch(packet.portId, packet.port, rinfo.port)
 
