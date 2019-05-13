@@ -200,39 +200,12 @@ export class Room {
     }
 
     /**
-     * gives the ammount of players (including bots)
-     * @returns the ammount of players
-     */
-    public getNumOfPlayers(): number {
-        const realPlayers: number = this.usersInfo.length
-        const botPlayers: number = this.getNumOfBotCts() + this.getNumOfBotTerrorists()
-        return realPlayers + botPlayers
-    }
-
-    /**
      * gives the ammount of player slots available in the room
      * @returns the free player slots
      */
     public getFreeSlots(): number {
-        if (this.settings.areBotsEnabled === true) {
-            const hostTeam: RoomTeamNum = this.host.team
-
-            let botsInHostTeam: number = 0
-            let humansInHostTeam: number = 0
-
-            if (hostTeam === RoomTeamNum.CounterTerrorist) {
-                botsInHostTeam = this.getNumOfBotCts()
-                humansInHostTeam = this.getNumOfRealCts()
-            } else if (hostTeam === RoomTeamNum.Terrorist) {
-                botsInHostTeam = this.getNumOfBotTerrorists()
-                humansInHostTeam = this.getNumOfRealTerrorists()
-            }
-
-            return botsInHostTeam - humansInHostTeam
-        }
-
-        const availableSlots: number = this.settings.maxPlayers - this.getNumOfPlayers()
-        return availableSlots >= 0 ? availableSlots : 0
+        const availableSlots: number = this.settings.maxPlayers - this.usersInfo.length
+        return Math.max(0, availableSlots)
     }
 
     /**
@@ -374,20 +347,6 @@ export class Room {
         }
 
         return numTerrorists
-    }
-
-    /**
-     * @returns the ammount of bots in the counter terrorist team
-     */
-    public getNumOfBotCts(): number {
-        return this.settings.numCtBots - this.getNumOfRealCts()
-    }
-
-    /**
-     * @returns the ammount of bots in the terrorist team
-     */
-    public getNumOfBotTerrorists(): number {
-        return this.settings.numTrBots - this.getNumOfRealTerrorists()
     }
 
     /**
