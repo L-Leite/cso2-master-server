@@ -65,7 +65,6 @@ export class ExtendedSocket extends net.Socket {
             this.resetReq()
         }
 
-        this.realSeq++
         return this.seq++
     }
 
@@ -73,7 +72,7 @@ export class ExtendedSocket extends net.Socket {
      * get the current real sequence
      */
     public getRealSeq(): number {
-        return this.realSeq
+        return this.realSeq++
     }
 
     /**
