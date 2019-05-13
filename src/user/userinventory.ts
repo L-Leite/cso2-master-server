@@ -299,13 +299,36 @@ export class UserInventory {
     }
 
     /**
+     * sets an user's whole buy menu
+     * @param ownerId the buy menu owner's user ID
+     * @param column the buy menu's column index
+     * @param items the new buy menu's column items
+     */
+    public static async setBuyMenu(ownerId: number, newBuyMenu: UserBuyMenu): Promise<void> {
+        try {
+            const res: superagent.Response = await superagent
+                .put('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .send(newBuyMenu)
+                .accept('json')
+
+            if (res.status === 200) {
+                buymenuCache.del(ownerId)
+                console.log('Set buy menu successfully')
+            }
+        } catch (error) {
+            console.error(error)
+            InventorySvcPing.checkNow()
+        }
+    }
+
+    /**
      * sets an user's buy menu column (such as the pistols column)
      * @param ownerId the buy menu owner's user ID
      * @param column the buy menu's column index
      * @param items the new buy menu's column items
      */
     public static async setBuyMenuColumn(ownerId: number, column: number, items: number[]): Promise<void> {
-        const params = UserInventory.buildSetBuyMenuParams(ownerId, column, items)
+        const params = UserInventory.buildSetBuyMenuParams(column, items)
         try {
             const res: superagent.Response = await superagent
                 .put('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/buymenu')
@@ -414,46 +437,38 @@ export class UserInventory {
         return null
     }
 
-    private static buildSetBuyMenuParams(userId: number, slot: number, items: number[]): any {
+    private static buildSetBuyMenuParams(slot: number, items: number[]): any {
         switch (slot) {
             case 0:
                 return {
-                    userId,
                     pistols: items,
                 }
             case 1:
                 return {
-                    userId,
                     shotguns: items,
                 }
             case 2:
                 return {
-                    userId,
                     smgs: items,
                 }
             case 3:
                 return {
-                    userId,
                     rifles: items,
                 }
             case 4:
                 return {
-                    userId,
                     snipers: items,
                 }
             case 5:
                 return {
-                    userId,
                     machineguns: items,
                 }
             case 6:
                 return {
-                    userId,
                     melees: items,
                 }
             case 7:
                 return {
-                    userId,
                     equipment: items,
                 }
         }

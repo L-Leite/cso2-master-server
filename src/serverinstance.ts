@@ -206,9 +206,6 @@ export class ServerInstance {
             return
         }*/
 
-        console.warn('userId: %i original IP: %s packet IP: %s',
-            packet.userId, session.externalNet.ipAddress, rinfo.address)
-
         if (session.shouldUpdatePorts(packet.portId, packet.port, rinfo.port) === false) {
             return
         }
@@ -291,6 +288,9 @@ export class ServerInstance {
                 return true
             case PacketId.Host:
                 UserManager.onHostPacket(packet.getData(), connection)
+                return true
+            case PacketId.Option:
+                UserManager.onOptionPacket(packet.getData(), connection)
                 return true
             case PacketId.Favorite:
                 UserManager.onFavoritePacket(packet.getData(), connection)

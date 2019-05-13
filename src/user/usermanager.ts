@@ -14,6 +14,7 @@ import { ChannelManager } from 'channel/channelmanager'
 
 import { FavoritePacketType } from 'packets/favoriteshared'
 import { HostPacketType } from 'packets/hostshared'
+import { OptionPacketType } from 'packets/optionshared'
 
 import { InFavoritePacket } from 'packets/in/favorite'
 import { InFavoriteSetCosmetics } from 'packets/in/favorite/setcosmetics'
@@ -23,6 +24,8 @@ import { InHostSetBuyMenu } from 'packets/in/host/setbuymenu'
 import { InHostSetInventory } from 'packets/in/host/setinventory'
 import { InHostSetLoadout } from 'packets/in/host/setloadout'
 import { InLoginPacket } from 'packets/in/login'
+import { InOptionPacket } from 'packets/in/option'
+import { InOptionBuyMenu } from 'packets/in/option/buymenu'
 
 import { OutFavoritePacket } from 'packets/out/favorite'
 import { OutHostPacket } from 'packets/out/host'
@@ -318,18 +321,63 @@ export class UserManager {
         return true
     }
 
+    /**
+     * listens for option packets
+     * @param optionData the packet's data
+     * @param conn the sender's connection
+     */
+    public static async onOptionPacket(optionData: Buffer, conn: ExtendedSocket): Promise<boolean> {
+        if (conn.hasOwner() === false) {
+            console.warn('uuid ' + conn.uuid + ' tried to set inventory options without a session')
+            return false
+        }
+
+        const optPacket: InOptionPacket = new InOptionPacket(optionData)
+
+        switch (optPacket.packetType) {
+            case OptionPacketType.SetBuyMenu:
+                return this.onOptionSetBuyMenu(optPacket, conn)
+        }
+
+        console.warn('UserManager::onOptionPacket: unknown packet type %i',
+            optPacket.packetType)
+
+        return false
+    }
+
+    public static async onOptionSetBuyMenu(optPacket: InOptionPacket,
+                                           conn: ExtendedSocket): Promise<boolean> {
+        const buyMenuData: InOptionBuyMenu = new InOptionBuyMenu(optPacket)
+        const session: UserSession = await UserSession.get(conn.getOwner())
+
+        if (session == null) {
+            console.warn('Could not get user ID %i\'s session', conn.getOwner())
+            return false
+        }
+
+        console.log('Setting user ID %i\'s buy menu', session.currentRoomId)
+
+        await UserInventory.setBuyMenu(session.userId, buyMenuData.buyMenu)
+
+        return true
+    }
+
     public static async onFavoritePacket(favoriteData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
+        if (sourceConn.hasOwner() === false) {
+            console.warn('uuid ' + sourceConn.uuid + ' tried to set inventory favorites without a session')
+            return false
+        }
+
         const favPacket: InFavoritePacket = new InFavoritePacket(favoriteData)
 
         switch (favPacket.packetType) {
             case FavoritePacketType.SetLoadout:
                 return this.onFavoriteSetLoadout(favPacket, sourceConn)
             case FavoritePacketType.SetCosmetics:
-                const cosmeticsData: InFavoriteSetCosmetics = new InFavoriteSetCosmetics(favPacket)
-                return this.onFavoriteSetCosmetics(cosmeticsData, sourceConn)
+                return this.onFavoriteSetCosmetics(favPacket, sourceConn)
         }
 
-        console.warn('UserManager::onFavoritePacket: unknown host packet type %i',
+        console.warn('UserManager::onFavoritePacket: unknown packet type %i',
             favPacket.packetType)
 
         return false
@@ -358,8 +406,10 @@ export class UserManager {
         return true
     }
 
-    public static async onFavoriteSetCosmetics(cosmeticsData: InFavoriteSetCosmetics,
+    public static async onFavoriteSetCosmetics(favPacket: InFavoritePacket,
                                                sourceConn: ExtendedSocket): Promise<boolean> {
+        const cosmeticsData: InFavoriteSetCosmetics = new InFavoriteSetCosmetics(favPacket)
+
         const session: UserSession = await UserSession.get(sourceConn.getOwner())
 
         if (session == null) {
