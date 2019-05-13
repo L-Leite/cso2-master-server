@@ -8,6 +8,34 @@ Used by this [client launcher](https://github.com/Ochii/cso2-launcher/).
 
 **You can no longer use this by itself**, see [cso2-master-services](https://github.com/Ochii/cso2-master-services) for more information.
 
+## Running
+
+To run the server, you need:
+
+- [Node.js](https://nodejs.org/) (version 10 or better);
+- A server build. You can download [prebuilt files here](https://github.com/Ochii/cso2-master-server/releases/latest) or you can [build it yourself](#building).
+
+Then, in a terminal instance inside the server's directory, do:
+
+```sh
+npm install --only=production # installs the required dependencies (minimal dependencies)
+npm run start # starts the prebuilt server
+```
+
+By the default, the server **will ask you which network interface to listen on**.
+
+See the [command line arguments](#command-line-arguments) for more options.
+
+## Building
+
+After downloading the source code, go to a terminal instance, inside the source code's directory and:
+
+```sh
+npm install # installs the required dependencies
+npm run build # builds the server
+npm run start # starts the fresh server build
+```
+
 ## Starting the master server
 
 ### With docker-compose
@@ -59,4 +87,4 @@ Please read the [contributing guide](https://github.com/Ochii/cso2-master-servic
 
 Read ```LICENSE``` for the project's license information.
 
-Counter-Strike: Online 2 is owned by Valve and Nexon. Neither of these companies are involved with this project.
+I'm not affiliated with either Valve or Nexon, just like I don't own Counter-Strike Online 2.
