@@ -30,6 +30,11 @@ export class ChannelManager {
      * @param sourceConn the user's socket
      */
     public static async onChannelListPacket(sourceConn: ExtendedSocket): Promise<boolean> {
+        if (sourceConn.hasOwner() === false) {
+            console.warn('uuid ' + sourceConn.uuid + ' tried to get channels without a session')
+            return false
+        }
+
         console.log('user ID %i requested server list', sourceConn.getOwner())
         this.sendChannelListTo(sourceConn)
 
@@ -43,6 +48,11 @@ export class ChannelManager {
      * @param users the user manager object
      */
     public static async onRoomRequest(reqData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
+        if (sourceConn.hasOwner() === false) {
+            console.warn('uuid ' + sourceConn.uuid + ' did a room request without a session')
+            return false
+        }
+
         const roomPacket: InRoomPacket = new InRoomPacket(reqData)
 
         switch (roomPacket.packetType) {
@@ -78,6 +88,11 @@ export class ChannelManager {
      * @param users the user manager object
      */
     public static async onRoomListPacket(packetData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
+        if (sourceConn.hasOwner() === false) {
+            console.warn('uuid ' + sourceConn.uuid + ' tried to get rooms without a session')
+            return false
+        }
+
         const session: UserSession = await UserSession.get(sourceConn.getOwner())
 
         if (session == null) {
