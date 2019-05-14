@@ -6,9 +6,11 @@ A master server for Nexon's Counter-Strike: Online 2 written in Typescript on to
 
 Used by this [client launcher](https://github.com/Ochii/cso2-launcher/).
 
-**You can no longer use this by itself**, see [cso2-master-services](https://github.com/Ochii/cso2-master-services) for more information.
+**You can no longer use this by itself**, see [cso2-master-services](https://github.com/Ochii/cso2-master-services#running-the-services) for more information.
 
 ## Running
+
+*Note: go to [cso2-master-services](https://github.com/Ochii/cso2-master-services#running-the-services) for download and build scripts.*
 
 To run the server, you need:
 
@@ -44,7 +46,7 @@ Go to [cso2-master-services](https://github.com/Ochii/cso2-master-services) to l
 
 ### By itself
 
-**You must have an user service and an inventory service running somewhere.**
+**Note: You must have an user service and an inventory service running somewhere.**
 
 You can start the master server with:
 
@@ -72,11 +74,11 @@ Options:
 - ```-P, --port-holepunch [port]``` (*optional*) The server's holepunch (UDP) port (default: 30002)
 - ```-l, --log-packets``` (*optional*) Log the incoming and outgoing packets
 
-## Pull requests
+## Contributing
 
-Pull requests are very much welcome.
+Bug reports and pull requests are very much welcome.
 
-Please read the [contributing guide](https://github.com/Ochii/cso2-master-service/blob/master/.github/PULL_REQUEST_TEMPLATE.md) before contributing.
+See the [current project's progress](https://github.com/Ochii/cso2-master-services/projects/1) for more information.
 
 ## Contributors
 
