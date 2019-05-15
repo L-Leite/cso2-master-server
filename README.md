@@ -8,45 +8,11 @@ Used by this [client launcher](https://github.com/Ochii/cso2-launcher/).
 
 **You can no longer use this by itself**, see [cso2-master-services](https://github.com/Ochii/cso2-master-services#running-the-services) for more information.
 
-## Running
+## Starting the master server
 
 *Note: go to [cso2-master-services](https://github.com/Ochii/cso2-master-services#running-the-services) for download and build scripts.*
 
-To run the server, you need:
-
-- [Node.js](https://nodejs.org/) (version 10 or better);
-- A server build. You can download [prebuilt files here](https://github.com/Ochii/cso2-master-server/releases/latest) or you can [build it yourself](#building).
-
-Then, in a terminal instance inside the server's directory, do:
-
-```sh
-npm install --only=production # installs the required dependencies (minimal dependencies)
-npm run start # starts the prebuilt server
-```
-
-By the default, the server **will ask you which network interface to listen on**.
-
-See the [command line arguments](#command-line-arguments) for more options.
-
-## Building
-
-After downloading the source code, go to a terminal instance, inside the source code's directory and:
-
-```sh
-npm install # installs the required dependencies
-npm run build # builds the server
-npm run start # starts the fresh server build
-```
-
-## Starting the master server
-
-### With docker-compose
-
-Go to [cso2-master-services](https://github.com/Ochii/cso2-master-services) to learn how to start the master server with docker-compose.
-
-### By itself
-
-**Note: You must have an user service and an inventory service running somewhere.**
+***Note: You must have an user service and an inventory service running somewhere.***
 
 You can start the master server with:
 
@@ -63,9 +29,15 @@ node dist/server.js
 
 You **must** set those environment variables, or the service will not start.
 
-### Command line arguments
+By the default, the server **will ask you which network interface to listen on**.
 
-**These are deprecated, and will be removed soon.**
+See the [command line arguments](#command-line-arguments) for more options.
+
+### Starting with docker-compose
+
+Go to [cso2-master-services](https://github.com/Ochii/cso2-master-services) to learn how to start the master server with docker-compose.
+
+### Command line arguments
 
 Options:
 
