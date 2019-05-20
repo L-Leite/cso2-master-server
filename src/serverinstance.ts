@@ -75,9 +75,6 @@ export class ServerInstance {
             this.packetLogging = new PacketLogger()
         }
 
-        // clean up any left over user sessions
-        UserSession.deleteAll()
-
         this.server.on('connection', (socket: net.Socket) => {
             this.onServerConnection(socket)
         }).on('close', () => {
@@ -98,6 +95,9 @@ export class ServerInstance {
     }
 
     public listen(): void {
+        // clean up any left over user sessions
+        UserSession.deleteAll()
+
         this.server.listen(this.masterPort, this.hostname)
         this.holepunchServer.bind(this.holepunchPort, this.hostname)
     }
