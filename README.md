@@ -1,16 +1,16 @@
 # cso2-master-server
 
-[![Build Status](https://travis-ci.org/Ochii/cso2-master-server.svg?branch=master)](https://travis-ci.org/Ochii/cso2-master-server)
+[![Build Status](https://travis-ci.org/L-Leite/cso2-master-server.svg?branch=master)](https://travis-ci.org/L-Leite/cso2-master-server)
 
 A master server for Nexon's Counter-Strike: Online 2 written in Typescript on top of NodeJS.
 
-Used by this [client launcher](https://github.com/Ochii/cso2-launcher/).
+Used by this [client launcher](https://github.com/L-Leite/cso2-launcher/).
 
-**You can no longer use this by itself**, see [cso2-master-services](https://github.com/Ochii/cso2-master-services#running-the-services) for more information.
+**You can no longer use this by itself**, see [cso2-master-services](https://github.com/L-Leite/cso2-master-services#running-the-services) for more information.
 
 ## Starting the master server
 
-*Note: go to [cso2-master-services](https://github.com/Ochii/cso2-master-services#running-the-services) for download and build scripts.*
+*Note: go to [cso2-master-services](https://github.com/L-Leite/cso2-master-services#running-the-services) for download and build scripts.*
 
 ***Note: You must have an user service and an inventory service running somewhere.***
 
@@ -35,7 +35,7 @@ See the [command line arguments](#command-line-arguments) for more options.
 
 ### Starting with docker-compose
 
-Go to [cso2-master-services](https://github.com/Ochii/cso2-master-services) to learn how to start the master server with docker-compose.
+Go to [cso2-master-services](https://github.com/L-Leite/cso2-master-services) to learn how to start the master server with docker-compose.
 
 ### Command line arguments
 
@@ -50,7 +50,7 @@ Options:
 
 Bug reports and pull requests are very much welcome.
 
-See the [current project's progress](https://github.com/Ochii/cso2-master-services/projects/1) for more information.
+See the [current project's progress](https://github.com/L-Leite/cso2-master-services/projects/1) for more information.
 
 ## Contributors
 

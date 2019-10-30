@@ -13,7 +13,7 @@ jobs:
       before_deploy:
         # Set up git user name and tag this commit
         - git config --local user.name "Luís Leite"
-        - git config --local user.email "ochii@leite.xyz"
+        - git config --local user.email "luis@leite.xyz"
         # write npm version to version.txt file
         - npm run write-version
         # setup vars
