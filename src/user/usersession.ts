@@ -20,7 +20,7 @@ export class UserSession {
     public static async create(username: string, password: string): Promise<UserSession> {
         try {
             const res: superagent.Response = await superagent
-                .post('http://' + userSvcAuthority() + '/users/session')
+                .post('http://' + userSvcAuthority() + '/sessions')
                 .send({
                     username,
                     password,
@@ -59,10 +59,7 @@ export class UserSession {
             }
 
             const res: superagent.Response = await superagent
-                .get('http://' + userSvcAuthority() + '/users/session')
-                .send({
-                    userId,
-                })
+                .get('http://' + userSvcAuthority() + '/sessions/' + userId)
                 .accept('json')
 
             if (res.status === 200) {
@@ -89,10 +86,7 @@ export class UserSession {
     public static async delete(userId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .delete('http://' + userSvcAuthority() + '/users/session')
-                .send({
-                    userId,
-                })
+                .delete('http://' + userSvcAuthority() + '/sessions/' + userId)
                 .accept('json')
 
             if (res.status === 200) {
@@ -115,7 +109,7 @@ export class UserSession {
     public static async deleteAll(): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .delete('http://' + userSvcAuthority() + '/users/session/all')
+                .delete('http://' + userSvcAuthority() + '/sessions')
                 .accept('json')
 
             if (res.status === 200) {
@@ -147,7 +141,7 @@ export class UserSession {
     public async update(): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .put('http://' + userSvcAuthority() + '/users/session')
+                .put('http://' + userSvcAuthority() + '/sessions/' + this.userId)
                 .send(this)
                 .accept('json')
 
