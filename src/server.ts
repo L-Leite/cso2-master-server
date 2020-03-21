@@ -105,10 +105,10 @@ async function startServer(): Promise<void> {
 /**
  * wait until the required services are online
  */
-const loop: NodeJS.Timeout = setInterval(() => {
+const loop: NodeJS.Timeout = setInterval(async () => {
   validateEnvVars()
 
-  if (checkServices()) {
+  if (await checkServices()) {
     console.warn('Connected to user and inventory services')
     console.warn('User service is at ' + UserSvcPing.getHost())
     console.warn('Inventory service is at ' + InventorySvcPing.getHost())
@@ -118,8 +118,8 @@ const loop: NodeJS.Timeout = setInterval(() => {
   }
 
   console.warn('Could not connect to the services, waiting 5 seconds until another connection attempt')
-  console.warn('User service is ' + UserSvcPing.isAlive() ? 'online' : 'offline')
-  console.warn('Inventory service is ' + InventorySvcPing.isAlive() ? 'online' : 'offline')
+  console.warn('User service is ' + (UserSvcPing.isAlive() ? 'online' : 'offline'))
+  console.warn('Inventory service is ' + (InventorySvcPing.isAlive() ? 'online' : 'offline'))
 }, 1000 * 5)
 
 process.on('SIGINT', () => {
