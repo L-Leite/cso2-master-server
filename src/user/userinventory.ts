@@ -6,7 +6,7 @@ import { UserCosmetics } from 'user/usercosmetics'
 import { UserInventoryItem } from 'user/userinventoryitem'
 import { UserLoadout } from 'user/userloadout'
 
-import { inventorySvcAuthority, InventorySvcPing } from 'authorities'
+import { userSvcAuthority, UserSvcPing } from 'authorities'
 
 export class UserInventory {
     /**
@@ -15,7 +15,7 @@ export class UserInventory {
      * @returns true if successful, false if not
      */
     public static async create(userId: number): Promise<boolean> {
-        if (InventorySvcPing.isAlive() === false) {
+        if (UserSvcPing.isAlive() === false) {
             return false
         }
 
@@ -40,12 +40,12 @@ export class UserInventory {
     public static async createInventory(ownerId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .post('http://' + inventorySvcAuthority() + '/inventory/' + ownerId)
+                .post('http://' + userSvcAuthority() + '/inventory/' + ownerId)
                 .accept('json')
             return res.status === 201
         } catch (error) {
             console.error(error)
-            InventorySvcPing.checkNow()
+            UserSvcPing.checkNow()
             return false
         }
     }
@@ -58,12 +58,12 @@ export class UserInventory {
     public static async createCosmetics(ownerId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .post('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
+                .post('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
                 .accept('json')
             return res.status === 201
         } catch (error) {
             console.error(error)
-            InventorySvcPing.checkNow()
+            UserSvcPing.checkNow()
             return false
         }
     }
@@ -76,12 +76,12 @@ export class UserInventory {
     public static async createLoadouts(ownerId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .post('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/loadout')
+                .post('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/loadout')
                 .accept('json')
             return res.status === 201
         } catch (error) {
             console.error(error)
-            InventorySvcPing.checkNow()
+            UserSvcPing.checkNow()
             return false
         }
     }
@@ -94,12 +94,12 @@ export class UserInventory {
     public static async createBuyMenu(ownerId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .post('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .post('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
                 .accept('json')
             return res.status === 201
         } catch (error) {
             console.error(error)
-            InventorySvcPing.checkNow()
+            UserSvcPing.checkNow()
             return null
         }
     }
@@ -116,12 +116,12 @@ export class UserInventory {
                 return inventory
             }
 
-            if (InventorySvcPing.isAlive() === false) {
+            if (UserSvcPing.isAlive() === false) {
                 return null
             }
 
             const res: superagent.Response = await superagent
-                .get('http://' + inventorySvcAuthority() + '/inventory/' + ownerId)
+                .get('http://' + userSvcAuthority() + '/inventory/' + ownerId)
                 .accept('json')
 
             if (res.status === 200) {
@@ -132,7 +132,7 @@ export class UserInventory {
             return null
         } catch (error) {
             console.error(error)
-            InventorySvcPing.checkNow()
+            UserSvcPing.checkNow()
             return null
         }
     }
@@ -149,12 +149,12 @@ export class UserInventory {
                 return cosmetics
             }
 
-            if (InventorySvcPing.isAlive() === false) {
+            if (UserSvcPing.isAlive() === false) {
                 return null
             }
 
             const res: superagent.Response = await superagent
-                .get('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
+                .get('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
                 .accept('json')
 
             if (res.status === 200) {
@@ -165,7 +165,7 @@ export class UserInventory {
             return null
         } catch (error) {
             console.error(error)
-            InventorySvcPing.checkNow()
+            UserSvcPing.checkNow()
             return null
         }
     }
@@ -178,13 +178,13 @@ export class UserInventory {
     public static async getLoadout(ownerId: number, loadoutNum: number): Promise<UserLoadout> {
         try {
             const res: superagent.Response = await superagent
-                .get('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/loadout')
+                .get('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/loadout')
                 .send({ loadoutNum })
                 .accept('json')
             return res.status === 200 ? res.body : null
         } catch (error) {
             console.error(error)
-            InventorySvcPing.checkNow()
+            UserSvcPing.checkNow()
             return null
         }
     }
@@ -200,7 +200,7 @@ export class UserInventory {
             return loadouts
         }
 
-        if (InventorySvcPing.isAlive() === false) {
+        if (UserSvcPing.isAlive() === false) {
             return null
         }
 
@@ -227,12 +227,12 @@ export class UserInventory {
                 return buymenu
             }
 
-            if (InventorySvcPing.isAlive() === false) {
+            if (UserSvcPing.isAlive() === false) {
                 return null
             }
 
             const res: superagent.Response = await superagent
-                .get('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .get('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
                 .accept('json')
 
             if (res.status === 200) {
@@ -243,7 +243,7 @@ export class UserInventory {
             return null
         } catch (error) {
             console.error(error)
-            InventorySvcPing.checkNow()
+            UserSvcPing.checkNow()
             return null
         }
     }
@@ -258,7 +258,7 @@ export class UserInventory {
         const params = UserInventory.buildSetCosmeticParams(ownerId, slot, itemId)
         try {
             const res: superagent.Response = await superagent
-                .put('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
+                .put('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
                 .send(params)
                 .accept('json')
 
@@ -268,7 +268,7 @@ export class UserInventory {
             }
         } catch (error) {
             console.error(error)
-            InventorySvcPing.checkNow()
+            UserSvcPing.checkNow()
         }
     }
 
@@ -284,7 +284,7 @@ export class UserInventory {
         const params = UserInventory.buildSetLoadoutParams(ownerId, loadout, slot, itemId)
         try {
             const res: superagent.Response = await superagent
-                .put('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/loadout')
+                .put('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/loadout')
                 .send(params)
                 .accept('json')
 
@@ -294,7 +294,7 @@ export class UserInventory {
             }
         } catch (error) {
             console.error(error)
-            InventorySvcPing.checkNow()
+            UserSvcPing.checkNow()
         }
     }
 
@@ -307,7 +307,7 @@ export class UserInventory {
     public static async setBuyMenu(ownerId: number, newBuyMenu: UserBuyMenu): Promise<void> {
         try {
             const res: superagent.Response = await superagent
-                .put('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .put('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
                 .send(newBuyMenu)
                 .accept('json')
 
@@ -317,7 +317,7 @@ export class UserInventory {
             }
         } catch (error) {
             console.error(error)
-            InventorySvcPing.checkNow()
+            UserSvcPing.checkNow()
         }
     }
 
@@ -331,7 +331,7 @@ export class UserInventory {
         const params = UserInventory.buildSetBuyMenuParams(column, items)
         try {
             const res: superagent.Response = await superagent
-                .put('http://' + inventorySvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .put('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
                 .send(params)
                 .accept('json')
 
@@ -341,7 +341,7 @@ export class UserInventory {
             }
         } catch (error) {
             console.error(error)
-            InventorySvcPing.checkNow()
+            UserSvcPing.checkNow()
         }
     }
 

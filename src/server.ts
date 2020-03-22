@@ -7,7 +7,7 @@ import 'app-module-path/register'
 
 import program from 'commander'
 
-import { InventorySvcPing, UserSvcPing } from 'authorities'
+import { UserSvcPing } from 'authorities'
 import { getNetIntf, getOrAskNetIntf, INetIntf } from 'interfacepicker'
 import { ServerInstance } from 'serverinstance'
 
@@ -43,10 +43,10 @@ function validateEnvVars(): void {
 async function checkServices(): Promise<boolean> {
   await Promise.all([
     UserSvcPing.checkNow(),
-    InventorySvcPing.checkNow(),
+    UserSvcPing.checkNow(),
   ])
 
-  return UserSvcPing.isAlive() && InventorySvcPing.isAlive()
+  return UserSvcPing.isAlive() && UserSvcPing.isAlive()
 }
 
 /**
@@ -111,7 +111,7 @@ const loop: NodeJS.Timeout = setInterval(async () => {
   if (await checkServices()) {
     console.warn('Connected to user and inventory services')
     console.warn('User service is at ' + UserSvcPing.getHost())
-    console.warn('Inventory service is at ' + InventorySvcPing.getHost())
+    console.warn('Inventory service is at ' + UserSvcPing.getHost())
     startServer()
     clearInterval(loop)
     return
@@ -119,7 +119,7 @@ const loop: NodeJS.Timeout = setInterval(async () => {
 
   console.warn('Could not connect to the services, waiting 5 seconds until another connection attempt')
   console.warn('User service is ' + (UserSvcPing.isAlive() ? 'online' : 'offline'))
-  console.warn('Inventory service is ' + (InventorySvcPing.isAlive() ? 'online' : 'offline'))
+  console.warn('Inventory service is ' + (UserSvcPing.isAlive() ? 'online' : 'offline'))
 }, 1000 * 5)
 
 process.on('SIGINT', () => {
