@@ -8,32 +8,6 @@ import { userSvcAuthority, UserSvcPing } from 'authorities'
  */
 export class User {
     /**
-     * create an user
-     * @param username the new user's name
-     * @param playername the user's ingame player name
-     * @param password the user's account password
-     * @returns true if successful, false if not
-     */
-    // TODO: delete this?
-    public static async create(username: string, playername: string, password: string): Promise<boolean> {
-        try {
-            const res: superagent.Response = await superagent
-                .post('http://' + userSvcAuthority() + '/users/')
-                .send({
-                    username,
-                    playername,
-                    password,
-                })
-                .accept('json')
-            return res.status === 200
-        } catch (error) {
-            console.error(error)
-            UserSvcPing.checkNow()
-            return false
-        }
-    }
-
-    /**
      * get an user's by its ID
      * @param userId the user's ID
      * @returns the user object if found, null otherwise
@@ -99,16 +73,54 @@ export class User {
     public userId: number
     public userName: string
     public playerName: string
+
+    public points: number
+    public cash: number
+    public mpoints: number
+
     public level: number
-    public avatar: number
     public curExp: number
     public maxExp: number
-    public rank: number
     public vipLevel: number
+
+    public rank: number
+    public rankFrame: number
+
+    public playedMatches: number
     public wins: number
+    public secondsPlayed: number
+
     public kills: number
     public deaths: number
     public assists: number
+    public headshots: number
+    public accuracy: number
+
+    public avatar: number
+    public unlockedAvatars: number[]
+
+    public netCafeName: string
+
+    public clanName: string
+    public clanMark: number
+
+    public worldRank: number
+
+    public titleId: number
+    public unlockedTitles: number[]
+    public signature: string
+
+    public bestGamemode: number
+    public bestMap: number
+
+    public unlockedAchievements: number[]
+
+    public skillHumanCurXp: number
+    public skillHumanMaxXp: number
+    public skillHumanPoints: number
+    public skillZombieCurXp: number
+    public skillZombieMaxXp: number
+    public skillZombiePoints: number
 
     /**
      * is the user a VIP?
