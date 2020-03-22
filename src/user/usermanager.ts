@@ -12,10 +12,13 @@ import { UserSession } from 'user/usersession'
 
 import { ChannelManager } from 'channel/channelmanager'
 
+import { AboutmePacketType } from 'packets/aboutmeshared'
 import { FavoritePacketType } from 'packets/favoriteshared'
 import { HostPacketType } from 'packets/hostshared'
 import { OptionPacketType } from 'packets/optionshared'
 
+import { InAboutmePacket } from 'packets/in/aboutme'
+import { InAboutmeSetEmblem } from 'packets/in/aboutme/emblem'
 import { InFavoritePacket } from 'packets/in/favorite'
 import { InFavoriteSetCosmetics } from 'packets/in/favorite/setcosmetics'
 import { InFavoriteSetLoadout } from 'packets/in/favorite/setloadout'
@@ -317,6 +320,53 @@ export class UserManager {
 
         console.log('Sending user ID %i\'s buy menu to host ID %i, room %s (room id %i)',
             requesterId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+
+        return true
+    }
+
+    public static async onAboutmePacket(packetData: Buffer, connection: ExtendedSocket): Promise<boolean> {
+        const aboutPacket: InAboutmePacket = new InAboutmePacket(packetData)
+
+        if (connection.hasOwner() === false) {
+            console.warn('connection %s sent a host packet without a session', connection.uuid)
+            return false
+        }
+
+        const user: User = await User.get(connection.getOwner())
+
+        if (user == null) {
+            console.error('couldn\'t get user %i from connection %s', connection.uuid)
+            return false
+        }
+
+        switch (aboutPacket.packetType) {
+            case AboutmePacketType.SetEmblem:
+                return this.onAboutmeSetEmblem(aboutPacket, connection)
+            /*case HostPacketType.SetInventory:
+                return this.onHostSetUserInventory(hostPacket, connection)
+            case HostPacketType.SetLoadout:
+                return this.onHostSetUserLoadout(hostPacket, connection)
+            case HostPacketType.SetBuyMenu:
+                return this.onHostSetUserBuyMenu(hostPacket, connection)*/
+        }
+
+        console.warn('UserManager::onHostPacket: unknown host packet type %i',
+            aboutPacket.packetType)
+
+        return false
+    }
+
+    public static async onAboutmeSetEmblem(aboutPkt: InAboutmePacket,
+                                           conn: ExtendedSocket): Promise<boolean> {
+        const emblemData: InAboutmeSetEmblem = new InAboutmeSetEmblem(aboutPkt)
+        const session: UserSession = await UserSession.get(conn.getOwner())
+
+        if (session == null) {
+            console.warn('Could not get user ID %i\'s session', conn.getOwner())
+            return false
+        }
+
+        console.log('Setting user ID %i\'s emblem', session.currentRoomId)
 
         return true
     }
