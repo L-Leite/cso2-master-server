@@ -13,6 +13,7 @@
             "never"
         ],
         "object-literal-sort-keys": false,
-        "no-unused-variable": true
+        "no-unused-variable": true,
+        "no-bitwise": false
     }
 }
