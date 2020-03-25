@@ -30,14 +30,6 @@ function validateEnvVars(): void {
   if (process.env.USERSERVICE_PORT == null) {
     throw new Error('USERSERVICE_PORT environment variable is not set.')
   }
-
-  if (process.env.INVSERVICE_HOST == null) {
-    throw new Error('INVSERVICE_HOST environment variable is not set.')
-  }
-
-  if (process.env.INVSERVICE_PORT == null) {
-    throw new Error('INVSERVICE_PORT environment variable is not set.')
-  }
 }
 
 async function checkServices(): Promise<boolean> {
