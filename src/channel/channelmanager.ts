@@ -229,7 +229,7 @@ export class ChannelManager {
         session.currentRoomId = newRoom.id
         await session.update()
 
-        newRoom.sendJoinNewRoom(session.userId)
+        await newRoom.sendJoinNewRoom(session.userId)
         newRoom.sendRoomSettingsTo(session.userId)
 
         console.log('user ID %i created a new room. name: "%s" (id: %i)',
@@ -280,7 +280,7 @@ export class ChannelManager {
         session.currentRoomId = desiredRoom.id
         await session.update()
 
-        desiredRoom.sendJoinNewRoom(session.userId)
+        await desiredRoom.sendJoinNewRoom(session.userId)
         desiredRoom.sendRoomSettingsTo(session.userId)
 
         desiredRoom.updateNewPlayerReadyStatus(session.userId)
