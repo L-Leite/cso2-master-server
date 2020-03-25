@@ -4,7 +4,7 @@ import { ExtendedSocket } from 'extendedsocket'
 
 import { ChannelManager } from 'channel/channelmanager'
 import { RoomSettings } from 'room/roomsettings'
-import { RoomUser } from 'room/roomuser'
+import { RoomUserEntry } from 'room/roomuserentry'
 
 import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
 import { OutHostPacket } from 'packets/out/host'
@@ -172,8 +172,8 @@ export class Room {
     public id: number
     public settings: RoomSettings
 
-    public host: RoomUser
-    public usersInfo: RoomUser[]
+    public host: RoomUserEntry
+    public usersInfo: RoomUserEntry[]
 
     private emptyRoomCallback: (emptyRoom: Room, channel: Channel) => void
     private parentChannel: Channel
@@ -230,8 +230,8 @@ export class Room {
      * @param userId the target user's ID
      * @returns the created user's room data
      */
-    public addUser(userId: number, connection: ExtendedSocket): RoomUser {
-        const userData: RoomUser = new RoomUser(userId, connection,
+    public addUser(userId: number, connection: ExtendedSocket): RoomUserEntry {
+        const userData: RoomUserEntry = new RoomUserEntry(userId, connection,
             this.findDesirableTeamNum(), RoomReadyStatus.NotReady)
         this.usersInfo.push(userData)
         return userData
@@ -293,7 +293,7 @@ export class Room {
      * @param userId the target user's ID
      */
     public getUserTeam(userId: number): RoomTeamNum {
-        const info: RoomUser = this.getRoomUser(userId)
+        const info: RoomUserEntry = this.getRoomUser(userId)
 
         if (info == null) {
             console.warn('getUserTeam: userId %i not found', userId)
@@ -372,15 +372,15 @@ export class Room {
      * @param userId the target user's ID
      * @returns the user's room info if found, else it returns null
      */
-    public getRoomUser(userId: number): RoomUser {
-        return this.usersInfo.find((u: RoomUser) => u.userId === userId)
+    public getRoomUser(userId: number): RoomUserEntry {
+        return this.usersInfo.find((u: RoomUserEntry) => u.userId === userId)
     }
 
     /**
      * returns an user's ready status
      * @param userId the target user's ID
      */
-    public getUserReadyStatus(user: RoomUser): RoomReadyStatus {
+    public getUserReadyStatus(user: RoomUserEntry): RoomReadyStatus {
         return user.ready
     }
 
@@ -390,7 +390,7 @@ export class Room {
      * @returns true if an user is ready, false if not
      */
     public isUserReady(userId: number): boolean {
-        const userInfo: RoomUser = this.getRoomUser(userId)
+        const userInfo: RoomUserEntry = this.getRoomUser(userId)
 
         if (userInfo == null) {
             console.warn('isUserReady: couldnt get user\'s room data (userId: %i)', userId)
@@ -404,7 +404,7 @@ export class Room {
      * is the user ingame?
      * @param user the target user
      */
-    public isUserIngame(user: RoomUser): boolean {
+    public isUserIngame(user: RoomUserEntry): boolean {
         return user.isIngame
     }
 
@@ -427,7 +427,7 @@ export class Room {
      * @param newTeam the user's new team
      */
     public updateUserTeam(userId: number, newTeam: RoomTeamNum): void {
-        const user: RoomUser = this.getRoomUser(userId)
+        const user: RoomUserEntry = this.getRoomUser(userId)
         user.team = newTeam
 
         // inform every user in the room of the changes
@@ -439,7 +439,7 @@ export class Room {
      * @param user the target user
      * @param ingame the new ingame status
      */
-    public setUserIngame(user: RoomUser, ingame: boolean): void {
+    public setUserIngame(user: RoomUserEntry, ingame: boolean): void {
         user.isIngame = ingame
         user.ready = ingame ? RoomReadyStatus.Ingame : RoomReadyStatus.NotReady
     }
@@ -456,7 +456,7 @@ export class Room {
             return null
         }
 
-        const userInfo: RoomUser = this.getRoomUser(userId)
+        const userInfo: RoomUserEntry = this.getRoomUser(userId)
 
         if (userInfo == null) {
             console.warn('toggleUserReadyStatus: couldnt get userinfo')
@@ -574,7 +574,7 @@ export class Room {
         this.setStatus(RoomStatus.Waiting)
         this.resetIngameUsersReadyStatus()
 
-        this.recurseUsers((u: RoomUser): void => {
+        this.recurseUsers((u: RoomUserEntry): void => {
             this.sendRoomStatusTo(u)
             this.sendRoomUsersReadyStatusTo(u)
             if (this.isUserIngame(u) === true) {
@@ -648,7 +648,7 @@ export class Room {
      * loop through all the players
      * @param fn the func to call in each user
      */
-    public recurseUsers(fn: (u: RoomUser) => void): void {
+    public recurseUsers(fn: (u: RoomUserEntry) => void): void {
         for (const user of this.usersInfo) {
             fn(user)
         }
@@ -658,7 +658,7 @@ export class Room {
      * loop through all the non host players
      * @param fn the func to call in each user
      */
-    public recurseNonHostUsers(fn: (u: RoomUser) => void): void {
+    public recurseNonHostUsers(fn: (u: RoomUserEntry) => void): void {
         for (const user of this.usersInfo) {
             if (user !== this.host) {
                 fn(user)
@@ -670,7 +670,7 @@ export class Room {
      * loop through all the non host players
      * @param fn the func to call in each user
      */
-    public async recurseNonHostUsersAsync(fn: (u: RoomUser) => Promise<void>): Promise<void> {
+    public async recurseNonHostUsersAsync(fn: (u: RoomUserEntry) => Promise<void>): Promise<void> {
         for (const user of this.usersInfo) {
             if (user !== this.host) {
                 fn(user)
@@ -683,7 +683,7 @@ export class Room {
      * @param userId the new user's ID
      */
     public async sendJoinNewRoom(userId: number): Promise<void> {
-        const user: RoomUser = this.getRoomUser(userId)
+        const user: RoomUserEntry = this.getRoomUser(userId)
         user.conn.send(await OutRoomPacket.createAndJoin(this))
     }
 
@@ -837,11 +837,11 @@ export class Room {
      * @param user the target user
      */
     public sendRoomSettingsTo(userId: number): void {
-        const user: RoomUser = this.getRoomUser(userId)
+        const user: RoomUserEntry = this.getRoomUser(userId)
         user.conn.send(OutRoomPacket.updateSettings(this.settings))
     }
 
-    public sendUpdateRoomSettingsTo(user: RoomUser, updatedSettings: RoomSettings): void {
+    public sendUpdateRoomSettingsTo(user: RoomUserEntry, updatedSettings: RoomSettings): void {
         user.conn.send(OutRoomPacket.updateSettings(updatedSettings))
     }
 
@@ -850,7 +850,7 @@ export class Room {
      * @param user the player to send the other player's ready status
      * @param newUser the player whose ready status will be sent
      */
-    public async sendNewUserTo(user: RoomUser, newUser: RoomUser): Promise<void> {
+    public async sendNewUserTo(user: RoomUserEntry, newUser: RoomUserEntry): Promise<void> {
         const team: RoomTeamNum = newUser.team
 
         if (team == null) {
@@ -868,8 +868,8 @@ export class Room {
      * @param userId the new player's user ID
      */
     public updateNewPlayerReadyStatus(userId: number): void {
-        const target: RoomUser = this.getRoomUser(userId)
-        this.recurseUsers((u: RoomUser): void => {
+        const target: RoomUserEntry = this.getRoomUser(userId)
+        this.recurseUsers((u: RoomUserEntry): void => {
             // send everyone's status to the new user
             this.sendUserReadyStatusTo(target, u)
 
@@ -886,7 +886,7 @@ export class Room {
         this.setStatus(RoomStatus.Ingame)
         this.setUserIngame(this.host, true)
 
-        this.recurseNonHostUsersAsync(async (u: RoomUser): Promise<void> => {
+        this.recurseNonHostUsersAsync(async (u: RoomUserEntry): Promise<void> => {
             this.sendRoomStatusTo(u)
             if (u.isReady()) {
                 this.setUserIngame(u, true)
@@ -903,7 +903,7 @@ export class Room {
     }
 
     public async guestGameJoin(guestUserId: number): Promise<void> {
-        const guest: RoomUser = this.getRoomUser(guestUserId)
+        const guest: RoomUserEntry = this.getRoomUser(guestUserId)
 
         this.sendRoomStatusTo(guest)
         this.setUserIngame(guest, true)
@@ -920,8 +920,8 @@ export class Room {
      * @param sourceUserId the user ID of the player who updated their ready status
      */
     public broadcastNewUserReadyStatus(sourceUserId: number): void {
-        const sourceUser: RoomUser = this.getRoomUser(sourceUserId)
-        this.recurseUsers((u: RoomUser): void => {
+        const sourceUser: RoomUserEntry = this.getRoomUser(sourceUserId)
+        this.recurseUsers((u: RoomUserEntry): void => {
             this.sendUserReadyStatusTo(u, sourceUser)
         })
     }
@@ -930,7 +930,7 @@ export class Room {
      * sends updated room settings to everyone in it
      */
     public broadcastNewRoomSettings(): void {
-        this.recurseUsers((u: RoomUser): void => {
+        this.recurseUsers((u: RoomUserEntry): void => {
             this.sendUpdateRoomSettingsTo(u, this.settings)
         })
     }
@@ -941,8 +941,8 @@ export class Room {
      * @param newTeamNum the new team number
      */
     public broadcastNewUserTeamNum(sourceUserId: number, newTeamNum: RoomTeamNum): void {
-        const sourceUser: RoomUser = this.getRoomUser(sourceUserId)
-        this.recurseUsers((u: RoomUser): void => {
+        const sourceUser: RoomUserEntry = this.getRoomUser(sourceUserId)
+        this.recurseUsers((u: RoomUserEntry): void => {
             this.sendTeamChangeTo(u, sourceUser, newTeamNum)
 
             if (this.settings.areBotsEnabled) {
@@ -957,7 +957,7 @@ export class Room {
      * @param shouldCountdown should the countdown continue?
      */
     public broadcastCountdown(shouldCountdown: boolean): void {
-        this.recurseUsers((u: RoomUser): void => {
+        this.recurseUsers((u: RoomUserEntry): void => {
             this.sendCountdownTo(u, shouldCountdown)
         })
     }
@@ -967,7 +967,7 @@ export class Room {
      * @param user the player to send the other player's ready status
      * @param player the player whose ready status will be sent
      */
-    public sendUserReadyStatusTo(user: RoomUser, player: RoomUser): void {
+    public sendUserReadyStatusTo(user: RoomUserEntry, player: RoomUserEntry): void {
         const ready: RoomReadyStatus = player.ready
 
         if (ready == null) {
@@ -983,8 +983,8 @@ export class Room {
      * send everyone's ready status to an user
      * @param targetUser the user to send the info to
      */
-    public sendRoomUsersReadyStatusTo(targetUser: RoomUser): void {
-        this.recurseUsers((u: RoomUser): void => {
+    public sendRoomUsersReadyStatusTo(targetUser: RoomUserEntry): void {
+        this.recurseUsers((u: RoomUserEntry): void => {
             this.sendUserReadyStatusTo(targetUser, u)
         })
     }
@@ -993,7 +993,7 @@ export class Room {
      * send everyone everyone's ready status
      */
     public sendBroadcastReadyStatus(): void {
-        this.recurseUsers((u: RoomUser): void => {
+        this.recurseUsers((u: RoomUserEntry): void => {
             this.sendRoomUsersReadyStatusTo(u)
         })
     }
@@ -1003,7 +1003,7 @@ export class Room {
      * @param user the user that will connect to the host
      * @param host the host to connect to
      */
-    public async sendConnectHostTo(user: RoomUser, host: RoomUser): Promise<void> {
+    public async sendConnectHostTo(user: RoomUserEntry, host: RoomUserEntry): Promise<void> {
         const hostSession: UserSession = await UserSession.get(host.userId)
 
         if (hostSession == null) {
@@ -1020,7 +1020,7 @@ export class Room {
      * @param host the user hosting the match
      * @param guest the guest player joining the host's match
      */
-    public async sendGuestDataTo(host: RoomUser, guest: RoomUser): Promise<void> {
+    public async sendGuestDataTo(host: RoomUserEntry, guest: RoomUserEntry): Promise<void> {
         const guestSession: UserSession = await UserSession.get(guest.userId)
 
         if (guestSession == null) {
@@ -1035,7 +1035,7 @@ export class Room {
      * tell the host to start the game match
      * @param host the game match's host
      */
-    public sendStartMatchTo(host: RoomUser): void {
+    public sendStartMatchTo(host: RoomUserEntry): void {
         host.conn.send(OutHostPacket.gameStart(host.userId))
     }
 
@@ -1045,7 +1045,7 @@ export class Room {
      * @param player the user who changed its team
      * @param newTeamNum the player's new team number
      */
-    public sendTeamChangeTo(user: RoomUser, player: RoomUser, newTeamNum: RoomTeamNum): void {
+    public sendTeamChangeTo(user: RoomUserEntry, player: RoomUserEntry, newTeamNum: RoomTeamNum): void {
         user.conn.send(OutRoomPacket.setUserTeam(player.userId, newTeamNum))
     }
 
@@ -1054,8 +1054,8 @@ export class Room {
      * @param player the user who changed its team
      * @param newTeamNum the player's new team number
      */
-    public sendTeamChangeGlobal(player: RoomUser, newTeamNum: RoomTeamNum): void {
-        this.recurseUsers((u: RoomUser) => {
+    public sendTeamChangeGlobal(player: RoomUserEntry, newTeamNum: RoomTeamNum): void {
+        this.recurseUsers((u: RoomUserEntry) => {
             this.sendTeamChangeTo(u, player, newTeamNum)
         })
     }
@@ -1065,7 +1065,7 @@ export class Room {
      * @param user the user to send the countdown to
      * @param shouldCountdown should the countdown continue
      */
-    public sendCountdownTo(user: RoomUser, shouldCountdown: boolean): void {
+    public sendCountdownTo(user: RoomUserEntry, shouldCountdown: boolean): void {
         user.conn.send(shouldCountdown
             ? OutRoomPacket.progressCountdown(this.getCountdown())
             : OutRoomPacket.stopCountdown())
@@ -1074,7 +1074,7 @@ export class Room {
     /**
      * ends a room's match and sends the players to the result window
      */
-    public sendGameEnd(user: RoomUser): void {
+    public sendGameEnd(user: RoomUserEntry): void {
         // TODO: set game end to ingame users only
         user.conn.send(OutHostPacket.hostStop())
         user.conn.send(OutRoomPacket.setGameResult())
@@ -1084,7 +1084,7 @@ export class Room {
      * send an user its current room's status
      * @param user the target user
      */
-    public sendRoomStatusTo(user: RoomUser): void {
+    public sendRoomStatusTo(user: RoomUserEntry): void {
         const settings: RoomSettings = new RoomSettings()
         settings.status = this.settings.status
         settings.isIngame = this.settings.isIngame
@@ -1127,7 +1127,7 @@ export class Room {
             //
             const hostTeamNum: RoomTeamNum = this.host.team
 
-            this.recurseNonHostUsers((u: RoomUser): void => {
+            this.recurseNonHostUsers((u: RoomUserEntry): void => {
                 const curUserTeamNum: RoomTeamNum = this.getUserTeam(u.userId)
 
                 if (curUserTeamNum !== hostTeamNum) {
@@ -1177,7 +1177,7 @@ export class Room {
      * sets the new room host and tells the users about it
      * @param newHost the new host user
      */
-    private updateHost(newHost: RoomUser): void {
+    private updateHost(newHost: RoomUserEntry): void {
         this.host = newHost
 
         for (const user of this.usersInfo) {

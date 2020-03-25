@@ -4,7 +4,7 @@ import { RoomReadyStatus, RoomTeamNum } from 'room/room'
 /**
  * room info specific to a room's user
  */
-export class RoomUser {
+export class RoomUserEntry {
     public userId: number
     public conn: ExtendedSocket
     public team: RoomTeamNum
