@@ -308,8 +308,8 @@ export class ServerInstance {
      */
     private async onSocketClose(conn: ExtendedSocket, hadError: boolean): Promise<void> {
         console.log('socket ' + conn.uuid + ' closed hadError: ' + hadError)
-        await Room.cleanUpUser(conn.getOwner())
-        UserSession.delete(conn.getOwner())
+        await Room.cleanUpUser(conn.getOwner().userId)
+        UserSession.delete(conn.getOwner().userId)
     }
 
     /**

@@ -3,6 +3,8 @@ import net from 'net'
 import { PacketLogger } from 'packetlogger'
 import { OutPacketBase } from 'packets/out/packet'
 
+import { User } from 'user/user'
+
 const MIN_SEQUENCE: number = 0
 const MAX_SEQUENCE: number = 255
 
@@ -15,7 +17,7 @@ export class ExtendedSocket extends net.Socket {
         const newSocket: ExtendedSocket = new ExtendedSocket()
         Object.assign(newSocket, socket)
 
-        newSocket.ownerId = 0
+        newSocket.owner = null
         newSocket.realSeq = MIN_SEQUENCE
         newSocket.packetDumper = packetDumper
 
@@ -25,7 +27,7 @@ export class ExtendedSocket extends net.Socket {
     // an uuid to identify the socket
     public uuid: string
     // the connection owning user, null if it doesn't have any
-    private ownerId: number
+    private owner: User
     // the current packet sequence (1 byte long)
     private seq: number
     // the real current packet sequence, used by logger
@@ -33,11 +35,11 @@ export class ExtendedSocket extends net.Socket {
     private packetDumper: PacketLogger
 
     /**
-     * returns the socket's owning user's ID if available
+     * @returns the socket's owning user's object if available
      * if it doesn't have any owner, it returns null
      */
-    public getOwner() {
-        return this.ownerId
+    public getOwner(): User {
+        return this.owner
     }
 
     /**
@@ -45,15 +47,15 @@ export class ExtendedSocket extends net.Socket {
      * @returns true if it has, false if not
      */
     public hasOwner(): boolean {
-        return this.getOwner() !== 0
+        return this.getOwner() != null
     }
 
     /**
      * sets the socket's owning user
-     * @param newOwnerId the new owner's user ID
+     * @param newOwner the new owner's user object
      */
-    public setOwner(newOwnerId: number): void {
-        this.ownerId = newOwnerId
+    public setOwner(newOwner: User): void {
+        this.owner = newOwner
     }
 
     /**

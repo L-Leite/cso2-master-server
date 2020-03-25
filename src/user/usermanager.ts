@@ -18,7 +18,7 @@ import { HostPacketType } from 'packets/hostshared'
 import { OptionPacketType } from 'packets/optionshared'
 
 import { InAboutmePacket } from 'packets/in/aboutme'
-import { InAboutmeSetEmblem } from 'packets/in/aboutme/emblem'
+import { InAboutmeSetAvatar } from 'packets/in/aboutme/avatar'
 import { InFavoritePacket } from 'packets/in/favorite'
 import { InFavoriteSetCosmetics } from 'packets/in/favorite/setcosmetics'
 import { InFavoriteSetLoadout } from 'packets/in/favorite/setloadout'
@@ -38,6 +38,11 @@ import { OutUserInfoPacket } from 'packets/out/userinfo'
 import { OutUserStartPacket } from 'packets/out/userstart'
 
 import { userSvcAuthority, UserSvcPing } from 'authorities'
+
+import { UserService } from 'services/userservice'
+
+// TODO: move this to UserManager, make UserManager not static
+const userService = new UserService(userSvcAuthority())
 
 /**
  * handles the user logic
@@ -113,15 +118,15 @@ export class UserManager {
         session.externalNet.ipAddress = (connection.address() as net.AddressInfo).address
         session.update()
 
-        connection.setOwner(session.userId)
-
-        const user: User = await User.get(session.userId)
+        const user: User = await userService.GetUserById(session.userId)
 
         if (user == null) {
             console.error('Couldn\'t get user ID %i\' information', session.userId)
             connection.end()
             return false
         }
+
+        connection.setOwner(user)
 
         UserManager.sendUserInfoTo(session.userId, user.userName, user.playerName, connection, holepunchPort)
         UserManager.sendInventory(session.userId, connection)
@@ -143,7 +148,7 @@ export class UserManager {
             return false
         }
 
-        const user: User = await User.get(connection.getOwner())
+        const user: User = connection.getOwner()
 
         if (user == null) {
             console.error('couldn\'t get user %i from connection %s', connection.uuid)
@@ -170,10 +175,10 @@ export class UserManager {
     public static async onHostSetUserInventory(hostPacket: InHostPacket, userConn: ExtendedSocket): Promise<boolean> {
         const preloadData: InHostSetInventory = new InHostSetInventory(hostPacket)
 
-        const requesterId: number = userConn.getOwner()
+        const requester: User = userConn.getOwner()
 
         const results: UserSession[] = await Promise.all([
-            UserSession.get(requesterId),
+            UserSession.get(requester.userId),
             UserSession.get(preloadData.userId),
         ])
 
@@ -181,18 +186,18 @@ export class UserManager {
         const targetSession: UserSession = results[1]
 
         if (requesterSession == null) {
-            console.warn('Could not get user ID\'s %i session', requesterId)
+            console.warn('Could not get user ID\'s %i session', requester.userId)
             return false
         }
 
         if (requesterSession.isInRoom() === false) {
-            console.warn('User ID %i tried to end a match without being in a room', requesterId)
+            console.warn('User ID %i tried to end a match without being in a room', requester.userId)
             return false
         }
 
         if (targetSession == null) {
             console.warn('User ID %i tried to send its inventory to user ID %i whose session is null',
-                requesterId, preloadData.userId)
+                requester.userId, preloadData.userId)
             return false
         }
 
@@ -204,10 +209,10 @@ export class UserManager {
             return false
         }
 
-        if (currentRoom.host.userId !== requesterId) {
+        if (currentRoom.host.userId !== requester.userId) {
             console.warn('User ID %i sent an user\'s inventory request without being the room\'s host.'
                 + 'Real host ID: %i room "%s" (id %i)',
-                requesterId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+                requester.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
@@ -223,10 +228,10 @@ export class UserManager {
                                              sourceConn: ExtendedSocket): Promise<boolean> {
         const loadoutData: InHostSetLoadout = new InHostSetLoadout(hostPacket)
 
-        const requesterId: number = sourceConn.getOwner()
+        const requester: User = sourceConn.getOwner()
 
         const results: UserSession[] = await Promise.all([
-            UserSession.get(requesterId),
+            UserSession.get(requester.userId),
             UserSession.get(loadoutData.userId),
         ])
 
@@ -234,18 +239,18 @@ export class UserManager {
         const targetSession: UserSession = results[1]
 
         if (requesterSession == null) {
-            console.warn('Could not get user ID\'s %i session', requesterId)
+            console.warn('Could not get user ID\'s %i session', requester.userId)
             return false
         }
 
         if (requesterSession.isInRoom() === false) {
-            console.warn('User ID %i tried to send loadout without being in a room', requesterId)
+            console.warn('User ID %i tried to send loadout without being in a room', requester.userId)
             return false
         }
 
         if (targetSession == null) {
             console.warn('User ID %i tried to send its loadout to user ID %i whose session is null',
-                requesterId, loadoutData.userId)
+                requester.userId, loadoutData.userId)
             return false
         }
 
@@ -275,10 +280,10 @@ export class UserManager {
     public static async onHostSetUserBuyMenu(hostPacket: InHostPacket, sourceConn: ExtendedSocket): Promise<boolean> {
         const buyMenuData: InHostSetBuyMenu = new InHostSetBuyMenu(hostPacket)
 
-        const requesterId: number = sourceConn.getOwner()
+        const requester: User = sourceConn.getOwner()
 
         const results: UserSession[] = await Promise.all([
-            UserSession.get(requesterId),
+            UserSession.get(requester.userId),
             UserSession.get(buyMenuData.userId),
         ])
 
@@ -286,18 +291,18 @@ export class UserManager {
         const targetSession: UserSession = results[1]
 
         if (requesterSession == null) {
-            console.warn('Could not get user ID\'s %i session', requesterId)
+            console.warn('Could not get user ID\'s %i session', requester.userId)
             return false
         }
 
         if (requesterSession.isInRoom() === false) {
-            console.warn('User ID %i tried to send buy menu without being in a room', requesterId)
+            console.warn('User ID %i tried to send buy menu without being in a room', requester.userId)
             return false
         }
 
         if (targetSession == null) {
             console.warn('User ID %i tried to send its buy menu to user ID %i whose session is null',
-                requesterId, buyMenuData.userId)
+                requester.userId, buyMenuData.userId)
             return false
         }
 
@@ -309,17 +314,17 @@ export class UserManager {
             return false
         }
 
-        if (currentRoom.host.userId !== requesterId) {
+        if (currentRoom.host.userId !== requester.userId) {
             console.warn('User ID %i sent an user\'s buy menu request without being the room\'s host.'
                 + 'Real host ID: %i room "%s" (id %i)',
-                requesterId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+                requester.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
         await this.sendUserBuyMenuTo(sourceConn, targetSession.userId)
 
         console.log('Sending user ID %i\'s buy menu to host ID %i, room %s (room id %i)',
-            requesterId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+            requester.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
 
         return true
     }
@@ -332,7 +337,7 @@ export class UserManager {
             return false
         }
 
-        const user: User = await User.get(connection.getOwner())
+        const user: User = connection.getOwner()
 
         if (user == null) {
             console.error('couldn\'t get user %i from connection %s', connection.uuid)
@@ -340,8 +345,8 @@ export class UserManager {
         }
 
         switch (aboutPacket.packetType) {
-            case AboutmePacketType.SetEmblem:
-                return this.onAboutmeSetEmblem(aboutPacket, connection)
+            case AboutmePacketType.SetAvatar:
+                return this.onAboutmeSetAvatar(aboutPacket, connection)
             /*case HostPacketType.SetInventory:
                 return this.onHostSetUserInventory(hostPacket, connection)
             case HostPacketType.SetLoadout:
@@ -356,17 +361,26 @@ export class UserManager {
         return false
     }
 
-    public static async onAboutmeSetEmblem(aboutPkt: InAboutmePacket,
+    public static async onAboutmeSetAvatar(aboutPkt: InAboutmePacket,
                                            conn: ExtendedSocket): Promise<boolean> {
-        const emblemData: InAboutmeSetEmblem = new InAboutmeSetEmblem(aboutPkt)
-        const session: UserSession = await UserSession.get(conn.getOwner())
+        const avatarData: InAboutmeSetAvatar = new InAboutmeSetAvatar(aboutPkt)
 
-        if (session == null) {
-            console.warn('Could not get user ID %i\'s session', conn.getOwner())
+        const user: User = conn.getOwner()
+        const session: UserSession = await UserSession.get(user.userId)
+
+        if (user == null || session == null) {
+            console.warn('Could not get user %i\'s session', user.userId)
             return false
         }
 
-        console.log('Setting user ID %i\'s emblem', session.currentRoomId)
+        const updated: boolean = await userService.SetUserAvatar(session.userId, avatarData.avatarId)
+
+        if (updated === false) {
+            console.warn(`Failed to update user ${session.userId}'s avatar to ${avatarData.avatarId}`)
+            return false;
+        }
+
+        console.log('Setting user ID %i\'s avatar', session.userId)
 
         return true
     }
@@ -398,10 +412,12 @@ export class UserManager {
     public static async onOptionSetBuyMenu(optPacket: InOptionPacket,
                                            conn: ExtendedSocket): Promise<boolean> {
         const buyMenuData: InOptionBuyMenu = new InOptionBuyMenu(optPacket)
-        const session: UserSession = await UserSession.get(conn.getOwner())
+
+        const user: User = conn.getOwner()
+        const session: UserSession = await UserSession.get(user.userId)
 
         if (session == null) {
-            console.warn('Could not get user ID %i\'s session', conn.getOwner())
+            console.warn('Could not get user ID %i\'s session', user.userId)
             return false
         }
 
@@ -437,10 +453,11 @@ export class UserManager {
                                              sourceConn: ExtendedSocket): Promise<boolean> {
         const loadoutData: InFavoriteSetLoadout = new InFavoriteSetLoadout(favPacket)
 
-        const session: UserSession = await UserSession.get(sourceConn.getOwner())
+        const user: User = sourceConn.getOwner()
+        const session: UserSession = await UserSession.get(user.userId)
 
         if (session == null) {
-            console.warn('Could not get user ID %i\'s session', sourceConn.getOwner())
+            console.warn('Could not get user ID %i\'s session', user.userId)
             return false
         }
 
@@ -460,10 +477,11 @@ export class UserManager {
                                                sourceConn: ExtendedSocket): Promise<boolean> {
         const cosmeticsData: InFavoriteSetCosmetics = new InFavoriteSetCosmetics(favPacket)
 
-        const session: UserSession = await UserSession.get(sourceConn.getOwner())
+        const user: User = sourceConn.getOwner()
+        const session: UserSession = await UserSession.get(user.userId)
 
         if (session == null) {
-            console.warn('Could not get user ID %i\'s session', sourceConn.getOwner())
+            console.warn('Could not get user ID %i\'s session', user.userId)
             return false
         }
 
@@ -479,15 +497,16 @@ export class UserManager {
     }
 
     public static async onHostGameEnd(userConn: ExtendedSocket): Promise<boolean> {
-        const session: UserSession = await UserSession.get(userConn.getOwner())
+        const user: User = userConn.getOwner()
+        const session: UserSession = await UserSession.get(user.userId)
 
         if (session == null) {
-            console.warn('Could not get user ID\'s %i session', userConn.getOwner())
+            console.warn('Could not get user ID\'s %i session', user.userId)
             return false
         }
 
         if (session.isInRoom() === false) {
-            console.warn('User ID %i tried to end a match without being in a room', userConn.getOwner())
+            console.warn('User ID %i tried to end a match without being in a room', user.userId)
             return false
         }
 
