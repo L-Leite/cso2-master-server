@@ -859,7 +859,7 @@ export class Room {
             return null
         }
 
-        user.conn.send(await OutRoomPacket.playerJoin(newUser.userId, team))
+        user.conn.send(await OutRoomPacket.playerJoin(newUser.conn.getOwner(), team))
     }
 
     /**

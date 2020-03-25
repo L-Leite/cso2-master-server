@@ -5,9 +5,6 @@ import { PacketString } from 'packets/packetstring'
 
 import { User } from 'user/user'
 
-import { userSvcAuthority } from 'authorities'
-import { UserService } from 'services/userservice'
-
 /**
  * sends out an user's data
  * @class UserInfoFullUpdate
@@ -17,14 +14,7 @@ export class UserInfoFullUpdate {
      * builds the sub structure to a packet's stream buffer
      * @param outPacket the packet where the data will go
      */
-    public static async build(userId: number, outPacket: OutPacketBase): Promise<void> {
-        // TODO: use UserService in UserManager
-        const user: User = await new UserService(userSvcAuthority()).GetUserById(userId)
-
-        if (user == null) {
-            return
-        }
-
+    public static async build(user: User, outPacket: OutPacketBase): Promise<void> {
         // outPacket.writeUInt32(this.userId)
 
         // should always be 0xFFFFFFFF for a full update

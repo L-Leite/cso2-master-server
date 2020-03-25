@@ -128,7 +128,7 @@ export class UserManager {
 
         connection.setOwner(user)
 
-        UserManager.sendUserInfoTo(session.userId, user.userName, user.playerName, connection, holepunchPort)
+        UserManager.sendUserInfoToSelf(user, connection, holepunchPort)
         UserManager.sendInventory(session.userId, connection)
         ChannelManager.sendChannelListTo(connection)
 
@@ -528,16 +528,13 @@ export class UserManager {
 
     /**
      * send an user's info to itself
-     * @param userId the target user's ID
-     * @param userName the target user's name
-     * @param playerName the target user's ingame name
+     * @param user the target user's object
      * @param conn the target user's connection
      * @param holepunchPort the master server's UDP holepunching port
      */
-    private static async sendUserInfoTo(userId: number, userName: string, playerName: string,
-                                        conn: ExtendedSocket, holepunchPort: number): Promise<void> {
-        conn.send(new OutUserStartPacket(userId, userName, playerName, holepunchPort))
-        conn.send(await OutUserInfoPacket.fullUserUpdate(userId))
+    private static async sendUserInfoToSelf(user: User, conn: ExtendedSocket, holepunchPort: number): Promise<void> {
+        conn.send(new OutUserStartPacket(user.userId, user.userName, user.playerName, holepunchPort))
+        conn.send(await OutUserInfoPacket.fullUserUpdate(user))
     }
 
     /**

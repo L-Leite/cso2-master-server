@@ -17,6 +17,8 @@ import { OutRoomUpdateSettings } from 'packets/out/room/updatesettings'
 
 import { RoomSettings } from 'room/roomsettings'
 
+import { User } from 'user/user'
+
 enum OutRoomPacketType {
     CreateAndJoin = 0,
     PlayerJoin = 1,
@@ -48,7 +50,7 @@ export class OutRoomPacket extends OutPacketBase {
         return packet
     }
 
-    public static async playerJoin(userId: number, teamNum: RoomTeamNum): Promise<OutRoomPacket> {
+    public static async playerJoin(user: User, teamNum: RoomTeamNum): Promise<OutRoomPacket> {
         const packet: OutRoomPacket = new OutRoomPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -57,7 +59,7 @@ export class OutRoomPacket extends OutPacketBase {
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.PlayerJoin)
 
-        await OutRoomPlayerJoin.build(userId, teamNum, packet)
+        await OutRoomPlayerJoin.build(user, teamNum, packet)
 
         return packet
     }
