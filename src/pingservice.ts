@@ -14,7 +14,7 @@ export class PingService {
     private static async onPingCheck(thisInstance: PingService): Promise<void> {
         try {
             const res: superagent.Response = await superagent
-                .get('http://' + thisInstance.host + '/ping')
+                .get(thisInstance.host + '/ping')
                 .accept('json')
             thisInstance.updateDelay(res.status === 200)
         } catch (error) {

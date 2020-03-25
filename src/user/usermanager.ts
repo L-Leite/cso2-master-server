@@ -80,7 +80,7 @@ export class UserManager {
     public static async validateCredentials(username: string, password: string): Promise<number> {
         try {
             const res: superagent.Response = await superagent
-                .post('http://' + userSvcAuthority() + '/users/check')
+                .post(userSvcAuthority() + '/users/check')
                 .send({
                     username,
                     password,

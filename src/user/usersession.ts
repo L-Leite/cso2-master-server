@@ -20,7 +20,7 @@ export class UserSession {
     public static async create(username: string, password: string): Promise<UserSession> {
         try {
             const res: superagent.Response = await superagent
-                .post('http://' + userSvcAuthority() + '/sessions')
+                .post(userSvcAuthority() + '/sessions')
                 .send({
                     username,
                     password,
@@ -59,7 +59,7 @@ export class UserSession {
             }
 
             const res: superagent.Response = await superagent
-                .get('http://' + userSvcAuthority() + '/sessions/' + userId)
+                .get(userSvcAuthority() + '/sessions/' + userId)
                 .accept('json')
 
             if (res.status === 200) {
@@ -86,7 +86,7 @@ export class UserSession {
     public static async delete(userId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .delete('http://' + userSvcAuthority() + '/sessions/' + userId)
+                .delete(userSvcAuthority() + '/sessions/' + userId)
                 .accept('json')
 
             if (res.status === 200) {
@@ -109,7 +109,7 @@ export class UserSession {
     public static async deleteAll(): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .delete('http://' + userSvcAuthority() + '/sessions')
+                .delete(userSvcAuthority() + '/sessions')
                 .accept('json')
 
             if (res.status === 200) {
@@ -141,7 +141,7 @@ export class UserSession {
     public async update(): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .put('http://' + userSvcAuthority() + '/sessions/' + this.userId)
+                .put(userSvcAuthority() + '/sessions/' + this.userId)
                 .send(this)
                 .accept('json')
 

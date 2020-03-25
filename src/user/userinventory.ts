@@ -40,7 +40,7 @@ export class UserInventory {
     public static async createInventory(ownerId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .post('http://' + userSvcAuthority() + '/inventory/' + ownerId)
+                .post(userSvcAuthority() + '/inventory/' + ownerId)
                 .accept('json')
             return res.status === 201
         } catch (error) {
@@ -58,7 +58,7 @@ export class UserInventory {
     public static async createCosmetics(ownerId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .post('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
+                .post(userSvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
                 .accept('json')
             return res.status === 201
         } catch (error) {
@@ -76,7 +76,7 @@ export class UserInventory {
     public static async createLoadouts(ownerId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .post('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/loadout')
+                .post(userSvcAuthority() + '/inventory/' + ownerId + '/loadout')
                 .accept('json')
             return res.status === 201
         } catch (error) {
@@ -94,7 +94,7 @@ export class UserInventory {
     public static async createBuyMenu(ownerId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .post('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .post(userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
                 .accept('json')
             return res.status === 201
         } catch (error) {
@@ -121,7 +121,7 @@ export class UserInventory {
             }
 
             const res: superagent.Response = await superagent
-                .get('http://' + userSvcAuthority() + '/inventory/' + ownerId)
+                .get(userSvcAuthority() + '/inventory/' + ownerId)
                 .accept('json')
 
             if (res.status === 200) {
@@ -154,7 +154,7 @@ export class UserInventory {
             }
 
             const res: superagent.Response = await superagent
-                .get('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
+                .get(userSvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
                 .accept('json')
 
             if (res.status === 200) {
@@ -178,7 +178,7 @@ export class UserInventory {
     public static async getLoadout(ownerId: number, loadoutNum: number): Promise<UserLoadout> {
         try {
             const res: superagent.Response = await superagent
-                .get('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/loadout')
+                .get(userSvcAuthority() + '/inventory/' + ownerId + '/loadout')
                 .send({ loadoutNum })
                 .accept('json')
             return res.status === 200 ? res.body : null
@@ -232,7 +232,7 @@ export class UserInventory {
             }
 
             const res: superagent.Response = await superagent
-                .get('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .get(userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
                 .accept('json')
 
             if (res.status === 200) {
@@ -258,7 +258,7 @@ export class UserInventory {
         const params = UserInventory.buildSetCosmeticParams(ownerId, slot, itemId)
         try {
             const res: superagent.Response = await superagent
-                .put('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
+                .put(userSvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
                 .send(params)
                 .accept('json')
 
@@ -284,7 +284,7 @@ export class UserInventory {
         const params = UserInventory.buildSetLoadoutParams(ownerId, loadout, slot, itemId)
         try {
             const res: superagent.Response = await superagent
-                .put('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/loadout')
+                .put(userSvcAuthority() + '/inventory/' + ownerId + '/loadout')
                 .send(params)
                 .accept('json')
 
@@ -307,7 +307,7 @@ export class UserInventory {
     public static async setBuyMenu(ownerId: number, newBuyMenu: UserBuyMenu): Promise<void> {
         try {
             const res: superagent.Response = await superagent
-                .put('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .put(userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
                 .send(newBuyMenu)
                 .accept('json')
 
@@ -331,7 +331,7 @@ export class UserInventory {
         const params = UserInventory.buildSetBuyMenuParams(column, items)
         try {
             const res: superagent.Response = await superagent
-                .put('http://' + userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .put(userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
                 .send(params)
                 .accept('json')
 
