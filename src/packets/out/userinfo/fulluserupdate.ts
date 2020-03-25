@@ -5,6 +5,9 @@ import { PacketString } from 'packets/packetstring'
 
 import { User } from 'user/user'
 
+import { userSvcAuthority } from 'authorities'
+import { UserService } from 'services/userservice'
+
 /**
  * sends out an user's data
  * @class UserInfoFullUpdate
@@ -15,7 +18,8 @@ export class UserInfoFullUpdate {
      * @param outPacket the packet where the data will go
      */
     public static async build(userId: number, outPacket: OutPacketBase): Promise<void> {
-        const user: User = await User.get(userId)
+        // TODO: use UserService in UserManager
+        const user: User = await new UserService(userSvcAuthority()).GetUserById(userId)
 
         if (user == null) {
             return

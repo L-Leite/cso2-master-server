@@ -7,6 +7,9 @@ import { User } from 'user/user'
 
 import { OutPacketBase } from 'packets/out/packet'
 
+import { userSvcAuthority } from 'authorities'
+import { UserService } from 'services/userservice'
+
 /**
  * shared room structure, used by room list
  */
@@ -18,7 +21,8 @@ export class RoomListItem {
     }
 
     public async build(outPacket: OutPacketBase): Promise<void> {
-        const host: User = await User.get(this.room.host.userId)
+        // TODO: use UserService in UserManager
+        const host: User = await new UserService(userSvcAuthority()).GetUserById(this.room.host.userId)
 
         if (host == null) {
             return
