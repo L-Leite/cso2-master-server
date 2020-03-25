@@ -94,9 +94,9 @@ export class ServerInstance {
         })
     }
 
-    public listen(): void {
+    public async listen(): Promise<void> {
         // clean up any left over user sessions
-        UserSession.deleteAll()
+        await UserSession.deleteAll()
 
         this.server.listen(this.masterPort, this.hostname)
         this.holepunchServer.bind(this.holepunchPort, this.hostname)
@@ -105,7 +105,7 @@ export class ServerInstance {
     public async stop(): Promise<void> {
         await UserSession.deleteAll()
         this.server.close()
-        process.exit(0)
+        // process.exit(0)
     }
 
     /**
