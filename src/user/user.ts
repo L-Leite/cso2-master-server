@@ -14,6 +14,7 @@ export class User {
     public curExp: number
     public maxExp: number
     public vipLevel: number
+    public vipXp: number
 
     public rank: number
     public rankFrame: number

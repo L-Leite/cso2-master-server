@@ -3,6 +3,7 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
 
+import { UserInfoDynamicUpdate } from 'packets/out/userinfo/dynamicuserupdate'
 import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 
 import { User } from 'user/user'
@@ -12,7 +13,7 @@ import { User } from 'user/user'
  * @class OutUserInfoPacket
  */
 export class OutUserInfoPacket extends OutPacketBase {
-    public static async fullUserUpdate(user: User): Promise<OutUserInfoPacket> {
+    public static fullUserUpdate(user: User): OutUserInfoPacket {
         const packet: OutUserInfoPacket = new OutUserInfoPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -21,7 +22,49 @@ export class OutUserInfoPacket extends OutPacketBase {
         packet.buildHeader()
         packet.writeUInt32(user.userId)
 
-        await UserInfoFullUpdate.build(user, packet)
+        UserInfoFullUpdate.build(user, packet)
+
+        return packet
+    }
+
+    public static updateAvatar(user: User): OutUserInfoPacket {
+        const packet: OutUserInfoPacket = new OutUserInfoPacket()
+
+        packet.outStream = new WritableStreamBuffer(
+            { initialSize: 100, incrementAmount: 20 })
+
+        packet.buildHeader()
+        packet.writeUInt32(user.userId)
+
+        UserInfoDynamicUpdate.build({avatar: user.avatar}, packet)
+
+        return packet
+    }
+
+    public static updateSignature(user: User): OutUserInfoPacket {
+        const packet: OutUserInfoPacket = new OutUserInfoPacket()
+
+        packet.outStream = new WritableStreamBuffer(
+            { initialSize: 100, incrementAmount: 20 })
+
+        packet.buildHeader()
+        packet.writeUInt32(user.userId)
+
+        UserInfoDynamicUpdate.build({ signature: user.signature }, packet)
+
+        return packet
+    }
+
+    public static updateTitle(user: User): OutUserInfoPacket {
+        const packet: OutUserInfoPacket = new OutUserInfoPacket()
+
+        packet.outStream = new WritableStreamBuffer(
+            { initialSize: 100, incrementAmount: 20 })
+
+        packet.buildHeader()
+        packet.writeUInt32(user.userId)
+
+        UserInfoDynamicUpdate.build({ titleId: user.titleId }, packet)
 
         return packet
     }

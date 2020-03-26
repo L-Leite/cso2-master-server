@@ -13,7 +13,9 @@ export class UserInfoDynamicUpdate {
      * builds the sub structure to a packet's stream buffer
      * @param outPacket the packet where the data will go
      */
-    public static build(user: any, outPacket: OutPacketBase): void {
+    public static build(userObj: any, outPacket: OutPacketBase): void {
+        const user: User = userObj
+
         // outPacket.writeUInt32(this.userId)
 
         outPacket.writeUInt32(this.GetFlagsUsed(user)) // flags

@@ -53,35 +53,86 @@ export class UserService {
 
   /**
    * sets an user's avatar
-   * @param targetUserId the ID of the user to have the avatar updated
+   * @param targetUser the user to have the avatar updated
    * @param avatarId the new avatar's ID
-   * @returns true if updated, false if not
+   * @returns the updated User object if updated, null if failed to update
    */
-  public async SetUserAvatar(targetUserId: number, avatarId: number): Promise<boolean> {
+  public async SetUserAvatar(targetUser: User, avatarId: number): Promise<User> {
     try {
       const res: superagent.Response = await superagent
-        .put(this.baseUrl + `/users/${targetUserId}`)
+        .put(this.baseUrl + `/users/${targetUser.userId}`)
         .send({
           avatar: avatarId,
         })
         .accept('json')
 
       if (res.status === 200) {
-        const entry: User = this.userCache.get(targetUserId)
-        if (entry != null) {
-          entry.avatar = avatarId
-          this.userCache.set(targetUserId, entry)
-        }
-
-        console.log('Set title successfully')
-        return true;
+        targetUser.avatar = avatarId
+        this.userCache.set(targetUser.userId, targetUser)
+        return targetUser;
       }
     } catch (error) {
       console.error(error)
       UserSvcPing.checkNow()
     }
 
-    return false;
+    return null;
+  }
+
+  /**
+   * sets an user's signature
+   * @param targetUser the user to have the avatar updated
+   * @param signature the new signature string
+   * @returns the updated User object if updated, null if failed to update
+   */
+  public async SetUserSignature(targetUser: User, signature: string): Promise<User> {
+    try {
+      const res: superagent.Response = await superagent
+        .put(this.baseUrl + `/users/${targetUser.userId}`)
+        .send({
+          signature,
+        })
+        .accept('json')
+
+      if (res.status === 200) {
+        targetUser.signature = signature
+        this.userCache.set(targetUser.userId, targetUser)
+        return targetUser;
+      }
+    } catch (error) {
+      console.error(error)
+      UserSvcPing.checkNow()
+    }
+
+    return null;
+  }
+
+  /**
+   * sets an user's title
+   * @param targetUser the user to have the avatar updated
+   * @param titleId the new title's ID
+   * @returns the updated User object if updated, null if failed to update
+   */
+  public async SetUserTitle(targetUser: User, titleId: number): Promise<User> {
+    try {
+      const res: superagent.Response = await superagent
+        .put(this.baseUrl + `/users/${targetUser.userId}`)
+        .send({
+          titleId,
+        })
+        .accept('json')
+
+      if (res.status === 200) {
+        targetUser.titleId = titleId
+        this.userCache.set(targetUser.userId, targetUser)
+        return targetUser;
+      }
+    } catch (error) {
+      console.error(error)
+      UserSvcPing.checkNow()
+    }
+
+    return null;
   }
 
   /**

@@ -105,7 +105,7 @@ export class ServerInstance {
     public async stop(): Promise<void> {
         await UserSession.deleteAll()
         this.server.close()
-        // process.exit(0)
+        process.exit(0)
     }
 
     /**
@@ -289,6 +289,9 @@ export class ServerInstance {
             case PacketId.Host:
                 UserManager.onHostPacket(packet.getData(), connection)
                 return true
+            case PacketId.AboutMe:
+                UserManager.onAboutmePacket(packet.getData(), connection)
+                return true;
             case PacketId.Option:
                 UserManager.onOptionPacket(packet.getData(), connection)
                 return true

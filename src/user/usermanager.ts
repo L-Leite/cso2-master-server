@@ -39,10 +39,12 @@ import { OutUserStartPacket } from 'packets/out/userstart'
 
 import { userSvcAuthority, UserSvcPing } from 'authorities'
 
+import { AboutMeHandler } from 'handlers/aboutmehandler'
 import { UserService } from 'services/userservice'
 
 // TODO: move this to UserManager, make UserManager not static
 const userService = new UserService(userSvcAuthority())
+const aboutMeHandler = new AboutMeHandler(userService)
 
 /**
  * handles the user logic
@@ -330,59 +332,7 @@ export class UserManager {
     }
 
     public static async onAboutmePacket(packetData: Buffer, connection: ExtendedSocket): Promise<boolean> {
-        const aboutPacket: InAboutmePacket = new InAboutmePacket(packetData)
-
-        if (connection.hasOwner() === false) {
-            console.warn('connection %s sent a host packet without a session', connection.uuid)
-            return false
-        }
-
-        const user: User = connection.getOwner()
-
-        if (user == null) {
-            console.error('couldn\'t get user %i from connection %s', connection.uuid)
-            return false
-        }
-
-        switch (aboutPacket.packetType) {
-            case AboutmePacketType.SetAvatar:
-                return this.onAboutmeSetAvatar(aboutPacket, connection)
-            /*case HostPacketType.SetInventory:
-                return this.onHostSetUserInventory(hostPacket, connection)
-            case HostPacketType.SetLoadout:
-                return this.onHostSetUserLoadout(hostPacket, connection)
-            case HostPacketType.SetBuyMenu:
-                return this.onHostSetUserBuyMenu(hostPacket, connection)*/
-        }
-
-        console.warn('UserManager::onHostPacket: unknown host packet type %i',
-            aboutPacket.packetType)
-
-        return false
-    }
-
-    public static async onAboutmeSetAvatar(aboutPkt: InAboutmePacket,
-                                           conn: ExtendedSocket): Promise<boolean> {
-        const avatarData: InAboutmeSetAvatar = new InAboutmeSetAvatar(aboutPkt)
-
-        const user: User = conn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
-
-        if (user == null || session == null) {
-            console.warn('Could not get user %i\'s session', user.userId)
-            return false
-        }
-
-        const updated: boolean = await userService.SetUserAvatar(session.userId, avatarData.avatarId)
-
-        if (updated === false) {
-            console.warn(`Failed to update user ${session.userId}'s avatar to ${avatarData.avatarId}`)
-            return false;
-        }
-
-        console.log('Setting user ID %i\'s avatar', session.userId)
-
-        return true
+        return await aboutMeHandler.OnPacket(packetData, connection)
     }
 
     /**
@@ -685,5 +635,11 @@ export class UserManager {
      */
     private static async sendUserBuyMenuTo(hostConn: ExtendedSocket, targetUserId: number): Promise<void> {
         hostConn.send(await OutHostPacket.setBuyMenu(targetUserId))
+    }
+
+    private static async UpdateConnectionOwner(conn: ExtendedSocket): Promise<User> {
+        const updatedOwner: User = await userService.GetUserById(conn.getOwner().userId)
+        conn.setOwner(updatedOwner)
+        return updatedOwner
     }
 }

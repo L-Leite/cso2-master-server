@@ -12,6 +12,7 @@ export enum PacketId {
     Room = 65,
     Chat = 67,
     Host = 68,
+    AboutMe = 69,
     Udp = 70,
     Ban = 74,
     Option = 76,
