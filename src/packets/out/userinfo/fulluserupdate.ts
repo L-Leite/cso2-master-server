@@ -14,7 +14,7 @@ export class UserInfoFullUpdate {
      * builds the sub structure to a packet's stream buffer
      * @param outPacket the packet where the data will go
      */
-    public static async build(user: User, outPacket: OutPacketBase): Promise<void> {
+    public static build(user: User, outPacket: OutPacketBase): void {
         // outPacket.writeUInt32(this.userId)
 
         // should always be 0xFFFFFFFF for a full update
@@ -23,24 +23,30 @@ export class UserInfoFullUpdate {
         // flag & 0x1
         outPacket.writeUInt64(new Uint64LE(0x2241158F)) // unk00, nexon id?
         // end flag & 0x1
+
         // flag & 0x2
         outPacket.writeString(new PacketString(user.playerName)) // userName
         // end of flag & 0x2
+
         // flag & 0x4
         outPacket.writeUInt16(user.level) // level
         // end of flag & 0x4
+
         // flag & 0x8
         outPacket.writeUInt64(new Uint64LE(user.curExp)) // curExp
         outPacket.writeUInt64(new Uint64LE(user.maxExp)) // maxExp
         outPacket.writeUInt32(0x313) // unk03
         // end of flag & 0x8
+
         // flag & 0x10
         outPacket.writeUInt8(user.rank) // rank
         outPacket.writeUInt8(user.rankFrame) // rankframe(item id: 9000-9003)
         // end of flag & 0x10
+
         // flag & 0x20
         outPacket.writeUInt64(new Uint64LE(user.points)) // Points
         // end of flag & 0x20
+
         // flag & 0x40
         outPacket.writeUInt32(user.playedMatches) // played game
         outPacket.writeUInt32(user.wins) // wins (win rate = wins / player game)
@@ -62,6 +68,7 @@ export class UserInfoFullUpdate {
         outPacket.writeUInt32(0) // unk24
         outPacket.writeUInt32(0) // unk25
         // end of flag & 0x40
+
         // if flags & 0x80
         outPacket.writeString(new PacketString(null)) // unk26
         outPacket.writeUInt32(0) // unk27
@@ -70,10 +77,12 @@ export class UserInfoFullUpdate {
         outPacket.writeUInt32(0) // unk30
         outPacket.writeString(new PacketString(user.netCafeName)) // net cafe
         // end if flags & 0x80
+
         // flag & 0x100
         outPacket.writeUInt32(user.cash) // Cash
         outPacket.writeUInt32(0) // unk33
         // end of flag & 0x100
+
         // flag & 0x200
         outPacket.writeUInt32(0) // unk34
         outPacket.writeString(new PacketString(user.clanName)) // clan name
@@ -88,52 +97,65 @@ export class UserInfoFullUpdate {
             outPacket.writeUInt32(elem) // unk39
         }
         // end of flag & 0x200
+
         // flag & 0x400
         outPacket.writeUInt8(0) // unk40
         // end of flag & 0x400
+
         // flag & 0x800
         outPacket.writeUInt32(user.worldRank) // rank in world
         outPacket.writeUInt32(0) // unk42
-        // end of flag & 0x400
-        // flag & 0x800
+        // end of flag & 0x800
+
+        // flag & 0x1000
         outPacket.writeUInt8(0) // unk43
         outPacket.writeUInt16(255) // unk44
         outPacket.writeUInt32(0) // unk45
         // end of flag & 0x1000
+
         // flag & 0x2000
         outPacket.writeUInt32(user.mpoints) // MPoint
         outPacket.writeUInt64(new Uint64LE(0)) // unk47
         // end of flag & 0x2000
+
         // flag & 0x4000
         outPacket.writeUInt32(0) // unk48
         // end of flag & 0x4000
+
         // flag & 0x8000
         outPacket.writeUInt16(user.titleId) // title
          // end of flag & 0x8000
+
         // flag & 0x10000
         outPacket.writeUInt16(0) // unk50
         // end of flag & 0x10000
+
         // flag & 0x20000
         // should always be 128 bytes long
         for (const elem of user.unlockedTitles) {
             outPacket.writeUInt8(elem) // title list
         }
         // end of flag & 0x20000
+
         // flag & 0x40000
         outPacket.writeString(new PacketString(user.signature)) // personal signature
         // end of flag & 0x40000
+
         // flag & 0x80000
         outPacket.writeUInt8(0) // unk53
         outPacket.writeUInt8(0) // unk54
         // end of flag & 0x80000
+
         // flag & 0x100000
         outPacket.writeUInt32(7) // unk55
         outPacket.writeUInt32(user.bestGamemode) // best gamemode
         outPacket.writeUInt32(user.bestMap) // best map
         // end of flag & 0x100000
+
         // flag & 0x200000
         outPacket.writeUInt16(0) // unk58
         // end of flag & 0x200000
+
         // flag & 0x400000
         // it must always be 128 bytes long
         for (const elem of user.unlockedAchievements) {
@@ -141,27 +163,32 @@ export class UserInfoFullUpdate {
         }
         outPacket.writeUInt32(0xA5C8) // unk60
         // end of flag & 0x400000
+
         // flag & 0x800000
         outPacket.writeUInt16(user.avatar)
         // end of flag & 0x800000
-        // flag & 0x1000000
 
+        // flag & 0x1000000
         outPacket.writeUInt16(0) // unk62
         // end of flag & 0x1000000
+
         // flag & 0x2000000
         // it must always be 128 bytes long
         for (const elem of user.unlockedAvatars) {
             outPacket.writeUInt8(elem) // avatar list
         }
         // end of flag & 0x2000000
+
         // flag & 0x4000000
         outPacket.writeUInt8(user.isVip() ? 1 : 0) // isVip
         outPacket.writeUInt8(user.vipLevel) // vipLevel
-        outPacket.writeUInt32(180000) // vipExp
+        outPacket.writeUInt32(user.vipXp) // vipExp
         // end of flag & 0x4000000
+
         // flag & 0x8000000
         outPacket.writeUInt32(0) // unk67
         // end of flag & 0x8000000
+
         // flag & 0x10000000
         // skill factory start
         outPacket.writeUInt64(new Uint64LE(user.skillHumanCurXp)) // human exp
@@ -178,10 +205,12 @@ export class UserInfoFullUpdate {
         outPacket.writeUInt32(0) // unk78
         outPacket.writeUInt32(0) // unk79
         // end of flag & 0x10000000
+
         // flag & 0x20000000
         outPacket.writeUInt32(0) // unk80
         outPacket.writeUInt32(0) // unk81
         // end of flag & 0x20000000
+
         // flag & 0x40000000
         outPacket.writeUInt8(0) // unk82
         outPacket.writeUInt8(0) // unk83
