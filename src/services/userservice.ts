@@ -55,9 +55,9 @@ export class UserService {
    * sets an user's avatar
    * @param targetUser the user to have the avatar updated
    * @param avatarId the new avatar's ID
-   * @returns the updated User object if updated, null if failed to update
+   * @returns true if updated successfully, false if not
    */
-  public async SetUserAvatar(targetUser: User, avatarId: number): Promise<User> {
+  public async SetUserAvatar(targetUser: User, avatarId: number): Promise<boolean> {
     try {
       const res: superagent.Response = await superagent
         .put(this.baseUrl + `/users/${targetUser.userId}`)
@@ -69,23 +69,23 @@ export class UserService {
       if (res.status === 200) {
         targetUser.avatar = avatarId
         this.userCache.set(targetUser.userId, targetUser)
-        return targetUser;
+        return true;
       }
     } catch (error) {
       console.error(error)
       UserSvcPing.checkNow()
     }
 
-    return null;
+    return false;
   }
 
   /**
    * sets an user's signature
    * @param targetUser the user to have the avatar updated
    * @param signature the new signature string
-   * @returns the updated User object if updated, null if failed to update
+   * @returns true if updated successfully, false if not
    */
-  public async SetUserSignature(targetUser: User, signature: string): Promise<User> {
+  public async SetUserSignature(targetUser: User, signature: string): Promise<boolean> {
     try {
       const res: superagent.Response = await superagent
         .put(this.baseUrl + `/users/${targetUser.userId}`)
@@ -97,23 +97,23 @@ export class UserService {
       if (res.status === 200) {
         targetUser.signature = signature
         this.userCache.set(targetUser.userId, targetUser)
-        return targetUser;
+        return true;
       }
     } catch (error) {
       console.error(error)
       UserSvcPing.checkNow()
     }
 
-    return null;
+    return false;
   }
 
   /**
    * sets an user's title
    * @param targetUser the user to have the avatar updated
    * @param titleId the new title's ID
-   * @returns the updated User object if updated, null if failed to update
+   * @returns true if updated successfully, false if not
    */
-  public async SetUserTitle(targetUser: User, titleId: number): Promise<User> {
+  public async SetUserTitle(targetUser: User, titleId: number): Promise<boolean> {
     try {
       const res: superagent.Response = await superagent
         .put(this.baseUrl + `/users/${targetUser.userId}`)
@@ -125,14 +125,14 @@ export class UserService {
       if (res.status === 200) {
         targetUser.titleId = titleId
         this.userCache.set(targetUser.userId, targetUser)
-        return targetUser;
+        return true;
       }
     } catch (error) {
       console.error(error)
       UserSvcPing.checkNow()
     }
 
-    return null;
+    return false;
   }
 
   /**

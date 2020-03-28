@@ -31,9 +31,7 @@ export class AboutMeHandler {
       return false
     }
 
-    const user: User = connection.getOwner()
-
-    if (user == null) {
+    if (connection.hasOwner() === false) {
       console.error(`couldn't get user from connection ${connection.uuid}`)
       return false
     }
@@ -55,16 +53,16 @@ export class AboutMeHandler {
   private async OnSetAvatar(aboutPkt: InAboutmePacket, conn: ExtendedSocket): Promise<boolean> {
     const avatarData: InAboutmeSetAvatar = new InAboutmeSetAvatar(aboutPkt)
 
-    let user: User = conn.getOwner()
+    const user: User = conn.getOwner()
 
     if (user == null) {
       console.error(`couldn't get user from connection ${conn.uuid}`)
       return false
     }
 
-    user = await this.userSvc.SetUserAvatar(user, avatarData.avatarId)
+    const updated: boolean = await this.userSvc.SetUserAvatar(user, avatarData.avatarId)
 
-    if (user == null) {
+    if (updated === false) {
       console.warn(`Failed to update user ${user.userId}'s avatar to ${avatarData.avatarId}`)
       return false;
     }
@@ -79,7 +77,7 @@ export class AboutMeHandler {
   private async OnSetSignature(aboutPkt: InAboutmePacket, conn: ExtendedSocket): Promise<boolean> {
     const signatureData: InAboutmeSetSignature = new InAboutmeSetSignature(aboutPkt)
 
-    let user: User = conn.getOwner()
+    const user: User = conn.getOwner()
 
     if (user == null) {
       console.error(`couldn't get user from connection ${conn.uuid}`)
@@ -91,9 +89,9 @@ export class AboutMeHandler {
       return false;
     }
 
-    user = await this.userSvc.SetUserSignature(user, signatureData.msg)
+    const updated: boolean  = await this.userSvc.SetUserSignature(user, signatureData.msg)
 
-    if (user == null) {
+    if (updated === false) {
       console.warn(`Failed to update user ${user.userId}'s signature`)
       return false;
     }
@@ -108,7 +106,7 @@ export class AboutMeHandler {
   private async OnSetTitle(aboutPkt: InAboutmePacket, conn: ExtendedSocket): Promise<boolean> {
     const titleData: InAboutmeSetTitle = new InAboutmeSetTitle(aboutPkt)
 
-    let user: User = conn.getOwner()
+    const user: User = conn.getOwner()
 
     if (user == null) {
       console.error(`couldn't get user from connection ${conn.uuid}`)
@@ -120,9 +118,9 @@ export class AboutMeHandler {
       return false;
     }
 
-    user = await this.userSvc.SetUserTitle(user, titleData.titleId)
+    const updated: boolean  = await this.userSvc.SetUserTitle(user, titleData.titleId)
 
-    if (user == null) {
+    if (updated === false) {
       console.warn(`Failed to update user ${user.userId}'s title to ${titleData.titleId}`)
       return false;
     }
