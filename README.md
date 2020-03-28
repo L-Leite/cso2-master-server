@@ -12,7 +12,7 @@ Used by this [client launcher](https://github.com/L-Leite/cso2-launcher/).
 
 *Note: go to [cso2-master-services](https://github.com/L-Leite/cso2-master-services#running-the-services) for download and build scripts.*
 
-***Note: You must have an user service and an inventory service running somewhere.***
+***Note: You must have an user service running somewhere.***
 
 You can start the master server with:
 
@@ -20,16 +20,12 @@ You can start the master server with:
 # environment variables
 export USERSERVICE_HOST=127.0.0.1 # the user service's host
 export USERSERVICE_PORT=30100 # the user service's port
-export INVSERVICE_HOST=127.0.0.1 # the inventory service's host
-export INVSERVICE_PORT=30101 # the inventory service's port
 
 # starts the master server
 node dist/server.js
 ```
 
 You **must** set those environment variables, or the service will not start.
-
-By the default, the server **will ask you which network interface to listen on**.
 
 See the [command line arguments](#command-line-arguments) for more options.
 
@@ -41,10 +37,13 @@ Go to [cso2-master-services](https://github.com/L-Leite/cso2-master-services) to
 
 Options:
 
-- ```-i, --ip-address [ip]``` (*optional*) The IP address to listen on (default: auto-detect)
+- ```-i, --ip-address [ip]``` (*optional*) The IP address to listen on (don't use --interface with this)
+- ```-I, --interface [intf]``` (*optional*) The interface to be used by the server (don't use --ip-address with this)
 - ```-p, --port-master [port]``` (*optional*) The server's (TCP) port (default: 30001)
 - ```-P, --port-holepunch [port]``` (*optional*) The server's holepunch (UDP) port (default: 30002)
 - ```-l, --log-packets``` (*optional*) Log the incoming and outgoing packets
+
+If you don't specify an IP address or an interface, the server **will ask you which network interface to listen on**.
 
 ## Contributing
 
@@ -61,4 +60,4 @@ See the [current project's progress](https://github.com/L-Leite/cso2-master-serv
 
 Read ```LICENSE``` for the project's license information.
 
-I'm not affiliated with either Valve or Nexon, just like I don't own Counter-Strike Online 2.
+This project is not affiliated with either Valve Software or Nexon.
