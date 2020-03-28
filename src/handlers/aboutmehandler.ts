@@ -69,7 +69,6 @@ export class AboutMeHandler {
       return false;
     }
 
-    conn.setOwner(user)
     conn.send(OutUserInfoPacket.updateAvatar(user))
 
     console.log(`Setting user ID ${user.userId}'s avatar to ${avatarData.avatarId}`)
@@ -99,7 +98,6 @@ export class AboutMeHandler {
       return false;
     }
 
-    conn.setOwner(user)
     conn.send(OutUserInfoPacket.updateSignature(user))
 
     console.log(`Setting user ID ${user.userId}'s signature`)
@@ -129,7 +127,6 @@ export class AboutMeHandler {
       return false;
     }
 
-    conn.setOwner(user)
     conn.send(OutUserInfoPacket.updateTitle(user))
 
     console.log(`Setting user ID ${user.userId}'s title to ${titleData.titleId}`)
