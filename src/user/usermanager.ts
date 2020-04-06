@@ -12,13 +12,10 @@ import { UserSession } from 'user/usersession'
 
 import { ChannelManager } from 'channel/channelmanager'
 
-import { AboutmePacketType } from 'packets/aboutmeshared'
 import { FavoritePacketType } from 'packets/favoriteshared'
 import { HostPacketType } from 'packets/hostshared'
 import { OptionPacketType } from 'packets/optionshared'
 
-import { InAboutmePacket } from 'packets/in/aboutme'
-import { InAboutmeSetAvatar } from 'packets/in/aboutme/avatar'
 import { InFavoritePacket } from 'packets/in/favorite'
 import { InFavoriteSetCosmetics } from 'packets/in/favorite/setcosmetics'
 import { InFavoriteSetLoadout } from 'packets/in/favorite/setloadout'
@@ -40,7 +37,9 @@ import { OutUserStartPacket } from 'packets/out/userstart'
 import { userSvcAuthority, UserSvcPing } from 'authorities'
 
 import { AboutMeHandler } from 'handlers/aboutmehandler'
+
 import { UserService } from 'services/userservice'
+import { ActiveConnections } from 'storage/activeconnections'
 
 // TODO: move this to UserManager, make UserManager not static
 const userService = new UserService(userSvcAuthority())
@@ -71,6 +70,10 @@ export class UserManager {
         }
 
         return currentRoom
+    }
+
+    public static async OnSocketClosed(socket: ExtendedSocket): Promise<void> {
+        await userService.Logout(socket.getOwner().userId)
     }
 
     /**
@@ -106,24 +109,26 @@ export class UserManager {
                                       holepunchPort: number): Promise<boolean> {
         const loginPacket: InLoginPacket = new InLoginPacket(loginData)
 
-        const session: UserSession = await UserSession.create(loginPacket.gameUsername, loginPacket.password)
+        const loggedIn = await userService.Login(loginPacket.gameUsername, loginPacket.password)
 
-        // if it fails, then the user either doesn't exist or the credentials are bad
-        if (session == null) {
+        if (loggedIn === false) {
             console.warn('Could not create session for user %s', loginPacket.gameUsername)
             connection.end()
             return false
         }
 
+        // clear plain password right away, we don't need it anymore
+        loginPacket.password = null
+
         console.log('user %s logged in (uuid: %s)', loginPacket.gameUsername, connection.uuid)
 
-        session.externalNet.ipAddress = (connection.address() as net.AddressInfo).address
-        session.update()
+        const newSession: UserSession = new UserSession(connection.address() as net.AddressInfo)
+        connection.setSession(newSession)
 
-        const user: User = await userService.GetUserById(session.userId)
+        const user: User = await userService.GetUserById(newSession.userId)
 
         if (user == null) {
-            console.error('Couldn\'t get user ID %i\' information', session.userId)
+            console.error('Couldn\'t get user ID %i\' information', newSession.userId)
             connection.end()
             return false
         }
@@ -131,7 +136,7 @@ export class UserManager {
         connection.setOwner(user)
 
         UserManager.sendUserInfoToSelf(user, connection, holepunchPort)
-        UserManager.sendInventory(session.userId, connection)
+        UserManager.sendInventory(newSession.userId, connection)
         ChannelManager.sendChannelListTo(connection)
 
         return true
@@ -178,14 +183,10 @@ export class UserManager {
         const preloadData: InHostSetInventory = new InHostSetInventory(hostPacket)
 
         const requester: User = userConn.getOwner()
+        const targetConn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(preloadData.userId)
 
-        const results: UserSession[] = await Promise.all([
-            UserSession.get(requester.userId),
-            UserSession.get(preloadData.userId),
-        ])
-
-        const requesterSession: UserSession = results[0]
-        const targetSession: UserSession = results[1]
+        const requesterSession: UserSession = userConn.getSession()
+        const targetSession: UserSession = targetConn.getSession()
 
         if (requesterSession == null) {
             console.warn('Could not get user ID\'s %i session', requester.userId)
@@ -231,14 +232,10 @@ export class UserManager {
         const loadoutData: InHostSetLoadout = new InHostSetLoadout(hostPacket)
 
         const requester: User = sourceConn.getOwner()
+        const targetConn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(loadoutData.userId)
 
-        const results: UserSession[] = await Promise.all([
-            UserSession.get(requester.userId),
-            UserSession.get(loadoutData.userId),
-        ])
-
-        const requesterSession: UserSession = results[0]
-        const targetSession: UserSession = results[1]
+        const requesterSession: UserSession = sourceConn.getSession()
+        const targetSession: UserSession = targetConn.getSession()
 
         if (requesterSession == null) {
             console.warn('Could not get user ID\'s %i session', requester.userId)
@@ -282,29 +279,24 @@ export class UserManager {
     public static async onHostSetUserBuyMenu(hostPacket: InHostPacket, sourceConn: ExtendedSocket): Promise<boolean> {
         const buyMenuData: InHostSetBuyMenu = new InHostSetBuyMenu(hostPacket)
 
-        const requester: User = sourceConn.getOwner()
+        const targetConn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(buyMenuData.userId)
 
-        const results: UserSession[] = await Promise.all([
-            UserSession.get(requester.userId),
-            UserSession.get(buyMenuData.userId),
-        ])
-
-        const requesterSession: UserSession = results[0]
-        const targetSession: UserSession = results[1]
+        const requesterSession: UserSession = sourceConn.getSession()
+        const targetSession: UserSession = targetConn.getSession()
 
         if (requesterSession == null) {
-            console.warn('Could not get user ID\'s %i session', requester.userId)
+            console.warn('Could not get user ID\'s %i session', requesterSession.userId)
             return false
         }
 
         if (requesterSession.isInRoom() === false) {
-            console.warn('User ID %i tried to send buy menu without being in a room', requester.userId)
+            console.warn('User ID %i tried to send buy menu without being in a room', requesterSession.userId)
             return false
         }
 
         if (targetSession == null) {
             console.warn('User ID %i tried to send its buy menu to user ID %i whose session is null',
-                requester.userId, buyMenuData.userId)
+                requesterSession.userId, buyMenuData.userId)
             return false
         }
 
@@ -316,17 +308,17 @@ export class UserManager {
             return false
         }
 
-        if (currentRoom.host.userId !== requester.userId) {
+        if (currentRoom.host.userId !== requesterSession.userId) {
             console.warn('User ID %i sent an user\'s buy menu request without being the room\'s host.'
                 + 'Real host ID: %i room "%s" (id %i)',
-                requester.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+                requesterSession.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
         await this.sendUserBuyMenuTo(sourceConn, targetSession.userId)
 
         console.log('Sending user ID %i\'s buy menu to host ID %i, room %s (room id %i)',
-            requester.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+            requesterSession.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
 
         return true
     }
@@ -364,7 +356,7 @@ export class UserManager {
         const buyMenuData: InOptionBuyMenu = new InOptionBuyMenu(optPacket)
 
         const user: User = conn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = conn.getSession()
 
         if (session == null) {
             console.warn('Could not get user ID %i\'s session', user.userId)
@@ -404,7 +396,7 @@ export class UserManager {
         const loadoutData: InFavoriteSetLoadout = new InFavoriteSetLoadout(favPacket)
 
         const user: User = sourceConn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = sourceConn.getSession()
 
         if (session == null) {
             console.warn('Could not get user ID %i\'s session', user.userId)
@@ -428,7 +420,7 @@ export class UserManager {
         const cosmeticsData: InFavoriteSetCosmetics = new InFavoriteSetCosmetics(favPacket)
 
         const user: User = sourceConn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = sourceConn.getSession()
 
         if (session == null) {
             console.warn('Could not get user ID %i\'s session', user.userId)
@@ -446,9 +438,9 @@ export class UserManager {
         return true
     }
 
-    public static async onHostGameEnd(userConn: ExtendedSocket): Promise<boolean> {
+    public static onHostGameEnd(userConn: ExtendedSocket): boolean {
         const user: User = userConn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = userConn.getSession()
 
         if (session == null) {
             console.warn('Could not get user ID\'s %i session', user.userId)
@@ -471,7 +463,7 @@ export class UserManager {
         console.log('Ending game for room "%s" (room id %i)',
             currentRoom.settings.roomName, currentRoom.id)
 
-        await currentRoom.endGame()
+        currentRoom.endGame()
 
         return true
     }
@@ -484,7 +476,7 @@ export class UserManager {
      */
     private static async sendUserInfoToSelf(user: User, conn: ExtendedSocket, holepunchPort: number): Promise<void> {
         conn.send(new OutUserStartPacket(user.userId, user.userName, user.playerName, holepunchPort))
-        conn.send(await OutUserInfoPacket.fullUserUpdate(user))
+        conn.send(OutUserInfoPacket.fullUserUpdate(user))
     }
 
     /**
@@ -600,8 +592,8 @@ export class UserManager {
             0x42, 0x00, 0x00, 0x00, 0x94, 0x01, 0x00, 0x00])
         conn.sendBuffer(unlockReply)
         conn.send(OutFavoritePacket.setCosmetics(cosmetics.ctItem, cosmetics.terItem,
-                cosmetics.headItem, cosmetics.gloveItem, cosmetics.backItem, cosmetics.stepsItem,
-                cosmetics.cardItem, cosmetics.sprayItem))
+            cosmetics.headItem, cosmetics.gloveItem, cosmetics.backItem, cosmetics.stepsItem,
+            cosmetics.cardItem, cosmetics.sprayItem))
         conn.send(OutFavoritePacket.setLoadout(loadouts))
         conn.send(OutOptionPacket.setBuyMenu(buyMenu))
     }

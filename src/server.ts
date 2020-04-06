@@ -91,7 +91,7 @@ async function startServer(): Promise<void> {
     shouldLogPackets: program.logPackets,
   })
 
-  await masterServer.listen()
+  masterServer.listen()
 }
 
 /**

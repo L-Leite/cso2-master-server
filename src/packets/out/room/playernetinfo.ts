@@ -5,13 +5,16 @@ import { OutPacketBase } from 'packets/out/packet'
 import { RoomTeamNum } from 'room/room'
 import { UserSession } from 'user/usersession'
 
+import { ActiveConnections } from 'storage/activeconnections'
+
 /**
  * shared room user structure
  * @class OutRoomPlayerNetInfo
  */
 export class OutRoomPlayerNetInfo {
-    public static async build(userId: number, teamNum: RoomTeamNum, outPacket: OutPacketBase): Promise<void> {
-        const session: UserSession = await UserSession.get(userId)
+    public static build(userId: number, teamNum: RoomTeamNum, outPacket: OutPacketBase): void {
+        const conn = ActiveConnections.Singleton().FindByOwnerId(userId)
+        const session: UserSession = conn.getSession()
 
         if (session == null) {
             return

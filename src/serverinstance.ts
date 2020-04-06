@@ -18,6 +18,8 @@ import { Room } from 'room/room'
 import { UserManager } from 'user/usermanager'
 import { UserSession } from 'user/usersession'
 
+import { ActiveConnections } from 'storage/activeconnections'
+
 import { PacketLogger } from 'packetlogger'
 
 /**
@@ -94,16 +96,12 @@ export class ServerInstance {
         })
     }
 
-    public async listen(): Promise<void> {
-        // clean up any left over user sessions
-        await UserSession.deleteAll()
-
+    public listen(): void {
         this.server.listen(this.masterPort, this.hostname)
         this.holepunchServer.bind(this.holepunchPort, this.hostname)
     }
 
-    public async stop(): Promise<void> {
-        await UserSession.deleteAll()
+    public stop(): void {
         this.server.close()
         process.exit(0)
     }
@@ -179,7 +177,7 @@ export class ServerInstance {
      * @param msg the received data
      * @param rinfo the sender's info
      */
-    private async onHolepunchMessage(msg: Buffer, rinfo: net.AddressInfo): Promise<void> {
+    private onHolepunchMessage(msg: Buffer, rinfo: net.AddressInfo): void {
         const packet: InHolepunchPacketUdp = new InHolepunchPacketUdp(msg)
 
         if (packet.isParsed() === false) {
@@ -191,7 +189,8 @@ export class ServerInstance {
             return
         }
 
-        const session: UserSession = await UserSession.get(packet.userId)
+        const conn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(packet.userId)
+        const session: UserSession = conn.getSession()
 
         if (session == null) {
             console.warn('Couldnt\'t get user ID %i\'s session when holepunching', packet.userId)
@@ -218,8 +217,6 @@ export class ServerInstance {
             console.warn('Unknown hole punch port')
             return
         }
-
-        session.update()
 
         const reply: Buffer = new OutHolepunchPacketUdp(portIndex).build()
         this.holepunchServer.send(reply, packet.port, packet.ipAddress)
@@ -311,8 +308,8 @@ export class ServerInstance {
      */
     private async onSocketClose(conn: ExtendedSocket, hadError: boolean): Promise<void> {
         console.log('socket ' + conn.uuid + ' closed hadError: ' + hadError)
-        await Room.cleanUpUser(conn.getOwner().userId)
-        UserSession.delete(conn.getOwner().userId)
+        Room.cleanUpUser(conn.getOwner().userId)
+        await UserManager.OnSocketClosed(conn)
     }
 
     /**

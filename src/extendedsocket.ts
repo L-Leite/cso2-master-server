@@ -4,6 +4,7 @@ import { PacketLogger } from 'packetlogger'
 import { OutPacketBase } from 'packets/out/packet'
 
 import { User } from 'user/user'
+import { UserSession } from 'user/usersession'
 
 const MIN_SEQUENCE: number = 0
 const MAX_SEQUENCE: number = 255
@@ -28,6 +29,8 @@ export class ExtendedSocket extends net.Socket {
     public uuid: string
     // the connection owning user, null if it doesn't have any
     private owner: User
+    private session: UserSession
+
     // the current packet sequence (1 byte long)
     private seq: number
     // the real current packet sequence, used by logger
@@ -40,6 +43,14 @@ export class ExtendedSocket extends net.Socket {
      */
     public getOwner(): User {
         return this.owner
+    }
+
+    /**
+     * @returns the socket's owning session's object if available
+     * if it doesn't have any, it returns null
+     */
+    public getSession(): UserSession {
+        return this.session
     }
 
     /**
@@ -56,6 +67,14 @@ export class ExtendedSocket extends net.Socket {
      */
     public setOwner(newOwner: User): void {
         this.owner = newOwner
+    }
+
+    /**
+     * sets the socket's owning user session
+     * @param newOwner the new owner's session object
+     */
+    public setSession(newSession: UserSession): void {
+        this.session = newSession
     }
 
     /**

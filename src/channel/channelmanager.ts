@@ -95,7 +95,7 @@ export class ChannelManager {
         }
 
         const user: User = sourceConn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = sourceConn.getSession()
 
         if (session == null) {
             console.warn('Couldn\'t get user ID %i\'s session', user.userId)
@@ -119,7 +119,7 @@ export class ChannelManager {
         }
 
         console.log('user "%s" requested room list successfully, sending it...', user.userId)
-        this.setUserChannel(session, sourceConn, channel, server)
+        await this.setUserChannel(session, sourceConn, channel, server)
 
         return true
     }
@@ -157,7 +157,6 @@ export class ChannelManager {
     private static async setUserChannel(session: UserSession, conn: ExtendedSocket,
                                         channel: Channel, channelServer: ChannelServer): Promise<void> {
         session.setCurrentChannelIndex(channelServer.index, channel.index)
-        await session.update()
         this.sendRoomListTo(conn, channel)
     }
 
@@ -184,7 +183,7 @@ export class ChannelManager {
         const newRoomReq: InRoomNewRequest = new InRoomNewRequest(roomPacket)
 
         const user: User = sourceConn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = sourceConn.getSession()
 
         if (session == null) {
             console.warn('Could not get user ID %i\'s session', user.userId)
@@ -202,7 +201,6 @@ export class ChannelManager {
 
             curRoom.removeUser(session.userId)
             session.currentRoomId = 0
-            await session.update()
 
             return false
         }
@@ -230,9 +228,8 @@ export class ChannelManager {
         })
 
         session.currentRoomId = newRoom.id
-        await session.update()
 
-        await newRoom.sendJoinNewRoom(session.userId)
+        newRoom.sendJoinNewRoom(session.userId)
         newRoom.sendRoomSettingsTo(session.userId)
 
         console.log('user ID %i created a new room. name: "%s" (id: %i)',
@@ -251,7 +248,7 @@ export class ChannelManager {
         const joinReq: InRoomJoinRequest = new InRoomJoinRequest(roomPacket)
 
         const user: User = sourceConn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = sourceConn.getSession()
 
         if (session == null) {
             console.warn('Could not get user ID %i\'s session', user.userId)
@@ -282,9 +279,8 @@ export class ChannelManager {
 
         desiredRoom.addUser(session.userId, sourceConn)
         session.currentRoomId = desiredRoom.id
-        await session.update()
 
-        await desiredRoom.sendJoinNewRoom(session.userId)
+        desiredRoom.sendJoinNewRoom(session.userId)
         desiredRoom.sendRoomSettingsTo(session.userId)
 
         desiredRoom.updateNewPlayerReadyStatus(session.userId)
@@ -303,7 +299,7 @@ export class ChannelManager {
      */
     private static async onGameStartRequest(sourceConn: ExtendedSocket): Promise<boolean> {
         const user: User = sourceConn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = sourceConn.getSession()
 
         if (session == null) {
             console.warn('Could not get user ID %i\'s session', user.userId)
@@ -324,7 +320,7 @@ export class ChannelManager {
                 session.userId, currentRoom.settings.roomName, currentRoom.id)
             return true
         } else if (currentRoom.getStatus() === RoomStatus.Ingame) {
-            currentRoom.guestGameJoin(session.userId)
+            await currentRoom.guestGameJoin(session.userId)
             console.debug('user ID %i is joining a match in room "%s" (room id: %i)',
                 session.userId, currentRoom.settings.roomName, currentRoom.id)
             return true
@@ -344,7 +340,7 @@ export class ChannelManager {
      */
     private static async onLeaveRoomRequest(sourceConn: ExtendedSocket): Promise<boolean> {
         const user: User = sourceConn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = sourceConn.getSession()
 
         if (session == null) {
             console.warn('Could not get user ID %i\'s session', user.userId)
@@ -365,12 +361,11 @@ export class ChannelManager {
 
         currentRoom.removeUser(session.userId)
         session.currentRoomId = 0
-        await session.update()
 
         console.log('user ID %i left room "%s" (room id: %i)',
             session.userId, currentRoom.settings.roomName, currentRoom.id)
 
-        this.sendRoomListTo(sourceConn,
+        await this.sendRoomListTo(sourceConn,
             this.getChannel(session.currentChannelIndex, session.currentChannelServerIndex))
 
         return true
@@ -383,7 +378,7 @@ export class ChannelManager {
      */
     private static async onToggleReadyRequest(sourceConn: ExtendedSocket): Promise<boolean> {
         const user: User = sourceConn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = sourceConn.getSession()
 
         if (session == null) {
             console.warn('Could not get user ID %i\'s session', user.userId)
@@ -431,7 +426,7 @@ export class ChannelManager {
         const newSettingsReq: InRoomUpdateSettings = new InRoomUpdateSettings(roomPacket)
 
         const user: User = sourceConn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = sourceConn.getSession()
 
         if (session == null) {
             console.warn('Could not get user ID %i\'s session', user.userId)
@@ -495,7 +490,7 @@ export class ChannelManager {
         const setTeamReq: InRoomSetUserTeamRequest = new InRoomSetUserTeamRequest(roomPacket)
 
         const user: User = sourceConn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = sourceConn.getSession()
 
         if (session == null) {
             console.warn('Could not get user ID %i\'s session', user.userId)
@@ -543,7 +538,7 @@ export class ChannelManager {
         const countdownReq: InRoomCountdown = new InRoomCountdown(roomPacket)
 
         const user: User = sourceConn.getOwner()
-        const session: UserSession = await UserSession.get(user.userId)
+        const session: UserSession = sourceConn.getSession()
 
         if (session == null) {
             console.warn('Could not get user ID %i\'s session', user.userId)

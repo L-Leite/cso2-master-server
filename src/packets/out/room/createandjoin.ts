@@ -12,7 +12,7 @@ import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
  * sends the newly created room information to an user
  */
 export class OutRoomCreateAndJoin {
-    public static async build(room: Room, outPacket: OutPacketBase): Promise<void> {
+    public static build(room: Room, outPacket: OutPacketBase): void {
         outPacket.writeUInt32(room.host.userId) // roomHostId
 
         outPacket.writeUInt8(2) // unk01
@@ -157,8 +157,8 @@ export class OutRoomCreateAndJoin {
 
         for (const userEntry of room.usersInfo) {
             outPacket.writeUInt32(userEntry.userId)
-            await OutRoomPlayerNetInfo.build(userEntry.userId, room.getUserTeam(userEntry.userId), outPacket)
-            await UserInfoFullUpdate.build(userEntry.conn.getOwner(), outPacket)
+            OutRoomPlayerNetInfo.build(userEntry.userId, room.getUserTeam(userEntry.userId), outPacket)
+            UserInfoFullUpdate.build(userEntry.conn.getOwner(), outPacket)
         }
     }
 }

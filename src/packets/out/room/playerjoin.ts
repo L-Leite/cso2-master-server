@@ -12,9 +12,9 @@ import { User } from 'user/user'
  * @class OutRoomPlayerJoin
  */
 export class OutRoomPlayerJoin {
-    public static async build(user: User, teamNum: RoomTeamNum, outPacket: OutPacketBase): Promise<void> {
+    public static build(user: User, teamNum: RoomTeamNum, outPacket: OutPacketBase): void {
         outPacket.writeUInt32(user.userId)
-        await OutRoomPlayerNetInfo.build(user.userId, teamNum, outPacket)
-        await UserInfoFullUpdate.build(user, outPacket)
+        OutRoomPlayerNetInfo.build(user.userId, teamNum, outPacket)
+        UserInfoFullUpdate.build(user, outPacket)
     }
 }

@@ -36,7 +36,7 @@ enum OutRoomPacketType {
  * @class OutRoomPacket
  */
 export class OutRoomPacket extends OutPacketBase {
-    public static async createAndJoin(room: Room): Promise<OutRoomPacket> {
+    public static createAndJoin(room: Room): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -45,12 +45,12 @@ export class OutRoomPacket extends OutPacketBase {
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.CreateAndJoin)
 
-        await OutRoomCreateAndJoin.build(room, packet)
+        OutRoomCreateAndJoin.build(room, packet)
 
         return packet
     }
 
-    public static async playerJoin(user: User, teamNum: RoomTeamNum): Promise<OutRoomPacket> {
+    public static playerJoin(user: User, teamNum: RoomTeamNum): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -59,7 +59,7 @@ export class OutRoomPacket extends OutPacketBase {
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.PlayerJoin)
 
-        await OutRoomPlayerJoin.build(user, teamNum, packet)
+        OutRoomPlayerJoin.build(user, teamNum, packet)
 
         return packet
     }

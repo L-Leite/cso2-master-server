@@ -12,6 +12,8 @@ import { OutRoomPacket } from 'packets/out/room'
 import { OutUdpPacket } from 'packets/out/udp'
 import { UserSession } from 'user/usersession'
 
+import { ActiveConnections } from 'storage/activeconnections'
+
 export enum RoomTeamNum {
     Unknown = 0,
     Terrorist = 1,
@@ -142,8 +144,9 @@ export class Room {
      * @param user the target user
      * @returns true if successful or if not in a room, false if not
      */
-    public static async cleanUpUser(userId: number): Promise<boolean> {
-        const session: UserSession = await UserSession.get(userId)
+    public static cleanUpUser(userId: number): boolean {
+        const conn = ActiveConnections.Singleton().FindByOwnerId(userId)
+        const session: UserSession = conn.getSession()
 
         if (session.currentRoomId == null || session.currentRoomId === 0) {
             return true
@@ -166,7 +169,7 @@ export class Room {
 
         session.currentRoomId = 0
 
-        return await session.update()
+        return true
     }
 
     public id: number
@@ -682,9 +685,9 @@ export class Room {
      * send the room's data to the user that joined the room
      * @param userId the new user's ID
      */
-    public async sendJoinNewRoom(userId: number): Promise<void> {
+    public sendJoinNewRoom(userId: number): void {
         const user: RoomUserEntry = this.getRoomUser(userId)
-        user.conn.send(await OutRoomPacket.createAndJoin(this))
+        user.conn.send(OutRoomPacket.createAndJoin(this))
     }
 
     /**
@@ -850,7 +853,7 @@ export class Room {
      * @param user the player to send the other player's ready status
      * @param newUser the player whose ready status will be sent
      */
-    public async sendNewUserTo(user: RoomUserEntry, newUser: RoomUserEntry): Promise<void> {
+    public sendNewUserTo(user: RoomUserEntry, newUser: RoomUserEntry): void {
         const team: RoomTeamNum = newUser.team
 
         if (team == null) {
@@ -859,7 +862,7 @@ export class Room {
             return null
         }
 
-        user.conn.send(await OutRoomPacket.playerJoin(newUser.conn.getOwner(), team))
+        user.conn.send(OutRoomPacket.playerJoin(newUser.conn.getOwner(), team))
     }
 
     /**
@@ -881,19 +884,17 @@ export class Room {
         })
     }
 
-    public async hostGameStart(): Promise<void> {
+    public hostGameStart(): void {
         this.stopCountdown()
         this.setStatus(RoomStatus.Ingame)
         this.setUserIngame(this.host, true)
 
-        this.recurseNonHostUsersAsync(async (u: RoomUserEntry): Promise<void> => {
+        this.recurseNonHostUsers((u: RoomUserEntry): void => {
             this.sendRoomStatusTo(u)
             if (u.isReady()) {
                 this.setUserIngame(u, true)
-                await Promise.all([
-                    this.sendConnectHostTo(u, this.host),
-                    this.sendGuestDataTo(this.host, u)],
-                )
+                this.sendConnectHostTo(u, this.host)
+                this.sendGuestDataTo(this.host, u)
             }
         })
 
@@ -907,10 +908,9 @@ export class Room {
 
         this.sendRoomStatusTo(guest)
         this.setUserIngame(guest, true)
-        await Promise.all([
-            this.sendConnectHostTo(guest, this.host),
-            this.sendGuestDataTo(this.host, guest)],
-        )
+
+        this.sendConnectHostTo(guest, this.host)
+        this.sendGuestDataTo(this.host, guest)
 
         this.sendBroadcastReadyStatus()
     }
@@ -1003,8 +1003,9 @@ export class Room {
      * @param user the user that will connect to the host
      * @param host the host to connect to
      */
-    public async sendConnectHostTo(user: RoomUserEntry, host: RoomUserEntry): Promise<void> {
-        const hostSession: UserSession = await UserSession.get(host.userId)
+    public sendConnectHostTo(user: RoomUserEntry, host: RoomUserEntry): void {
+        const hostConn = ActiveConnections.Singleton().FindByOwnerId(host.userId)
+        const hostSession: UserSession = hostConn.getSession()
 
         if (hostSession == null) {
             return
@@ -1020,8 +1021,9 @@ export class Room {
      * @param host the user hosting the match
      * @param guest the guest player joining the host's match
      */
-    public async sendGuestDataTo(host: RoomUserEntry, guest: RoomUserEntry): Promise<void> {
-        const guestSession: UserSession = await UserSession.get(guest.userId)
+    public sendGuestDataTo(host: RoomUserEntry, guest: RoomUserEntry): void {
+        const guestConn = ActiveConnections.Singleton().FindByOwnerId(guest.userId)
+        const guestSession: UserSession = guestConn.getSession()
 
         if (guestSession == null) {
             return

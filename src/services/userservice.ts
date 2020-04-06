@@ -21,6 +21,65 @@ export class UserService {
    * @param userId the user's ID
    * @returns the user object if found, null otherwise
    */
+  public async Login(username: string, password: string): Promise<boolean> {
+    if (UserSvcPing.isAlive() === false) {
+      return false
+    }
+
+    try {
+      const res: superagent.Response = await superagent
+        .post(this.baseUrl + `/auth/login`)
+        .send({
+          username,
+          password,
+        })
+        .accept('json')
+
+      if (res.status === 200) {
+        return true
+      }
+    } catch (error) {
+      console.error(error)
+      UserSvcPing.checkNow()
+    }
+
+    return false
+  }
+
+  /**
+   * get an user's by its ID
+   * @param userId the user's ID
+   * @returns the user object if found, null otherwise
+   */
+  public async Logout(userId: number): Promise<boolean> {
+    if (UserSvcPing.isAlive() === false) {
+      return false
+    }
+
+    try {
+      const res: superagent.Response = await superagent
+        .post(this.baseUrl + `/auth/logout`)
+        .send({
+          userId,
+        })
+        .accept('json')
+
+      if (res.status === 200) {
+        return true
+      }
+    } catch (error) {
+      console.error(error)
+      UserSvcPing.checkNow()
+    }
+
+    return false
+  }
+
+  /**
+   * get an user's by its ID
+   * @param userId the user's ID
+   * @returns the user object if found, null otherwise
+   */
   public async GetUserById(userId: number): Promise<User> {
     try {
       let user: User = this.userCache.get(userId)
