@@ -109,9 +109,9 @@ export class UserManager {
                                       holepunchPort: number): Promise<boolean> {
         const loginPacket: InLoginPacket = new InLoginPacket(loginData)
 
-        const loggedIn = await userService.Login(loginPacket.gameUsername, loginPacket.password)
+        const loggedUserId = await userService.Login(loginPacket.gameUsername, loginPacket.password)
 
-        if (loggedIn === false) {
+        if (loggedUserId === 0) {
             console.warn('Could not create session for user %s', loginPacket.gameUsername)
             connection.end()
             return false
@@ -122,18 +122,18 @@ export class UserManager {
 
         console.log('user %s logged in (uuid: %s)', loginPacket.gameUsername, connection.uuid)
 
-        const newSession: UserSession = new UserSession(connection.address() as net.AddressInfo)
-        connection.setSession(newSession)
-
-        const user: User = await userService.GetUserById(newSession.userId)
+        const user: User = await userService.GetUserById(loggedUserId)
 
         if (user == null) {
-            console.error('Couldn\'t get user ID %i\' information', newSession.userId)
+            console.error('Couldn\'t get user ID %i\' information', loggedUserId)
             connection.end()
             return false
         }
 
         connection.setOwner(user)
+
+        const newSession: UserSession = new UserSession(user, connection.address() as net.AddressInfo)
+        connection.setSession(newSession)
 
         UserManager.sendUserInfoToSelf(user, connection, holepunchPort)
         UserManager.sendInventory(newSession.userId, connection)

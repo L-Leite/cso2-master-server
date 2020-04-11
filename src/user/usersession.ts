@@ -3,11 +3,13 @@ import net from 'net'
 import { HolepunchType } from 'packets/holepunch/inholepunch'
 
 import { SessionNetworkInfo } from 'user/sessionnetworkinfo'
+import { User } from 'user/user'
 
 /**
  * holds an user's session information
  */
 export class UserSession {
+    public user: User
     public userId: number
 
     public externalNet: SessionNetworkInfo
@@ -17,7 +19,8 @@ export class UserSession {
     public currentChannelIndex: number
     public currentRoomId: number
 
-    constructor(addr: net.AddressInfo) {
+    constructor(user: User, addr: net.AddressInfo) {
+        this.user = user
         this.externalNet.ipAddress = addr.address
     }
 

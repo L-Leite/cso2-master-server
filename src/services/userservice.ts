@@ -21,9 +21,9 @@ export class UserService {
    * @param userId the user's ID
    * @returns the user object if found, null otherwise
    */
-  public async Login(username: string, password: string): Promise<boolean> {
+  public async Login(username: string, password: string): Promise<number> {
     if (UserSvcPing.isAlive() === false) {
-      return false
+      return 0
     }
 
     try {
@@ -36,14 +36,14 @@ export class UserService {
         .accept('json')
 
       if (res.status === 200) {
-        return true
+        return res.body.userId
       }
     } catch (error) {
       console.error(error)
       UserSvcPing.checkNow()
     }
 
-    return false
+    return 0
   }
 
   /**
