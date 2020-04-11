@@ -28,7 +28,7 @@ export class UserService {
 
     try {
       const res: superagent.Response = await superagent
-        .post(this.baseUrl + `/auth/login`)
+        .post(this.baseUrl + `/users/auth/login`)
         .send({
           username,
           password,
@@ -58,7 +58,7 @@ export class UserService {
 
     try {
       const res: superagent.Response = await superagent
-        .post(this.baseUrl + `/auth/logout`)
+        .post(this.baseUrl + `/users/auth/logout`)
         .send({
           userId,
         })
