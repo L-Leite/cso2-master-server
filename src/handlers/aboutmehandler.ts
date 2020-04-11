@@ -11,6 +11,7 @@ import { OutUserInfoPacket } from 'packets/out/userinfo'
 
 import { UserService } from 'services/userservice'
 
+import { Room } from 'room/room'
 import { UserSession } from 'user/usersession'
 
 /**
@@ -56,7 +57,18 @@ export class AboutMeHandler {
       return false;
     }
 
-    conn.send(OutUserInfoPacket.updateAvatar(session.user))
+    const newPacket: OutUserInfoPacket = OutUserInfoPacket.updateAvatar(session.user)
+
+    conn.send(newPacket)
+
+    if (session.isInRoom() === true) {
+      const curRoom: Room = session.currentRoom
+      curRoom.recurseUsers((u) => {
+        if (u.conn !== conn) {
+          u.conn.send(newPacket)
+        }
+      })
+    }
 
     console.log(`Setting user ID ${session.user.userId}'s avatar to ${avatarData.avatarId}`)
 
@@ -73,14 +85,25 @@ export class AboutMeHandler {
       return false;
     }
 
-    const updated: boolean  = await this.userSvc.SetUserSignature(session.user, signatureData.msg)
+    const updated: boolean = await this.userSvc.SetUserSignature(session.user, signatureData.msg)
 
     if (updated === false) {
       console.warn(`Failed to update user ${session.user.userId}'s signature`)
       return false;
     }
 
-    conn.send(OutUserInfoPacket.updateSignature(session.user))
+    const newPacket: OutUserInfoPacket = OutUserInfoPacket.updateSignature(session.user)
+
+    conn.send(newPacket)
+
+    if (session.isInRoom() === true) {
+      const curRoom: Room = session.currentRoom
+      curRoom.recurseUsers((u) => {
+        if (u.conn !== conn) {
+          u.conn.send(newPacket)
+        }
+      })
+    }
 
     console.log(`Setting user ID ${session.user.userId}'s signature`)
 
@@ -97,14 +120,25 @@ export class AboutMeHandler {
       return false;
     }
 
-    const updated: boolean  = await this.userSvc.SetUserTitle(session.user, titleData.titleId)
+    const updated: boolean = await this.userSvc.SetUserTitle(session.user, titleData.titleId)
 
     if (updated === false) {
       console.warn(`Failed to update user ${session.user.userId}'s title to ${titleData.titleId}`)
       return false;
     }
 
-    conn.send(OutUserInfoPacket.updateTitle(session.user))
+    const newPacket: OutUserInfoPacket = OutUserInfoPacket.updateTitle(session.user)
+
+    conn.send(newPacket)
+
+    if (session.isInRoom() === true) {
+      const curRoom: Room = session.currentRoom
+      curRoom.recurseUsers((u) => {
+        if (u.conn !== conn) {
+          u.conn.send(newPacket)
+        }
+      })
+    }
 
     console.log(`Setting user ID ${session.user.userId}'s title to ${titleData.titleId}`)
 
