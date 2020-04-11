@@ -133,6 +133,8 @@ export class UserManager {
 
         console.log(`user ${user.userName} logged in (uuid: ${connection.uuid})`)
 
+        ActiveConnections.Singleton().Add(connection)
+
         UserManager.sendUserInfoToSelf(user, connection, holepunchPort)
         UserManager.sendInventory(newSession.user.userId, connection)
         ChannelManager.sendChannelListTo(connection)

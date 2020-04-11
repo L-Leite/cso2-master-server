@@ -190,6 +190,11 @@ export class ServerInstance {
         }
 
         const conn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(packet.userId)
+
+        if (conn == null) {
+            return
+        }
+
         const session: UserSession = conn.getSession()
 
         if (session == null) {
@@ -310,6 +315,7 @@ export class ServerInstance {
         console.log('socket ' + conn.uuid + ' closed hadError: ' + hadError)
         Room.cleanUpUser(conn.getSession().user.userId)
         await UserManager.OnSocketClosed(conn)
+        ActiveConnections.Singleton().Remove(conn)
     }
 
     /**
