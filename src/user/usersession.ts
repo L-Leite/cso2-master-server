@@ -19,6 +19,8 @@ export class UserSession {
     public currentRoomId: number
 
     constructor(user: User, addr: net.AddressInfo) {
+        this.externalNet = new SessionNetworkInfo()
+        this.internalNet = new SessionNetworkInfo()
         this.user = user
         this.externalNet.ipAddress = addr.address
     }
