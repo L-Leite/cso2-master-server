@@ -49,29 +49,6 @@ const aboutMeHandler = new AboutMeHandler(userService)
  * handles the user logic
  */
 export class UserManager {
-
-    /**
-     * get the current room's object of an user's session
-     * @param session the target user's session
-     * @returns the room object if found, else it's null
-     */
-    public static getSessionCurRoom(session: UserSession): Room {
-        const channel: Channel =
-            ChannelManager.getChannel(session.currentChannelIndex, session.currentChannelServerIndex)
-
-        if (channel == null) {
-            return null
-        }
-
-        const currentRoom: Room = channel.getRoomById(session.currentRoomId)
-
-        if (currentRoom == null) {
-            return null
-        }
-
-        return currentRoom
-    }
-
     public static async OnSocketClosed(socket: ExtendedSocket): Promise<void> {
         await userService.Logout(socket.getSession().user.userId)
     }
@@ -198,7 +175,7 @@ its inventory to user ID ${preloadData.userId} whose session is null`)
             return false
         }
 
-        const currentRoom: Room = UserManager.getSessionCurRoom(requesterSession)
+        const currentRoom: Room = requesterSession.currentRoom
 
         if (currentRoom == null) {
             console.error(`Tried to get user's ${requesterSession.user.userId}
@@ -246,7 +223,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
             return false
         }
 
-        const currentRoom: Room = this.getSessionCurRoom(requesterSession)
+        const currentRoom: Room = requesterSession.currentRoom
 
         if (currentRoom == null) {
             console.error('Tried to get user\'s %i room but it couldn\'t be found. room id: %i',
@@ -293,7 +270,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
             return false
         }
 
-        const currentRoom: Room = this.getSessionCurRoom(requesterSession)
+        const currentRoom: Room = requesterSession.currentRoom
 
         if (currentRoom == null) {
             console.error('Tried to get user\'s %i room but it couldn\'t be found. room id: %i',
@@ -355,7 +332,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
             return false
         }
 
-        console.log('Setting user ID %i\'s buy menu', session.currentRoomId)
+        console.log(`Setting user ID ${session.user.userId}'s buy menu`)
 
         await UserInventory.setBuyMenu(session.user.userId, buyMenuData.buyMenu)
 
@@ -398,8 +375,8 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
         const slot: number = loadoutData.weaponSlot
         const itemId: number = loadoutData.itemId
 
-        console.log('Setting user ID %i\'s new weapon %i to slot %i in loadout %i',
-            session.currentRoomId, itemId, slot, loadoutNum)
+        console.log(
+            `Setting user ID ${session.user.userId}'s new weapon ${itemId} to slot ${slot} in loadout ${loadoutNum}`)
 
         await UserInventory.setLoadoutWeapon(session.user.userId, loadoutNum, slot, itemId)
 
@@ -441,7 +418,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
             return false
         }
 
-        const currentRoom: Room = UserManager.getSessionCurRoom(session)
+        const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
             console.error('Tried to get user\'s %i room but it couldn\'t be found. room id: %i',

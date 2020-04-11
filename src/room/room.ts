@@ -144,30 +144,18 @@ export class Room {
      * @param user the target user
      * @returns true if successful or if not in a room, false if not
      */
-    public static cleanUpUser(userId: number): boolean {
-        const conn = ActiveConnections.Singleton().FindByOwnerId(userId)
+    public static cleanUpUser(conn: ExtendedSocket): boolean {
         const session: UserSession = conn.getSession()
 
-        if (session.currentRoomId == null || session.currentRoomId === 0) {
-            return true
-        }
-
-        const channel: Channel = ChannelManager.getChannel(
-            session.currentChannelIndex, session.currentChannelServerIndex)
-
-        if (channel == null) {
-            return false
-        }
-
-        const room: Room = channel.getRoomById(session.currentRoomId)
+        const room: Room = session.currentRoom
 
         if (room == null) {
             return false
         }
 
-        room.removeUser(userId)
+        room.removeUser(session.user.userId)
 
-        session.currentRoomId = 0
+        session.currentRoom = null
 
         return true
     }

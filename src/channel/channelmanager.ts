@@ -111,7 +111,7 @@ export class ChannelManager {
         }
 
         console.log('user "%s" requested room list successfully, sending it...', session.user.userId)
-        await this.setUserChannel(session, sourceConn, channel, server)
+        await this.setUserChannel(session, sourceConn, channel)
 
         return true
     }
@@ -147,8 +147,8 @@ export class ChannelManager {
      * @param channelServer the channel's channelServer
      */
     private static async setUserChannel(session: UserSession, conn: ExtendedSocket,
-                                        channel: Channel, channelServer: ChannelServer): Promise<void> {
-        session.setCurrentChannelIndex(channelServer.index, channel.index)
+                                        channel: Channel): Promise<void> {
+        session.currentChannel = channel
         this.sendRoomListTo(conn, channel)
     }
 
@@ -180,28 +180,21 @@ export class ChannelManager {
         // this will remove the user from its current room
         // it should help mitigating the 'ghost room' issue,
         // where a room has users that aren't in it on the client's side
-        if (session.currentRoomId !== 0) {
-            const curRoom: Room = UserManager.getSessionCurRoom(session)
+        if (session.currentRoom != null) {
+            const curRoom: Room = session.currentRoom
             console.warn('user ID %i tried to create a new room, while in an existing one current room: "%s" (id: %i)',
-                session.currentRoomId, curRoom.settings.roomName, curRoom.id)
+                curRoom.id, curRoom.settings.roomName, curRoom.id)
 
             curRoom.removeUser(session.user.userId)
-            session.currentRoomId = 0
+            session.currentRoom = null
 
-            return false
+            // return false
         }
 
-        const server: ChannelServer = this.getServerByIndex(session.currentChannelServerIndex)
-
-        if (server == null) {
-            console.warn('user ID %i requested a new room, but it isn\'t in a channel server', session.user.userId)
-            return false
-        }
-
-        const channel: Channel = server.getChannelByIndex(session.currentChannelIndex)
+        const channel: Channel = session.currentChannel
 
         if (channel == null) {
-            console.warn('user ID %i  requested a new room, but it isn\'t in a channel', session.user.userId)
+            console.warn('user ID %i requested a new room, but it isn\'t in a channel', session.user.userId)
             return false
         }
 
@@ -213,7 +206,7 @@ export class ChannelManager {
             winLimit: newRoomReq.winLimit,
         })
 
-        session.currentRoomId = newRoom.id
+        session.currentRoom = newRoom
 
         newRoom.sendJoinNewRoom(session.user.userId)
         newRoom.sendRoomSettingsTo(session.user.userId)
@@ -234,8 +227,7 @@ export class ChannelManager {
         const joinReq: InRoomJoinRequest = new InRoomJoinRequest(roomPacket)
 
         const session: UserSession = sourceConn.getSession()
-        const channel: Channel = ChannelManager.getChannel(session.currentChannelIndex,
-            session.currentChannelServerIndex)
+        const channel: Channel = session.currentChannel
 
         if (channel == null) {
             console.warn('user ID %i tried to join a room, but it isn\'t in a channel', session.user.userId)
@@ -257,7 +249,7 @@ export class ChannelManager {
         }
 
         desiredRoom.addUser(session.user.userId, sourceConn)
-        session.currentRoomId = desiredRoom.id
+        session.currentRoom = desiredRoom
 
         desiredRoom.sendJoinNewRoom(session.user.userId)
         desiredRoom.sendRoomSettingsTo(session.user.userId)
@@ -278,7 +270,7 @@ export class ChannelManager {
      */
     private static async onGameStartRequest(sourceConn: ExtendedSocket): Promise<boolean> {
         const session: UserSession = sourceConn.getSession()
-        const currentRoom: Room = UserManager.getSessionCurRoom(session)
+        const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
             console.warn('user ID %i tried to start a room\'s match, although it isn\'t in any', session.user.userId)
@@ -312,7 +304,7 @@ export class ChannelManager {
      */
     private static async onLeaveRoomRequest(sourceConn: ExtendedSocket): Promise<boolean> {
         const session: UserSession = sourceConn.getSession()
-        const currentRoom: Room = UserManager.getSessionCurRoom(session)
+        const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
             console.warn('user ID %i tried to leave a room, although it isn\'t in any', session.user.userId)
@@ -325,13 +317,12 @@ export class ChannelManager {
         }
 
         currentRoom.removeUser(session.user.userId)
-        session.currentRoomId = 0
+        session.currentRoom = null
 
         console.log('user ID %i left room "%s" (room id: %i)',
             session.user.userId, currentRoom.settings.roomName, currentRoom.id)
 
-        await this.sendRoomListTo(sourceConn,
-            this.getChannel(session.currentChannelIndex, session.currentChannelServerIndex))
+        await this.sendRoomListTo(sourceConn, session.currentChannel)
 
         return true
     }
@@ -343,7 +334,7 @@ export class ChannelManager {
      */
     private static async onToggleReadyRequest(sourceConn: ExtendedSocket): Promise<boolean> {
         const session: UserSession = sourceConn.getSession()
-        const currentRoom: Room = UserManager.getSessionCurRoom(session)
+        const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
             console.warn('user ID %i tried toggle ready status, although it isn\'t in any room', session.user.userId)
@@ -384,7 +375,7 @@ export class ChannelManager {
         const newSettingsReq: InRoomUpdateSettings = new InRoomUpdateSettings(roomPacket)
 
         const session: UserSession = sourceConn.getSession()
-        const currentRoom: Room = UserManager.getSessionCurRoom(session)
+        const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
             console.warn(`user ${session.user.userId} tried to update a room's settings without being in one`)
@@ -434,7 +425,7 @@ export class ChannelManager {
         const setTeamReq: InRoomSetUserTeamRequest = new InRoomSetUserTeamRequest(roomPacket)
 
         const session: UserSession = sourceConn.getSession()
-        const currentRoom: Room = UserManager.getSessionCurRoom(session)
+        const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
             console.warn('user ID %i tried change team in a room, although it isn\'t in any', session.user.userId)
@@ -475,7 +466,7 @@ export class ChannelManager {
         const countdownReq: InRoomCountdown = new InRoomCountdown(roomPacket)
 
         const session: UserSession = sourceConn.getSession()
-        const currentRoom: Room = UserManager.getSessionCurRoom(session)
+        const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
             console.warn('user ID %i tried to toggle a room\'s game start countdown, although it isn\'t in any',

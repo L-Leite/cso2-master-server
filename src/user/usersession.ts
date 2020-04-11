@@ -2,6 +2,8 @@ import net from 'net'
 
 import { HolepunchType } from 'packets/holepunch/inholepunch'
 
+import { Channel } from 'channel/channel'
+import { Room } from 'room/room'
 import { SessionNetworkInfo } from 'user/sessionnetworkinfo'
 import { User } from 'user/user'
 
@@ -14,19 +16,14 @@ export class UserSession {
     public externalNet: SessionNetworkInfo
     public internalNet: SessionNetworkInfo
 
-    public currentChannelServerIndex: number
-    public currentChannelIndex: number
-    public currentRoomId: number
+    public currentChannel: Channel
+    public currentRoom: Room
 
     constructor(user: User, addr: net.AddressInfo) {
         this.externalNet = new SessionNetworkInfo()
         this.internalNet = new SessionNetworkInfo()
         this.user = user
         this.externalNet.ipAddress = addr.address
-
-        this.currentChannelServerIndex = 0
-        this.currentChannelIndex = 0
-        this.currentRoomId = 0
     }
 
     /**
@@ -34,12 +31,7 @@ export class UserSession {
      * @returns true if so, false if not
      */
     public isInRoom(): boolean {
-        return this.currentRoomId !== 0
-    }
-
-    public setCurrentChannelIndex(channelServerIndex: number, channelIndex: number): void {
-        this.currentChannelServerIndex = channelServerIndex
-        this.currentChannelIndex = channelIndex
+        return this.currentRoom != null
     }
 
     /**

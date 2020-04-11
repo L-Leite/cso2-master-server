@@ -313,7 +313,7 @@ export class ServerInstance {
      */
     private async onSocketClose(conn: ExtendedSocket, hadError: boolean): Promise<void> {
         console.log('socket ' + conn.uuid + ' closed hadError: ' + hadError)
-        Room.cleanUpUser(conn.getSession().user.userId)
+        Room.cleanUpUser(conn)
         await UserManager.OnSocketClosed(conn)
         ActiveConnections.Singleton().Remove(conn)
     }
