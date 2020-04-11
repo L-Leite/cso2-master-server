@@ -23,6 +23,10 @@ export class UserSession {
         this.internalNet = new SessionNetworkInfo()
         this.user = user
         this.externalNet.ipAddress = addr.address
+
+        this.currentChannelServerIndex = 0
+        this.currentChannelIndex = 0
+        this.currentRoomId = 0
     }
 
     /**
