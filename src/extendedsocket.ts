@@ -62,6 +62,14 @@ export class ExtendedSocket extends net.Socket {
     }
 
     /**
+     * checks if the socket has a session
+     * @returns true if it has, false if not
+     */
+    public hasSession(): boolean {
+        return this.getSession() != null
+    }
+
+    /**
      * sets the socket's owning user
      * @param newOwner the new owner's user object
      */

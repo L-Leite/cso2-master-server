@@ -10,7 +10,6 @@ import { User } from 'user/user'
  */
 export class UserSession {
     public user: User
-    public userId: number
 
     public externalNet: SessionNetworkInfo
     public internalNet: SessionNetworkInfo
