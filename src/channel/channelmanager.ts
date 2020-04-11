@@ -3,7 +3,6 @@ import { ChannelServer } from 'channel/channelserver'
 
 import { Room, RoomReadyStatus, RoomStatus } from 'room/room'
 
-import { User } from 'user/user'
 import { UserManager } from 'user/usermanager'
 import { UserSession } from 'user/usersession'
 
@@ -31,12 +30,12 @@ export class ChannelManager {
      * @param sourceConn the user's socket
      */
     public static async onChannelListPacket(sourceConn: ExtendedSocket): Promise<boolean> {
-        if (sourceConn.hasOwner() === false) {
-            console.warn('uuid ' + sourceConn.uuid + ' tried to get channels without a session')
+        if (sourceConn.hasSession() === false) {
+            console.warn(`uuid ${sourceConn.uuid} tried to get channels without a session`)
             return false
         }
 
-        console.log('user ID %i requested server list', sourceConn.getSession().user.userId)
+        console.log(`user ID ${sourceConn.getSession().user.userId} requested server list` )
         this.sendChannelListTo(sourceConn)
 
         return true
@@ -49,8 +48,8 @@ export class ChannelManager {
      * @param users the user manager object
      */
     public static async onRoomRequest(reqData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
-        if (sourceConn.hasOwner() === false) {
-            console.warn('uuid ' + sourceConn.uuid + ' did a room request without a session')
+        if (sourceConn.hasSession() === false) {
+            console.warn(`connection ${sourceConn.uuid} did a room request without a session`)
             return false
         }
 
@@ -177,11 +176,6 @@ export class ChannelManager {
 
         const session: UserSession = sourceConn.getSession()
 
-        if (session == null) {
-            console.warn(`Could not get connection "${sourceConn.uuid}"'s session`)
-            return false
-        }
-
         // if the user wants to create a new room, let it
         // this will remove the user from its current room
         // it should help mitigating the 'ghost room' issue,
@@ -237,15 +231,9 @@ export class ChannelManager {
      * @returns true if successful
      */
     private static async onJoinRoomRequest(roomPacket: InRoomPacket, sourceConn: ExtendedSocket): Promise<boolean> {
-        if (sourceConn.hasSession() === false) {
-            console.warn('connection ${sourceConn.uuid} tried to join room without a session')
-            return false
-        }
-
         const joinReq: InRoomJoinRequest = new InRoomJoinRequest(roomPacket)
 
         const session: UserSession = sourceConn.getSession()
-
         const channel: Channel = ChannelManager.getChannel(session.currentChannelIndex,
             session.currentChannelServerIndex)
 
@@ -289,13 +277,7 @@ export class ChannelManager {
      * @returns true if successful
      */
     private static async onGameStartRequest(sourceConn: ExtendedSocket): Promise<boolean> {
-        if (sourceConn.hasSession() === false) {
-            console.warn('connection ${sourceConn.uuid} tried to start a game without a session')
-            return false
-        }
-
         const session: UserSession = sourceConn.getSession()
-
         const currentRoom: Room = UserManager.getSessionCurRoom(session)
 
         if (currentRoom == null) {
@@ -329,23 +311,11 @@ export class ChannelManager {
      * @returns true if successful
      */
     private static async onLeaveRoomRequest(sourceConn: ExtendedSocket): Promise<boolean> {
-        if (sourceConn.hasSession() === false) {
-            console.warn('connection ${sourceConn.uuid} tried to leave a room without a session')
-            return false
-        }
-
-        const user: User = sourceConn.getOwner()
         const session: UserSession = sourceConn.getSession()
-
-        if (session == null) {
-            console.warn('Could not get user ID %i\'s session', user.userId)
-            return false
-        }
-
         const currentRoom: Room = UserManager.getSessionCurRoom(session)
 
         if (currentRoom == null) {
-            console.warn('user ID %i tried to leave a room, although it isn\'t in any', user.userId)
+            console.warn('user ID %i tried to leave a room, although it isn\'t in any', session.user.userId)
             return false
         }
 
@@ -372,14 +342,7 @@ export class ChannelManager {
      * @returns true if successful
      */
     private static async onToggleReadyRequest(sourceConn: ExtendedSocket): Promise<boolean> {
-        const user: User = sourceConn.getOwner()
         const session: UserSession = sourceConn.getSession()
-
-        if (session == null) {
-            console.warn('Could not get user ID %i\'s session', user.userId)
-            return false
-        }
-
         const currentRoom: Room = UserManager.getSessionCurRoom(session)
 
         if (currentRoom == null) {
@@ -420,14 +383,7 @@ export class ChannelManager {
     private static async onRoomUpdateSettings(roomPacket: InRoomPacket, sourceConn: ExtendedSocket): Promise<boolean> {
         const newSettingsReq: InRoomUpdateSettings = new InRoomUpdateSettings(roomPacket)
 
-        const user: User = sourceConn.getOwner()
         const session: UserSession = sourceConn.getSession()
-
-        if (session == null) {
-            console.warn('Could not get user ID %i\'s session', user.userId)
-            return false
-        }
-
         const currentRoom: Room = UserManager.getSessionCurRoom(session)
 
         if (currentRoom == null) {
@@ -462,16 +418,9 @@ export class ChannelManager {
      * @param sourceConn the source connection
      * @returns true if successful
      */
-    private static async onCloseResultRequest(sourceConn: ExtendedSocket): Promise<boolean> {
-        if (sourceConn.hasOwner() === false) {
-            console.warn('Connection %s tried to close results window without owner', sourceConn.uuid)
-            return false
-        }
-
+    private static onCloseResultRequest(sourceConn: ExtendedSocket): boolean {
         Room.sendCloseResultWindow(sourceConn)
-
-        console.log('user ID %i closed game result window', sourceConn.getOwner())
-
+        console.log(`user ID ${sourceConn.getSession().user.userId} closed game result window`)
         return true
     }
 
@@ -484,14 +433,7 @@ export class ChannelManager {
     private static async onSetTeamRequest(roomPacket: InRoomPacket, sourceConn: ExtendedSocket): Promise<boolean> {
         const setTeamReq: InRoomSetUserTeamRequest = new InRoomSetUserTeamRequest(roomPacket)
 
-        const user: User = sourceConn.getOwner()
         const session: UserSession = sourceConn.getSession()
-
-        if (session == null) {
-            console.warn('Could not get user ID %i\'s session', user.userId)
-            return false
-        }
-
         const currentRoom: Room = UserManager.getSessionCurRoom(session)
 
         if (currentRoom == null) {
@@ -532,14 +474,7 @@ export class ChannelManager {
                                                   sourceConn: ExtendedSocket): Promise<boolean> {
         const countdownReq: InRoomCountdown = new InRoomCountdown(roomPacket)
 
-        const user: User = sourceConn.getOwner()
         const session: UserSession = sourceConn.getSession()
-
-        if (session == null) {
-            console.warn('Could not get user ID %i\'s session', user.userId)
-            return false
-        }
-
         const currentRoom: Room = UserManager.getSessionCurRoom(session)
 
         if (currentRoom == null) {

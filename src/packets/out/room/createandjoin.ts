@@ -158,7 +158,7 @@ export class OutRoomCreateAndJoin {
         for (const userEntry of room.usersInfo) {
             outPacket.writeUInt32(userEntry.userId)
             OutRoomPlayerNetInfo.build(userEntry.userId, room.getUserTeam(userEntry.userId), outPacket)
-            UserInfoFullUpdate.build(userEntry.conn.getOwner(), outPacket)
+            UserInfoFullUpdate.build(userEntry.conn.getSession().user, outPacket)
         }
     }
 }

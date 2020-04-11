@@ -19,7 +19,7 @@ export class ActiveConnections {
 
     public FindByOwnerId(ownerId: number): ExtendedSocket {
         for (const conn of this.connections) {
-            if (conn.getOwner().userId === ownerId) {
+            if (conn.getSession().user.userId === ownerId) {
                 return conn
             }
         }

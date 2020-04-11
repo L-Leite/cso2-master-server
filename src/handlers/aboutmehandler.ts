@@ -11,7 +11,7 @@ import { OutUserInfoPacket } from 'packets/out/userinfo'
 
 import { UserService } from 'services/userservice'
 
-import { User } from 'user/user'
+import { UserSession } from 'user/usersession'
 
 /**
  * handles incoming AboutMe type packets
@@ -26,13 +26,8 @@ export class AboutMeHandler {
   public async OnPacket(packetData: Buffer, connection: ExtendedSocket): Promise<boolean> {
     const aboutPacket: InAboutmePacket = new InAboutmePacket(packetData)
 
-    if (connection.hasOwner() === false) {
-      console.warn(`connection ${connection.uuid} sent a host packet without a session`)
-      return false
-    }
-
-    if (connection.hasOwner() === false) {
-      console.error(`couldn't get user from connection ${connection.uuid}`)
+    if (connection.hasSession() === false) {
+      console.warn(`connection ${connection.uuid} sent an AboutMe packet without a session`)
       return false
     }
 
@@ -53,23 +48,17 @@ export class AboutMeHandler {
   private async OnSetAvatar(aboutPkt: InAboutmePacket, conn: ExtendedSocket): Promise<boolean> {
     const avatarData: InAboutmeSetAvatar = new InAboutmeSetAvatar(aboutPkt)
 
-    const user: User = conn.getOwner()
-
-    if (user == null) {
-      console.error(`couldn't get user from connection ${conn.uuid}`)
-      return false
-    }
-
-    const updated: boolean = await this.userSvc.SetUserAvatar(user, avatarData.avatarId)
+    const session: UserSession = conn.getSession()
+    const updated: boolean = await this.userSvc.SetUserAvatar(session.user, avatarData.avatarId)
 
     if (updated === false) {
-      console.warn(`Failed to update user ${user.userId}'s avatar to ${avatarData.avatarId}`)
+      console.warn(`Failed to update user ${session.user.userId}'s avatar to ${avatarData.avatarId}`)
       return false;
     }
 
-    conn.send(OutUserInfoPacket.updateAvatar(user))
+    conn.send(OutUserInfoPacket.updateAvatar(session.user))
 
-    console.log(`Setting user ID ${user.userId}'s avatar to ${avatarData.avatarId}`)
+    console.log(`Setting user ID ${session.user.userId}'s avatar to ${avatarData.avatarId}`)
 
     return true
   }
@@ -77,28 +66,23 @@ export class AboutMeHandler {
   private async OnSetSignature(aboutPkt: InAboutmePacket, conn: ExtendedSocket): Promise<boolean> {
     const signatureData: InAboutmeSetSignature = new InAboutmeSetSignature(aboutPkt)
 
-    const user: User = conn.getOwner()
-
-    if (user == null) {
-      console.error(`couldn't get user from connection ${conn.uuid}`)
-      return false
-    }
+    const session: UserSession = conn.getSession()
 
     if (signatureData.msg == null) {
       console.warn(`null signature requested to be set by ${conn.uuid}`)
       return false;
     }
 
-    const updated: boolean  = await this.userSvc.SetUserSignature(user, signatureData.msg)
+    const updated: boolean  = await this.userSvc.SetUserSignature(session.user, signatureData.msg)
 
     if (updated === false) {
-      console.warn(`Failed to update user ${user.userId}'s signature`)
+      console.warn(`Failed to update user ${session.user.userId}'s signature`)
       return false;
     }
 
-    conn.send(OutUserInfoPacket.updateSignature(user))
+    conn.send(OutUserInfoPacket.updateSignature(session.user))
 
-    console.log(`Setting user ID ${user.userId}'s signature`)
+    console.log(`Setting user ID ${session.user.userId}'s signature`)
 
     return true
   }
@@ -106,28 +90,23 @@ export class AboutMeHandler {
   private async OnSetTitle(aboutPkt: InAboutmePacket, conn: ExtendedSocket): Promise<boolean> {
     const titleData: InAboutmeSetTitle = new InAboutmeSetTitle(aboutPkt)
 
-    const user: User = conn.getOwner()
-
-    if (user == null) {
-      console.error(`couldn't get user from connection ${conn.uuid}`)
-      return false
-    }
+    const session: UserSession = conn.getSession()
 
     if (titleData.titleId == null) {
       console.warn(`null title requested to be set by ${conn.uuid}`)
       return false;
     }
 
-    const updated: boolean  = await this.userSvc.SetUserTitle(user, titleData.titleId)
+    const updated: boolean  = await this.userSvc.SetUserTitle(session.user, titleData.titleId)
 
     if (updated === false) {
-      console.warn(`Failed to update user ${user.userId}'s title to ${titleData.titleId}`)
+      console.warn(`Failed to update user ${session.user.userId}'s title to ${titleData.titleId}`)
       return false;
     }
 
-    conn.send(OutUserInfoPacket.updateTitle(user))
+    conn.send(OutUserInfoPacket.updateTitle(session.user))
 
-    console.log(`Setting user ID ${user.userId}'s title to ${titleData.titleId}`)
+    console.log(`Setting user ID ${session.user.userId}'s title to ${titleData.titleId}`)
 
     return true
   }

@@ -3,7 +3,6 @@ import net from 'net'
 import { PacketLogger } from 'packetlogger'
 import { OutPacketBase } from 'packets/out/packet'
 
-import { User } from 'user/user'
 import { UserSession } from 'user/usersession'
 
 const MIN_SEQUENCE: number = 0
@@ -18,7 +17,7 @@ export class ExtendedSocket extends net.Socket {
         const newSocket: ExtendedSocket = new ExtendedSocket()
         Object.assign(newSocket, socket)
 
-        newSocket.owner = null
+        newSocket.session = null
         newSocket.realSeq = MIN_SEQUENCE
         newSocket.packetDumper = packetDumper
 
@@ -27,23 +26,17 @@ export class ExtendedSocket extends net.Socket {
 
     // an uuid to identify the socket
     public uuid: string
+
     // the connection owning user, null if it doesn't have any
-    private owner: User
     private session: UserSession
 
     // the current packet sequence (1 byte long)
     private seq: number
+
     // the real current packet sequence, used by logger
     private realSeq: number
-    private packetDumper: PacketLogger
 
-    /**
-     * @returns the socket's owning user's object if available
-     * if it doesn't have any owner, it returns null
-     */
-    public getOwner(): User {
-        return this.owner
-    }
+    private packetDumper: PacketLogger
 
     /**
      * @returns the socket's owning session's object if available
@@ -54,27 +47,11 @@ export class ExtendedSocket extends net.Socket {
     }
 
     /**
-     * checks if the socket has an owning user
-     * @returns true if it has, false if not
-     */
-    public hasOwner(): boolean {
-        return this.getOwner() != null
-    }
-
-    /**
      * checks if the socket has a session
      * @returns true if it has, false if not
      */
     public hasSession(): boolean {
         return this.getSession() != null
-    }
-
-    /**
-     * sets the socket's owning user
-     * @param newOwner the new owner's user object
-     */
-    public setOwner(newOwner: User): void {
-        this.owner = newOwner
     }
 
     /**

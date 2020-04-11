@@ -120,8 +120,6 @@ export class UserManager {
         // clear plain password right away, we don't need it anymore
         loginPacket.password = null
 
-        console.log('user %s logged in (uuid: %s)', loginPacket.gameUsername, connection.uuid)
-
         const user: User = await userService.GetUserById(loggedUserId)
 
         if (user == null) {
@@ -130,10 +128,10 @@ export class UserManager {
             return false
         }
 
-        connection.setOwner(user)
-
         const newSession: UserSession = new UserSession(user, connection.address() as net.AddressInfo)
         connection.setSession(newSession)
+
+        console.log(`user ${user.userName} logged in (uuid: ${connection.uuid})`)
 
         UserManager.sendUserInfoToSelf(user, connection, holepunchPort)
         UserManager.sendInventory(newSession.user.userId, connection)
@@ -326,8 +324,8 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
      * @param conn the sender's connection
      */
     public static async onOptionPacket(optionData: Buffer, conn: ExtendedSocket): Promise<boolean> {
-        if (conn.hasOwner() === false) {
-            console.warn('uuid ' + conn.uuid + ' tried to set inventory options without a session')
+        if (conn.hasSession() === false) {
+            console.warn(`connection ${conn.uuid} sent an option packet without a session`)
             return false
         }
 
@@ -363,8 +361,8 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
     }
 
     public static async onFavoritePacket(favoriteData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
-        if (sourceConn.hasOwner() === false) {
-            console.warn('uuid ' + sourceConn.uuid + ' tried to set inventory favorites without a session')
+        if (sourceConn.hasSession() === false) {
+            console.warn(`connection ${sourceConn.uuid} sent a favorite packet without a session`)
             return false
         }
 
