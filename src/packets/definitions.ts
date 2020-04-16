@@ -31,3 +31,7 @@ export enum PacketId {
     Inventory_Create = 154,
     UserInfo = 157,
 }
+
+export enum ChatMessageType {
+
+}
