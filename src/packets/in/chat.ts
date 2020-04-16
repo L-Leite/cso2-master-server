@@ -7,6 +7,7 @@ import { ChatMessageType } from 'packets/definitions'
  */
 export class InChatPacket extends InPacketBase {
     public type: ChatMessageType
+    public destination: string
     public message: string
 
     /**
@@ -15,6 +16,11 @@ export class InChatPacket extends InPacketBase {
     protected parse(): void {
         super.parse()
         this.type = this.readUInt8()
+
+        if (this.type === ChatMessageType.DirectMessage) {
+            this.destination = this.readString()
+        }
+
         this.message = this.readLongString()
     }
 }
