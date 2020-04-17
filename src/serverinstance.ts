@@ -273,23 +273,19 @@ export class ServerInstance {
             this.packetLogging.dumpIn(connection.uuid, connection.getRealSeq(), packet.id, packet.getData())
         }
 
+        // the most received packets should go first
         switch (packet.id) {
-            case PacketId.Version:
-                return ServerInstance.onVersionPacket(packet.getData(), connection)
-            case PacketId.Login:
-                UserManager.onLoginPacket(packet.getData(), connection, this.holepunchPort)
+            case PacketId.Host:
+                UserManager.onHostPacket(packet.getData(), connection)
+                return true
+            case PacketId.Room:
+                ChannelManager.onRoomRequest(packet.getData(), connection)
                 return true
             case PacketId.RequestChannels:
                 ChannelManager.onChannelListPacket(connection)
                 return true
             case PacketId.RequestRoomList:
                 ChannelManager.onRoomListPacket(packet.getData(), connection)
-                return true
-            case PacketId.Room:
-                ChannelManager.onRoomRequest(packet.getData(), connection)
-                return true
-            case PacketId.Host:
-                UserManager.onHostPacket(packet.getData(), connection)
                 return true
             case PacketId.AboutMe:
                 UserManager.onAboutmePacket(packet.getData(), connection)
@@ -300,6 +296,11 @@ export class ServerInstance {
             case PacketId.Favorite:
                 UserManager.onFavoritePacket(packet.getData(), connection)
                 return true
+            case PacketId.Login:
+                UserManager.onLoginPacket(packet.getData(), connection, this.holepunchPort)
+                return true
+            case PacketId.Version:
+                return ServerInstance.onVersionPacket(packet.getData(), connection)
         }
 
         console.warn('unknown packet id ' + packet.id + ' from ' + connection.uuid)
