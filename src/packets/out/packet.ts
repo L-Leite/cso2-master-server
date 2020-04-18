@@ -20,6 +20,7 @@ import { PacketString } from 'packets/packetstring'
  */
 export class OutPacketBase extends PacketBaseShared {
     protected outStream: WritableStreamBuffer
+    private builtBuffer: Buffer
 
     constructor(id: PacketId) {
         super()
@@ -33,10 +34,13 @@ export class OutPacketBase extends PacketBaseShared {
      * @returns the new packet's data
      */
     public getData(): Buffer {
-        const newPacket: Buffer = this.outStream.getContents() as Buffer
-        const dataLen: number = newPacket.byteLength - OutPacketBase.headerLength
-        newPacket.writeUInt16LE(dataLen, 2)
-        return newPacket
+        if (this.builtBuffer == null) {
+            this.builtBuffer = this.outStream.getContents() as Buffer
+            const dataLen: number = this.builtBuffer.byteLength - OutPacketBase.headerLength
+            this.builtBuffer.writeUInt16LE(dataLen, 2)
+        }
+
+        return this.builtBuffer
     }
 
     /**
