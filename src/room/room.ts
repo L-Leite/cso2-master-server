@@ -393,9 +393,16 @@ export class Room {
 
     /**
      * is the user ingame?
-     * @param user the target user
+     * @param userId the target user's ID
+     * @returns true if it is, false if not
      */
-    public isUserIngame(user: RoomUserEntry): boolean {
+    public isUserIngame(userId: number): boolean {
+        const user: RoomUserEntry = this.getRoomUser(userId)
+
+        if (user == null) {
+            return false
+        }
+
         return user.isIngame
     }
 
@@ -568,7 +575,7 @@ export class Room {
         this.recurseUsers((u: RoomUserEntry): void => {
             this.sendRoomStatusTo(u)
             this.sendRoomUsersReadyStatusTo(u)
-            if (this.isUserIngame(u) === true) {
+            if (this.isUserIngame(u.userId) === true) {
                 this.sendGameEnd(u)
                 this.setUserIngame(u, false)
             }
@@ -650,18 +657,6 @@ export class Room {
      * @param fn the func to call in each user
      */
     public recurseNonHostUsers(fn: (u: RoomUserEntry) => void): void {
-        for (const user of this.usersInfo) {
-            if (user !== this.host) {
-                fn(user)
-            }
-        }
-    }
-
-    /**
-     * loop through all the non host players
-     * @param fn the func to call in each user
-     */
-    public async recurseNonHostUsersAsync(fn: (u: RoomUserEntry) => Promise<void>): Promise<void> {
         for (const user of this.usersInfo) {
             if (user !== this.host) {
                 fn(user)

@@ -22,6 +22,9 @@ import { ActiveConnections } from 'storage/activeconnections'
 
 import { PacketLogger } from 'packetlogger'
 
+import { ChatHandler } from 'handlers/chathandler'
+import { ChatService } from 'services/chatservice'
+
 /**
  * The welcome message sent to the client
  */
@@ -59,6 +62,10 @@ export class ServerInstance {
     private holepunchPort: number
     private hostname: string
 
+    private chatSvc: ChatService
+
+    private chatHandler: ChatHandler
+
     private packetLogging: PacketLogger
 
     /**
@@ -72,6 +79,9 @@ export class ServerInstance {
 
         this.server = net.createServer()
         this.holepunchServer = dgram.createSocket('udp4')
+
+        this.chatSvc = new ChatService('https://implement.me.invalid')
+        this.chatHandler = new ChatHandler(this.chatSvc)
 
         if (options.shouldLogPackets) {
             this.packetLogging = new PacketLogger()
@@ -269,38 +279,43 @@ export class ServerInstance {
             return false
         }
 
+        const data: Buffer = packet.getData()
+
         if (this.packetLogging) {
-            this.packetLogging.dumpIn(connection.uuid, connection.getRealSeq(), packet.id, packet.getData())
+            this.packetLogging.dumpIn(connection.uuid, connection.getRealSeq(), packet.id, data)
         }
 
         // the most received packets should go first
         switch (packet.id) {
             case PacketId.Host:
-                UserManager.onHostPacket(packet.getData(), connection)
+                UserManager.onHostPacket(data, connection)
                 return true
             case PacketId.Room:
-                ChannelManager.onRoomRequest(packet.getData(), connection)
+                ChannelManager.onRoomRequest(data, connection)
+                return true
+            case PacketId.Chat:
+                this.chatHandler.OnPacket(data, connection)
                 return true
             case PacketId.RequestChannels:
                 ChannelManager.onChannelListPacket(connection)
                 return true
             case PacketId.RequestRoomList:
-                ChannelManager.onRoomListPacket(packet.getData(), connection)
+                ChannelManager.onRoomListPacket(data, connection)
                 return true
             case PacketId.AboutMe:
-                UserManager.onAboutmePacket(packet.getData(), connection)
+                UserManager.onAboutmePacket(data, connection)
                 return true;
             case PacketId.Option:
-                UserManager.onOptionPacket(packet.getData(), connection)
+                UserManager.onOptionPacket(data, connection)
                 return true
             case PacketId.Favorite:
-                UserManager.onFavoritePacket(packet.getData(), connection)
+                UserManager.onFavoritePacket(data, connection)
                 return true
             case PacketId.Login:
-                UserManager.onLoginPacket(packet.getData(), connection, this.holepunchPort)
+                UserManager.onLoginPacket(data, connection, this.holepunchPort)
                 return true
             case PacketId.Version:
-                return ServerInstance.onVersionPacket(packet.getData(), connection)
+                return ServerInstance.onVersionPacket(data, connection)
         }
 
         console.warn('unknown packet id ' + packet.id + ' from ' + connection.uuid)

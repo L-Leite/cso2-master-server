@@ -36,7 +36,8 @@ export enum ChatMessageType {
     DirectMessage = 0, // also known as whisper
     Channel = 1,
     Room = 2,
-    Ingame = 4,
+    IngameGlobal = 3,
+    IngameTeam = 4,
     Clan = 5,
     Party = 7,
 }
