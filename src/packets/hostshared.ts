@@ -4,6 +4,8 @@ export enum HostPacketType {
     HostStop = 3,
     LeaveResultWindow = 4,
 
+    TeamChanging = 11, // when a user is changing his team in the game
+
     // logging packet types
     OnGameEnd = 21,
 
