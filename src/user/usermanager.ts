@@ -23,6 +23,7 @@ import { InHostPacket } from 'packets/in/host'
 import { InHostSetBuyMenu } from 'packets/in/host/setbuymenu'
 import { InHostSetInventory } from 'packets/in/host/setinventory'
 import { InHostSetLoadout } from 'packets/in/host/setloadout'
+import { InHostTeamChanging } from 'packets/in/host/teamchanging'
 import { InLoginPacket } from 'packets/in/login'
 import { InOptionPacket } from 'packets/in/option'
 import { InOptionBuyMenu } from 'packets/in/option/buymenu'
@@ -143,12 +144,55 @@ export class UserManager {
                 return this.onHostSetUserLoadout(hostPacket, connection)
             case HostPacketType.SetBuyMenu:
                 return this.onHostSetUserBuyMenu(hostPacket, connection)
+            case HostPacketType.TeamChanging:
+                return this.onTeamChangingRequest(packetData, connection)
         }
 
         console.warn('UserManager::onHostPacket: unknown host packet type %i',
             hostPacket.packetType)
 
         return false
+    }
+
+    public static onTeamChangingRequest(packetData: Buffer, userConn: ExtendedSocket): boolean {
+        const teamData = new InHostTeamChanging(packetData)
+
+        const targetConn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(teamData.userId)
+
+        const requesterSession: UserSession = userConn.getSession()
+        const targetSession: UserSession = targetConn.getSession()
+
+        if (requesterSession == null) {
+            console.warn(`Could not get user ID's ${teamData.userId} session`)
+            return false
+        }
+
+        if (requesterSession.isInRoom() === false) {
+            console.warn(`User ID ${requesterSession.user.userId} tried to send someone's team chaning request without being in a room`)
+            return false
+        }
+
+        if (targetSession == null) {
+            console.warn(`User ID ${requesterSession.user.userId} tried to send someone's team changing request with user ID ${teamData.userId} whose session is null`)
+            return false
+        }
+
+        const currentRoom: Room = requesterSession.currentRoom
+
+        if (currentRoom == null) {
+            console.error(`Tried to get user's ${requesterSession.user.userId}
+room but it couldn't be found.`)
+            return false
+        }
+
+        if (currentRoom.host.userId !== requesterSession.user.userId) {
+            console.warn(`User ID ${requesterSession.user.userId} sent User ID ${targetSession.user.userId}'s team changing request without being the room's host. Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}" (id ${currentRoom.id})`)
+            return false
+        }
+
+        currentRoom.updateUserTeam(targetSession.user.userId, teamData.newTeam)
+
+        return true
     }
 
     public static async onHostSetUserInventory(hostPacket: InHostPacket, userConn: ExtendedSocket): Promise<boolean> {
@@ -179,7 +223,7 @@ its inventory to user ID ${preloadData.userId} whose session is null`)
 
         if (currentRoom == null) {
             console.error(`Tried to get user's ${requesterSession.user.userId}
-room but it couldn't be found. room id: ${currentRoom.id}`)
+room but it couldn't be found.`)
             return false
         }
 
@@ -226,8 +270,8 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
         const currentRoom: Room = requesterSession.currentRoom
 
         if (currentRoom == null) {
-            console.error('Tried to get user\'s %i room but it couldn\'t be found. room id: %i',
-                requesterSession.user.userId, currentRoom.id)
+            console.error('Tried to get user\'s %i room but it couldn\'t be found.',
+                requesterSession.user.userId)
             return false
         }
 
@@ -273,8 +317,8 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
         const currentRoom: Room = requesterSession.currentRoom
 
         if (currentRoom == null) {
-            console.error('Tried to get user\'s %i room but it couldn\'t be found. room id: %i',
-                requesterSession.user.userId, currentRoom.id)
+            console.error('Tried to get user\'s %i room but it couldn\'t be found.',
+                requesterSession.user.userId)
             return false
         }
 
