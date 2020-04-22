@@ -10,6 +10,7 @@ import { UserInventoryItem } from 'user/userinventoryitem'
 
 import { OutHostBuyMenu } from 'packets/out/host/buymenu'
 import { OutHostGameStart } from 'packets/out/host/gamestart'
+import { OutItemUsing } from 'packets/out/host/itemusing'
 import { OutHostSetInventory } from 'packets/out/host/inventory'
 import { OutHostJoinHost } from 'packets/out/host/joinhost'
 import { OutHostLoadout } from 'packets/out/host/loadout'
@@ -68,6 +69,20 @@ export class OutHostPacket extends OutPacketBase {
 
         packet.buildHeader()
         packet.writeUInt8(HostPacketType.LeaveResultWindow)
+
+        return packet
+    }
+
+    public static itemUse(userId: number, itemId: number): OutHostPacket {
+        const packet: OutHostPacket = new OutHostPacket()
+
+        packet.outStream = new WritableStreamBuffer(
+            { initialSize: 80, incrementAmount: 20 })
+
+        packet.buildHeader()
+        packet.writeUInt8(HostPacketType.ItemUsing)
+
+        OutHostItemUsing.build(userId, itemId, packet)
 
         return packet
     }
