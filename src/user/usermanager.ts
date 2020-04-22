@@ -166,7 +166,7 @@ export class UserManager {
         const targetSession: UserSession = targetConn.getSession()
 
         if (requesterSession == null) {
-            console.warn(`Could not get user ID's ${teamData.userId} session`)
+            console.warn(`Could not get user ID's ${itemData.userId} session`)
             return false
         }
 
@@ -176,7 +176,7 @@ export class UserManager {
         }
 
         if (targetSession == null) {
-            console.warn(`User ID ${requesterSession.user.userId} tried to send someone's team changing request with user ID ${teamData.userId} whose session is null`)
+            console.warn(`User ID ${requesterSession.user.userId} tried to send someone's team changing request with user ID ${itemData.userId} whose session is null`)
             return false
         }
 
