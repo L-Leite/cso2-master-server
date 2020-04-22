@@ -10,6 +10,7 @@ export enum HostPacketType {
     OnGameEnd = 21,
 
     SetInventory = 101, // there are 2 or 3 other host packet types that send this
+    ItemUsing = 105,
     SetLoadout = 107,
     SetBuyMenu = 111,
 }
