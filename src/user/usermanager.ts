@@ -20,11 +20,11 @@ import { InFavoritePacket } from 'packets/in/favorite'
 import { InFavoriteSetCosmetics } from 'packets/in/favorite/setcosmetics'
 import { InFavoriteSetLoadout } from 'packets/in/favorite/setloadout'
 import { InHostPacket } from 'packets/in/host'
+inport { InHostItemUsing } from 'packets/in/host/itemusing'
 import { InHostSetBuyMenu } from 'packets/in/host/setbuymenu'
 import { InHostSetInventory } from 'packets/in/host/setinventory'
 import { InHostSetLoadout } from 'packets/in/host/setloadout'
 import { InHostTeamChanging } from 'packets/in/host/teamchanging'
-inport { InHostItemUsing } from 'packets/in/host/itemusing'
 import { InLoginPacket } from 'packets/in/login'
 import { InOptionPacket } from 'packets/in/option'
 import { InOptionBuyMenu } from 'packets/in/option/buymenu'
@@ -157,7 +157,7 @@ export class UserManager {
         return false
     }
 
-    public static onItemUsing(hostPacket: Buffer, userConn: ExtendedSocket): boolean {
+    public static onItemUsing(hostPacket: InHostPacket, userConn: ExtendedSocket): boolean {
         const itemData: InHostItemUsing = new InHostItemUsing(hostPacket)
 
         const targetConn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(itemData.userId)
@@ -196,7 +196,8 @@ room but it couldn't be found.`)
         userConn.send(OutHostPacket.itemUse(itemData.userId, itemData.itemId))
 
         console.log('Sending user ID %i\'s item %i using request to host ID %i, room %s (room id %i)',
-        requesterSession.user.userId, itemData.itemId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+        requesterSession.user.userId, itemData.itemId,
+        currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
 
         return true;
     }
