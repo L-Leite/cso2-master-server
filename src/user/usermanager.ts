@@ -148,7 +148,7 @@ export class UserManager {
             case HostPacketType.TeamChanging:
                 return this.onTeamChangingRequest(packetData, connection)
             case HostPacketType.ItemUsing:
-                return this.onItemUsing(packetData, connection)
+                return this.onItemUsing(hostPacket, connection)
         }
 
         console.warn('UserManager::onHostPacket: unknown host packet type %i',
@@ -157,8 +157,8 @@ export class UserManager {
         return false
     }
 
-    public static onItemUsing(packetData: Buffer, userConn: ExtendedSocket): boolean {
-        const itemData = new InHostItemUsing(packetData)
+    public static onItemUsing(hostPacket: Buffer, userConn: ExtendedSocket): boolean {
+        const itemData: InHostItemUsing = new InHostItemUsing(hostPacket)
 
         const targetConn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(itemData.userId)
 
