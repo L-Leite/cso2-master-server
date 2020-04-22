@@ -4,7 +4,7 @@ import { InPacketBase } from 'packets/in/packet'
  * requests an user's team change
  * @class InHostTeamChanging
  */
- 
+
 export class InHostTeamChanging extends InPacketBase {
     public type: number
     public userId: number
@@ -13,8 +13,8 @@ export class InHostTeamChanging extends InPacketBase {
     public newTeam: number
 
     /**
-    * parses the packet's data
-    */
+     * parses the packet's data
+     */
     protected parse(): void {
         super.parse()
         this.type = this.readUInt8()
