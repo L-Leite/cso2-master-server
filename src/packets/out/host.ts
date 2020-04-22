@@ -10,8 +10,8 @@ import { UserInventoryItem } from 'user/userinventoryitem'
 
 import { OutHostBuyMenu } from 'packets/out/host/buymenu'
 import { OutHostGameStart } from 'packets/out/host/gamestart'
-import { OutItemUsing } from 'packets/out/host/itemusing'
 import { OutHostSetInventory } from 'packets/out/host/inventory'
+import { OutHostItemUsing } from 'packets/out/host/itemusing'
 import { OutHostJoinHost } from 'packets/out/host/joinhost'
 import { OutHostLoadout } from 'packets/out/host/loadout'
 
