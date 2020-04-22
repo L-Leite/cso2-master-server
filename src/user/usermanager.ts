@@ -192,8 +192,9 @@ room but it couldn't be found.`)
 
         currentRoom.updateUserTeam(targetSession.user.userId, teamData.newTeam)
 
-        console.log('Sending user ID %i\'s team changing request to host ID %i, room %s (room id %i)',
-        requesterSession.user.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+        console.log('Automatic changing User ID %i\'s team to the %i in room %s (host ID %i, room id %i)',
+        requesterSession.user.userId, teamData.newTeam,
+        currentRoom.settings.roomName, currentRoom.host.userId, currentRoom.id)
 
         return true
     }
