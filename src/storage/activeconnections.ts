@@ -27,6 +27,16 @@ export class ActiveConnections {
         return null
     }
 
+    public FindByPlayerName(targetName: string): ExtendedSocket {
+        for (const conn of this.connections) {
+            if (conn.getSession().user.playerName === targetName) {
+                return conn
+            }
+        }
+
+        return null
+    }
+
     public Add(conn: ExtendedSocket): void {
         this.connections.push(conn)
     }

@@ -8,8 +8,9 @@ import { Room } from 'room/room'
 import { RoomUserEntry } from 'room/roomuserentry'
 
 import { InChatPacket } from 'packets/in/chat'
-
 import { OutChatPacket } from 'packets/out/chat'
+
+import { ActiveConnections } from 'storage/activeconnections'
 
 /**
  * handles incoming Chat packets
@@ -39,6 +40,8 @@ export class ChatHandler {
         console.debug(`"${session.user.userName} said "${chatPkt.message}" to type ${chatPkt.type} (destination: ${chatPkt.destination})`)
 
         switch (chatPkt.type) {
+            case ChatMessageType.DirectMessage:
+                return this.OnDirectMessage(chatPkt, conn)
             case ChatMessageType.Room:
                 return this.OnRoomMessage(chatPkt, conn)
             case ChatMessageType.IngameGlobal:
@@ -48,6 +51,30 @@ export class ChatHandler {
         }
 
         return false
+    }
+
+    private async OnDirectMessage(chatPkt: InChatPacket, conn: ExtendedSocket): Promise<boolean> {
+        const session: UserSession = conn.getSession()
+
+        if (chatPkt.destination == null) {
+            console.warn(`user ${session.user.userId} sent a direct message without destination`)
+            return false
+        }
+
+        const receiverConn: ExtendedSocket = ActiveConnections.Singleton().FindByPlayerName(chatPkt.destination)
+
+        if (receiverConn == null) {
+            console.warn(`couldn't find receiver ${chatPkt.destination} for user ${session.user.userId}'s direct message`)
+            return false
+        }
+
+        const outMsgData: OutChatPacket = OutChatPacket.directMessage(
+            session.user.playerName, chatPkt.message)
+
+        conn.send(outMsgData)
+        receiverConn.send(outMsgData)
+
+        return true
     }
 
     private async OnRoomMessage(chatPkt: InChatPacket, conn: ExtendedSocket): Promise<boolean> {

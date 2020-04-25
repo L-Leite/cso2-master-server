@@ -7,6 +7,39 @@ import { OutPacketBase } from 'packets/out/packet'
 import { OutChatDefaultMsg } from 'packets/out/chat/defaultmsg'
 
 export class OutChatPacket extends OutPacketBase {
+<<<<<<< HEAD
+=======
+    public static channelMessage(sender: string, message: string): OutChatPacket {
+        const packet: OutChatPacket = new OutChatPacket()
+
+        packet.outStream = new WritableStreamBuffer(
+            { initialSize: 32, incrementAmount: 64 })
+
+        packet.buildHeader()
+        packet.writeUInt8(ChatMessageType.Channel)
+        packet.writeUInt8(0) // some subtype?
+
+        OutChatDefaultMsg.build(sender, null, message, packet)
+
+        return packet
+    }
+
+    public static directMessage(sender: string, message: string): OutChatPacket {
+        const packet: OutChatPacket = new OutChatPacket()
+
+        packet.outStream = new WritableStreamBuffer(
+            { initialSize: 32, incrementAmount: 64 })
+
+        packet.buildHeader()
+        packet.writeUInt8(ChatMessageType.DirectMessage)
+        packet.writeUInt8(0) // some subtype?
+
+        OutChatDefaultMsg.build(sender, null, message, packet)
+
+        return packet
+    }
+
+>>>>>>> 9a6844f... rebase me
     public static roomMessage(sender: string, teamNum: number, message: string): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
