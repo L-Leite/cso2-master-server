@@ -111,7 +111,12 @@ export class ChannelManager {
      */
     private static async setUserChannel(session: UserSession, conn: ExtendedSocket,
                                         channel: Channel): Promise<void> {
+        if (session.currentChannel != null) {
+            channel.OnUserLeft(session)
+        }
+
         session.currentChannel = channel
+        channel.OnUserJoined(session)
         this.sendRoomListTo(conn, channel)
     }
 }

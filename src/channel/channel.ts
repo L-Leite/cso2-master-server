@@ -18,14 +18,20 @@ export class Channel {
 
     public index: number
     public name: string
+
     public rooms: Room[]
     private nextRoomId: number
+
+    private userConns: ExtendedSocket[]
 
     constructor(index: number, name: string) {
         this.index = index
         this.name = name
+
         this.rooms = []
         this.nextRoomId = 1
+
+        this.userConns = []
     }
 
     /**
@@ -67,5 +73,27 @@ export class Channel {
                 return
             }
         }
+    }
+
+    /**
+     * loop through all the users' connection in this channel
+     * @param fn the func to call in each user conn
+     */
+    public recurseUsers(fn: (c: ExtendedSocket) => void): void {
+        for (const user of this.userConns) {
+            fn(user)
+        }
+    }
+
+    /**
+     * called when an user joins a channel
+     * @param u the user (connection) that joined the channel
+     */
+    public OnUserJoined(u: ExtendedSocket): void {
+        this.userConns.push(u)
+    }
+
+    public OnUserLeft(u: ExtendedSocket): void {
+        this.userConns.splice(this.userConns.indexOf(u), 1)
     }
 }

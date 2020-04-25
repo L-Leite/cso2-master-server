@@ -4,6 +4,7 @@ import { UserSession } from 'user/usersession'
 import { ChatMessageType } from 'packets/definitions'
 import { ChatService } from 'services/chatservice'
 
+import { Channel } from 'channel/channel'
 import { Room } from 'room/room'
 import { RoomUserEntry } from 'room/roomuserentry'
 
@@ -42,6 +43,8 @@ export class ChatHandler {
         switch (chatPkt.type) {
             case ChatMessageType.DirectMessage:
                 return this.OnDirectMessage(chatPkt, conn)
+            case ChatMessageType.Channel:
+                return this.OnChannelMessage(chatPkt, conn)
             case ChatMessageType.Room:
                 return this.OnRoomMessage(chatPkt, conn)
             case ChatMessageType.IngameGlobal:
@@ -51,6 +54,28 @@ export class ChatHandler {
         }
 
         return false
+    }
+
+    private async OnChannelMessage(chatPkt: InChatPacket, conn: ExtendedSocket): Promise<boolean> {
+        const session: UserSession = conn.getSession()
+
+        const curChannel: Channel = session.currentChannel
+
+        if (curChannel == null) {
+            console.warn(`user ${session.user.userId} sent a channel message without being in a channel`)
+            return false
+        }
+
+        const outMsgData: OutChatPacket = OutChatPacket.channelMessage(
+            session.user.playerName, chatPkt.message)
+
+        curChannel.recurseUsers((c: ExtendedSocket) => {
+            if (c !== conn) {
+                c.send(outMsgData)
+            }
+        })
+
+        return true
     }
 
     private async OnDirectMessage(chatPkt: InChatPacket, conn: ExtendedSocket): Promise<boolean> {

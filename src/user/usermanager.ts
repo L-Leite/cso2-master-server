@@ -51,8 +51,15 @@ const aboutMeHandler = new AboutMeHandler(userService)
  * handles the user logic
  */
 export class UserManager {
-    public static async OnSocketClosed(socket: ExtendedSocket): Promise<void> {
-        await userService.Logout(socket.getSession().user.userId)
+    public static async OnSocketClosed(conn: ExtendedSocket): Promise<void> {
+        const session: UserSession = conn.getSession()
+        const curChannel: Channel = session.currentChannel
+
+        if (curChannel != null) {
+            curChannel.OnUserLeft(session)
+        }
+
+        await userService.Logout(conn.getSession().user.userId)
     }
 
     /**

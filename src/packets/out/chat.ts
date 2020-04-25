@@ -7,8 +7,6 @@ import { OutPacketBase } from 'packets/out/packet'
 import { OutChatDefaultMsg } from 'packets/out/chat/defaultmsg'
 
 export class OutChatPacket extends OutPacketBase {
-<<<<<<< HEAD
-=======
     public static channelMessage(sender: string, message: string): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
@@ -39,7 +37,6 @@ export class OutChatPacket extends OutPacketBase {
         return packet
     }
 
->>>>>>> 9a6844f... rebase me
     public static roomMessage(sender: string, teamNum: number, message: string): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
