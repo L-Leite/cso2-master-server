@@ -80,7 +80,12 @@ export class ChatHandler {
         const session: UserSession = conn.getSession()
 
         if (chatPkt.destination == null) {
-            console.warn(`user ${session.user.userId} sent a direct message without destination`)
+            console.warn(`user ${session.user.userId} tried to send a direct message without destination`)
+            return false
+        }
+
+        if (chatPkt.destination === session.user.playerName) {
+            console.warn(`user ${session.user.userId} tried send a direct message to itself`)
             return false
         }
 
