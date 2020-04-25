@@ -66,7 +66,7 @@ export class ChannelManager {
         }
 
         console.log('user "%s" requested room list successfully, sending it...', session.user.userId)
-        await this.setUserChannel(session, sourceConn, channel)
+        await this.setUserChannel(sourceConn, channel)
 
         return true
     }
@@ -105,18 +105,18 @@ export class ChannelManager {
 
     /**
      * sets an user's current channel
-     * @param session the target user's session
+     * @param conn the target user's connection
      * @param channel the target channel
-     * @param channelServer the channel's channelServer
      */
-    private static async setUserChannel(session: UserSession, conn: ExtendedSocket,
-                                        channel: Channel): Promise<void> {
+    private static async setUserChannel(conn: ExtendedSocket, channel: Channel): Promise<void> {
+        const session: UserSession = conn.getSession()
+
         if (session.currentChannel != null) {
-            channel.OnUserLeft(session)
+            channel.OnUserLeft(conn)
         }
 
         session.currentChannel = channel
-        channel.OnUserJoined(session)
+        channel.OnUserJoined(conn)
         this.sendRoomListTo(conn, channel)
     }
 }

@@ -31,6 +31,7 @@ export class OutChatPacket extends OutPacketBase {
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.DirectMessage)
         packet.writeUInt8(0) // some subtype?
+        packet.writeUInt8(0) // unknown
 
         OutChatDefaultMsg.build(sender, null, message, packet)
 

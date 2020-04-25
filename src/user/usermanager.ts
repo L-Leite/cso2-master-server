@@ -56,10 +56,10 @@ export class UserManager {
         const curChannel: Channel = session.currentChannel
 
         if (curChannel != null) {
-            curChannel.OnUserLeft(session)
+            curChannel.OnUserLeft(conn)
         }
 
-        await userService.Logout(conn.getSession().user.userId)
+        await userService.Logout(session.user.userId)
     }
 
     /**

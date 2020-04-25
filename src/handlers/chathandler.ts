@@ -70,9 +70,7 @@ export class ChatHandler {
             session.user.playerName, chatPkt.message)
 
         curChannel.recurseUsers((c: ExtendedSocket) => {
-            if (c !== conn) {
-                c.send(outMsgData)
-            }
+            c.send(outMsgData)
         })
 
         return true
@@ -155,7 +153,7 @@ export class ChatHandler {
         const curRoom: Room = session.currentRoom
         const ourRoomUser: RoomUserEntry = curRoom.getRoomUser(session.user.userId)
 
-        const outMsgData: OutChatPacket  = OutChatPacket.ingameTeamMessage(
+        const outMsgData: OutChatPacket = OutChatPacket.ingameTeamMessage(
             session.user.playerName, ourRoomUser.team, chatPkt.message)
 
         curRoom.recurseUsers((u: RoomUserEntry) => {
