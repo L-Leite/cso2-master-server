@@ -72,12 +72,13 @@ export class ChatHandler {
             c.send(outMsgData)
         })
 
-        console.log(`user ${session.user.userId} sent a channel message "${chatPkt.message}" from channel "${curChannel.name}"`)
+        console.log('user %i sent a channel message "%s" from channel "%s"', session.user.userId, chatPkt.message, curChannel.name)
         return true
     }
 
     private async OnDirectMessage(chatPkt: InChatPacket, conn: ExtendedSocket): Promise<boolean> {
         const session: UserSession = conn.getSession()
+        const targetsession: UserSession = ActiveConnections.Singleton().FindByPlayerName(chatPkt.destination).getSession()
 
         if (chatPkt.destination == null) {
             console.warn(`user ${session.user.userId} tried to send a direct message without destination`)
@@ -102,7 +103,7 @@ export class ChatHandler {
         conn.send(outMsgData)
         receiverConn.send(outMsgData)
 
-        console.log(`user ${session.user.userId} sent a direct message "${chatPkt.message}" to the user ${receiverConn.user.userId}`)
+        console.log('user %i sent a direct message "%s" to the user %i`, session.user.userId, chatPkt.message, targetsession.user.userId)
         return true
     }
 
