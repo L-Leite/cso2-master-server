@@ -39,7 +39,7 @@ export class OutChatPacket extends OutPacketBase {
         return packet
     }
 
-    public static roomMessage(sender: string, teamNum: number, message: string): OutChatPacket {
+    public static roomMessage(sender: string, vipLevel: number, message: string): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -49,12 +49,12 @@ export class OutChatPacket extends OutPacketBase {
         packet.writeUInt8(ChatMessageType.Room)
         packet.writeUInt8(0) // is GM?
 
-        OutChatDefaultMsg.build(sender, teamNum, message, packet)
+        OutChatDefaultMsg.build(sender, vipLevel, message, packet)
 
         return packet
     }
 
-    public static ingameMessage(sender: string, teamNum: number, message: string): OutChatPacket {
+    public static ingameMessage(sender: string, vipLevel: number, message: string): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -64,12 +64,12 @@ export class OutChatPacket extends OutPacketBase {
         packet.writeUInt8(ChatMessageType.IngameGlobal)
         packet.writeUInt8(0) // is GM?
 
-        OutChatDefaultMsg.build(sender, teamNum, message, packet)
+        OutChatDefaultMsg.build(sender, vipLevel, message, packet)
 
         return packet
     }
 
-    public static ingameTeamMessage(sender: string, teamNum: number, message: string): OutChatPacket {
+    public static ingameTeamMessage(sender: string, vipLevel: number, message: string): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -79,7 +79,7 @@ export class OutChatPacket extends OutPacketBase {
         packet.writeUInt8(ChatMessageType.IngameTeam)
         packet.writeUInt8(0) // is GM?
 
-        OutChatDefaultMsg.build(sender, teamNum, message, packet)
+        OutChatDefaultMsg.build(sender, vipLevel, message, packet)
 
         return packet
     }
