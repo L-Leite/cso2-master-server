@@ -97,11 +97,15 @@ export class ChatHandler {
             return false
         }
 
-        const outMsgData: OutChatPacket = OutChatPacket.directMessage(
-            session.user.playerName, chatPkt.message)
+        const targetsession: UserSession = receiverConn.getSession()
 
+        const outMsgData: OutChatPacket = OutChatPacket.directMessage(
+            session.user, targetsession.user, false, chatPkt.message)
         conn.send(outMsgData)
-        receiverConn.send(outMsgData)
+
+        const outMsgDataOfTarget: OutChatPacket = OutChatPacket.directMessage(
+            session.user, targetsession.user, true, chatPkt.message)
+        receiverConn.send(outMsgDataOfTarget)
 
         console.log('user ID %i sent a direct message "%s" to the user ID %i',
         session.user.userId, chatPkt.message, receiverConn.getSession().user.userId)
