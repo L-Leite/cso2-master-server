@@ -34,11 +34,9 @@ export class ChatHandler {
         }
 
         if (chatPkt.message == null) {
-            console.warn(`user ${session.user.userId} sent a null room message`)
+            console.warn(`user ${session.user.userId} sent a null chat message`)
             return false
         }
-
-        console.debug(`"${session.user.userName} said "${chatPkt.message}" to type ${chatPkt.type} (destination: ${chatPkt.destination})`)
 
         switch (chatPkt.type) {
             case ChatMessageType.DirectMessage:
@@ -74,6 +72,7 @@ export class ChatHandler {
             c.send(outMsgData)
         })
 
+        console.log('user ${session.user.userId} sent a channel message "${chatPkt.message}" from channel "${curChannel.name}"')
         return true
     }
 
@@ -103,6 +102,7 @@ export class ChatHandler {
         conn.send(outMsgData)
         receiverConn.send(outMsgData)
 
+        console.log('user ${session.user.userId} sent a direct message "${chatPkt.message}" to the user ${receiverConn.user.userId}')
         return true
     }
 
@@ -130,6 +130,8 @@ export class ChatHandler {
             }
         })
 
+        console.log('user %i sent a room message "%s" from room "%s" (room id: %i)',
+        session.user.userId, chatPkt.message, curRoom.settings.roomName, curRoom.id)
         return true
     }
 
@@ -152,6 +154,8 @@ export class ChatHandler {
             }
         })
 
+        console.log('user %i sent a ingame global message "%s" from room "%s" (room id: %i)',
+        session.user.userId, chatPkt.message, curRoom.settings.roomName, curRoom.id)
         return true
     }
 
@@ -174,6 +178,8 @@ export class ChatHandler {
             }
         })
 
+        console.log('user %i sent a ingame team message "%s" from room "%s" (room id: %i)',
+        session.user.userId, chatPkt.message, curRoom.settings.roomName, curRoom.id)
         return true
     }
 
