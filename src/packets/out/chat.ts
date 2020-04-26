@@ -22,7 +22,7 @@ export class OutChatPacket extends OutPacketBase {
         return packet
     }
 
-    public static directMessage(sender: string, message: string): OutChatPacket {
+    public static directMessage(sender: string, vipLevel: number, target: string, isTarget: boolean, message: string): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -30,10 +30,10 @@ export class OutChatPacket extends OutPacketBase {
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.DirectMessage)
-        packet.writeUInt8(0) // some subtype?
-        packet.writeUInt8(0) // unknown
+        packet.writeUInt8(0) // is GM?
+        packet.writeUInt8(isTarget ? 1 : 0) // is direct message's target?
 
-        OutChatDefaultMsg.build(sender, null, message, packet)
+        OutChatDefaultMsg.build(isTarget ? sender : target, vipLevel, message, packet)
 
         return packet
     }
