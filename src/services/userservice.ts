@@ -39,6 +39,9 @@ export class UserService {
         return res.body.userId
       }
     } catch (error) {
+      if (error.status === 401) {
+        return -1
+      }
       console.error(error)
       UserSvcPing.checkNow()
     }
