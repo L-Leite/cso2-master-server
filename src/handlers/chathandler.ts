@@ -156,6 +156,28 @@ export class ChatHandler {
             }
         })
 
+        // showing right chat message on the log
+        let start = 0
+        let Message = ''
+        for (let i = 0; i < chatPkt.message.length; i++) {
+            if (chatPkt.message.charCodeAt(i) === 32) {
+                if (start === 0) {
+                    start++
+                } else {
+                    start = i + 1
+                    break
+                }
+            }
+        }
+
+        if (start !== 0 && start !== 1) {
+            for (let i = start; i < chatPkt.message.length; i++) {
+                Message += chatPkt.message[i]
+            }
+        } else {
+            Message = chatPkt.message
+        }
+
         console.log('user ID %i sent a ingame global message "%s" from room "%s" (room id: %i)',
         session.user.userId, chatPkt.message, curRoom.settings.roomName, curRoom.id)
         return true
@@ -179,6 +201,28 @@ export class ChatHandler {
                 u.conn.send(outMsgData)
             }
         })
+
+        // showing right chat message on the log
+        let start = 0
+        let Message = ''
+        for (let i = 0; i < chatPkt.message.length; i++) {
+            if (chatPkt.message.charCodeAt(i) === 32) {
+                if (start === 0) {
+                    start++
+                } else {
+                    start = i + 1
+                    break
+                }
+            }
+        }
+
+        if (start !== 0 && start !== 1) {
+            for (let i = start; i < chatPkt.message.length; i++) {
+                Message += chatPkt.message[i]
+            }
+        } else {
+            Message = chatPkt.message
+        }
 
         console.log('user ID %i sent a ingame team message "%s" from room "%s" (room id: %i)',
         session.user.userId, chatPkt.message, curRoom.settings.roomName, curRoom.id)
