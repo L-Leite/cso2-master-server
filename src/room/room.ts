@@ -147,6 +147,10 @@ export class Room {
     public static cleanUpUser(conn: ExtendedSocket): boolean {
         const session: UserSession = conn.getSession()
 
+        if (session == null) {
+            return false
+        }
+
         const room: Room = session.currentRoom
 
         if (room == null) {
