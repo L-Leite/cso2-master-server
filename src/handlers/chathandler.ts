@@ -55,6 +55,39 @@ export class ChatHandler {
         return false
     }
 
+    public async OnAnyMessage(conn: ExtendedSocket, message: string, type: number): Promise<boolean> {
+        const session: UserSession = conn.getSession()
+
+        if (message == null || !message[0]) {
+            console.warn('failed to send a type %i message to user ID %i because the message is null',
+                type, session.user.userId)
+            return false
+        }
+
+        if (type < 11) {
+            console.warn('failed to send a type %i message to user ID %i because the type is not a system type',
+                type, session.user.userId)
+            return false
+        }
+
+        const outAnyMsgData: OutChatPacket = OutChatPacket.anyMessage(type, message)
+
+        conn.send(outAnyMsgData)
+
+        // optimization for the logging when message has '\n'
+        let Message = ''
+        for (let i = 0; i < message.length; i++) {
+            if (message.charCodeAt(i) === 0xA) { // '\n'
+                Message += '(\\n)'
+            } else {
+                Message += message[i]
+            }
+        }
+
+        console.log('sending message "%s" with type %i to the user ID %i', Message, type, session.user.userId)
+        return true
+    }
+
     private async OnChannelMessage(chatPkt: InChatPacket, conn: ExtendedSocket): Promise<boolean> {
         const session: UserSession = conn.getSession()
 
