@@ -43,6 +43,10 @@ import { AboutMeHandler } from 'handlers/aboutmehandler'
 import { UserService } from 'services/userservice'
 import { ActiveConnections } from 'storage/activeconnections'
 
+import { ChatHandler } from 'handlers/chathandler'
+import { ChatMessageType } from 'packets/definitions'
+import { ChatService } from 'services/chatservice'
+
 // TODO: move this to UserManager, make UserManager not static
 const userService = new UserService(userSvcAuthority())
 const aboutMeHandler = new AboutMeHandler(userService)
@@ -53,6 +57,11 @@ const aboutMeHandler = new AboutMeHandler(userService)
 export class UserManager {
     public static async OnSocketClosed(conn: ExtendedSocket): Promise<void> {
         const session: UserSession = conn.getSession()
+
+        if (session == null) {
+            return
+        }
+
         const curChannel: Channel = session.currentChannel
 
         if (curChannel != null) {
@@ -100,6 +109,19 @@ export class UserManager {
         if (loggedUserId === 0) {
             console.warn('Could not create session for user %s', loginPacket.gameUsername)
             connection.end()
+            return false
+        } else if (loggedUserId === -1) {
+            // I hate the 120 word limits on TypeScript
+            let Message = ''
+            Message += '<b>Wrong account / password!</b>\n'
+            Message += 'Please try again!\n'
+            Message += '\nIf you don\'t have an account\n'
+            Message += '<u>Please contact the server admin for register website</u>'
+
+            const chatHandler: ChatHandler = new ChatHandler(new ChatService('https://implement.me.invalid'))
+            chatHandler.OnAnyMessage(connection, Message, ChatMessageType.DialogBox)
+
+            console.warn('Could not create session for user %s', loginPacket.gameUsername)
             return false
         }
 
