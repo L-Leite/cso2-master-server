@@ -23,7 +23,7 @@ export class OutChatPacket extends OutPacketBase {
     }
 
     public static directMessage(sender: string, vL: number, t: string, isT: boolean, message: string): OutChatPacket {
-        // original: sender, vipLevel, target, isTarget, message (fu*king TypeScript)
+        // original: sender, vipLevel, target, isTarget, message (TypeScript has max 120 words limit on every line)
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
