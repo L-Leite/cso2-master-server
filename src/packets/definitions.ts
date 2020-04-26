@@ -40,4 +40,11 @@ export enum ChatMessageType {
     IngameTeam = 4,
     Clan = 5,
     Party = 7,
+    IngameParty = 9,
+
+    // only for the server, not sended by any player
+    Congratulate = 11, // when someone get the rare item from box opening
+    SystemImportant = 20,
+    DialogBox = 21, // note: has not 'Yes' and 'No' select option
+    System = 22,
 }
