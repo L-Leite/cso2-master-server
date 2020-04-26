@@ -4,6 +4,7 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { ChatMessageType, PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
 
+import { OutChatAnyMessage } from 'packets/out/chat/anymessage'
 import { OutChatDefaultMsg } from 'packets/out/chat/defaultmsg'
 
 export class OutChatPacket extends OutPacketBase {
@@ -80,6 +81,20 @@ export class OutChatPacket extends OutPacketBase {
         packet.writeUInt8(0) // is GM?
 
         OutChatDefaultMsg.build(sender, vipLevel, message, packet)
+
+        return packet
+    }
+
+    public static anyMessage(message:string, type: number): OutChatPacket {
+        const packet: OutChatPacket = new OutChatPacket()
+
+        packet.outStream = new WritableStreamBuffer(
+            { initialSize: 32, incrementAmount: 64 })
+
+        packet.buildHeader()
+        packet.writeUInt8(type)
+
+        OutChatAnyMessage.build(message, type, packet)
 
         return packet
     }
