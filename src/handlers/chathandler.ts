@@ -70,7 +70,7 @@ export class ChatHandler {
             return false
         }
 
-        const outAnyMsgData: OutChatPacket = OutChatPacket.anyMessage(type, message)
+        const outAnyMsgData: OutChatPacket = OutChatPacket.anyMessage(message, type)
 
         conn.send(outAnyMsgData)
 
