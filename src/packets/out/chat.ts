@@ -22,7 +22,8 @@ export class OutChatPacket extends OutPacketBase {
         return packet
     }
 
-    public static directMessage(sender: string, vipLevel: number, target: string, isTarget: boolean, message: string): OutChatPacket {
+    public static directMessage(sender: string, vL: number, t: string, isT: boolean, message: string): OutChatPacket {
+        // original: sender, vipLevel, target, isTarget, message (fu*king TypeScript)
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -31,9 +32,9 @@ export class OutChatPacket extends OutPacketBase {
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.DirectMessage)
         packet.writeUInt8(0) // is GM?
-        packet.writeUInt8(isTarget ? 1 : 0) // is direct message's target?
+        packet.writeUInt8(isT ? 1 : 0) // is direct message's target?
 
-        OutChatDefaultMsg.build(isTarget ? sender : target, vipLevel, message, packet)
+        OutChatDefaultMsg.build(isT ? sender : t, vL, message, packet)
 
         return packet
     }
