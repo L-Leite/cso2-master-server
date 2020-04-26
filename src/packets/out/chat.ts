@@ -85,7 +85,7 @@ export class OutChatPacket extends OutPacketBase {
         return packet
     }
 
-    public static anyMessage(message:string, type: number): OutChatPacket {
+    public static anyMessage(message: string, type: number): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
