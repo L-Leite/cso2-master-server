@@ -179,7 +179,7 @@ export class ChatHandler {
         }
 
         console.log('user ID %i sent a ingame global message "%s" from room "%s" (room id: %i)',
-        session.user.userId, chatPkt.message, curRoom.settings.roomName, curRoom.id)
+        session.user.userId, Message, curRoom.settings.roomName, curRoom.id)
         return true
     }
 
@@ -225,7 +225,7 @@ export class ChatHandler {
         }
 
         console.log('user ID %i sent a ingame team message "%s" from room "%s" (room id: %i)',
-        session.user.userId, chatPkt.message, curRoom.settings.roomName, curRoom.id)
+        session.user.userId, Message, curRoom.settings.roomName, curRoom.id)
         return true
     }
 
