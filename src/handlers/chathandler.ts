@@ -53,6 +53,7 @@ export class ChatHandler {
                 return this.OnIngameTeamMessage(chatPkt, conn)
         }
 
+        console.warn('unknown chat packet type %i from User ID %i', chatPkt.type, session.user.userId)
         return false
     }
 
@@ -114,6 +115,12 @@ export class ChatHandler {
         }
 
         const curRoom: Room = session.currentRoom
+
+        if (curRoom.getRoomUser(session.user.userId).isIngame === true) {
+            console.warn(`user ${session.user.userId} sent an room message with ingame status`)
+            return false
+        }
+
         const outMsgData: OutChatPacket = OutChatPacket.roomMessage(
             session.user.playerName, null, chatPkt.message)
 
@@ -136,7 +143,7 @@ export class ChatHandler {
         const curRoom: Room = session.currentRoom
         const ourRoomUser: RoomUserEntry = curRoom.getRoomUser(session.user.userId)
 
-        const outMsgData: OutChatPacket = OutChatPacket.ingameTeamMessage(
+        const outMsgData: OutChatPacket = OutChatPacket.ingameMessage(
             session.user.playerName, ourRoomUser.team, chatPkt.message)
 
         curRoom.recurseUsers((u: RoomUserEntry) => {
