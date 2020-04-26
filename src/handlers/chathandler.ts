@@ -60,13 +60,13 @@ export class ChatHandler {
 
         if (message == null || !message[0]) {
             console.warn('failed to send a type %i message to user ID %i because the message is null',
-                type, session.user.userId)
+                type, session == null ? -1 : session.user.userId)
             return false
         }
 
         if (type < 11) {
             console.warn('failed to send a type %i message to user ID %i because the type is not a system type',
-                type, session.user.userId)
+                type, session == null ? -1 : session.user.userId)
             return false
         }
 
@@ -84,7 +84,7 @@ export class ChatHandler {
             }
         }
 
-        console.log('sending message "%s" with type %i to the user ID %i', Message, type, session.user.userId)
+        console.log('sending message "%s" with type %i to the user ID %i', Message, type, session == null ? -1 : session.user.userId)
         return true
     }
 
