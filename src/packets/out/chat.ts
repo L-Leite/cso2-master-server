@@ -47,7 +47,7 @@ export class OutChatPacket extends OutPacketBase {
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.Room)
-        packet.writeUInt8(0) // some subtype?
+        packet.writeUInt8(0) // is GM?
 
         OutChatDefaultMsg.build(sender, teamNum, message, packet)
 
@@ -62,7 +62,7 @@ export class OutChatPacket extends OutPacketBase {
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.IngameGlobal)
-        packet.writeUInt8(0) // some subtype?
+        packet.writeUInt8(0) // is GM?
 
         OutChatDefaultMsg.build(sender, teamNum, message, packet)
 
@@ -77,7 +77,7 @@ export class OutChatPacket extends OutPacketBase {
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.IngameTeam)
-        packet.writeUInt8(0) // some subtype?
+        packet.writeUInt8(0) // is GM?
 
         OutChatDefaultMsg.build(sender, teamNum, message, packet)
 
