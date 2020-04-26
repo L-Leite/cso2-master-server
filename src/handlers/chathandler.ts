@@ -128,7 +128,7 @@ export class ChatHandler {
         }
 
         const outMsgData: OutChatPacket = OutChatPacket.roomMessage(
-            session.user.playerName, null, chatPkt.message)
+            session.user.playerName, session.user.vipLevel, chatPkt.message)
 
         curRoom.recurseUsers((u: RoomUserEntry) => {
             if (u.isIngame === false) {
@@ -152,7 +152,7 @@ export class ChatHandler {
         const ourRoomUser: RoomUserEntry = curRoom.getRoomUser(session.user.userId)
 
         const outMsgData: OutChatPacket = OutChatPacket.ingameMessage(
-            session.user.playerName, ourRoomUser.team, chatPkt.message)
+            session.user.playerName, session.user.vipLelvel, chatPkt.message)
 
         curRoom.recurseUsers((u: RoomUserEntry) => {
             if (u.isIngame === true) {
@@ -198,7 +198,7 @@ export class ChatHandler {
         const ourRoomUser: RoomUserEntry = curRoom.getRoomUser(session.user.userId)
 
         const outMsgData: OutChatPacket = OutChatPacket.ingameTeamMessage(
-            session.user.playerName, ourRoomUser.team, chatPkt.message)
+            session.user.playerName, session.user.vipLelvel, chatPkt.message)
 
         curRoom.recurseUsers((u: RoomUserEntry) => {
             if (u.isIngame === true && u.team === ourRoomUser.team) {
