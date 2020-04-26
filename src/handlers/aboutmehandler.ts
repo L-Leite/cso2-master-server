@@ -105,7 +105,7 @@ export class AboutMeHandler {
       })
     }
 
-    console.log(`Setting user ID ${session.user.userId}'s signature`)
+    console.log(`Setting user ID ${session.user.userId}'s signature "${signatureData.msg}"`)
 
     return true
   }
