@@ -119,7 +119,7 @@ export class ChatHandler {
         const curRoom: Room = session.currentRoom
 
         if (curRoom.getRoomUser(session.user.userId).isIngame === true) {
-            console.warn(`user ID ${session.user.userId} sent a room message without being not ingame status`)
+            console.warn(`user ID ${session.user.userId} sent a room message without being non-ingame status`)
             return false
         }
 
