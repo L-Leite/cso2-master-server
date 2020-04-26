@@ -84,7 +84,8 @@ export class ChatHandler {
             }
         }
 
-        console.log('sending message "%s" with type %i to the user ID %i', Message, type, session == null ? -1 : session.user.userId)
+        console.log('sending message "%s" with type %i to the user ID %i',
+            Message, type, session == null ? -1 : session.user.userId)
         return true
     }
 
