@@ -33,7 +33,7 @@ export class ChatHandler {
             return false
         }
 
-        if (chatPkt.message == null) {
+        if (chatPkt.message == null || chatPkt.length === 0 || chatPkt.message[0] === '\0') {
             console.warn(`user ID ${session.user.userId} sent a null chat message`)
             return false
         }
