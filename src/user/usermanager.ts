@@ -12,6 +12,7 @@ import { UserSession } from 'user/usersession'
 
 import { ChannelManager } from 'channel/channelmanager'
 
+import { ChatMessageType } from 'packets/definitions'
 import { FavoritePacketType } from 'packets/favoriteshared'
 import { HostPacketType } from 'packets/hostshared'
 import { OptionPacketType } from 'packets/optionshared'
@@ -29,6 +30,7 @@ import { InLoginPacket } from 'packets/in/login'
 import { InOptionPacket } from 'packets/in/option'
 import { InOptionBuyMenu } from 'packets/in/option/buymenu'
 
+import { OutChatPacket } from 'packets/out/chat'
 import { OutFavoritePacket } from 'packets/out/favorite'
 import { OutHostPacket } from 'packets/out/host'
 import { OutInventoryPacket } from 'packets/out/inventory'
@@ -42,10 +44,6 @@ import { AboutMeHandler } from 'handlers/aboutmehandler'
 
 import { UserService } from 'services/userservice'
 import { ActiveConnections } from 'storage/activeconnections'
-
-import { ChatHandler } from 'handlers/chathandler'
-import { ChatMessageType } from 'packets/definitions'
-import { ChatService } from 'services/chatservice'
 
 // TODO: move this to UserManager, make UserManager not static
 const userService = new UserService(userSvcAuthority())
@@ -118,8 +116,8 @@ export class UserManager {
             Message += '\nIf you don\'t have an account\n'
             Message += '<u>Please contact the server admin for register website</u>'
 
-            const chatHandler: ChatHandler = new ChatHandler(new ChatService('https://implement.me.invalid'))
-            chatHandler.OnAnyMessage(connection, Message, ChatMessageType.DialogBox)
+            const outAnyMsgData: OutChatPacket = OutChatPacket.anyMessage(Message, ChatMessageType.DialogBox)
+            connection.send(outAnyMsgData)
 
             console.warn('Could not create session for user %s', loginPacket.gameUsername)
             return false
