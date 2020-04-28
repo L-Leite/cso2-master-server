@@ -74,18 +74,6 @@ export class ChatHandler {
 
         conn.send(outAnyMsgData)
 
-        // optimization for the logging when message has '\n'
-        let Message = ''
-        for (let i = 0; i < message.length; i++) {
-            if (message.charCodeAt(i) === 0xA) { // '\n'
-                Message += '(\\n)'
-            } else {
-                Message += message[i]
-            }
-        }
-
-        console.log('sending message "%s" with type %i to the user ID %i',
-            Message, type, session == null ? -1 : session.user.userId)
         return true
     }
 
@@ -106,8 +94,6 @@ export class ChatHandler {
             c.send(outMsgData)
         })
 
-        console.log('user %i sent a channel message "%s" from channel "%s"',
-        session.user.userId, chatPkt.message, curChannel.name)
         return true
     }
 
@@ -141,8 +127,6 @@ export class ChatHandler {
             session.user.playerName, session.user.vipLevel, targetsession.user.playerName, true, chatPkt.message)
         receiverConn.send(outMsgDataOfTarget)
 
-        console.log('user ID %i sent a direct message "%s" to the user ID %i',
-        session.user.userId, chatPkt.message, receiverConn.getSession().user.userId)
         return true
     }
 
@@ -170,8 +154,6 @@ export class ChatHandler {
             }
         })
 
-        console.log('user ID %i sent a room message "%s" from room "%s" (room id: %i)',
-        session.user.userId, chatPkt.message, curRoom.settings.roomName, curRoom.id)
         return true
     }
 
@@ -194,30 +176,6 @@ export class ChatHandler {
             }
         })
 
-        // showing right chat message on the log
-        let start = 0
-        let Message = ''
-        for (let i = 0; i < chatPkt.message.length; i++) {
-            if (chatPkt.message.charCodeAt(i) === 32) {
-                if (start === 0) {
-                    start++
-                } else {
-                    start = i + 1
-                    break
-                }
-            }
-        }
-
-        if (start !== 0 && start !== 1) {
-            for (let i = start; i < chatPkt.message.length; i++) {
-                Message += chatPkt.message[i]
-            }
-        } else {
-            Message = chatPkt.message
-        }
-
-        console.log('user ID %i sent a ingame global message "%s" from room "%s" (room id: %i)',
-        session.user.userId, Message, curRoom.settings.roomName, curRoom.id)
         return true
     }
 
@@ -240,30 +198,6 @@ export class ChatHandler {
             }
         })
 
-        // showing right chat message on the log
-        let start = 0
-        let Message = ''
-        for (let i = 0; i < chatPkt.message.length; i++) {
-            if (chatPkt.message.charCodeAt(i) === 32) {
-                if (start === 0) {
-                    start++
-                } else {
-                    start = i + 1
-                    break
-                }
-            }
-        }
-
-        if (start !== 0 && start !== 1) {
-            for (let i = start; i < chatPkt.message.length; i++) {
-                Message += chatPkt.message[i]
-            }
-        } else {
-            Message = chatPkt.message
-        }
-
-        console.log('user ID %i sent a ingame team message "%s" from room "%s" (room id: %i)',
-        session.user.userId, Message, curRoom.settings.roomName, curRoom.id)
         return true
     }
 
