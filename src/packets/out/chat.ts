@@ -8,7 +8,7 @@ import { OutChatAnyMessage } from 'packets/out/chat/anymessage'
 import { OutChatDefaultMsg } from 'packets/out/chat/defaultmsg'
 
 export class OutChatPacket extends OutPacketBase {
-    public static channelMessage(sender: string, message: string): OutChatPacket {
+    public static channelMessage(sender: string, isGm: boolean, message: string): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -16,15 +16,15 @@ export class OutChatPacket extends OutPacketBase {
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.Channel)
-        packet.writeUInt8(0) // some subtype?
+        packet.writeUInt8(isGm ? 1 : 0) // is GM?
 
         OutChatDefaultMsg.build(sender, null, message, packet)
 
         return packet
     }
 
-    public static directMessage(sender: string, vL: number, t: string, isT: boolean, message: string): OutChatPacket {
-        // original: sender, vipLevel, target, isTarget, message (TypeScript has max 120 words limit on every line)
+    public static directMessage(sender: string, vipLevel: number, isGm: boolean,
+                                target: string, isTarget: boolean, message: string): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -32,15 +32,15 @@ export class OutChatPacket extends OutPacketBase {
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.DirectMessage)
-        packet.writeUInt8(0) // is GM?
-        packet.writeUInt8(isT ? 1 : 0) // is direct message's target?
+        packet.writeUInt8(isGm ? 1 : 0) // is GM?
+        packet.writeUInt8(isTarget ? 1 : 0) // is direct message's target?
 
-        OutChatDefaultMsg.build(isT ? sender : t, vL, message, packet)
+        OutChatDefaultMsg.build(isTarget ? sender : target, vipLevel, message, packet)
 
         return packet
     }
 
-    public static roomMessage(sender: string, vipLevel: number, message: string): OutChatPacket {
+    public static roomMessage(sender: string, vipLevel: number, isGm: boolean, message: string): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -48,14 +48,14 @@ export class OutChatPacket extends OutPacketBase {
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.Room)
-        packet.writeUInt8(0) // is GM?
+        packet.writeUInt8(isGm ? 1 : 0) // is GM?
 
         OutChatDefaultMsg.build(sender, vipLevel, message, packet)
 
         return packet
     }
 
-    public static ingameMessage(sender: string, vipLevel: number, message: string): OutChatPacket {
+    public static ingameMessage(sender: string, vipLevel: number, isGm: boolean, message: string): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -63,14 +63,14 @@ export class OutChatPacket extends OutPacketBase {
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.IngameGlobal)
-        packet.writeUInt8(0) // is GM?
+        packet.writeUInt8(isGm ? 1 : 0) // is GM?
 
         OutChatDefaultMsg.build(sender, vipLevel, message, packet)
 
         return packet
     }
 
-    public static ingameTeamMessage(sender: string, vipLevel: number, message: string): OutChatPacket {
+    public static ingameTeamMessage(sender: string, vipLevel: number, isGm: boolean, message: string): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -78,7 +78,7 @@ export class OutChatPacket extends OutPacketBase {
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.IngameTeam)
-        packet.writeUInt8(0) // is GM?
+        packet.writeUInt8(isGm ? 1 : 0) // is GM?
 
         OutChatDefaultMsg.build(sender, vipLevel, message, packet)
 

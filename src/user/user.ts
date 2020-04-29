@@ -6,6 +6,8 @@ export class User {
     public userName: string
     public playerName: string
 
+    public gm: boolean
+
     public points: number
     public cash: number
     public mpoints: number
