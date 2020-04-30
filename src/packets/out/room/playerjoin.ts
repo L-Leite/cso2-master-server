@@ -5,6 +5,7 @@ import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 
 import { RoomTeamNum } from 'room/room'
 
+import { ExtendedSocket } from 'extendedsocket'
 import { User } from 'user/user'
 
 /**
@@ -12,9 +13,11 @@ import { User } from 'user/user'
  * @class OutRoomPlayerJoin
  */
 export class OutRoomPlayerJoin {
-    public static build(user: User, teamNum: RoomTeamNum, outPacket: OutPacketBase): void {
+    public static build(conn: ExtendedSocket, teamNum: RoomTeamNum, outPacket: OutPacketBase): void {
+        const user: User = conn.getSession().user
+
         outPacket.writeUInt32(user.userId)
-        OutRoomPlayerNetInfo.build(user.userId, teamNum, outPacket)
+        OutRoomPlayerNetInfo.build(conn, teamNum, outPacket)
         UserInfoFullUpdate.build(user, outPacket)
     }
 }

@@ -849,7 +849,7 @@ export class Room {
             return null
         }
 
-        user.conn.send(OutRoomPacket.playerJoin(newUser.conn.getSession().user, team))
+        user.conn.send(OutRoomPacket.playerJoin(newUser, team))
     }
 
     /**

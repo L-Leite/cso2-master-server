@@ -5,20 +5,15 @@ import { OutPacketBase } from 'packets/out/packet'
 import { RoomTeamNum } from 'room/room'
 import { UserSession } from 'user/usersession'
 
-import { ActiveConnections } from 'storage/activeconnections'
+import { ExtendedSocket } from 'extendedsocket'
 
 /**
  * shared room user structure
  * @class OutRoomPlayerNetInfo
  */
 export class OutRoomPlayerNetInfo {
-    public static build(userId: number, teamNum: RoomTeamNum, outPacket: OutPacketBase): void {
-        const conn = ActiveConnections.Singleton().FindByOwnerId(userId)
+    public static build(conn: ExtendedSocket, teamNum: RoomTeamNum, outPacket: OutPacketBase): void {
         const session: UserSession = conn.getSession()
-
-        if (session == null) {
-            return
-        }
 
         outPacket.writeUInt8(teamNum)
         outPacket.writeUInt8(0) // unk01
