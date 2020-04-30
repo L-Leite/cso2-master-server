@@ -58,6 +58,6 @@ See the [current project's progress](https://github.com/L-Leite/cso2-master-serv
 
 ## License
 
-Read ```LICENSE``` for the project's license information.
+`cso2-masters-server` is licensed under the MIT License.
 
 This project is not affiliated with either Valve Software or Nexon.
