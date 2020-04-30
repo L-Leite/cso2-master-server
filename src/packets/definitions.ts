@@ -3,11 +3,11 @@ export const PacketSignature: number = 0x55 // 'U'
 
 export enum PacketId {
     Version = 0,
-    Reply,
+    Reply = 1,
     Login = 3,
     ServerList = 5,
-    Character,
-    RequestRoomList,
+    Character = 6,
+    RequestRoomList = 7,
     RequestChannels = 10,
     Room = 65,
     Chat = 67,

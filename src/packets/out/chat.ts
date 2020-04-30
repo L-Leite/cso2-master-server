@@ -4,8 +4,8 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { ChatMessageType, PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
 
-import { OutChatAnyMessage } from 'packets/out/chat/anymessage'
 import { OutChatDefaultMsg } from 'packets/out/chat/defaultmsg'
+import { OutChatSystemMsg } from 'packets/out/chat/systemmsg'
 
 export class OutChatPacket extends OutPacketBase {
     public static channelMessage(sender: string, isGm: boolean, message: string): OutChatPacket {
@@ -85,7 +85,7 @@ export class OutChatPacket extends OutPacketBase {
         return packet
     }
 
-    public static anyMessage(message: string, type: number): OutChatPacket {
+    public static systemMessage(message: string, type: ChatMessageType): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
         packet.outStream = new WritableStreamBuffer(
@@ -94,7 +94,7 @@ export class OutChatPacket extends OutPacketBase {
         packet.buildHeader()
         packet.writeUInt8(type)
 
-        OutChatAnyMessage.build(message, type, packet)
+        OutChatSystemMsg.build(message, type, packet)
 
         return packet
     }

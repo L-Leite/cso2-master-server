@@ -108,18 +108,15 @@ export class UserManager {
             console.warn('Could not create session for user %s', loginPacket.gameUsername)
             connection.end()
             return false
-        } else if (loggedUserId === -1) {
-            // I hate the 120 word limits on TypeScript
-            let Message = ''
-            Message += '<b>Wrong account / password!</b>\n'
-            Message += 'Please try again!\n'
-            Message += '\nIf you don\'t have an account\n'
-            Message += '<u>Please contact the server admin for register website</u>'
+        }
 
-            const outAnyMsgData: OutChatPacket = OutChatPacket.anyMessage(Message, ChatMessageType.DialogBox)
-            connection.send(outAnyMsgData)
+        if (loggedUserId === -1) {
+            const badCredsMsg = '#CSO2_LoginAuth_WrongPassword'
 
-            console.warn('Could not create session for user %s', loginPacket.gameUsername)
+            const badDialogData: OutChatPacket = OutChatPacket.systemMessage(badCredsMsg, ChatMessageType.DialogBox)
+            connection.send(badDialogData)
+
+            console.warn(`Login attempt for user ${loginPacket.gameUsername} failed`)
             return false
         }
 
