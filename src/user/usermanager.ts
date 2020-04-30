@@ -54,7 +54,7 @@ const aboutMeHandler = new AboutMeHandler(userService)
  */
 export class UserManager {
     public static async OnSocketClosed(conn: ExtendedSocket): Promise<void> {
-        const session: UserSession = conn.getSession()
+        const session: UserSession = conn.session
 
         if (session == null) {
             return
@@ -132,7 +132,7 @@ export class UserManager {
         }
 
         const newSession: UserSession = new UserSession(user, connection.address() as net.AddressInfo)
-        connection.setSession(newSession)
+        connection.session = newSession
 
         console.log(`user ${user.userName} logged in (uuid: ${connection.uuid})`)
 
@@ -153,7 +153,7 @@ export class UserManager {
     public static async onHostPacket(packetData: Buffer, connection: ExtendedSocket): Promise<boolean> {
         const hostPacket: InHostPacket = new InHostPacket(packetData)
 
-        const session: UserSession = connection.getSession()
+        const session: UserSession = connection.session
 
         if (session == null) {
             console.error(`couldn't get session from connection ${connection.uuid}`)
@@ -186,8 +186,8 @@ export class UserManager {
 
         const targetConn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(itemData.userId)
 
-        const requesterSession: UserSession = userConn.getSession()
-        const targetSession: UserSession = targetConn.getSession()
+        const requesterSession: UserSession = userConn.session
+        const targetSession: UserSession = targetConn.session
 
         if (requesterSession == null) {
             console.warn(`Could not get user ID's ${itemData.userId} session`)
@@ -231,8 +231,8 @@ room but it couldn't be found.`)
 
         const targetConn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(teamData.userId)
 
-        const requesterSession: UserSession = userConn.getSession()
-        const targetSession: UserSession = targetConn.getSession()
+        const requesterSession: UserSession = userConn.session
+        const targetSession: UserSession = targetConn.session
 
         if (requesterSession == null) {
             console.warn(`Could not get user ID's ${teamData.userId} session`)
@@ -276,8 +276,8 @@ room but it couldn't be found.`)
 
         const targetConn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(preloadData.userId)
 
-        const requesterSession: UserSession = userConn.getSession()
-        const targetSession: UserSession = targetConn.getSession()
+        const requesterSession: UserSession = userConn.session
+        const targetSession: UserSession = targetConn.session
 
         if (requesterSession == null) {
             console.warn(`Could not get user ID's ${preloadData.userId} session`)
@@ -324,8 +324,8 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
 
         const targetConn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(loadoutData.userId)
 
-        const requesterSession: UserSession = sourceConn.getSession()
-        const targetSession: UserSession = targetConn.getSession()
+        const requesterSession: UserSession = sourceConn.session
+        const targetSession: UserSession = targetConn.session
 
         if (requesterSession == null) {
             console.warn('Could not get user ID\'s %i session', loadoutData.userId)
@@ -371,8 +371,8 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
 
         const targetConn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(buyMenuData.userId)
 
-        const requesterSession: UserSession = sourceConn.getSession()
-        const targetSession: UserSession = targetConn.getSession()
+        const requesterSession: UserSession = sourceConn.session
+        const targetSession: UserSession = targetConn.session
 
         if (requesterSession == null) {
             console.warn('Could not get user ID\'s %i session', buyMenuData.userId)
@@ -423,7 +423,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
      * @param conn the sender's connection
      */
     public static async onOptionPacket(optionData: Buffer, conn: ExtendedSocket): Promise<boolean> {
-        if (conn.hasSession() === false) {
+        if (conn.session == null) {
             console.warn(`connection ${conn.uuid} sent an option packet without a session`)
             return false
         }
@@ -445,7 +445,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
                                            conn: ExtendedSocket): Promise<boolean> {
         const buyMenuData: InOptionBuyMenu = new InOptionBuyMenu(optPacket)
 
-        const session: UserSession = conn.getSession()
+        const session: UserSession = conn.session
 
         if (session == null) {
             console.warn(`Could not get connection "${conn.uuid}"'s session`)
@@ -460,7 +460,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
     }
 
     public static async onFavoritePacket(favoriteData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
-        if (sourceConn.hasSession() === false) {
+        if (sourceConn.session == null) {
             console.warn(`connection ${sourceConn.uuid} sent a favorite packet without a session`)
             return false
         }
@@ -484,7 +484,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
                                              sourceConn: ExtendedSocket): Promise<boolean> {
         const loadoutData: InFavoriteSetLoadout = new InFavoriteSetLoadout(favPacket)
 
-        const session: UserSession = sourceConn.getSession()
+        const session: UserSession = sourceConn.session
 
         if (session == null) {
             console.warn(`Could not get connection "${sourceConn.uuid}"'s session`)
@@ -507,7 +507,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
                                                sourceConn: ExtendedSocket): Promise<boolean> {
         const cosmeticsData: InFavoriteSetCosmetics = new InFavoriteSetCosmetics(favPacket)
 
-        const session: UserSession = sourceConn.getSession()
+        const session: UserSession = sourceConn.session
 
         if (session == null) {
             console.warn(`Could not get connection "${sourceConn.uuid}"'s session`)
@@ -526,7 +526,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
     }
 
     public static onHostGameEnd(userConn: ExtendedSocket): boolean {
-        const session: UserSession = userConn.getSession()
+        const session: UserSession = userConn.session
 
         if (session == null) {
             console.warn(`Could not get connection "${userConn.uuid}"'s session`)

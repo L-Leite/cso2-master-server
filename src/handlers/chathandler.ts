@@ -26,9 +26,9 @@ export class ChatHandler {
     public async OnPacket(packetData: Buffer, conn: ExtendedSocket): Promise<boolean> {
         const chatPkt: InChatPacket = new InChatPacket(packetData)
 
-        const session: UserSession = conn.getSession()
+        const session: UserSession = conn.session
 
-        if (conn.hasSession() === false) {
+        if (session == null) {
             console.warn(`connection ${conn.uuid} sent an chat packet without a session`)
             return false
         }
@@ -56,7 +56,7 @@ export class ChatHandler {
     }
 
     private async OnChannelMessage(chatPkt: InChatPacket, conn: ExtendedSocket): Promise<boolean> {
-        const session: UserSession = conn.getSession()
+        const session: UserSession = conn.session
 
         const curChannel: Channel = session.currentChannel
 
@@ -76,7 +76,7 @@ export class ChatHandler {
     }
 
     private async OnDirectMessage(chatPkt: InChatPacket, conn: ExtendedSocket): Promise<boolean> {
-        const session: UserSession = conn.getSession()
+        const session: UserSession = conn.session
 
         if (chatPkt.destination == null) {
             console.warn(`user ID ${session.user.userId} tried to send a direct message without destination`)
@@ -95,7 +95,7 @@ export class ChatHandler {
             return false
         }
 
-        const targetsession: UserSession = receiverConn.getSession()
+        const targetsession: UserSession = receiverConn.session
 
         const outMsgData: OutChatPacket = OutChatPacket.directMessage(
             session.user.playerName, session.user.vipLevel, session.user.gm,
@@ -111,7 +111,7 @@ export class ChatHandler {
     }
 
     private async OnRoomMessage(chatPkt: InChatPacket, conn: ExtendedSocket): Promise<boolean> {
-        const session: UserSession = conn.getSession()
+        const session: UserSession = conn.session
 
         if (session.isInRoom() === false) {
             console.warn(`user ID ${session.user.userId} sent a room message without being in a room`)
@@ -138,7 +138,7 @@ export class ChatHandler {
     }
 
     private async OnIngameGlobalMessage(chatPkt: InChatPacket, conn: ExtendedSocket): Promise<boolean> {
-        const session: UserSession = conn.getSession()
+        const session: UserSession = conn.session
 
         if (this.CanSendIngameMessage(session) === false) {
             return false
@@ -160,7 +160,7 @@ export class ChatHandler {
     }
 
     private async OnIngameTeamMessage(chatPkt: InChatPacket, conn: ExtendedSocket): Promise<boolean> {
-        const session: UserSession = conn.getSession()
+        const session: UserSession = conn.session
 
         if (this.CanSendIngameMessage(session) === false) {
             return false

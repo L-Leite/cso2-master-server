@@ -23,7 +23,7 @@ export class RoomHandler {
      * @param users the user manager object
      */
     public async onRoomRequest(reqData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
-        if (sourceConn.hasSession() === false) {
+        if (sourceConn.session == null) {
             console.warn(`connection ${sourceConn.uuid} did a room request without a session`)
             return false
         }
@@ -74,7 +74,7 @@ export class RoomHandler {
     private async onNewRoomRequest(roomPacket: InRoomPacket, sourceConn: ExtendedSocket): Promise<boolean> {
         const newRoomReq: InRoomNewRequest = new InRoomNewRequest(roomPacket)
 
-        const session: UserSession = sourceConn.getSession()
+        const session: UserSession = sourceConn.session
 
         // if the user wants to create a new room, let it
         // this will remove the user from its current room
@@ -126,7 +126,7 @@ export class RoomHandler {
     private async onJoinRoomRequest(roomPacket: InRoomPacket, sourceConn: ExtendedSocket): Promise<boolean> {
         const joinReq: InRoomJoinRequest = new InRoomJoinRequest(roomPacket)
 
-        const session: UserSession = sourceConn.getSession()
+        const session: UserSession = sourceConn.session
         const channel: Channel = session.currentChannel
 
         if (channel == null) {
@@ -169,7 +169,7 @@ export class RoomHandler {
      * @returns true if successful
      */
     private async onGameStartRequest(sourceConn: ExtendedSocket): Promise<boolean> {
-        const session: UserSession = sourceConn.getSession()
+        const session: UserSession = sourceConn.session
         const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
@@ -203,7 +203,7 @@ export class RoomHandler {
      * @returns true if successful
      */
     private async onLeaveRoomRequest(sourceConn: ExtendedSocket): Promise<boolean> {
-        const session: UserSession = sourceConn.getSession()
+        const session: UserSession = sourceConn.session
         const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
@@ -233,7 +233,7 @@ export class RoomHandler {
      * @returns true if successful
      */
     private async onToggleReadyRequest(sourceConn: ExtendedSocket): Promise<boolean> {
-        const session: UserSession = sourceConn.getSession()
+        const session: UserSession = sourceConn.session
         const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
@@ -274,7 +274,7 @@ export class RoomHandler {
     private async onRoomUpdateSettings(roomPacket: InRoomPacket, sourceConn: ExtendedSocket): Promise<boolean> {
         const newSettingsReq: InRoomUpdateSettings = new InRoomUpdateSettings(roomPacket)
 
-        const session: UserSession = sourceConn.getSession()
+        const session: UserSession = sourceConn.session
         const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
@@ -311,7 +311,7 @@ export class RoomHandler {
      */
     private onCloseResultRequest(sourceConn: ExtendedSocket): boolean {
         Room.sendCloseResultWindow(sourceConn)
-        console.log(`user ID ${sourceConn.getSession().user.userId} closed game result window`)
+        console.log(`user ID ${sourceConn.session.user.userId} closed game result window`)
         return true
     }
 
@@ -324,7 +324,7 @@ export class RoomHandler {
     private async onSetTeamRequest(roomPacket: InRoomPacket, sourceConn: ExtendedSocket): Promise<boolean> {
         const setTeamReq: InRoomSetUserTeamRequest = new InRoomSetUserTeamRequest(roomPacket)
 
-        const session: UserSession = sourceConn.getSession()
+        const session: UserSession = sourceConn.session
         const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
@@ -365,7 +365,7 @@ export class RoomHandler {
                                            sourceConn: ExtendedSocket): Promise<boolean> {
         const countdownReq: InRoomCountdown = new InRoomCountdown(roomPacket)
 
-        const session: UserSession = sourceConn.getSession()
+        const session: UserSession = sourceConn.session
         const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {

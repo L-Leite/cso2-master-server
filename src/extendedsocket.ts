@@ -28,7 +28,7 @@ export class ExtendedSocket extends net.Socket {
     public uuid: string
 
     // the connection owning user, null if it doesn't have any
-    private session: UserSession
+    public session: UserSession
 
     // the current packet sequence (1 byte long)
     private seq: number
@@ -44,22 +44,6 @@ export class ExtendedSocket extends net.Socket {
      */
     public getSession(): UserSession {
         return this.session
-    }
-
-    /**
-     * checks if the socket has a session
-     * @returns true if it has, false if not
-     */
-    public hasSession(): boolean {
-        return this.getSession() != null
-    }
-
-    /**
-     * sets the socket's owning user session
-     * @param newOwner the new owner's session object
-     */
-    public setSession(newSession: UserSession): void {
-        this.session = newSession
     }
 
     /**

@@ -13,7 +13,7 @@ import { ExtendedSocket } from 'extendedsocket'
  */
 export class OutRoomPlayerNetInfo {
     public static build(conn: ExtendedSocket, teamNum: RoomTeamNum, outPacket: OutPacketBase): void {
-        const session: UserSession = conn.getSession()
+        const session: UserSession = conn.session
 
         outPacket.writeUInt8(teamNum)
         outPacket.writeUInt8(0) // unk01

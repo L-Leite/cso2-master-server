@@ -18,7 +18,7 @@ export class RoomListItem {
     }
 
     public async build(outPacket: OutPacketBase): Promise<void> {
-        const host: User = this.room.host.conn.getSession().user
+        const host: User = this.room.host.conn.session.user
 
         if (host == null) {
             return

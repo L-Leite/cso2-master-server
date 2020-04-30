@@ -27,7 +27,7 @@ export class AboutMeHandler {
   public async OnPacket(packetData: Buffer, connection: ExtendedSocket): Promise<boolean> {
     const aboutPacket: InAboutmePacket = new InAboutmePacket(packetData)
 
-    if (connection.hasSession() === false) {
+    if (connection.session == null) {
       console.warn(`connection ${connection.uuid} sent an AboutMe packet without a session`)
       return false
     }
@@ -49,7 +49,7 @@ export class AboutMeHandler {
   private async OnSetAvatar(aboutPkt: InAboutmePacket, conn: ExtendedSocket): Promise<boolean> {
     const avatarData: InAboutmeSetAvatar = new InAboutmeSetAvatar(aboutPkt)
 
-    const session: UserSession = conn.getSession()
+    const session: UserSession = conn.session
     const updated: boolean = await this.userSvc.SetUserAvatar(session.user, avatarData.avatarId)
 
     if (updated === false) {
@@ -78,7 +78,7 @@ export class AboutMeHandler {
   private async OnSetSignature(aboutPkt: InAboutmePacket, conn: ExtendedSocket): Promise<boolean> {
     const signatureData: InAboutmeSetSignature = new InAboutmeSetSignature(aboutPkt)
 
-    const session: UserSession = conn.getSession()
+    const session: UserSession = conn.session
 
     if (signatureData.msg == null) {
       console.warn(`null signature requested to be set by ${conn.uuid}`)
@@ -113,7 +113,7 @@ export class AboutMeHandler {
   private async OnSetTitle(aboutPkt: InAboutmePacket, conn: ExtendedSocket): Promise<boolean> {
     const titleData: InAboutmeSetTitle = new InAboutmeSetTitle(aboutPkt)
 
-    const session: UserSession = conn.getSession()
+    const session: UserSession = conn.session
 
     if (titleData.titleId == null) {
       console.warn(`null title requested to be set by ${conn.uuid}`)

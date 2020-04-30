@@ -145,7 +145,7 @@ export class Room {
      * @returns true if successful or if not in a room, false if not
      */
     public static cleanUpUser(conn: ExtendedSocket): boolean {
-        const session: UserSession = conn.getSession()
+        const session: UserSession = conn.session
 
         if (session == null) {
             return false
@@ -992,7 +992,7 @@ export class Room {
      */
     public sendConnectHostTo(user: RoomUserEntry, host: RoomUserEntry): void {
         const hostConn = ActiveConnections.Singleton().FindByOwnerId(host.userId)
-        const hostSession: UserSession = hostConn.getSession()
+        const hostSession: UserSession = hostConn.session
 
         if (hostSession == null) {
             return
@@ -1010,7 +1010,7 @@ export class Room {
      */
     public sendGuestDataTo(host: RoomUserEntry, guest: RoomUserEntry): void {
         const guestConn = ActiveConnections.Singleton().FindByOwnerId(guest.userId)
-        const guestSession: UserSession = guestConn.getSession()
+        const guestSession: UserSession = guestConn.session
 
         if (guestSession == null) {
             return

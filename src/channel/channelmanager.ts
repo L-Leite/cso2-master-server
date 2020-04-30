@@ -25,12 +25,14 @@ export class ChannelManager {
      * @param sourceConn the user's socket
      */
     public static async onChannelListPacket(sourceConn: ExtendedSocket): Promise<boolean> {
-        if (sourceConn.hasSession() === false) {
+        const session: UserSession = sourceConn.session
+
+        if (session == null) {
             console.warn(`uuid ${sourceConn.uuid} tried to get channels without a session`)
             return false
         }
 
-        console.log(`user ID ${sourceConn.getSession().user.userId} requested server list` )
+        console.log(`user ID ${session.user.userId} requested server list` )
         this.sendChannelListTo(sourceConn)
 
         return true
@@ -43,13 +45,14 @@ export class ChannelManager {
      * @param users the user manager object
      */
     public static async onRoomListPacket(packetData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
-        if (sourceConn.hasSession() === false) {
+        const session: UserSession = sourceConn.session
+
+        if (session == null) {
             console.warn('uuid ' + sourceConn.uuid + ' tried to get rooms without a session')
             return false
         }
 
         const listReq: InRequestRoomListPacket = new InRequestRoomListPacket(packetData)
-        const session: UserSession = sourceConn.getSession()
 
         const server: ChannelServer = ChannelManager.getServerByIndex(listReq.channelServerIndex)
 
@@ -109,7 +112,7 @@ export class ChannelManager {
      * @param channel the target channel
      */
     private static async setUserChannel(conn: ExtendedSocket, channel: Channel): Promise<void> {
-        const session: UserSession = conn.getSession()
+        const session: UserSession = conn.session
 
         if (session.currentChannel != null) {
             channel.OnUserLeft(conn)

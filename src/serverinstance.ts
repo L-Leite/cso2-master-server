@@ -205,7 +205,7 @@ export class ServerInstance {
             return
         }
 
-        const session: UserSession = conn.getSession()
+        const session: UserSession = conn.session
 
         if (session == null) {
             console.warn('Couldnt\'t get user ID %i\'s session when holepunching', packet.userId)
