@@ -1,7 +1,6 @@
 import { Uint64LE } from 'int64-buffer'
 
 import { OutPacketBase } from 'packets/out/packet'
-import { PacketString } from 'packets/packetstring'
 
 import { Room, RoomStatus } from 'room/room'
 
@@ -25,7 +24,7 @@ export class OutRoomCreateAndJoin {
         // special class start?
         // flags & 0x1
         outPacket.writeUInt64(new Uint64LE('FFFFFFFFFFFFFFFF', 16)) // roomFlags
-        outPacket.writeString(new PacketString(room.settings.roomName)) // roomName
+        outPacket.writeString(room.settings.roomName) // roomName
         // end of flags & 0x1
         // flags & 0x2
         outPacket.writeUInt8(0) // unk05
@@ -36,7 +35,7 @@ export class OutRoomCreateAndJoin {
         outPacket.writeUInt32(0) // unk08
         // end of flags & 0x4
         // flags & 0x8
-        outPacket.writeString(new PacketString(null)) // unk09
+        outPacket.writeString(null) // unk09
         // end of flags & 0x8
         // flags & 0x10
         outPacket.writeUInt16(0) // unk10

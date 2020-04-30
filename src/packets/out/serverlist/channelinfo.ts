@@ -1,5 +1,4 @@
 import { OutPacketBase } from 'packets/out/packet'
-import { PacketString } from 'packets/packetstring'
 
 import { Channel } from 'channel/channel'
 
@@ -9,7 +8,7 @@ import { Channel } from 'channel/channel'
  */
 export class ServerListChannelInfo {
     private id: number
-    private name: PacketString
+    private name: string
     private unk00: number
     private unk01: number
     private unk02: number
@@ -18,7 +17,7 @@ export class ServerListChannelInfo {
 
     constructor(channel: Channel) {
         this.id = channel.index
-        this.name = new PacketString(channel.name)
+        this.name = channel.name
         this.unk00 = 4
         this.unk01 = 0x1F4
         this.unk02 = 1

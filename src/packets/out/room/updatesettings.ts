@@ -1,7 +1,5 @@
 import { Uint64LE } from 'int64-buffer'
 
-import { PacketString } from 'packets/packetstring'
-
 import { OutPacketBase } from 'packets/out/packet'
 
 import { RoomSettings } from 'room/roomsettings'
@@ -162,7 +160,7 @@ export class OutRoomUpdateSettings {
         // disable linter bitwise restrictions so we can check the flags
         /* tslint:disable: no-bitwise */
         if (lowFlag & 0x1) {
-            outPacket.writeString(new PacketString(settings.roomName))
+            outPacket.writeString(settings.roomName)
         }
         if (lowFlag & 0x2) {
             outPacket.writeUInt8(settings.unk00)
@@ -173,7 +171,7 @@ export class OutRoomUpdateSettings {
             outPacket.writeUInt32(settings.unk03)
         }
         if (lowFlag & 0x8) {
-            outPacket.writeString(new PacketString(settings.unk09))
+            outPacket.writeString(settings.unk09)
         }
         if (lowFlag & 0x10) {
             outPacket.writeUInt16(settings.unk10)

@@ -1,7 +1,6 @@
 import { Uint64LE } from 'int64-buffer'
 
 import { OutPacketBase } from 'packets/out/packet'
-import { PacketString } from 'packets/packetstring'
 
 import { User } from 'user/user'
 
@@ -25,7 +24,7 @@ export class UserInfoDynamicUpdate {
         // end flag & 0x1
 
         if (user.playerName != null) {
-            outPacket.writeString(new PacketString(user.playerName)) // userName
+            outPacket.writeString(user.playerName) // userName
         }
 
         if (user.level != null) {
@@ -72,12 +71,12 @@ export class UserInfoDynamicUpdate {
         }
 
         if (user.netCafeName != null) {
-            outPacket.writeString(new PacketString(null)) // unk26
+            outPacket.writeString(null) // unk26
             outPacket.writeUInt32(0) // unk27
             outPacket.writeUInt32(0) // unk28
             outPacket.writeUInt32(0) // unk29
             outPacket.writeUInt32(0) // unk30
-            outPacket.writeString(new PacketString(user.netCafeName)) // net cafe
+            outPacket.writeString(user.netCafeName) // net cafe
         }
 
         if (user.cash != null) {
@@ -87,7 +86,7 @@ export class UserInfoDynamicUpdate {
 
         if (user.clanName != null || user.clanMark != null) {
             outPacket.writeUInt32(0) // unk34
-            outPacket.writeString(new PacketString(user.clanName)) // clan name
+            outPacket.writeString(user.clanName) // clan name
             outPacket.writeUInt32(user.clanMark) // clan mark (0-10)
             outPacket.writeUInt8(0) // unk37
             // array size is always 5
@@ -139,7 +138,7 @@ export class UserInfoDynamicUpdate {
         }
 
         if (user.signature != null) {
-            outPacket.writeString(new PacketString(user.signature)) // personal signature
+            outPacket.writeString(user.signature) // personal signature
         }
 
         // flag & 0x80000

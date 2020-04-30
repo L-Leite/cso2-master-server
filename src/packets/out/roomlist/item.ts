@@ -1,7 +1,5 @@
 import { Uint64LE } from 'int64-buffer'
 
-import { PacketString } from 'packets/packetstring'
-
 import { Room } from 'room/room'
 import { User } from 'user/user'
 
@@ -28,7 +26,7 @@ export class RoomListItem {
         outPacket.writeUInt64(new Uint64LE('FFFFFFFFFFFFFFFF', 16)) // flags
 
         // flags & 0x1
-        outPacket.writeString(new PacketString(this.room.settings.roomName)) // roomName
+        outPacket.writeString(this.room.settings.roomName) // roomName
         // end flags & 0x1
         // flags & 0x2
         outPacket.writeUInt8(this.room.id) // roomNumber
@@ -56,7 +54,7 @@ export class RoomListItem {
         // end flags & 0x100
         // flags & 0x200
         outPacket.writeUInt32(host.userId) // hostUserId
-        outPacket.writeString(new PacketString(host.playerName)) // hostUserName
+        outPacket.writeString(host.playerName) // hostUserName
         outPacket.writeUInt8(0) // unk11
         // end flags & 0x200
         // flags & 0x400

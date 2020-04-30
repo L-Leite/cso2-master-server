@@ -1,7 +1,6 @@
 import { OutPacketBase } from 'packets/out/packet'
 
 import { Uint64LE } from 'int64-buffer'
-import { PacketString } from 'packets/packetstring'
 
 /**
  * sends an user the match's end result
@@ -15,8 +14,8 @@ export class OutRoomGameResult {
         outPacket.writeUInt64(new Uint64LE(0)) // unk03
         outPacket.writeUInt64(new Uint64LE(0)) // unk04
         outPacket.writeUInt8(0) // unk05
-        outPacket.writeString(new PacketString(null)) // unk06
-        outPacket.writeString(new PacketString(null)) // unk07
+        outPacket.writeString(null) // unk06
+        outPacket.writeString(null) // unk07
         outPacket.writeUInt8(0) // unk08
         outPacket.writeUInt8(0) // unk09
     }

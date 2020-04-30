@@ -1,8 +1,5 @@
 import { OutPacketBase } from 'packets/out/packet'
 
-import { PacketLongString } from 'packets/packetlongstring'
-import { PacketString } from 'packets/packetstring'
-
 import { ChatMessageType } from 'packets/definitions'
 
 /**
@@ -13,9 +10,9 @@ export class OutChatSystemMsg {
 
         if (type === ChatMessageType.Congratulate) {
             outPacket.writeUInt8(0) // unknown
-            outPacket.writeString(new PacketString(message))
+            outPacket.writeString(message)
         } else {
-            outPacket.writeLongString(new PacketLongString(message))
+            outPacket.writeLongString(message)
         }
     }
 }

@@ -153,12 +153,14 @@ export class OutPacketBase extends PacketBaseShared {
         this.outStream.write(buf)
     }
 
-    public writeLongString(str: PacketLongString): void {
-        this.outStream.write(str.toBuffer())
+    public writeLongString(str: string): void {
+        const serializedStr: PacketLongString = new PacketLongString(str)
+        this.outStream.write(serializedStr.toBuffer())
     }
 
-    public writeString(str: PacketString): void {
-        this.outStream.write(str.toBuffer())
+    public writeString(str: string): void {
+        const serializedStr: PacketString = new PacketString(str)
+        this.outStream.write(serializedStr.toBuffer())
     }
 
     /**

@@ -3,7 +3,6 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { OutPacketBase } from 'packets/out/packet'
 
 import { PacketId } from 'packets/definitions'
-import { PacketString } from 'packets/packetstring'
 
 /**
  * sends out the result of a login attempt
@@ -26,8 +25,8 @@ export class OutUserStartPacket extends OutPacketBase {
 
         this.buildHeader()
         this.writeUInt32(userId)
-        this.writeString(new PacketString(loginName))
-        this.writeString(new PacketString(userName))
+        this.writeString(loginName)
+        this.writeString(userName)
         this.writeUInt8(1) // unk00
         this.writeUInt16(holepunchPort)
     }

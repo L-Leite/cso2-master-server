@@ -3,7 +3,6 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { OutPacketBase } from 'packets/out/packet'
 
 import { PacketId } from 'packets/definitions'
-import { PacketString } from 'packets/packetstring'
 
 /**
  * sends out the result of a client integrity validation
@@ -23,6 +22,6 @@ export class OutVersionPacket extends OutPacketBase {
 
         this.buildHeader()
         this.writeUInt8(isBadHash ? 1 : 0)
-        this.writeString(new PacketString(hash))
+        this.writeString(hash)
     }
 }

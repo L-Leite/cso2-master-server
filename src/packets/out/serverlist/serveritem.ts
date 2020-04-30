@@ -1,9 +1,8 @@
 import { OutPacketBase } from 'packets/out/packet'
-import { PacketString } from 'packets/packetstring'
 
 import { ChannelServer } from 'channel/channelserver'
 
-import { ServerListChannelInfo as OutChannelItem } from 'packets/out/serverlist/channelinfo'
+import { ServerListChannelInfo } from 'packets/out/serverlist/channelinfo'
 
 /**
  * sends out a channel server data to an user
@@ -12,19 +11,19 @@ export class OutChannelServerItem {
     private serverIndex: number
     private serverStatus: number
     private serverType: number
-    private serverName: PacketString
+    private serverName: string
     private channelCount: number
-    private channels: OutChannelItem[]
+    private channels: ServerListChannelInfo[]
 
     constructor(channelServer: ChannelServer) {
         this.serverIndex = 1
         this.serverStatus = 1
         this.serverType = 3
-        this.serverName = new PacketString(channelServer.name)
+        this.serverName = channelServer.name
         this.channelCount = channelServer.channels.length
         this.channels = []
         for (const channel of channelServer.channels) {
-            this.channels.push(new OutChannelItem(channel))
+            this.channels.push(new ServerListChannelInfo(channel))
         }
     }
 
