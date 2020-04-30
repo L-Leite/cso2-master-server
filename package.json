@@ -1,7 +1,7 @@
 {
   "name": "cso2-master-server",
   "version": "0.9.5",
-  "repository": "github:Ochii/cso2-master-server",
+  "repository": "github:L-Leite/cso2-master-server",
   "description": "A master server for Nexon's Counter-Strike: Online 2",
   "author": "Luís Leite",
   "license": "MIT",
@@ -17,7 +17,6 @@
     "int64-buffer": "^0.99.1007",
     "ip": "^1.1.5",
     "lru-cache": "^5.1.1",
-    "mongodb": "^3.3.3",
     "stream-buffers": "^3.0.2",
     "superagent": "^5.1.0",
     "uuid": "^3.3.3"
@@ -25,7 +24,6 @@
   "devDependencies": {
     "@types/ip": "0.0.31",
     "@types/lru-cache": "^5.1.0",
-    "@types/mongodb": "^3.3.7",
     "@types/node": "^10.17.2",
     "@types/stream-buffers": "^3.0.3",
     "@types/superagent": "^4.1.4",
