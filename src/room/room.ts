@@ -465,6 +465,11 @@ export class Room {
             return null
         }
 
+        if (userInfo.isIngame === true) {
+            console.warn(`toggleUserReadyStatus: user ${userId} tried to toggle ready status while ingame`)
+            return null
+        }
+
         const curStatus: RoomReadyStatus = userInfo.ready
         const newStatus: RoomReadyStatus =
             curStatus === RoomReadyStatus.NotReady
