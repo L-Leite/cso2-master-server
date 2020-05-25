@@ -4,7 +4,7 @@ import superagent from 'superagent'
 import { ExtendedSocket } from 'extendedsocket'
 
 import { Channel } from 'channel/channel'
-import { Room } from 'room/room'
+import { Room, RoomTeamNum } from 'room/room'
 
 import { User } from 'user/user'
 import { UserInventory } from 'user/userinventory'
@@ -270,7 +270,7 @@ room but it couldn't be found.`)
             return false
         }
 
-        if (teamData.newTeam !== 1 && teamData.newTeam !== 2) {
+        if (teamData.newTeam !== RoomTeamNum.Terrorist && teamData.newTeam !== RoomTeamNum.CounterTerrorist) {
             console.warn(`User Id ${targetSession.user.userId} tried to change his team, but the value ${teamData.newTeam} is not allowed.`)
             return false
         }
