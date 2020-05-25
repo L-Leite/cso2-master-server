@@ -262,6 +262,11 @@ room but it couldn't be found.`)
             return false
         }
 
+        if (teamData.newTeam !== 1 && teamData.newTeam !== 2) {
+            console.warn(`User Id ${targetSession.user.userId} tried to change his team, but the value ${teamData.newTeam} is not allowed.`)
+            return false
+        }
+
         currentRoom.updateUserTeam(targetSession.user.userId, teamData.newTeam)
 
         console.log('Automatic changing User ID %i\'s team to the %i in room %s (host ID %i, room id %i)',
