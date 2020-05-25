@@ -8,12 +8,16 @@ import { Room, RoomReadyStatus, RoomStatus } from 'room/room'
 
 import { UserSession } from 'user/usersession'
 
+import { ChatMessageType } from 'packets/definitions'
+
 import { InRoomPacket, InRoomType } from 'packets/in/room'
 import { InRoomCountdown } from 'packets/in/room/countdown'
 import { InRoomNewRequest } from 'packets/in/room/fullrequest'
 import { InRoomJoinRequest } from 'packets/in/room/joinrequest'
 import { InRoomSetUserTeamRequest } from 'packets/in/room/setuserteamreq'
 import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
+
+import { OutChatPacket } from 'packets/out/chat'
 
 export class RoomHandler {
     /**
@@ -137,12 +141,22 @@ export class RoomHandler {
         const desiredRoom: Room = channel.getRoomById(joinReq.roomId)
 
         if (desiredRoom == null) {
+            const roomMsg = '#CSO2_POPUP_ROOM_JOIN_FAILED_CLOSED'
+
+            const sysDialog: OutChatPacket = OutChatPacket.systemMessage(roomMsg, ChatMessageType.DialogBox)
+            sourceConn.send(sysDialog)
+
             console.warn('user ID %i tried to join a non existing room. room id: %i',
                 session.user.userId, joinReq.roomId)
             return false
         }
 
         if (desiredRoom.hasFreeSlots() === false) {
+            const roomMsg = '#CSO2_POPUP_ROOM_JOIN_FAILED_FULL'
+
+            const sysDialog: OutChatPacket = OutChatPacket.systemMessage(roomMsg, ChatMessageType.DialogBox)
+            sourceConn.send(sysDialog)
+
             console.warn('user ID %i tried to join a full room. room name "%s" room id: %i',
                 session.user.userId, desiredRoom.settings.roomName, desiredRoom.id)
             return false
