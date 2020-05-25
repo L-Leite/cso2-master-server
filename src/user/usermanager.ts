@@ -105,8 +105,12 @@ export class UserManager {
         const loggedUserId = await userService.Login(loginPacket.gameUsername, loginPacket.password)
 
         if (loggedUserId === 0) {
+            const badCredsMsg = '#CSO2_LoginAuth_Certify_NoPassport'
+
+            const badDialogData: OutChatPacket = OutChatPacket.systemMessage(badCredsMsg, ChatMessageType.DialogBox)
+            connection.send(badDialogData)
+
             console.warn('Could not create session for user %s', loginPacket.gameUsername)
-            connection.end()
             return false
         }
 
@@ -126,8 +130,12 @@ export class UserManager {
         const user: User = await userService.GetUserById(loggedUserId)
 
         if (user == null) {
+            const badInfoMsg = '#CSO2_ServerMessage_INVALID_USERINFO'
+
+            const badDialogData: OutChatPacket = OutChatPacket.systemMessage(badInfoMsg, ChatMessageType.DialogBox)
+            connection.send(badDialogData)
+
             console.error('Couldn\'t get user ID %i\' information', loggedUserId)
-            connection.end()
             return false
         }
 
