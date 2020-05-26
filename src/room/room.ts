@@ -701,6 +701,9 @@ export class Room {
         if (newSettings.roomName != null) {
             this.settings.roomName = newSettings.roomName
         }
+        if (newSettings.roomPassword != null) {
+            this.settings.roomPassword = newSettings.roomPassword
+        }
         if (newSettings.gameModeId != null) {
             this.settings.gameModeId = newSettings.gameModeId
         }
@@ -763,9 +766,6 @@ export class Room {
         }
         if (newSettings.unk03 != null) {
             this.settings.unk03 = newSettings.unk03
-        }
-        if (newSettings.unk09 != null) {
-            this.settings.unk09 = newSettings.unk09
         }
         if (newSettings.unk10 != null) {
             this.settings.unk10 = newSettings.unk10
