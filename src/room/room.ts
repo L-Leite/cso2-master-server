@@ -18,6 +18,7 @@ export enum RoomTeamNum {
     Unknown = 0,
     Terrorist = 1,
     CounterTerrorist = 2,
+    Spectator = 3,
 }
 
 export enum RoomReadyStatus {
@@ -106,6 +107,7 @@ export enum RoomTeamBalance {
 
 export interface IRoomOptions {
     roomName?: string,
+    roomPassword?: string,
     gameModeId?: number,
     mapId?: number,
     winLimit?: number,
@@ -209,6 +211,15 @@ export class Room {
      */
     public hasFreeSlots(): boolean {
         return this.getFreeSlots() !== 0
+    }
+
+    /**
+     * did the user typed the correct password?
+     * @param password the password we need to check
+     * @returns true the password is matches, false if not
+     */
+    public isPasswordRight(password: string): boolean {
+        return this.settings.roomPassword === password
     }
 
     /**
