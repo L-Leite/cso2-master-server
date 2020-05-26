@@ -222,11 +222,11 @@ export class Room {
     }
 
     /**
-     * did the user type the correct password?
+     * compares any password with the room's
      * @param password the password we need to check
-     * @returns true the password matches, false if it doesn't
+     * @returns true if the password matches, false if it doesn't
      */
-    public isPasswordRight(password: string): boolean {
+    public ComparePassword(password: string): boolean {
         return this.settings.roomPassword === password
     }
 
