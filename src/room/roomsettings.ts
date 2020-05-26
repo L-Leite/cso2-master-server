@@ -2,6 +2,7 @@ import { IRoomOptions, RoomGamemode, RoomStatus, RoomTeamBalance } from 'room/ro
 
 export class RoomSettings {
     public roomName: string
+    public roomPassword: string
     public maxPlayers: number
     public gameModeId: RoomGamemode
     public mapId: number
@@ -29,7 +30,6 @@ export class RoomSettings {
     public unk01: number
     public unk02: number
     public unk03: number
-    public unk09: string
     public unk10: number
     public unk13: number
     public unk17: number
@@ -56,6 +56,7 @@ export class RoomSettings {
         }
 
         this.roomName = options.roomName ? options.roomName : 'Some room'
+        this.roomPassword = options.roomPassword ? options.roomPassword : ''
         this.gameModeId = options.gameModeId ? options.gameModeId : 0
         this.mapId = options.mapId ? options.mapId : 1
         this.winLimit = options.winLimit ? options.winLimit : 10
