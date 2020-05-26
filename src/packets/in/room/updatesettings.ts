@@ -16,7 +16,7 @@ export class InRoomUpdateSettings {
     public unk02: number
     public unk03: number
     // flags & 0x8
-    public unk09: string
+    public roomPassword: string
     // end of flags & 0x8
     // flags & 0x10
     public unk10: number
@@ -153,7 +153,7 @@ export class InRoomUpdateSettings {
             this.unk03 = inPacket.readUInt32()
         }
         if (lowFlag & 0x8) {
-            this.unk09 = inPacket.readString()
+            this.roomPassword = inPacket.readString()
         }
         if (lowFlag & 0x10) {
             this.unk10 = inPacket.readUInt16()

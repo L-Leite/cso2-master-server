@@ -47,4 +47,5 @@ export enum ChatMessageType {
     SystemImportant = 20,
     DialogBox = 21, // note: has not 'Yes' and 'No' select option
     System = 22,
+    DialogBoxExit = 60, // when client clicked 'OK', the game will exit (text start with '#CSO2_POPUP_')
 }

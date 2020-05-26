@@ -8,12 +8,16 @@ import { Room, RoomReadyStatus, RoomStatus } from 'room/room'
 
 import { UserSession } from 'user/usersession'
 
+import { ChatMessageType } from 'packets/definitions'
+
 import { InRoomPacket, InRoomType } from 'packets/in/room'
 import { InRoomCountdown } from 'packets/in/room/countdown'
 import { InRoomNewRequest } from 'packets/in/room/fullrequest'
 import { InRoomJoinRequest } from 'packets/in/room/joinrequest'
 import { InRoomSetUserTeamRequest } from 'packets/in/room/setuserteamreq'
 import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
+
+import { OutChatPacket } from 'packets/out/chat'
 
 export class RoomHandler {
     /**
@@ -103,6 +107,7 @@ export class RoomHandler {
             killLimit: newRoomReq.killLimit,
             mapId: newRoomReq.mapId,
             roomName: newRoomReq.roomName,
+            roomPassword: newRoomReq.roomPassword,
             winLimit: newRoomReq.winLimit,
         })
 
@@ -137,14 +142,36 @@ export class RoomHandler {
         const desiredRoom: Room = channel.getRoomById(joinReq.roomId)
 
         if (desiredRoom == null) {
+            const roomMsg = '#CSO2_POPUP_ROOM_JOIN_FAILED_CLOSED'
+
+            const sysDialog: OutChatPacket = OutChatPacket.systemMessage(roomMsg, ChatMessageType.DialogBox)
+            sourceConn.send(sysDialog)
+
             console.warn('user ID %i tried to join a non existing room. room id: %i',
                 session.user.userId, joinReq.roomId)
             return false
         }
 
         if (desiredRoom.hasFreeSlots() === false) {
+            const roomMsg = '#CSO2_POPUP_ROOM_JOIN_FAILED_FULL'
+
+            const sysDialog: OutChatPacket = OutChatPacket.systemMessage(roomMsg, ChatMessageType.DialogBox)
+            sourceConn.send(sysDialog)
+
             console.warn('user ID %i tried to join a full room. room name "%s" room id: %i',
                 session.user.userId, desiredRoom.settings.roomName, desiredRoom.id)
+            return false
+        }
+
+        if (!desiredRoom.isPasswordRight('') && desiredRoom.isPasswordRight(joinReq.roomPassword) === false) {
+            const roomMsg = '#CSO2_POPUP_ROOM_JOIN_FAILED_INVALID_PASSWD'
+
+            const sysDialog: OutChatPacket = OutChatPacket.systemMessage(roomMsg, ChatMessageType.DialogBox)
+            sourceConn.send(sysDialog)
+
+            console.warn('user ID %i tried to join a password protected room with wrong password "%s", really password: "%s". room name "%s" room id: %i', session.user.userId,
+                joinReq.roomPassword, desiredRoom.settings.roomPassword,
+                desiredRoom.settings.roomName, desiredRoom.id)
             return false
         }
 
@@ -333,6 +360,11 @@ export class RoomHandler {
         }
 
         if (currentRoom.isUserReady(session.user.userId)) {
+            const roomMsg = '#CSO2_POPUP_ROOM_CHANGETEAM_FAILED'
+
+            const sysMessage: OutChatPacket = OutChatPacket.systemMessage(roomMsg, ChatMessageType.System)
+            sourceConn.send(sysMessage)
+
             console.warn('user ID %i tried change team in a room, although it\'s ready. room name "%s" room id: %i',
                 session.user.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
@@ -385,6 +417,11 @@ export class RoomHandler {
         const count: number = countdownReq.count
 
         if (currentRoom.canStartGame() === false) {
+            const roomMsg = '#CSO2_UI_ROOM_COUNTDOWN_FAILED_NOENEMY'
+
+            const sysMessage: OutChatPacket = OutChatPacket.systemMessage(roomMsg, ChatMessageType.System)
+            sourceConn.send(sysMessage)
+
             console.warn('user ID %i tried to toggle a room\'s game start countdown, although it can\'t start. '
                 + 'room name "%s" room id: %i',
                 session.user.userId, currentRoom.settings.roomName, currentRoom.id)

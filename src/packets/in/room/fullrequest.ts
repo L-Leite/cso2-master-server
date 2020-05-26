@@ -15,7 +15,7 @@ export class InRoomNewRequest {
     public unk02: number
     public unk03: number
     public unk04: number
-    public unk05: string
+    public roomPassword: string
     public unk06: number
     public unk07: number
     public unk08: number
@@ -34,7 +34,7 @@ export class InRoomNewRequest {
         this.unk02 = inPacket.readUInt8()
         this.unk03 = inPacket.readUInt8()
         this.unk04 = inPacket.readUInt8()
-        this.unk05 = inPacket.readString()
+        this.roomPassword = inPacket.readString()
         this.unk06 = inPacket.readUInt8()
         this.unk07 = inPacket.readUInt8()
         this.unk08 = inPacket.readUInt8()

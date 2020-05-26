@@ -98,7 +98,7 @@ export class ChatHandler {
         const targetsession: UserSession = receiverConn.session
 
         const outMsgData: OutChatPacket = OutChatPacket.directMessage(
-            session.user.playerName, session.user.vipLevel, session.user.gm,
+            session.user.playerName, session.user.vipLevel, targetsession.user.gm,
             targetsession.user.playerName, false, chatPkt.message)
         conn.send(outMsgData)
 

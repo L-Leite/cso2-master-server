@@ -4,7 +4,7 @@ import superagent from 'superagent'
 import { ExtendedSocket } from 'extendedsocket'
 
 import { Channel } from 'channel/channel'
-import { Room } from 'room/room'
+import { Room, RoomTeamNum } from 'room/room'
 
 import { User } from 'user/user'
 import { UserInventory } from 'user/userinventory'
@@ -105,8 +105,12 @@ export class UserManager {
         const loggedUserId = await userService.Login(loginPacket.gameUsername, loginPacket.password)
 
         if (loggedUserId === 0) {
+            const badCredsMsg = '#CSO2_LoginAuth_Certify_NoPassport'
+
+            const badDialogData: OutChatPacket = OutChatPacket.systemMessage(badCredsMsg, ChatMessageType.DialogBox)
+            connection.send(badDialogData)
+
             console.warn('Could not create session for user %s', loginPacket.gameUsername)
-            connection.end()
             return false
         }
 
@@ -126,8 +130,12 @@ export class UserManager {
         const user: User = await userService.GetUserById(loggedUserId)
 
         if (user == null) {
+            const badInfoMsg = '#CSO2_ServerMessage_INVALID_USERINFO'
+
+            const badDialogData: OutChatPacket = OutChatPacket.systemMessage(badInfoMsg, ChatMessageType.DialogBox)
+            connection.send(badDialogData)
+
             console.error('Couldn\'t get user ID %i\' information', loggedUserId)
-            connection.end()
             return false
         }
 
@@ -259,6 +267,11 @@ room but it couldn't be found.`)
 
         if (currentRoom.host.userId !== requesterSession.user.userId) {
             console.warn(`User ID ${requesterSession.user.userId} sent User ID ${targetSession.user.userId}'s team changing request without being the room's host. Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}" (id ${currentRoom.id})`)
+            return false
+        }
+
+        if (teamData.newTeam !== RoomTeamNum.Terrorist && teamData.newTeam !== RoomTeamNum.CounterTerrorist) {
+            console.warn(`User Id ${targetSession.user.userId} tried to change his team, but the value ${teamData.newTeam} is not allowed.`)
             return false
         }
 

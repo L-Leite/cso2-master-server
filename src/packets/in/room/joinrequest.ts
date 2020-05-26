@@ -6,10 +6,10 @@ import { InPacketBase } from 'packets/in/packet'
  */
 export class InRoomJoinRequest {
     public roomId: number
-    public password: string // unconfirmed
+    public roomPassword: string
 
     constructor(inPacket: InPacketBase) {
-        this.roomId = inPacket.readUInt8()
-        this.password = inPacket.readLongString()
+        this.roomId = inPacket.readUInt16()
+        this.roomPassword = inPacket.readString()
     }
 }

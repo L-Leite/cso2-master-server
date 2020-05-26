@@ -48,7 +48,7 @@ export class UserInfoFullUpdate {
 
         // flag & 0x40
         outPacket.writeUInt32(user.playedMatches) // played game
-        outPacket.writeUInt32(user.wins) // wins (win rate = wins / player game)
+        outPacket.writeUInt32(user.wins) // wins (win rate = wins / played game)
         outPacket.writeUInt32(user.kills) // kills
         outPacket.writeUInt32(user.headshots) // headshots (hs rate = hs / kills)
         outPacket.writeUInt32(user.deaths) // deaths
