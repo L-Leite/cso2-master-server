@@ -165,7 +165,8 @@ export class RoomHandler {
             return false
         }
 
-        if (!desiredRoom.isPasswordRight('') && desiredRoom.isPasswordRight(joinReq.roomPassword) === false) {
+        if (desiredRoom.IsPasswordProtected() === true
+            && desiredRoom.isPasswordRight(joinReq.roomPassword) === false) {
             this.SendUserDialogBox(sourceConn, GAME_ROOM_JOIN_FAILED_BAD_PASSWORD)
 
             console.warn('user ID %i tried to join a password protected room with wrong password "%s", really password: "%s". room name "%s" room id: %i', session.user.userId,

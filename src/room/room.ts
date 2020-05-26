@@ -214,9 +214,17 @@ export class Room {
     }
 
     /**
-     * did the user typed the correct password?
+     * is this room password protected?
+     * @returns true if so, false if not
+     */
+    public IsPasswordProtected(): boolean {
+        return this.settings.roomPassword != null && this.settings.roomPassword.length > 0
+    }
+
+    /**
+     * did the user type the correct password?
      * @param password the password we need to check
-     * @returns true the password is matches, false if not
+     * @returns true the password matches, false if it doesn't
      */
     public isPasswordRight(password: string): boolean {
         return this.settings.roomPassword === password
