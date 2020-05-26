@@ -45,6 +45,12 @@ import { AboutMeHandler } from 'handlers/aboutmehandler'
 import { UserService } from 'services/userservice'
 import { ActiveConnections } from 'storage/activeconnections'
 
+import {
+    GAME_LOGIN_BAD_PASSWORD,
+    GAME_LOGIN_BAD_USERNAME,
+    GAME_LOGIN_INVALID_USERINFO,
+} from 'gamestrings'
+
 // TODO: move this to UserManager, make UserManager not static
 const userService = new UserService(userSvcAuthority())
 const aboutMeHandler = new AboutMeHandler(userService)
@@ -105,16 +111,14 @@ export class UserManager {
         const loggedUserId = await userService.Login(loginPacket.gameUsername, loginPacket.password)
 
         if (loggedUserId === 0) {
-            const badCredsMsg = '#CSO2_LoginAuth_Certify_NoPassport'
-            this.SendUserDialogBox(connection, badCredsMsg)
+            this.SendUserDialogBox(connection, GAME_LOGIN_BAD_USERNAME)
 
             console.warn('Could not create session for user %s', loginPacket.gameUsername)
             return false
         }
 
         if (loggedUserId === -1) {
-            const badCredsMsg = '#CSO2_LoginAuth_WrongPassword'
-            this.SendUserDialogBox(connection, badCredsMsg)
+            this.SendUserDialogBox(connection, GAME_LOGIN_BAD_PASSWORD)
 
             console.warn(`Login attempt for user ${loginPacket.gameUsername} failed`)
             return false
@@ -126,8 +130,7 @@ export class UserManager {
         const user: User = await userService.GetUserById(loggedUserId)
 
         if (user == null) {
-            const badInfoMsg = '#CSO2_ServerMessage_INVALID_USERINFO'
-            this.SendUserDialogBox(connection, badInfoMsg)
+            this.SendUserDialogBox(connection, GAME_LOGIN_INVALID_USERINFO)
 
             console.error('Couldn\'t get user ID %i\' information', loggedUserId)
             return false

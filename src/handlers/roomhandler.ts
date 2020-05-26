@@ -19,6 +19,14 @@ import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
 
 import { OutChatPacket } from 'packets/out/chat'
 
+import {
+    GAME_ROOM_CHANGETEAM_FAILED,
+    GAME_ROOM_COUNTDOWN_FAILED_NOENEMIES,
+    GAME_ROOM_JOIN_FAILED_BAD_PASSWORD,
+    GAME_ROOM_JOIN_FAILED_CLOSED,
+    GAME_ROOM_JOIN_FAILED_FULL,
+} from 'gamestrings'
+
 export class RoomHandler {
     /**
      * called when the user sends a Room packet
@@ -142,8 +150,7 @@ export class RoomHandler {
         const desiredRoom: Room = channel.getRoomById(joinReq.roomId)
 
         if (desiredRoom == null) {
-            const roomMsg = '#CSO2_POPUP_ROOM_JOIN_FAILED_CLOSED'
-            this.SendUserDialogBox(sourceConn, roomMsg)
+            this.SendUserDialogBox(sourceConn, GAME_ROOM_JOIN_FAILED_CLOSED)
 
             console.warn('user ID %i tried to join a non existing room. room id: %i',
                 session.user.userId, joinReq.roomId)
@@ -151,8 +158,7 @@ export class RoomHandler {
         }
 
         if (desiredRoom.hasFreeSlots() === false) {
-            const roomMsg = '#CSO2_POPUP_ROOM_JOIN_FAILED_FULL'
-            this.SendUserDialogBox(sourceConn, roomMsg)
+            this.SendUserDialogBox(sourceConn, GAME_ROOM_JOIN_FAILED_FULL)
 
             console.warn('user ID %i tried to join a full room. room name "%s" room id: %i',
                 session.user.userId, desiredRoom.settings.roomName, desiredRoom.id)
@@ -160,8 +166,7 @@ export class RoomHandler {
         }
 
         if (!desiredRoom.isPasswordRight('') && desiredRoom.isPasswordRight(joinReq.roomPassword) === false) {
-            const roomMsg = '#CSO2_POPUP_ROOM_JOIN_FAILED_INVALID_PASSWD'
-            this.SendUserDialogBox(sourceConn, roomMsg)
+            this.SendUserDialogBox(sourceConn, GAME_ROOM_JOIN_FAILED_BAD_PASSWORD)
 
             console.warn('user ID %i tried to join a password protected room with wrong password "%s", really password: "%s". room name "%s" room id: %i', session.user.userId,
                 joinReq.roomPassword, desiredRoom.settings.roomPassword,
@@ -354,8 +359,7 @@ export class RoomHandler {
         }
 
         if (currentRoom.isUserReady(session.user.userId)) {
-            const roomMsg = '#CSO2_POPUP_ROOM_CHANGETEAM_FAILED'
-            this.SendUserSystemMsg(sourceConn, roomMsg)
+            this.SendUserSystemMsg(sourceConn, GAME_ROOM_CHANGETEAM_FAILED)
 
             console.warn('user ID %i tried change team in a room, although it\'s ready. room name "%s" room id: %i',
                 session.user.userId, currentRoom.settings.roomName, currentRoom.id)
@@ -409,8 +413,7 @@ export class RoomHandler {
         const count: number = countdownReq.count
 
         if (currentRoom.canStartGame() === false) {
-            const roomMsg = '#CSO2_UI_ROOM_COUNTDOWN_FAILED_NOENEMY'
-            this.SendUserSystemMsg(sourceConn, roomMsg)
+            this.SendUserSystemMsg(sourceConn, GAME_ROOM_COUNTDOWN_FAILED_NOENEMIES)
 
             console.warn('user ID %i tried to toggle a room\'s game start countdown, although it can\'t start. '
                 + 'room name "%s" room id: %i',
