@@ -107,6 +107,7 @@ export class RoomHandler {
             killLimit: newRoomReq.killLimit,
             mapId: newRoomReq.mapId,
             roomName: newRoomReq.roomName,
+            roomPassword: newRoomReq.roomPassword,
             winLimit: newRoomReq.winLimit,
         })
 
@@ -159,6 +160,18 @@ export class RoomHandler {
 
             console.warn('user ID %i tried to join a full room. room name "%s" room id: %i',
                 session.user.userId, desiredRoom.settings.roomName, desiredRoom.id)
+            return false
+        }
+
+        if (desiredRoom.isPasswordRight(joinReq.roomPassword) === false) {
+            const roomMsg = '#CSO2_POPUP_ROOM_JOIN_FAILED_INVALID_PASSWD'
+
+            const sysDialog: OutChatPacket = OutChatPacket.systemMessage(roomMsg, ChatMessageType.DialogBox)
+            sourceConn.send(sysDialog)
+
+            console.warn('user ID %i tried to join a password protected room with wrong password "%s", really password: "%s". room name "%s" room id: %i', session.user.userId,
+                joinReq.roomPassword, desiredRoom.settings.roomPassword,
+                desiredRoom.settings.roomName, desiredRoom.id)
             return false
         }
 
@@ -347,6 +360,11 @@ export class RoomHandler {
         }
 
         if (currentRoom.isUserReady(session.user.userId)) {
+            const roomMsg = '#CSO2_POPUP_ROOM_CHANGETEAM_FAILED'
+
+            const sysMessage: OutChatPacket = OutChatPacket.systemMessage(roomMsg, ChatMessageType.System)
+            sourceConn.send(sysMessage)
+
             console.warn('user ID %i tried change team in a room, although it\'s ready. room name "%s" room id: %i',
                 session.user.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
@@ -399,6 +417,11 @@ export class RoomHandler {
         const count: number = countdownReq.count
 
         if (currentRoom.canStartGame() === false) {
+            const roomMsg = '#CSO2_UI_ROOM_COUNTDOWN_FAILED_NOENEMY'
+
+            const sysMessage: OutChatPacket = OutChatPacket.systemMessage(roomMsg, ChatMessageType.System)
+            sourceConn.send(sysMessage)
+
             console.warn('user ID %i tried to toggle a room\'s game start countdown, although it can\'t start. '
                 + 'room name "%s" room id: %i',
                 session.user.userId, currentRoom.settings.roomName, currentRoom.id)
