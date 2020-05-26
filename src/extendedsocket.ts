@@ -39,14 +39,6 @@ export class ExtendedSocket extends net.Socket {
     private packetDumper: PacketLogger
 
     /**
-     * @returns the socket's owning session's object if available
-     * if it doesn't have any, it returns null
-     */
-    public getSession(): UserSession {
-        return this.session
-    }
-
-    /**
      * returns the current sequence and increments it
      */
     public getNextSeq(): number {
