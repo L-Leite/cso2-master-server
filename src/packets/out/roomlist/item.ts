@@ -32,7 +32,7 @@ export class RoomListItem {
         outPacket.writeUInt8(this.room.id) // roomNumber
         // end flags & 0x2
         // flags & 0x4
-        outPacket.writeUInt8(0) // passwordProtected
+        outPacket.writeUInt8(this.room.isPasswordRight('') ? 0 : 1) // passwordProtected
         // end flags & 0x4
         // flags & 0x8
         outPacket.writeUInt16(0) // unk03
