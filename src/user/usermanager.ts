@@ -106,9 +106,7 @@ export class UserManager {
 
         if (loggedUserId === 0) {
             const badCredsMsg = '#CSO2_LoginAuth_Certify_NoPassport'
-
-            const badDialogData: OutChatPacket = OutChatPacket.systemMessage(badCredsMsg, ChatMessageType.DialogBox)
-            connection.send(badDialogData)
+            this.SendUserDialogBox(connection, badCredsMsg)
 
             console.warn('Could not create session for user %s', loginPacket.gameUsername)
             return false
@@ -116,9 +114,7 @@ export class UserManager {
 
         if (loggedUserId === -1) {
             const badCredsMsg = '#CSO2_LoginAuth_WrongPassword'
-
-            const badDialogData: OutChatPacket = OutChatPacket.systemMessage(badCredsMsg, ChatMessageType.DialogBox)
-            connection.send(badDialogData)
+            this.SendUserDialogBox(connection, badCredsMsg)
 
             console.warn(`Login attempt for user ${loginPacket.gameUsername} failed`)
             return false
@@ -131,9 +127,7 @@ export class UserManager {
 
         if (user == null) {
             const badInfoMsg = '#CSO2_ServerMessage_INVALID_USERINFO'
-
-            const badDialogData: OutChatPacket = OutChatPacket.systemMessage(badInfoMsg, ChatMessageType.DialogBox)
-            connection.send(badDialogData)
+            this.SendUserDialogBox(connection, badInfoMsg)
 
             console.error('Couldn\'t get user ID %i\' information', loggedUserId)
             return false
@@ -726,5 +720,10 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
      */
     private static async sendUserBuyMenuTo(hostConn: ExtendedSocket, targetUserId: number): Promise<void> {
         hostConn.send(await OutHostPacket.setBuyMenu(targetUserId))
+    }
+
+    private static SendUserDialogBox(userConn: ExtendedSocket, msg: string) {
+        const badDialogData: OutChatPacket = OutChatPacket.systemMessage(msg, ChatMessageType.DialogBox)
+        userConn.send(badDialogData)
     }
 }
