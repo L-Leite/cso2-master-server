@@ -163,7 +163,7 @@ export class RoomHandler {
             return false
         }
 
-        if (desiredRoom.isPasswordRight(joinReq.roomPassword) === false) {
+        if (!desiredRoom.isPasswordRight('') && desiredRoom.isPasswordRight(joinReq.roomPassword) === false) {
             const roomMsg = '#CSO2_POPUP_ROOM_JOIN_FAILED_INVALID_PASSWD'
 
             const sysDialog: OutChatPacket = OutChatPacket.systemMessage(roomMsg, ChatMessageType.DialogBox)
