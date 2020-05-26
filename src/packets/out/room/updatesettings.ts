@@ -23,7 +23,7 @@ export class OutRoomUpdateSettings {
         if (settings.unk01 != null && settings.unk02 != null && settings.unk03 != null) {
             lowFlag |= 0x4
         }
-        if (settings.unk09 != null) {
+        if (settings.roomPassword != null) {
             lowFlag |= 0x8
         }
         if (settings.unk10 != null) {
@@ -171,7 +171,7 @@ export class OutRoomUpdateSettings {
             outPacket.writeUInt32(settings.unk03)
         }
         if (lowFlag & 0x8) {
-            outPacket.writeString(settings.unk09)
+            outPacket.writeString(settings.roomPassword)
         }
         if (lowFlag & 0x10) {
             outPacket.writeUInt16(settings.unk10)
