@@ -1,6 +1,6 @@
 import { InPacketBase } from 'packets/in/packet'
 
-import { HostPacketType } from 'packets/hostshared'
+import { HostPacketType } from 'packets/definitions'
 
 /**
  * incoming host packet

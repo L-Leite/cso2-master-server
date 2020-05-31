@@ -1,6 +1,6 @@
 import ip from 'ip'
 
-import { UdpPacketSignature } from 'packets/holepunchbaseshared'
+import { UdpPacketSignature } from 'packets/definitions'
 
 export enum HolepunchType {
     Client = 0,

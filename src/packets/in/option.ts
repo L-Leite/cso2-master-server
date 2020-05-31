@@ -1,6 +1,6 @@
 import { InPacketBase } from 'packets/in/packet'
 
-import { OptionPacketType } from 'packets/optionshared'
+import { OptionPacketType } from 'packets/definitions'
 
 /**
  * incoming option packet

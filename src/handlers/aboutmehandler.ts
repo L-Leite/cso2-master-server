@@ -1,6 +1,6 @@
 import { ExtendedSocket } from 'extendedsocket'
 
-import { AboutmePacketType } from 'packets/aboutmeshared'
+import { AboutmePacketType } from 'packets/definitions'
 
 import { InAboutmePacket } from 'packets/in/aboutme'
 import { InAboutmeSetAvatar } from 'packets/in/aboutme/avatar'

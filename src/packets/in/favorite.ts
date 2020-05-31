@@ -1,6 +1,6 @@
 import { InPacketBase } from 'packets/in/packet'
 
-import { FavoritePacketType } from 'packets/favoriteshared'
+import { FavoritePacketType } from 'packets/definitions'
 
 /**
  * incoming favorite packet

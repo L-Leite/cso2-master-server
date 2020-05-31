@@ -3,7 +3,7 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { OutPacketBase } from 'packets/out/packet'
 
 import { PacketId } from 'packets/definitions'
-import { HostPacketType } from 'packets/hostshared'
+import { HostPacketType } from 'packets/definitions'
 
 import { UserInventory } from 'user/userinventory'
 import { UserInventoryItem } from 'user/userinventoryitem'

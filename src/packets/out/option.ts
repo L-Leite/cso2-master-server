@@ -3,7 +3,7 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
 
-import { OptionPacketType } from 'packets/optionshared'
+import { OptionPacketType } from 'packets/definitions'
 import { OutOptionBuyMenu } from 'packets/out/option/buymenu'
 
 import { UserBuyMenu } from 'user/userbuymenu'

@@ -13,9 +13,9 @@ import { UserSession } from 'user/usersession'
 import { ChannelManager } from 'channel/channelmanager'
 
 import { ChatMessageType } from 'packets/definitions'
-import { FavoritePacketType } from 'packets/favoriteshared'
-import { HostPacketType } from 'packets/hostshared'
-import { OptionPacketType } from 'packets/optionshared'
+import { FavoritePacketType } from 'packets/definitions'
+import { HostPacketType } from 'packets/definitions'
+import { OptionPacketType } from 'packets/definitions'
 
 import { InFavoritePacket } from 'packets/in/favorite'
 import { InFavoriteSetCosmetics } from 'packets/in/favorite/setcosmetics'

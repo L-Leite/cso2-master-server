@@ -1,4 +1,4 @@
-import { UdpPacketSignature } from 'packets/holepunchbaseshared'
+import { UdpPacketSignature } from 'packets/definitions'
 
 /**
  * sends out an acknowledgement holepunch packet to the user

@@ -1,6 +1,6 @@
 import { InPacketBase } from 'packets/in/packet'
 
-import { AboutmePacketType } from 'packets/aboutmeshared'
+import { AboutmePacketType } from 'packets/definitions'
 
 /**
  * handles the user's profile settings requests

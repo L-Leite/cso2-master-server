@@ -5,7 +5,7 @@ import { OutPacketBase } from 'packets/out/packet'
 
 import { UserLoadout } from 'user/userloadout'
 
-import { FavoritePacketType } from 'packets/favoriteshared'
+import { FavoritePacketType } from 'packets/definitions'
 
 import { OutFavoriteCosmetics } from 'packets/out/favorite/cosmetics'
 import { OutFavoritePresetLoadout } from 'packets/out/favorite/presetloadout'
