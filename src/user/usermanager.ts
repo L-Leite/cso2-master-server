@@ -12,11 +12,12 @@ import { UserSession } from 'user/usersession'
 
 import { ChannelManager } from 'channel/channelmanager'
 
-import { ChatMessageType } from 'packets/definitions'
+import { AchievementPacketType, ChatMessageType } from 'packets/definitions'
 import { FavoritePacketType } from 'packets/definitions'
 import { HostPacketType } from 'packets/definitions'
 import { OptionPacketType } from 'packets/definitions'
 
+import { InAchievementPacket } from 'packets/in/achievement'
 import { InFavoritePacket } from 'packets/in/favorite'
 import { InFavoriteSetCosmetics } from 'packets/in/favorite/setcosmetics'
 import { InFavoriteSetLoadout } from 'packets/in/favorite/setloadout'
@@ -225,8 +226,8 @@ room but it couldn't be found.`)
         userConn.send(OutHostPacket.itemUse(itemData.userId, itemData.itemId))
 
         console.log('Sending user ID %i\'s item %i using request to host ID %i, room %s (room id %i)',
-        requesterSession.user.userId, itemData.itemId,
-        currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+            requesterSession.user.userId, itemData.itemId,
+            currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
 
         return true;
     }
@@ -275,8 +276,8 @@ room but it couldn't be found.`)
         currentRoom.updateUserTeam(targetSession.user.userId, teamData.newTeam)
 
         console.log('Automatic changing User ID %i\'s team to the %i in room %s (host ID %i, room id %i)',
-        requesterSession.user.userId, teamData.newTeam,
-        currentRoom.settings.roomName, currentRoom.host.userId, currentRoom.id)
+            requesterSession.user.userId, teamData.newTeam,
+            currentRoom.settings.roomName, currentRoom.host.userId, currentRoom.id)
 
         return true
     }
@@ -564,6 +565,18 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
         return true
     }
 
+    public static TEST_onAchievementPacket(packetData: Buffer, conn: ExtendedSocket) {
+        const achPacket: InAchievementPacket = new InAchievementPacket(packetData)
+
+        if (achPacket.packetType === AchievementPacketType.Campaign) {
+            console.log('sending campaign data')
+            const achievementReplyTest: Buffer = Buffer.from([0x55, 0x12, 0x21, 0x00, 0x60, 0x03, 0x00, 0x00, 0x40,
+                0x00, 0x00, 0x00, 0x03, 0xDE, 0x07, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xD8, 0x07, 0x00, 0x00, 0x04,
+                0x00, 0x00, 0x00, 0xDD, 0x07, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00])
+            conn.sendBuffer(achievementReplyTest)
+        }
+    }
+
     /**
      * send an user's info to itself
      * @param user the target user's object
@@ -572,6 +585,12 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
      */
     private static async sendUserInfoToSelf(user: User, conn: ExtendedSocket, holepunchPort: number): Promise<void> {
         conn.send(new OutUserStartPacket(user.userId, user.userName, user.playerName, holepunchPort))
+
+        const achievementReplyTest: Buffer = Buffer.from([0x55, 0x12, 0x21, 0x00, 0x60, 0x03, 0x00, 0x00, 0x40, 0x00,
+            0x00, 0x00, 0x03, 0xDE, 0x07, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xD8, 0x07, 0x00, 0x00, 0x04, 0x00, 0x00,
+            0x00, 0xDD, 0x07, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00])
+        conn.sendBuffer(achievementReplyTest)
+
         conn.send(OutUserInfoPacket.fullUserUpdate(user))
     }
 
@@ -597,6 +616,23 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
         /*const defaultInvReply: Buffer =
             new OutInventoryPacket(conn).addInventory(inventory.getDefaultInventory())
         conn.send(defaultInvReply)*/
+
+        /* const achievementReply: Buffer = Buffer.from([0x55, 0x12, 0x23, 0x00, 0x60, 0x04, 0x2C, 0x00, 0x02, 0x02,
+            0x40, 0x00, 0x00, 0x00, 0x03, 0xDE, 0x07, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xD8, 0x07, 0x00, 0x00,
+            0x04, 0x00, 0x00, 0x00, 0xDD, 0x07, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00])
+        conn.sendBuffer(achievementReply)
+
+        const achievementReply2: Buffer = Buffer.from([0x55, 0x13, 0x2B, 0x00, 0x60, 0x04, 0x2D, 0x00, 0x02, 0x02,
+            0x40, 0x00, 0x00, 0x00, 0x04, 0x40, 0x1F, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x42, 0x1F, 0x00, 0x00,
+            0x01, 0x00, 0x00, 0x00, 0x44, 0x1F, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x54, 0xC3, 0x00, 0x00, 0x01,
+            0x00, 0x00, 0x00])
+        conn.sendBuffer(achievementReply2)
+
+        const achievementReply3: Buffer = Buffer.from([0x55, 0x14, 0x2B, 0x00, 0x60, 0x04, 0x2E, 0x00, 0x02, 0x02,
+            0x40, 0x00, 0x00, 0x00, 0x04, 0x54, 0xC3, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x36, 0x21, 0x00, 0x00,
+            0x01, 0x00, 0x00, 0x00, 0xE6, 0x07, 0x00, 0x00, 0x01, 0x00, 0x07, 0x00, 0xE4, 0x07, 0x00, 0x00, 0x05,
+            0x00, 0x00, 0x00])
+        conn.sendBuffer(achievementReply3) */
 
         // TO BE REVERSED
         const unlockReply: Buffer = Buffer.from([0x55, 0x19, 0x5F, 0x05, 0x5A, 0x01, 0x4B, 0x00, 0x01, 0x00, 0x00,

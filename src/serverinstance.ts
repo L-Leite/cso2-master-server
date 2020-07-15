@@ -296,6 +296,9 @@ export class ServerInstance {
             case PacketId.Chat:
                 this.chatHandler.OnPacket(data, connection)
                 return true
+            case PacketId.Achievement:
+                UserManager.TEST_onAchievementPacket(data, connection)
+                return true
             case PacketId.RequestChannels:
                 ChannelManager.onChannelListPacket(connection)
                 return true

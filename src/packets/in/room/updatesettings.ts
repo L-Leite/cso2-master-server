@@ -139,7 +139,6 @@ export class InRoomUpdateSettings {
         const lowFlag = flagBuf.readUInt32LE(0)
         const highFlag = flagBuf.readUInt32LE(4)
 
-        // disable linter bitwise restrictions so we can check the flags
         /* tslint:disable: no-bitwise */
         if (lowFlag & 0x1) {
             this.roomName = inPacket.readString()

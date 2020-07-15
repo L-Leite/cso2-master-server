@@ -40,6 +40,11 @@ export enum AboutmePacketType {
     SetAvatar = 7,
 }
 
+export enum AchievementPacketType {
+    Campaign = 3,
+    Boss = 4,
+}
+
 export enum ChatMessageType {
     DirectMessage = 0, // also known as whisper
     Channel = 1,
