@@ -2,17 +2,18 @@
     "compilerOptions": {
         "baseUrl": ".",
         "esModuleInterop": true,
-        "module": "commonjs",  
-        "moduleResolution": "node",   
-        "noImplicitAny": true,     
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "noImplicitAny": true,
         "outDir": "dist",
+        "removeComments": true,
         "sourceMap": true,
         "paths": {
             "*": ["src/*"]
         },
         "target": "es6"
     },
-    "include": [
-        "src/**/*"
-    ]
+    "include": ["src/**/*"]
 }
