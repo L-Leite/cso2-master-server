@@ -159,7 +159,7 @@ export class Room {
             return false
         }
 
-        room.removeUser(session.user.userId)
+        room.removeUser(session.user.id)
 
         session.currentRoom = null
 

@@ -16,7 +16,7 @@ export class OutInventoryAdd {
 
         let curItem: number = 0
         for (const item of items) {
-            new OutInventoryItem(curItem++, item.itemId, item.ammount).build(outPacket)
+            new OutInventoryItem(curItem++, item.item_id, item.ammount).build(outPacket)
         }
     }
 }

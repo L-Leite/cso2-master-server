@@ -16,7 +16,7 @@ export class OutRoomPlayerJoin {
     public static build(conn: ExtendedSocket, teamNum: RoomTeamNum, outPacket: OutPacketBase): void {
         const user: User = conn.session.user
 
-        outPacket.writeUInt32(user.userId)
+        outPacket.writeUInt32(user.id)
         OutRoomPlayerNetInfo.build(conn, teamNum, outPacket)
         UserInfoFullUpdate.build(user, outPacket)
     }

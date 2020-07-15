@@ -53,8 +53,8 @@ export class RoomListItem {
         outPacket.writeUInt8(0) // unk08
         // end flags & 0x100
         // flags & 0x200
-        outPacket.writeUInt32(host.userId) // hostUserId
-        outPacket.writeString(host.playerName) // hostUserName
+        outPacket.writeUInt32(host.id) // hostUserId
+        outPacket.writeString(host.playername) // hostUserName
         outPacket.writeUInt8(0) // unk11
         // end flags & 0x200
         // flags & 0x400
@@ -136,8 +136,8 @@ export class RoomListItem {
         outPacket.writeUInt8(0) // canSpec
         // end flags & 0x20000000
         // flags & 0x40000000
-        outPacket.writeUInt8(host.vipLevel !== 0 ? 1 : 0) // isVipRoom
-        outPacket.writeUInt8(host.vipLevel) // vipRoomLevel
+        outPacket.writeUInt8(host.vip_level !== 0 ? 1 : 0) // isVipRoom
+        outPacket.writeUInt8(host.vip_level) // vipRoomLevel
         // end flags & 0x40000000
         // flags & 0x80000000
         outPacket.writeUInt8(this.room.settings.difficulty) // difficulty

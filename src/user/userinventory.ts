@@ -477,7 +477,7 @@ export class UserInventory {
         return null
     }
 
-    public ownerId: number
+    public owner_id: number
     public items: UserInventoryItem[]
 }
 

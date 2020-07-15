@@ -23,40 +23,40 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt64(new Uint64LE(0x2241158F)) // unk00, nexon id?
         // end flag & 0x1
 
-        if (user.playerName != null) {
-            outPacket.writeString(user.playerName) // userName
+        if (user.playername != null) {
+            outPacket.writeString(user.playername) // userName
         }
 
         if (user.level != null) {
             outPacket.writeUInt16(user.level) // level
         }
 
-        if (user.curExp != null || user.maxExp != null) {
-            outPacket.writeUInt64(new Uint64LE(user.curExp)) // curExp
-            outPacket.writeUInt64(new Uint64LE(user.maxExp)) // maxExp
+        if (user.cur_xp != null || user.max_xp != null) {
+            outPacket.writeUInt64(new Uint64LE(user.cur_xp.toString())) // curExp
+            outPacket.writeUInt64(new Uint64LE(user.max_xp.toString())) // maxExp
             outPacket.writeUInt32(0x313) // unk03
         }
 
-        if (user.rank != null || user.rankFrame != null) {
+        if (user.rank != null || user.rank_frame != null) {
             outPacket.writeUInt8(user.rank) // rank
-            outPacket.writeUInt8(user.rankFrame) // rankframe(item id: 9000-9003)
+            outPacket.writeUInt8(user.rank_frame) // rankframe(item id: 9000-9003)
         }
 
         if (user.points != null) {
             outPacket.writeUInt64(new Uint64LE(user.points)) // Points
         }
 
-        if (user.playedMatches != null || user.wins != null || user.kills != null
+        if (user.played_matches != null || user.wins != null || user.kills != null
             || user.headshots != null || user.deaths != null || user.assists != null
-            || user.accuracy != null || user.secondsPlayed != null) {
-            outPacket.writeUInt32(user.playedMatches) // played game
+            || user.accuracy != null || user.seconds_played != null) {
+            outPacket.writeUInt32(user.played_matches) // played game
             outPacket.writeUInt32(user.wins) // wins (win rate = wins / player game)
             outPacket.writeUInt32(user.kills) // kills
             outPacket.writeUInt32(user.headshots) // headshots (hs rate = hs / kills)
             outPacket.writeUInt32(user.deaths) // deaths
             outPacket.writeUInt32(user.assists) // assists
             outPacket.writeUInt16(user.accuracy) // hit rate
-            outPacket.writeUInt32(user.secondsPlayed) // played time (s)
+            outPacket.writeUInt32(user.seconds_played) // played time (s)
             outPacket.writeUInt32(0) // unk15
             outPacket.writeUInt32(50) // unk16
             outPacket.writeUInt8(0) // unk17
@@ -70,13 +70,13 @@ export class UserInfoDynamicUpdate {
             outPacket.writeUInt32(0) // unk25
         }
 
-        if (user.netCafeName != null) {
+        if (user.netcafe_name != null) {
             outPacket.writeString(null) // unk26
             outPacket.writeUInt32(0) // unk27
             outPacket.writeUInt32(0) // unk28
             outPacket.writeUInt32(0) // unk29
             outPacket.writeUInt32(0) // unk30
-            outPacket.writeString(user.netCafeName) // net cafe
+            outPacket.writeString(user.netcafe_name) // net cafe
         }
 
         if (user.cash != null) {
@@ -84,10 +84,10 @@ export class UserInfoDynamicUpdate {
             outPacket.writeUInt32(0) // unk33
         }
 
-        if (user.clanName != null || user.clanMark != null) {
+        if (user.clan_name != null || user.clan_mark != null) {
             outPacket.writeUInt32(0) // unk34
-            outPacket.writeString(user.clanName) // clan name
-            outPacket.writeUInt32(user.clanMark) // clan mark (0-10)
+            outPacket.writeString(user.clan_name) // clan name
+            outPacket.writeUInt32(user.clan_mark) // clan mark (0-10)
             outPacket.writeUInt8(0) // unk37
             // array size is always 5
             for (const elem of [0, 0, 0, 0, 0]) {
@@ -103,8 +103,8 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt8(0) // unk40
         // end of flag & 0x400
 
-        if (user.worldRank != null) {
-            outPacket.writeUInt32(user.worldRank) // rank in world
+        if (user.world_rank != null) {
+            outPacket.writeUInt32(user.world_rank) // rank in world
             outPacket.writeUInt32(0) // unk42
         }
 
@@ -123,16 +123,16 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt32(0) // unk48
         // end of flag & 0x4000
 
-        if (user.titleId != null) {
-            outPacket.writeUInt16(user.titleId) // title
+        if (user.title != null) {
+            outPacket.writeUInt16(user.title) // title
         }
 
         // flag & 0x10000
         // outPacket.writeUInt16(0) // unk50
         // end of flag & 0x10000
 
-        if (user.unlockedTitles != null && user.unlockedTitles.length === 128) {
-            for (const elem of user.unlockedTitles) {
+        if (user.unlocked_titles != null && user.unlocked_titles.length === 128) {
+            for (const elem of user.unlocked_titles) {
                 outPacket.writeUInt8(elem) // title list
             }
         }
@@ -146,18 +146,18 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt8(0) // unk54
         // end of flag & 0x80000
 
-        if (user.bestGamemode != null || user.bestMap != null) {
+        if (user.best_gamemode != null || user.best_map != null) {
             outPacket.writeUInt32(7) // unk55
-            outPacket.writeUInt32(user.bestGamemode) // best gamemode
-            outPacket.writeUInt32(user.bestMap) // best map
+            outPacket.writeUInt32(user.best_gamemode) // best gamemode
+            outPacket.writeUInt32(user.best_map) // best map
         }
 
         // flag & 0x200000
         // outPacket.writeUInt16(0) // unk58
         // end of flag & 0x200000
 
-        if (user.unlockedTitles != null && user.unlockedTitles.length === 128) {
-            for (const elem of user.unlockedAchievements) {
+        if (user.unlocked_titles != null && user.unlocked_titles.length === 128) {
+            for (const elem of user.unlocked_achievements) {
                 outPacket.writeUInt8(elem) // achievement unlocked (all 0xFF only 1024 unlocked)
             }
             outPacket.writeUInt32(0xA5C8) // unk60
@@ -171,32 +171,32 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt16(0) // unk62
         // end of flag & 0x1000000
 
-        if (user.unlockedAvatars != null && user.unlockedAvatars.length === 128) {
-            for (const elem of user.unlockedAvatars) {
+        if (user.unlocked_avatars != null && user.unlocked_avatars.length === 128) {
+            for (const elem of user.unlocked_avatars) {
                 outPacket.writeUInt8(elem) // avatar list
             }
         }
 
-        if (user.vipLevel != null || user.vipXp != null) {
+        if (user.vip_level != null || user.vip_xp != null) {
             outPacket.writeUInt8(user.isVip() ? 1 : 0) // isVip
-            outPacket.writeUInt8(user.vipLevel) // vipLevel
-            outPacket.writeUInt32(user.vipXp) // vipExp
+            outPacket.writeUInt8(user.vip_level) // vipLevel
+            outPacket.writeUInt32(user.vip_xp) // vipExp
         }
 
         // flag & 0x8000000
         // outPacket.writeUInt32(0) // unk67
         // end of flag & 0x8000000
 
-        if (user.skillHumanCurXp != null || user.skillHumanMaxXp != null
-            || user.skillHumanPoints != null || user.skillZombieCurXp != null
-            || user.skillZombieMaxXp != null || user.skillZombiePoints != null) {
+        if (user.skill_human_curxp != null || user.skill_human_maxxp != null
+            || user.skill_human_points != null || user.skill_zombie_curxp != null
+            || user.skill_zombie_maxxp != null || user.skill_zombie_points != null) {
             // skill factory start
-            outPacket.writeUInt64(new Uint64LE(user.skillHumanCurXp)) // human exp
-            outPacket.writeUInt64(new Uint64LE(user.skillHumanMaxXp)) // human max exp
-            outPacket.writeUInt8(user.skillHumanPoints) // human skill point
-            outPacket.writeUInt64(new Uint64LE(user.skillZombieCurXp)) // zombie exp
-            outPacket.writeUInt64(new Uint64LE(user.skillZombieMaxXp)) // zombie max exp
-            outPacket.writeUInt8(user.skillZombiePoints) // zombie skill point
+            outPacket.writeUInt64(new Uint64LE(user.skill_human_curxp.toString())) // human exp
+            outPacket.writeUInt64(new Uint64LE(user.skill_human_maxxp.toString())) // human max exp
+            outPacket.writeUInt8(user.skill_human_points) // human skill point
+            outPacket.writeUInt64(new Uint64LE(user.skill_zombie_curxp.toString())) // zombie exp
+            outPacket.writeUInt64(new Uint64LE(user.skill_zombie_maxxp.toString())) // zombie max exp
+            outPacket.writeUInt8(user.skill_zombie_points) // zombie skill point
             // skill factory end
             outPacket.writeUInt32(0) // unk74
             outPacket.writeUInt32(0) // unk75
@@ -225,7 +225,7 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt64(new Uint64LE(0x2241158F)) // unk00, nexon id?
         // end flag & 0x1
 
-        if (user.playerName != null) {
+        if (user.playername != null) {
             flags |= 0x2
         }
 
@@ -233,11 +233,11 @@ export class UserInfoDynamicUpdate {
             flags |= 0x4
         }
 
-        if (user.curExp != null || user.maxExp != null) {
+        if (user.cur_xp != null || user.max_xp != null) {
             flags |= 0x8
         }
 
-        if (user.rank != null || user.rankFrame != null) {
+        if (user.rank != null || user.rank_frame != null) {
             flags |= 0x10
         }
 
@@ -245,13 +245,13 @@ export class UserInfoDynamicUpdate {
             flags |= 0x20
         }
 
-        if (user.playedMatches != null || user.wins != null || user.kills != null
+        if (user.played_matches != null || user.wins != null || user.kills != null
             || user.headshots != null || user.deaths != null || user.assists != null
-            || user.accuracy != null || user.secondsPlayed != null) {
+            || user.accuracy != null || user.seconds_played != null) {
             flags |= 0x40
         }
 
-        if (user.netCafeName != null) {
+        if (user.netcafe_name != null) {
             flags |= 0x80
         }
 
@@ -259,7 +259,7 @@ export class UserInfoDynamicUpdate {
             flags |= 0x100
         }
 
-        if (user.clanName != null || user.clanMark != null) {
+        if (user.clan_name != null || user.clan_mark != null) {
             flags |= 0x200
         }
 
@@ -267,7 +267,7 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt8(0) // unk40
         // end of flag & 0x400
 
-        if (user.worldRank != null) {
+        if (user.world_rank != null) {
             flags |= 0x800
         }
 
@@ -285,7 +285,7 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt32(0) // unk48
         // end of flag & 0x4000
 
-        if (user.titleId != null) {
+        if (user.title != null) {
             flags |= 0x8000
         }
 
@@ -293,7 +293,7 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt16(0) // unk50
         // end of flag & 0x10000
 
-        if (user.unlockedTitles != null && user.unlockedTitles.length === 128) {
+        if (user.unlocked_titles != null && user.unlocked_titles.length === 128) {
             flags |= 0x20000
         }
 
@@ -306,7 +306,7 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt8(0) // unk54
         // end of flag & 0x80000
 
-        if (user.bestGamemode != null || user.bestMap != null) {
+        if (user.best_gamemode != null || user.best_map != null) {
             flags |= 0x100000
         }
 
@@ -314,7 +314,7 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt16(0) // unk58
         // end of flag & 0x200000
 
-        if (user.unlockedTitles != null && user.unlockedTitles.length === 128) {
+        if (user.unlocked_titles != null && user.unlocked_titles.length === 128) {
             flags |= 0x400000
         }
 
@@ -326,11 +326,11 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt16(0) // unk62
         // end of flag & 0x1000000
 
-        if (user.unlockedAvatars != null && user.unlockedAvatars.length === 128) {
+        if (user.unlocked_avatars != null && user.unlocked_avatars.length === 128) {
             flags |= 0x2000000
         }
 
-        if (user.vipLevel != null || user.vipXp != null) {
+        if (user.vip_level != null || user.vip_xp != null) {
             flags |= 0x4000000
         }
 
@@ -338,9 +338,9 @@ export class UserInfoDynamicUpdate {
         // outPacket.writeUInt32(0) // unk67
         // end of flag & 0x8000000
 
-        if (user.skillHumanCurXp != null || user.skillHumanMaxXp != null
-            || user.skillHumanPoints != null || user.skillZombieCurXp != null
-            || user.skillZombieMaxXp != null || user.skillZombiePoints != null) {
+        if (user.skill_human_curxp != null || user.skill_human_maxxp != null
+            || user.skill_human_points != null || user.skill_zombie_curxp != null
+            || user.skill_zombie_maxxp != null || user.skill_zombie_points != null) {
             flags |= 0x10000000
         }
 

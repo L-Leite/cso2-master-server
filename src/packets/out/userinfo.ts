@@ -20,7 +20,7 @@ export class OutUserInfoPacket extends OutPacketBase {
             { initialSize: 100, incrementAmount: 20 })
 
         packet.buildHeader()
-        packet.writeUInt32(user.userId)
+        packet.writeUInt32(user.id)
 
         UserInfoFullUpdate.build(user, packet)
 
@@ -34,7 +34,7 @@ export class OutUserInfoPacket extends OutPacketBase {
             { initialSize: 100, incrementAmount: 20 })
 
         packet.buildHeader()
-        packet.writeUInt32(user.userId)
+        packet.writeUInt32(user.id)
 
         UserInfoDynamicUpdate.build({avatar: user.avatar}, packet)
 
@@ -48,7 +48,7 @@ export class OutUserInfoPacket extends OutPacketBase {
             { initialSize: 100, incrementAmount: 20 })
 
         packet.buildHeader()
-        packet.writeUInt32(user.userId)
+        packet.writeUInt32(user.id)
 
         UserInfoDynamicUpdate.build({ signature: user.signature }, packet)
 
@@ -62,9 +62,9 @@ export class OutUserInfoPacket extends OutPacketBase {
             { initialSize: 100, incrementAmount: 20 })
 
         packet.buildHeader()
-        packet.writeUInt32(user.userId)
+        packet.writeUInt32(user.id)
 
-        UserInfoDynamicUpdate.build({ titleId: user.titleId }, packet)
+        UserInfoDynamicUpdate.build({ titleId: user.title }, packet)
 
         return packet
     }

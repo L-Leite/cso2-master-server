@@ -73,7 +73,7 @@ export class UserManager {
             curChannel.OnUserLeft(conn)
         }
 
-        await userService.Logout(session.user.userId)
+        await userService.Logout(session.user.id)
     }
 
     /**
@@ -140,12 +140,12 @@ export class UserManager {
         const newSession: UserSession = new UserSession(user, connection.address() as net.AddressInfo)
         connection.session = newSession
 
-        console.log(`user ${user.userName} logged in (uuid: ${connection.uuid})`)
+        console.log(`user ${user.username} logged in (uuid: ${connection.uuid})`)
 
         ActiveConnections.Singleton().Add(connection)
 
         UserManager.sendUserInfoToSelf(user, connection, holepunchPort)
-        UserManager.sendInventory(newSession.user.userId, connection)
+        UserManager.sendInventory(newSession.user.id, connection)
         ChannelManager.sendChannelListTo(connection)
 
         return true
@@ -201,32 +201,32 @@ export class UserManager {
         }
 
         if (requesterSession.isInRoom() === false) {
-            console.warn(`User ID ${requesterSession.user.userId} tried to send someone's team chaning request without being in a room`)
+            console.warn(`User ID ${requesterSession.user.id} tried to send someone's team chaning request without being in a room`)
             return false
         }
 
         if (targetSession == null) {
-            console.warn(`User ID ${requesterSession.user.userId} tried to send someone's team changing request with user ID ${itemData.userId} whose session is null`)
+            console.warn(`User ID ${requesterSession.user.id} tried to send someone's team changing request with user ID ${itemData.userId} whose session is null`)
             return false
         }
 
         const currentRoom: Room = requesterSession.currentRoom
 
         if (currentRoom == null) {
-            console.error(`Tried to get user's ${requesterSession.user.userId}
+            console.error(`Tried to get user's ${requesterSession.user.id}
 room but it couldn't be found.`)
             return false
         }
 
-        if (currentRoom.host.userId !== requesterSession.user.userId) {
-            console.warn(`User ID ${requesterSession.user.userId} sent User ID ${targetSession.user.userId}'s team changing request without being the room's host. Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}" (id ${currentRoom.id})`)
+        if (currentRoom.host.userId !== requesterSession.user.id) {
+            console.warn(`User ID ${requesterSession.user.id} sent User ID ${targetSession.user.id}'s team changing request without being the room's host. Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}" (id ${currentRoom.id})`)
             return false
         }
 
         userConn.send(OutHostPacket.itemUse(itemData.userId, itemData.itemId))
 
         console.log('Sending user ID %i\'s item %i using request to host ID %i, room %s (room id %i)',
-            requesterSession.user.userId, itemData.itemId,
+            requesterSession.user.id, itemData.itemId,
             currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
 
         return true;
@@ -246,37 +246,37 @@ room but it couldn't be found.`)
         }
 
         if (requesterSession.isInRoom() === false) {
-            console.warn(`User ID ${requesterSession.user.userId} tried to send someone's team chaning request without being in a room`)
+            console.warn(`User ID ${requesterSession.user.id} tried to send someone's team chaning request without being in a room`)
             return false
         }
 
         if (targetSession == null) {
-            console.warn(`User ID ${requesterSession.user.userId} tried to send someone's team changing request with user ID ${teamData.userId} whose session is null`)
+            console.warn(`User ID ${requesterSession.user.id} tried to send someone's team changing request with user ID ${teamData.userId} whose session is null`)
             return false
         }
 
         const currentRoom: Room = requesterSession.currentRoom
 
         if (currentRoom == null) {
-            console.error(`Tried to get user's ${requesterSession.user.userId}
+            console.error(`Tried to get user's ${requesterSession.user.id}
 room but it couldn't be found.`)
             return false
         }
 
-        if (currentRoom.host.userId !== requesterSession.user.userId) {
-            console.warn(`User ID ${requesterSession.user.userId} sent User ID ${targetSession.user.userId}'s team changing request without being the room's host. Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}" (id ${currentRoom.id})`)
+        if (currentRoom.host.userId !== requesterSession.user.id) {
+            console.warn(`User ID ${requesterSession.user.id} sent User ID ${targetSession.user.id}'s team changing request without being the room's host. Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}" (id ${currentRoom.id})`)
             return false
         }
 
         if (teamData.newTeam !== RoomTeamNum.Terrorist && teamData.newTeam !== RoomTeamNum.CounterTerrorist) {
-            console.warn(`User Id ${targetSession.user.userId} tried to change his team, but the value ${teamData.newTeam} is not allowed.`)
+            console.warn(`User Id ${targetSession.user.id} tried to change his team, but the value ${teamData.newTeam} is not allowed.`)
             return false
         }
 
-        currentRoom.updateUserTeam(targetSession.user.userId, teamData.newTeam)
+        currentRoom.updateUserTeam(targetSession.user.id, teamData.newTeam)
 
         console.log('Automatic changing User ID %i\'s team to the %i in room %s (host ID %i, room id %i)',
-            requesterSession.user.userId, teamData.newTeam,
+            requesterSession.user.id, teamData.newTeam,
             currentRoom.settings.roomName, currentRoom.host.userId, currentRoom.id)
 
         return true
@@ -296,12 +296,12 @@ room but it couldn't be found.`)
         }
 
         if (requesterSession.isInRoom() === false) {
-            console.warn(`User ID ${requesterSession.user.userId} tried to send its inventory without being in a room`)
+            console.warn(`User ID ${requesterSession.user.id} tried to send its inventory without being in a room`)
             return false
         }
 
         if (targetSession == null) {
-            console.warn(`User ID ${requesterSession.user.userId} tried to send
+            console.warn(`User ID ${requesterSession.user.id} tried to send
 its inventory to user ID ${preloadData.userId} whose session is null`)
             return false
         }
@@ -309,19 +309,19 @@ its inventory to user ID ${preloadData.userId} whose session is null`)
         const currentRoom: Room = requesterSession.currentRoom
 
         if (currentRoom == null) {
-            console.error(`Tried to get user's ${requesterSession.user.userId}
+            console.error(`Tried to get user's ${requesterSession.user.id}
 room but it couldn't be found.`)
             return false
         }
 
-        if (currentRoom.host.userId !== requesterSession.user.userId) {
+        if (currentRoom.host.userId !== requesterSession.user.id) {
             console.warn(
-                `User ID ${requesterSession.user.userId} sent an user's inventory request without being the room's host.
+                `User ID ${requesterSession.user.id} sent an user's inventory request without being the room's host.
 Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}" (id ${currentRoom.id})`)
             return false
         }
 
-        await this.sendUserInventoryTo(requesterSession.user.userId, userConn, targetSession.user.userId)
+        await this.sendUserInventoryTo(requesterSession.user.id, userConn, targetSession.user.id)
 
         console.log(`Sending user ID ${preloadData.userId}'s inventory to host ID ${currentRoom.host.userId},
  room ${currentRoom.settings.roomName} (room id ${currentRoom.id})`)
@@ -344,13 +344,13 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
         }
 
         if (requesterSession.isInRoom() === false) {
-            console.warn('User ID %i tried to send loadout without being in a room', requesterSession.user.userId)
+            console.warn('User ID %i tried to send loadout without being in a room', requesterSession.user.id)
             return false
         }
 
         if (targetSession == null) {
             console.warn('User ID %i tried to send its loadout to user ID %i whose session is null',
-                requesterSession.user.userId, loadoutData.userId)
+                requesterSession.user.id, loadoutData.userId)
             return false
         }
 
@@ -358,21 +358,21 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
 
         if (currentRoom == null) {
             console.error('Tried to get user\'s %i room but it couldn\'t be found.',
-                requesterSession.user.userId)
+                requesterSession.user.id)
             return false
         }
 
-        if (currentRoom.host.userId !== requesterSession.user.userId) {
+        if (currentRoom.host.userId !== requesterSession.user.id) {
             console.warn('User ID %i sent an user\'s loadout request without being the room\'s host.'
                 + 'Real host ID: %i room "%s" (id %i)',
-                requesterSession.user.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+                requesterSession.user.id, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
-        await this.sendUserLoadoutTo(sourceConn, targetSession.user.userId)
+        await this.sendUserLoadoutTo(sourceConn, targetSession.user.id)
 
         console.log('Sending user ID %i\'s loadout to host ID %i, room %s (room id %i)',
-            requesterSession.user.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+            requesterSession.user.id, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
 
         return true
     }
@@ -391,13 +391,13 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
         }
 
         if (requesterSession.isInRoom() === false) {
-            console.warn('User ID %i tried to send buy menu without being in a room', requesterSession.user.userId)
+            console.warn('User ID %i tried to send buy menu without being in a room', requesterSession.user.id)
             return false
         }
 
         if (targetSession == null) {
             console.warn('User ID %i tried to send its buy menu to user ID %i whose session is null',
-                requesterSession.user.userId, buyMenuData.userId)
+                requesterSession.user.id, buyMenuData.userId)
             return false
         }
 
@@ -405,21 +405,21 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
 
         if (currentRoom == null) {
             console.error('Tried to get user\'s %i room but it couldn\'t be found.',
-                requesterSession.user.userId)
+                requesterSession.user.id)
             return false
         }
 
-        if (currentRoom.host.userId !== requesterSession.user.userId) {
+        if (currentRoom.host.userId !== requesterSession.user.id) {
             console.warn('User ID %i sent an user\'s buy menu request without being the room\'s host.'
                 + 'Real host ID: %i room "%s" (id %i)',
-                requesterSession.user.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+                requesterSession.user.id, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
-        await this.sendUserBuyMenuTo(sourceConn, targetSession.user.userId)
+        await this.sendUserBuyMenuTo(sourceConn, targetSession.user.id)
 
         console.log('Sending user ID %i\'s buy menu to host ID %i, room %s (room id %i)',
-            requesterSession.user.userId, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
+            requesterSession.user.id, currentRoom.host.userId, currentRoom.settings.roomName, currentRoom.id)
 
         return true
     }
@@ -463,9 +463,9 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
             return false
         }
 
-        console.log(`Setting user ID ${session.user.userId}'s buy menu`)
+        console.log(`Setting user ID ${session.user.id}'s buy menu`)
 
-        await UserInventory.setBuyMenu(session.user.userId, buyMenuData.buyMenu)
+        await UserInventory.setBuyMenu(session.user.id, buyMenuData.buyMenu)
 
         return true
     }
@@ -507,9 +507,9 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
         const itemId: number = loadoutData.itemId
 
         console.log(
-            `Setting user ID ${session.user.userId}'s new weapon ${itemId} to slot ${slot} in loadout ${loadoutNum}`)
+            `Setting user ID ${session.user.id}'s new weapon ${itemId} to slot ${slot} in loadout ${loadoutNum}`)
 
-        await UserInventory.setLoadoutWeapon(session.user.userId, loadoutNum, slot, itemId)
+        await UserInventory.setLoadoutWeapon(session.user.id, loadoutNum, slot, itemId)
 
         return true
     }
@@ -529,9 +529,9 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
         const itemId: number = cosmeticsData.itemId
 
         console.log('Setting user ID %i\'s new cosmetic %i to slot %i',
-            session.user.userId, itemId, slot)
+            session.user.id, itemId, slot)
 
-        await UserInventory.setCosmeticSlot(session.user.userId, slot, itemId)
+        await UserInventory.setCosmeticSlot(session.user.id, slot, itemId)
 
         return true
     }
@@ -545,7 +545,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
         }
 
         if (session.isInRoom() === false) {
-            console.warn('User ID %i tried to end a match without being in a room', session.user.userId)
+            console.warn('User ID %i tried to end a match without being in a room', session.user.id)
             return false
         }
 
@@ -553,7 +553,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
 
         if (currentRoom == null) {
             console.error('Tried to get user\'s %i room but it couldn\'t be found. room id: %i',
-                session.user.userId, currentRoom.id)
+                session.user.id, currentRoom.id)
             return false
         }
 
@@ -584,7 +584,7 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
      * @param holepunchPort the master server's UDP holepunching port
      */
     private static async sendUserInfoToSelf(user: User, conn: ExtendedSocket, holepunchPort: number): Promise<void> {
-        conn.send(new OutUserStartPacket(user.userId, user.userName, user.playerName, holepunchPort))
+        conn.send(new OutUserStartPacket(user.id, user.username, user.playername, holepunchPort))
 
         const achievementReplyTest: Buffer = Buffer.from([0x55, 0x12, 0x21, 0x00, 0x60, 0x03, 0x00, 0x00, 0x40, 0x00,
             0x00, 0x00, 0x03, 0xDE, 0x07, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0xD8, 0x07, 0x00, 0x00, 0x04, 0x00, 0x00,
@@ -723,9 +723,9 @@ Real host ID: ${currentRoom.host.userId} room "${currentRoom.settings.roomName}"
             0x1A, 0x00, 0x00, 0x00, 0x1C, 0x00, 0x00, 0x00, 0x6C, 0xBF, 0x00, 0x00, 0x71, 0xBF, 0x00, 0x00,
             0x42, 0x00, 0x00, 0x00, 0x94, 0x01, 0x00, 0x00])
         conn.sendBuffer(unlockReply)
-        conn.send(OutFavoritePacket.setCosmetics(cosmetics.ctItem, cosmetics.terItem,
-            cosmetics.headItem, cosmetics.gloveItem, cosmetics.backItem, cosmetics.stepsItem,
-            cosmetics.cardItem, cosmetics.sprayItem))
+        conn.send(OutFavoritePacket.setCosmetics(cosmetics.ct_item, cosmetics.ter_item,
+            cosmetics.head_item, cosmetics.glove_item, cosmetics.back_item, cosmetics.steps_item,
+            cosmetics.card_item, cosmetics.spray_item))
         conn.send(OutFavoritePacket.setLoadout(loadouts))
         conn.send(OutOptionPacket.setBuyMenu(buyMenu))
     }

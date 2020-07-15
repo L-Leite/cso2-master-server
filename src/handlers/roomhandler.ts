@@ -97,7 +97,7 @@ export class RoomHandler {
             console.warn('user ID %i tried to create a new room, while in an existing one current room: "%s" (id: %i)',
                 curRoom.id, curRoom.settings.roomName, curRoom.id)
 
-            curRoom.removeUser(session.user.userId)
+            curRoom.removeUser(session.user.id)
             session.currentRoom = null
 
             // return false
@@ -106,11 +106,11 @@ export class RoomHandler {
         const channel: Channel = session.currentChannel
 
         if (channel == null) {
-            console.warn('user ID %i requested a new room, but it isn\'t in a channel', session.user.userId)
+            console.warn('user ID %i requested a new room, but it isn\'t in a channel', session.user.id)
             return false
         }
 
-        const newRoom: Room = channel.createRoom(session.user.userId, sourceConn, {
+        const newRoom: Room = channel.createRoom(session.user.id, sourceConn, {
             gameModeId: newRoomReq.gameModeId,
             killLimit: newRoomReq.killLimit,
             mapId: newRoomReq.mapId,
@@ -121,11 +121,11 @@ export class RoomHandler {
 
         session.currentRoom = newRoom
 
-        newRoom.sendJoinNewRoom(session.user.userId)
-        newRoom.sendRoomSettingsTo(session.user.userId)
+        newRoom.sendJoinNewRoom(session.user.id)
+        newRoom.sendRoomSettingsTo(session.user.id)
 
         console.log('user ID %i created a new room. name: "%s" (id: %i)',
-            session.user.userId, newRoom.settings.roomName, newRoom.id)
+            session.user.id, newRoom.settings.roomName, newRoom.id)
 
         return true
     }
@@ -143,7 +143,7 @@ export class RoomHandler {
         const channel: Channel = session.currentChannel
 
         if (channel == null) {
-            console.warn('user ID %i tried to join a room, but it isn\'t in a channel', session.user.userId)
+            console.warn('user ID %i tried to join a room, but it isn\'t in a channel', session.user.id)
             return false
         }
 
@@ -153,7 +153,7 @@ export class RoomHandler {
             this.SendUserDialogBox(sourceConn, GAME_ROOM_JOIN_FAILED_CLOSED)
 
             console.warn('user ID %i tried to join a non existing room. room id: %i',
-                session.user.userId, joinReq.roomId)
+                session.user.id, joinReq.roomId)
             return false
         }
 
@@ -161,7 +161,7 @@ export class RoomHandler {
             this.SendUserDialogBox(sourceConn, GAME_ROOM_JOIN_FAILED_FULL)
 
             console.warn('user ID %i tried to join a full room. room name "%s" room id: %i',
-                session.user.userId, desiredRoom.settings.roomName, desiredRoom.id)
+                session.user.id, desiredRoom.settings.roomName, desiredRoom.id)
             return false
         }
 
@@ -169,22 +169,22 @@ export class RoomHandler {
             && desiredRoom.ComparePassword(joinReq.roomPassword) === false) {
             this.SendUserDialogBox(sourceConn, GAME_ROOM_JOIN_FAILED_BAD_PASSWORD)
 
-            console.warn('user ID %i tried to join a password protected room with wrong password "%s", really password: "%s". room name "%s" room id: %i', session.user.userId,
+            console.warn('user ID %i tried to join a password protected room with wrong password "%s", really password: "%s". room name "%s" room id: %i', session.user.id,
                 joinReq.roomPassword, desiredRoom.settings.roomPassword,
                 desiredRoom.settings.roomName, desiredRoom.id)
             return false
         }
 
-        desiredRoom.addUser(session.user.userId, sourceConn)
+        desiredRoom.addUser(session.user.id, sourceConn)
         session.currentRoom = desiredRoom
 
-        desiredRoom.sendJoinNewRoom(session.user.userId)
-        desiredRoom.sendRoomSettingsTo(session.user.userId)
+        desiredRoom.sendJoinNewRoom(session.user.id)
+        desiredRoom.sendRoomSettingsTo(session.user.id)
 
-        desiredRoom.updateNewPlayerReadyStatus(session.user.userId)
+        desiredRoom.updateNewPlayerReadyStatus(session.user.id)
 
         console.log('user id %i joined a room. room name: "%s" room id: %i',
-            session.user.userId, desiredRoom.settings.roomName, desiredRoom.id)
+            session.user.id, desiredRoom.settings.roomName, desiredRoom.id)
 
         return true
     }
@@ -200,26 +200,26 @@ export class RoomHandler {
         const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
-            console.warn('user ID %i tried to start a room\'s match, although it isn\'t in any', session.user.userId)
+            console.warn('user ID %i tried to start a room\'s match, although it isn\'t in any', session.user.id)
             return false
         }
 
         // if started by the host
-        if (session.user.userId === currentRoom.host.userId) {
+        if (session.user.id === currentRoom.host.userId) {
             currentRoom.hostGameStart()
             console.debug('host ID %i is starting a match in room "%s" (room id: %i)',
-                session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+                session.user.id, currentRoom.settings.roomName, currentRoom.id)
             return true
         } else if (currentRoom.getStatus() === RoomStatus.Ingame) {
-            await currentRoom.guestGameJoin(session.user.userId)
+            await currentRoom.guestGameJoin(session.user.id)
             console.debug('user ID %i is joining a match in room "%s" (room id: %i)',
-                session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+                session.user.id, currentRoom.settings.roomName, currentRoom.id)
             return true
         }
 
         console.warn('user ID %i tried to start a room\'s match, although it isn\'t the host.'
             + 'room name "%s" room id: %i',
-            session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+            session.user.id, currentRoom.settings.roomName, currentRoom.id)
 
         return false
     }
@@ -234,20 +234,20 @@ export class RoomHandler {
         const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
-            console.warn('user ID %i tried to leave a room, although it isn\'t in any', session.user.userId)
+            console.warn('user ID %i tried to leave a room, although it isn\'t in any', session.user.id)
             return false
         }
 
-        if (currentRoom.isUserReady(session.user.userId)
+        if (currentRoom.isUserReady(session.user.id)
             && currentRoom.isGlobalCountdownInProgress()) {
             return false
         }
 
-        currentRoom.removeUser(session.user.userId)
+        currentRoom.removeUser(session.user.id)
         session.currentRoom = null
 
         console.log('user ID %i left room "%s" (room id: %i)',
-            session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+            session.user.id, currentRoom.settings.roomName, currentRoom.id)
 
         await ChannelManager.sendRoomListTo(sourceConn, session.currentChannel)
 
@@ -264,29 +264,29 @@ export class RoomHandler {
         const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
-            console.warn('user ID %i tried toggle ready status, although it isn\'t in any room', session.user.userId)
+            console.warn('user ID %i tried toggle ready status, although it isn\'t in any room', session.user.id)
             return false
         }
 
-        const readyStatus: RoomReadyStatus = currentRoom.toggleUserReadyStatus(session.user.userId)
+        const readyStatus: RoomReadyStatus = currentRoom.toggleUserReadyStatus(session.user.id)
 
         if (readyStatus == null) {
-            console.warn('failed to set user ID %i\'s ready status', session.user.userId)
+            console.warn('failed to set user ID %i\'s ready status', session.user.id)
             return false
         }
 
         // inform every user in the room of the changes
-        currentRoom.broadcastNewUserReadyStatus(session.user.userId)
+        currentRoom.broadcastNewUserReadyStatus(session.user.id)
 
         if (readyStatus === RoomReadyStatus.Ready) {
             console.log('user ID %i readied in room "%s" (id %i)',
-                session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+                session.user.id, currentRoom.settings.roomName, currentRoom.id)
         } else if (readyStatus === RoomReadyStatus.NotReady) {
             console.log('user ID %i unreadied in room "%s" (id %i)',
-                session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+                session.user.id, currentRoom.settings.roomName, currentRoom.id)
         } else {
             console.log('user ID %i did something with ready status. status: %i room \""%s"\" (id %i)',
-                session.user.userId, readyStatus, currentRoom.settings.roomName, currentRoom.id)
+                session.user.id, readyStatus, currentRoom.settings.roomName, currentRoom.id)
         }
 
         return true
@@ -305,28 +305,28 @@ export class RoomHandler {
         const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
-            console.warn(`user ${session.user.userId} tried to update a room's settings without being in one`)
+            console.warn(`user ${session.user.id} tried to update a room's settings without being in one`)
             return false
         }
 
-        if (session.user.userId !== currentRoom.host.userId) {
+        if (session.user.id !== currentRoom.host.userId) {
             console.warn('user ID %i tried to update a room\'s settings, although it isn\'t the host.'
                 + 'room name "%s" room id: %i',
-                session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+                session.user.id, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
         if (currentRoom.isGlobalCountdownInProgress()) {
             console.warn('user ID %i tried to update a room\'s settings, although a countdown is in progress.'
                 + 'room name "%s" room id: %i',
-                session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+                session.user.id, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
         currentRoom.updateSettings(newSettingsReq)
 
         console.log('host ID %i updated room "%s"\'s settings (room id: %i)',
-            session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+            session.user.id, currentRoom.settings.roomName, currentRoom.id)
 
         return true
     }
@@ -338,7 +338,7 @@ export class RoomHandler {
      */
     private onCloseResultRequest(sourceConn: ExtendedSocket): boolean {
         Room.sendCloseResultWindow(sourceConn)
-        console.log(`user ID ${sourceConn.session.user.userId} closed game result window`)
+        console.log(`user ID ${sourceConn.session.user.id} closed game result window`)
         return true
     }
 
@@ -355,30 +355,30 @@ export class RoomHandler {
         const currentRoom: Room = session.currentRoom
 
         if (currentRoom == null) {
-            console.warn('user ID %i tried change team in a room, although it isn\'t in any', session.user.userId)
+            console.warn('user ID %i tried change team in a room, although it isn\'t in any', session.user.id)
             return false
         }
 
-        if (currentRoom.isUserReady(session.user.userId)) {
+        if (currentRoom.isUserReady(session.user.id)) {
             this.SendUserSystemMsg(sourceConn, GAME_ROOM_CHANGETEAM_FAILED)
 
             console.warn('user ID %i tried change team in a room, although it\'s ready. room name "%s" room id: %i',
-                session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+                session.user.id, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
         if (currentRoom.settings.areBotsEnabled
-            && session.user.userId !== currentRoom.host.userId) {
+            && session.user.id !== currentRoom.host.userId) {
             console.warn('user ID %i tried change team in a room when bot mode is enabled, but its not the host.'
                 + 'room name "%s" room id: %i',
-                session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+                session.user.id, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
-        currentRoom.updateUserTeam(session.user.userId, setTeamReq.newTeam)
+        currentRoom.updateUserTeam(session.user.id, setTeamReq.newTeam)
 
         console.log('user ID %i changed to team %i. room name "%s" room id: %i',
-            session.user.userId, setTeamReq.newTeam, currentRoom.settings.roomName, currentRoom.id)
+            session.user.id, setTeamReq.newTeam, currentRoom.settings.roomName, currentRoom.id)
 
         return true
     }
@@ -399,14 +399,14 @@ export class RoomHandler {
 
         if (currentRoom == null) {
             console.warn('user ID %i tried to toggle a room\'s game start countdown, although it isn\'t in any',
-                session.user.userId)
+                session.user.id)
             return false
         }
 
-        if (session.user.userId !== currentRoom.host.userId) {
+        if (session.user.id !== currentRoom.host.userId) {
             console.warn('user ID %i tried to toggle a room\'s game start countdown, although it isn\'t the host.'
                 + 'room name "%s" room id: %i',
-                session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+                session.user.id, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
@@ -418,7 +418,7 @@ export class RoomHandler {
 
             console.warn('user ID %i tried to toggle a room\'s game start countdown, although it can\'t start. '
                 + 'room name "%s" room id: %i',
-                session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+                session.user.id, currentRoom.settings.roomName, currentRoom.id)
             return false
         }
 
@@ -429,7 +429,7 @@ export class RoomHandler {
         } else {
             currentRoom.stopCountdown()
             console.log('user ID %i canceled room "%s"\'s (id %i) countdown',
-                session.user.userId, currentRoom.settings.roomName, currentRoom.id)
+                session.user.id, currentRoom.settings.roomName, currentRoom.id)
         }
 
         currentRoom.broadcastCountdown(shouldCountdown)

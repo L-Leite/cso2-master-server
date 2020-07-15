@@ -32,7 +32,7 @@ export class ChannelManager {
             return false
         }
 
-        console.log(`user ID ${session.user.userId} requested server list` )
+        console.log(`user ID ${session.user.id} requested server list` )
         this.sendChannelListTo(sourceConn)
 
         return true
@@ -57,18 +57,18 @@ export class ChannelManager {
         const server: ChannelServer = ChannelManager.getServerByIndex(listReq.channelServerIndex)
 
         if (server == null) {
-            console.warn('user ID %i requested room list, but it isn\'t in a channel server', session.user.userId)
+            console.warn('user ID %i requested room list, but it isn\'t in a channel server', session.user.id)
             return false
         }
 
         const channel: Channel = server.getChannelByIndex(listReq.channelIndex)
 
         if (channel == null) {
-            console.warn('user ID %i requested room list, but it isn\'t in a channel', session.user.userId)
+            console.warn('user ID %i requested room list, but it isn\'t in a channel', session.user.id)
             return false
         }
 
-        console.log('user "%s" requested room list successfully, sending it...', session.user.userId)
+        console.log('user "%s" requested room list successfully, sending it...', session.user.id)
         await this.setUserChannel(sourceConn, channel)
 
         return true

@@ -34,7 +34,7 @@ export class ChatHandler {
         }
 
         if (chatPkt.message == null || chatPkt.length === 0 || chatPkt.message[0] === '\0') {
-            console.warn(`user ID ${session.user.userId} sent a null chat message`)
+            console.warn(`user ID ${session.user.id} sent a null chat message`)
             return false
         }
 
@@ -51,7 +51,7 @@ export class ChatHandler {
                 return this.OnIngameTeamMessage(chatPkt, conn)
         }
 
-        console.warn('unknown chat packet type %i from user ID %i', chatPkt.type, session.user.userId)
+        console.warn('unknown chat packet type %i from user ID %i', chatPkt.type, session.user.id)
         return false
     }
 
@@ -61,12 +61,12 @@ export class ChatHandler {
         const curChannel: Channel = session.currentChannel
 
         if (curChannel == null) {
-            console.warn(`user ID ${session.user.userId} sent a channel message without being in a channel`)
+            console.warn(`user ID ${session.user.id} sent a channel message without being in a channel`)
             return false
         }
 
         const outMsgData: OutChatPacket = OutChatPacket.channelMessage(
-            session.user.playerName, session.user.gm, chatPkt.message)
+            session.user.playername, session.user.gm, chatPkt.message)
 
         curChannel.recurseUsers((c: ExtendedSocket) => {
             c.send(outMsgData)
@@ -79,32 +79,32 @@ export class ChatHandler {
         const session: UserSession = conn.session
 
         if (chatPkt.destination == null) {
-            console.warn(`user ID ${session.user.userId} tried to send a direct message without destination`)
+            console.warn(`user ID ${session.user.id} tried to send a direct message without destination`)
             return false
         }
 
-        if (chatPkt.destination === session.user.playerName) {
-            console.warn(`user ID ${session.user.userId} tried send a direct message to itself`)
+        if (chatPkt.destination === session.user.playername) {
+            console.warn(`user ID ${session.user.id} tried send a direct message to itself`)
             return false
         }
 
         const receiverConn: ExtendedSocket = ActiveConnections.Singleton().FindByPlayerName(chatPkt.destination)
 
         if (receiverConn == null) {
-            console.warn(`couldn't find receiver ${chatPkt.destination} for user ID ${session.user.userId}'s direct message`)
+            console.warn(`couldn't find receiver ${chatPkt.destination} for user ID ${session.user.id}'s direct message`)
             return false
         }
 
         const targetsession: UserSession = receiverConn.session
 
         const outMsgData: OutChatPacket = OutChatPacket.directMessage(
-            session.user.playerName, session.user.vipLevel, targetsession.user.gm,
-            targetsession.user.playerName, false, chatPkt.message)
+            session.user.playername, session.user.vip_level, targetsession.user.gm,
+            targetsession.user.playername, false, chatPkt.message)
         conn.send(outMsgData)
 
         const outMsgDataOfTarget: OutChatPacket = OutChatPacket.directMessage(
-            session.user.playerName, session.user.vipLevel, session.user.gm,
-            targetsession.user.playerName, true, chatPkt.message)
+            session.user.playername, session.user.vip_level, session.user.gm,
+            targetsession.user.playername, true, chatPkt.message)
         receiverConn.send(outMsgDataOfTarget)
 
         return true
@@ -114,19 +114,19 @@ export class ChatHandler {
         const session: UserSession = conn.session
 
         if (session.isInRoom() === false) {
-            console.warn(`user ID ${session.user.userId} sent a room message without being in a room`)
+            console.warn(`user ID ${session.user.id} sent a room message without being in a room`)
             return false
         }
 
         const curRoom: Room = session.currentRoom
 
-        if (curRoom.getRoomUser(session.user.userId).isIngame === true) {
-            console.warn(`user ID ${session.user.userId} sent a room message without being non-ingame status`)
+        if (curRoom.getRoomUser(session.user.id).isIngame === true) {
+            console.warn(`user ID ${session.user.id} sent a room message without being non-ingame status`)
             return false
         }
 
         const outMsgData: OutChatPacket = OutChatPacket.roomMessage(
-            session.user.playerName, session.user.vipLevel, session.user.gm, chatPkt.message)
+            session.user.playername, session.user.vip_level, session.user.gm, chatPkt.message)
 
         curRoom.recurseUsers((u: RoomUserEntry) => {
             if (u.isIngame === false) {
@@ -145,10 +145,10 @@ export class ChatHandler {
         }
 
         const curRoom: Room = session.currentRoom
-        const ourRoomUser: RoomUserEntry = curRoom.getRoomUser(session.user.userId)
+        const ourRoomUser: RoomUserEntry = curRoom.getRoomUser(session.user.id)
 
         const outMsgData: OutChatPacket = OutChatPacket.ingameMessage(
-            session.user.playerName, session.user.vipLevel, session.user.gm, chatPkt.message)
+            session.user.playername, session.user.vip_level, session.user.gm, chatPkt.message)
 
         curRoom.recurseUsers((u: RoomUserEntry) => {
             if (u.isIngame === true) {
@@ -167,10 +167,10 @@ export class ChatHandler {
         }
 
         const curRoom: Room = session.currentRoom
-        const ourRoomUser: RoomUserEntry = curRoom.getRoomUser(session.user.userId)
+        const ourRoomUser: RoomUserEntry = curRoom.getRoomUser(session.user.id)
 
         const outMsgData: OutChatPacket = OutChatPacket.ingameTeamMessage(
-            session.user.playerName, session.user.vipLevel, session.user.gm, chatPkt.message)
+            session.user.playername, session.user.vip_level, session.user.gm, chatPkt.message)
 
         curRoom.recurseUsers((u: RoomUserEntry) => {
             if (u.isIngame === true && u.team === ourRoomUser.team) {
@@ -183,20 +183,20 @@ export class ChatHandler {
 
     private CanSendIngameMessage(session: UserSession): boolean {
         if (session.isInRoom() === false) {
-            console.warn(`user ID ${session.user.userId} sent a ingame message without being in a room`)
+            console.warn(`user ID ${session.user.id} sent a ingame message without being in a room`)
             return false
         }
 
         const curRoom: Room = session.currentRoom
-        const roomUser: RoomUserEntry = curRoom.getRoomUser(session.user.userId)
+        const roomUser: RoomUserEntry = curRoom.getRoomUser(session.user.id)
 
         if (roomUser == null) {
-            console.warn(`user ID ${session.user.userId} sent a ingame message without being in the correct room`)
+            console.warn(`user ID ${session.user.id} sent a ingame message without being in the correct room`)
             return false
         }
 
         if (roomUser.isIngame === false) {
-            console.warn(`user ID ${session.user.userId} sent a ingame message without being ingame`)
+            console.warn(`user ID ${session.user.id} sent a ingame message without being ingame`)
             return false
         }
 

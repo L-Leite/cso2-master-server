@@ -102,7 +102,7 @@ export class UserService {
         // HACK to get methods working
         user = new User()
         Object.assign(user, res.body)
-        this.userCache.set(user.userId, user)
+        this.userCache.set(user.id, user)
         return user
       }
       return null
@@ -122,7 +122,7 @@ export class UserService {
   public async SetUserAvatar(targetUser: User, avatarId: number): Promise<boolean> {
     try {
       const res: superagent.Response = await superagent
-        .put(this.baseUrl + `/users/${targetUser.userId}`)
+        .put(this.baseUrl + `/users/${targetUser.id}`)
         .send({
           avatar: avatarId,
         })
@@ -130,7 +130,7 @@ export class UserService {
 
       if (res.status === 200) {
         targetUser.avatar = avatarId
-        this.userCache.set(targetUser.userId, targetUser)
+        this.userCache.set(targetUser.id, targetUser)
         return true;
       }
     } catch (error) {
@@ -150,7 +150,7 @@ export class UserService {
   public async SetUserSignature(targetUser: User, signature: string): Promise<boolean> {
     try {
       const res: superagent.Response = await superagent
-        .put(this.baseUrl + `/users/${targetUser.userId}`)
+        .put(this.baseUrl + `/users/${targetUser.id}`)
         .send({
           signature,
         })
@@ -158,7 +158,7 @@ export class UserService {
 
       if (res.status === 200) {
         targetUser.signature = signature
-        this.userCache.set(targetUser.userId, targetUser)
+        this.userCache.set(targetUser.id, targetUser)
         return true;
       }
     } catch (error) {
@@ -178,15 +178,15 @@ export class UserService {
   public async SetUserTitle(targetUser: User, titleId: number): Promise<boolean> {
     try {
       const res: superagent.Response = await superagent
-        .put(this.baseUrl + `/users/${targetUser.userId}`)
+        .put(this.baseUrl + `/users/${targetUser.id}`)
         .send({
           titleId,
         })
         .accept('json')
 
       if (res.status === 200) {
-        targetUser.titleId = titleId
-        this.userCache.set(targetUser.userId, targetUser)
+        targetUser.title = titleId
+        this.userCache.set(targetUser.id, targetUser)
         return true;
       }
     } catch (error) {
@@ -205,12 +205,12 @@ export class UserService {
   public async Update(targetUser: User): Promise<boolean> {
     try {
       const res: superagent.Response = await superagent
-        .put(this.baseUrl + `/users/${targetUser.userId}`)
+        .put(this.baseUrl + `/users/${targetUser.id}`)
         .send(targetUser)
         .accept('json')
 
       if (res.status === 200) {
-        this.userCache.set(targetUser.userId, targetUser)
+        this.userCache.set(targetUser.id, targetUser)
         console.log('Set buy menu successfully')
         return true;
       }

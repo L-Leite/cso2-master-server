@@ -2,9 +2,9 @@
  * represents an user account
  */
 export class User {
-  public userId: number;
-  public userName: string;
-  public playerName: string;
+  public id: number;
+  public username: string;
+  public playername: string;
 
   public gm: boolean;
 
@@ -13,17 +13,17 @@ export class User {
   public mpoints: number;
 
   public level: number;
-  public curExp: number;
-  public maxExp: number;
-  public vipLevel: number;
-  public vipXp: number;
+  public cur_xp: BigInt;
+  public max_xp: BigInt;
+  public vip_level: number;
+  public vip_xp: number;
 
   public rank: number;
-  public rankFrame: number;
+  public rank_frame: number;
 
-  public playedMatches: number;
+  public played_matches: number;
   public wins: number;
-  public secondsPlayed: number;
+  public seconds_played: number;
 
   public kills: number;
   public deaths: number;
@@ -32,36 +32,36 @@ export class User {
   public accuracy: number;
 
   public avatar: number;
-  public unlockedAvatars: number[];
+  public unlocked_avatars: number[];
 
-  public netCafeName: string;
-
-  public clanName: string;
-  public clanMark: number;
-
-  public worldRank: number;
-
-  public titleId: number;
-  public unlockedTitles: number[];
+  public title: number;
+  public unlocked_titles: number[];
   public signature: string;
 
-  public bestGamemode: number;
-  public bestMap: number;
+  public unlocked_achievements: number[];
 
-  public unlockedAchievements: number[];
+  public netcafe_name: string;
 
-  public skillHumanCurXp: BigInt;
-  public skillHumanMaxXp: BigInt;
-  public skillHumanPoints: number;
-  public skillZombieCurXp: BigInt;
-  public skillZombieMaxXp: BigInt;
-  public skillZombiePoints: number;
+  public clan_name: string;
+  public clan_mark: number;
+
+  public world_rank: number;
+
+  public best_gamemode: number;
+  public best_map: number;
+
+  public skill_human_curxp: BigInt;
+  public skill_human_maxxp: BigInt;
+  public skill_human_points: number;
+  public skill_zombie_curxp: BigInt;
+  public skill_zombie_maxxp: BigInt;
+  public skill_zombie_points: number;
 
   /**
    * is the user a VIP?
    * @returns true if so, false if not
    */
   public isVip(): boolean {
-    return this.vipLevel !== 0;
+    return this.vip_level !== 0;
   }
 }

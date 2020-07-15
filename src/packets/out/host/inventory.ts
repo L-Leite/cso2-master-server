@@ -14,7 +14,7 @@ export class OutHostSetInventory {
         // these are unconfirmed
         outPacket.writeUInt16(items.length) // numOfItems
         for (const item of items) {
-            outPacket.writeUInt32(item.itemId)
+            outPacket.writeUInt32(item.item_id)
             outPacket.writeUInt16(item.ammount)
         }
     }

@@ -53,7 +53,7 @@ export class AboutMeHandler {
     const updated: boolean = await this.userSvc.SetUserAvatar(session.user, avatarData.avatarId)
 
     if (updated === false) {
-      console.warn(`Failed to update user ${session.user.userId}'s avatar to ${avatarData.avatarId}`)
+      console.warn(`Failed to update user ${session.user.id}'s avatar to ${avatarData.avatarId}`)
       return false;
     }
 
@@ -70,7 +70,7 @@ export class AboutMeHandler {
       })
     }
 
-    console.log(`Setting user ID ${session.user.userId}'s avatar to ${avatarData.avatarId}`)
+    console.log(`Setting user ID ${session.user.id}'s avatar to ${avatarData.avatarId}`)
 
     return true
   }
@@ -88,7 +88,7 @@ export class AboutMeHandler {
     const updated: boolean = await this.userSvc.SetUserSignature(session.user, signatureData.msg)
 
     if (updated === false) {
-      console.warn(`Failed to update user ${session.user.userId}'s signature`)
+      console.warn(`Failed to update user ${session.user.id}'s signature`)
       return false;
     }
 
@@ -105,7 +105,7 @@ export class AboutMeHandler {
       })
     }
 
-    console.log(`Setting user ID ${session.user.userId}'s signature "${signatureData.msg}"`)
+    console.log(`Setting user ID ${session.user.id}'s signature "${signatureData.msg}"`)
 
     return true
   }
@@ -123,7 +123,7 @@ export class AboutMeHandler {
     const updated: boolean = await this.userSvc.SetUserTitle(session.user, titleData.titleId)
 
     if (updated === false) {
-      console.warn(`Failed to update user ${session.user.userId}'s title to ${titleData.titleId}`)
+      console.warn(`Failed to update user ${session.user.id}'s title to ${titleData.titleId}`)
       return false;
     }
 
@@ -140,7 +140,7 @@ export class AboutMeHandler {
       })
     }
 
-    console.log(`Setting user ID ${session.user.userId}'s title to ${titleData.titleId}`)
+    console.log(`Setting user ID ${session.user.id}'s title to ${titleData.titleId}`)
 
     return true
   }

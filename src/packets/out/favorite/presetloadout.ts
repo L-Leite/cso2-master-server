@@ -26,16 +26,16 @@ export class OutFavoritePresetLoadout {
                                 loadout: UserLoadout): void {
         let curItem = 0
 
-        this.writeItem(outPacket, loadout.primary, curItem++, loadout.loadoutNum)
-        this.writeItem(outPacket, loadout.secondary, curItem++, loadout.loadoutNum)
-        this.writeItem(outPacket, loadout.melee, curItem++, loadout.loadoutNum)
-        this.writeItem(outPacket, loadout.hegrenade, curItem++, loadout.loadoutNum)
-        this.writeItem(outPacket, loadout.smoke, curItem++, loadout.loadoutNum)
-        this.writeItem(outPacket, loadout.flash, curItem++, loadout.loadoutNum)
+        this.writeItem(outPacket, loadout.primary_weapon, curItem++, loadout.loadout_num)
+        this.writeItem(outPacket, loadout.secondary_weapon, curItem++, loadout.loadout_num)
+        this.writeItem(outPacket, loadout.melee, curItem++, loadout.loadout_num)
+        this.writeItem(outPacket, loadout.hegrenade, curItem++, loadout.loadout_num)
+        this.writeItem(outPacket, loadout.smoke, curItem++, loadout.loadout_num)
+        this.writeItem(outPacket, loadout.flash, curItem++, loadout.loadout_num)
 
         // fill the remaining unused spaces with null items
         for (; curItem < 16; curItem++) {
-            outPacket.writeUInt8(loadout.loadoutNum)
+            outPacket.writeUInt8(loadout.loadout_num)
             outPacket.writeUInt8(curItem)
             outPacket.writeUInt32(0)
         }
