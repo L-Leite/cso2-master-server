@@ -272,11 +272,7 @@ export class UserInventory {
         slot: number,
         itemId: number
     ): Promise<void> {
-        const params = UserInventory.buildSetCosmeticParams(
-            ownerId,
-            slot,
-            itemId
-        )
+        const params = UserInventory.buildSetCosmeticParams(slot, itemId)
         try {
             const res: superagent.Response = await superagent
                 .put(`${userSvcAuthority()}/inventory/${ownerId}/cosmetics`)
@@ -379,51 +375,39 @@ export class UserInventory {
         }
     }
 
-    private static buildSetCosmeticParams(
-        userId: number,
-        slot: number,
-        itemId: number
-    ) {
+    private static buildSetCosmeticParams(slot: number, itemId: number) {
         switch (slot) {
             case 0:
                 return {
-                    userId,
-                    ctItem: itemId
+                    ct_item: itemId
                 }
             case 1:
                 return {
-                    userId,
-                    terItem: itemId
+                    ter_item: itemId
                 }
             case 2:
                 return {
-                    userId,
-                    headItem: itemId
+                    head_item: itemId
                 }
             case 3:
                 return {
-                    userId,
-                    gloveItem: itemId
+                    glove_item: itemId
                 }
             case 4:
                 return {
-                    userId,
-                    backItem: itemId
+                    back_item: itemId
                 }
             case 5:
                 return {
-                    userId,
-                    stepsItem: itemId
+                    steps_item: itemId
                 }
             case 6:
                 return {
-                    userId,
-                    cardItem: itemId
+                    card_item: itemId
                 }
             case 7:
                 return {
-                    userId,
-                    sprayItem: itemId
+                    spray_item: itemId
                 }
         }
 
@@ -435,11 +419,11 @@ export class UserInventory {
         switch (slot) {
             case 0:
                 return {
-                    primary: itemId
+                    primary_weapon: itemId
                 }
             case 1:
                 return {
-                    secondary: itemId
+                    secondary_weapon: itemId
                 }
             case 2:
                 return {
