@@ -13,12 +13,13 @@ import { PacketId } from 'packets/definitions'
  * @class OutVersionPacket
  */
 export class OutVersionPacket extends OutPacketBase {
-
     constructor(isBadHash: boolean, hash: string) {
         super(PacketId.Version)
 
-        this.outStream = new WritableStreamBuffer(
-            { initialSize: 40, incrementAmount: 12 })
+        this.outStream = new WritableStreamBuffer({
+            initialSize: 40,
+            incrementAmount: 12
+        })
 
         this.buildHeader()
         this.writeUInt8(isBadHash ? 1 : 0)

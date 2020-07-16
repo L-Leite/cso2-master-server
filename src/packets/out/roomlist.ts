@@ -7,7 +7,7 @@ import { RoomListCollection } from 'packets/out/roomlist/collection'
 import { Room } from 'room/room'
 
 enum OutRoomListType {
-    SendFullRoomList = 0,
+    SendFullRoomList = 0
 }
 
 /**
@@ -15,16 +15,18 @@ enum OutRoomListType {
  * @class OutHostPacket
  */
 export class OutRoomListPacket extends OutPacketBase {
-    public static async getFullList(rooms: Room[]): Promise<OutRoomListPacket> {
+    public static getFullList(rooms: Room[]): OutRoomListPacket {
         const packet: OutRoomListPacket = new OutRoomListPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 100, incrementAmount: 20 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 100,
+            incrementAmount: 20
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OutRoomListType.SendFullRoomList)
 
-        await new RoomListCollection(rooms).build(packet)
+        new RoomListCollection(rooms).build(packet)
 
         return packet
     }

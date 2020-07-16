@@ -7,7 +7,11 @@ import { RoomCountdownType } from 'packets/in/room/countdown'
  * @class OutRoomCountdown
  */
 export class OutRoomCountdown {
-    public static build(shouldCooldown: boolean, countdown: number, outPacket: OutPacketBase): void {
+    public static build(
+        shouldCooldown: boolean,
+        countdown: number,
+        outPacket: OutPacketBase
+    ): void {
         const type = shouldCooldown
             ? RoomCountdownType.InProgress
             : RoomCountdownType.Stop

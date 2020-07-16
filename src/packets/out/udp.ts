@@ -17,11 +17,17 @@ import { OutPacketBase } from 'packets/out/packet'
  * @class OutUdpPacket
  */
 export class OutUdpPacket extends OutPacketBase {
-    constructor(isHost: boolean, userId: number,
-                ipAddress: string, port: number) {
+    constructor(
+        isHost: boolean,
+        userId: number,
+        ipAddress: string,
+        port: number
+    ) {
         super(PacketId.Udp)
-        this.outStream = new WritableStreamBuffer(
-            { initialSize: 32, incrementAmount: 8 })
+        this.outStream = new WritableStreamBuffer({
+            initialSize: 32,
+            incrementAmount: 8
+        })
 
         this.buildHeader()
 

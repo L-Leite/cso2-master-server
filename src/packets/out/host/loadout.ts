@@ -8,12 +8,16 @@ import { UserLoadout } from 'user/userloadout'
  * @class OutHostPreloadInventory
  */
 export class OutHostLoadout {
-    public static build(userId: number, cosmetics: UserCosmetics,
-                        loadouts: UserLoadout[], outPacket: OutPacketBase): void {
+    public static build(
+        userId: number,
+        cosmetics: UserCosmetics,
+        loadouts: UserLoadout[],
+        outPacket: OutPacketBase
+    ): void {
         outPacket.writeUInt32(userId)
         outPacket.writeUInt8(8) // num of cosmetics
 
-        let curItem: number = 0
+        let curItem = 0
 
         this.writeItem(cosmetics.ct_item, curItem++, outPacket)
         this.writeItem(cosmetics.ter_item, curItem++, outPacket)
@@ -45,7 +49,11 @@ export class OutHostLoadout {
         outPacket.writeUInt8(0) // unk00
     }
 
-    private static writeItem(itemNum: number, curItem: number, outPacket: OutPacketBase): void {
+    private static writeItem(
+        itemNum: number,
+        curItem: number,
+        outPacket: OutPacketBase
+    ): void {
         outPacket.writeUInt8(curItem)
         outPacket.writeUInt32(itemNum)
     }

@@ -36,7 +36,8 @@ export class OutPacketBase extends PacketBaseShared {
     public getData(): Buffer {
         if (this.builtBuffer == null) {
             this.builtBuffer = this.outStream.getContents() as Buffer
-            const dataLen: number = this.builtBuffer.byteLength - OutPacketBase.headerLength
+            const dataLen: number =
+                this.builtBuffer.byteLength - OutPacketBase.headerLength
             this.builtBuffer.writeUInt16LE(dataLen, 2)
         }
 
@@ -49,7 +50,7 @@ export class OutPacketBase extends PacketBaseShared {
      */
     public writeInt8(val: number): void {
         const buf: Buffer = Buffer.alloc(1)
-        buf.writeInt8(val as number, 0)
+        buf.writeInt8(val, 0)
         this.outStream.write(buf)
     }
 
@@ -58,12 +59,12 @@ export class OutPacketBase extends PacketBaseShared {
      * @param val the signed 2 bytes to write
      * @param littleEndian should the bytes be written in little endian?
      */
-    public writeInt16(val: number, littleEndian: boolean = true): void {
+    public writeInt16(val: number, littleEndian = true): void {
         const buf: Buffer = Buffer.alloc(2)
         if (littleEndian) {
-            buf.writeInt16LE(val as number, 0)
+            buf.writeInt16LE(val, 0)
         } else {
-            buf.writeInt16BE(val as number, 0)
+            buf.writeInt16BE(val, 0)
         }
         this.outStream.write(buf)
     }
@@ -73,12 +74,12 @@ export class OutPacketBase extends PacketBaseShared {
      * @param val the signed 4 bytes to write
      * @param littleEndian should the bytes be written in little endian?
      */
-    public writeInt32(val: number, littleEndian: boolean = true): void {
+    public writeInt32(val: number, littleEndian = true): void {
         const buf: Buffer = Buffer.alloc(4)
         if (littleEndian) {
-            buf.writeInt32LE(val as number, 0)
+            buf.writeInt32LE(val, 0)
         } else {
-            buf.writeInt32BE(val as number, 0)
+            buf.writeInt32BE(val, 0)
         }
         this.outStream.write(buf)
     }
@@ -88,7 +89,7 @@ export class OutPacketBase extends PacketBaseShared {
      * @param val the signed 8 bytes to write
      * @param littleEndian should the bytes be written in little endian?
      */
-    public writeInt64(val: Int64LE | Int64BE, littleEndian: boolean = true): void {
+    public writeInt64(val: Int64LE | Int64BE, littleEndian = true): void {
         let buf: Buffer = null
         if (littleEndian) {
             buf = (val as Int64LE).toBuffer()
@@ -104,7 +105,7 @@ export class OutPacketBase extends PacketBaseShared {
      */
     public writeUInt8(val: number): void {
         const buf: Buffer = Buffer.alloc(1)
-        buf.writeUInt8(val as number, 0)
+        buf.writeUInt8(val, 0)
         this.outStream.write(buf)
     }
 
@@ -113,12 +114,12 @@ export class OutPacketBase extends PacketBaseShared {
      * @param val the unsigned 2 bytes to write
      * @param littleEndian should the bytes be written in little endian?
      */
-    public writeUInt16(val: number, littleEndian: boolean = true): void {
+    public writeUInt16(val: number, littleEndian = true): void {
         const buf: Buffer = Buffer.alloc(2)
         if (littleEndian) {
-            buf.writeUInt16LE(val as number, 0)
+            buf.writeUInt16LE(val, 0)
         } else {
-            buf.writeUInt16BE(val as number, 0)
+            buf.writeUInt16BE(val, 0)
         }
         this.outStream.write(buf)
     }
@@ -128,12 +129,12 @@ export class OutPacketBase extends PacketBaseShared {
      * @param val the unsigned 4 bytes to write
      * @param littleEndian should the bytes be written in little endian?
      */
-    public writeUInt32(val: number, littleEndian: boolean = true): void {
+    public writeUInt32(val: number, littleEndian = true): void {
         const buf: Buffer = Buffer.alloc(4)
         if (littleEndian) {
-            buf.writeUInt32LE(val as number, 0)
+            buf.writeUInt32LE(val, 0)
         } else {
-            buf.writeUInt32BE(val as number, 0)
+            buf.writeUInt32BE(val, 0)
         }
         this.outStream.write(buf)
     }
@@ -143,7 +144,7 @@ export class OutPacketBase extends PacketBaseShared {
      * @param val the unsigned 8 bytes to write
      * @param littleEndian should the bytes be written in little endian?
      */
-    public writeUInt64(val: Uint64LE | Uint64BE, littleEndian: boolean = true): void {
+    public writeUInt64(val: Uint64LE | Uint64BE, littleEndian = true): void {
         let buf: Buffer = null
         if (littleEndian) {
             buf = (val as Uint64LE).toBuffer()

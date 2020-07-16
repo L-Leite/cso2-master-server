@@ -1,4 +1,9 @@
-import { IRoomOptions, RoomGamemode, RoomStatus, RoomTeamBalance } from 'room/room'
+import {
+    IRoomOptions,
+    RoomGamemode,
+    RoomStatus,
+    RoomTeamBalance
+} from 'room/room'
 
 export class RoomSettings {
     public roomName: string
@@ -63,14 +68,18 @@ export class RoomSettings {
         this.killLimit = options.killLimit ? options.killLimit : 150
         this.startMoney = options.startMoney ? options.startMoney : 16000
         this.forceCamera = options.forceCamera ? options.forceCamera : 1
-        this.nextMapEnabled = options.nextMapEnabled ? options.nextMapEnabled : 0
+        this.nextMapEnabled = options.nextMapEnabled
+            ? options.nextMapEnabled
+            : 0
         this.changeTeams = options.changeTeams ? options.changeTeams : 0
         this.areBotsEnabled = options.enableBots ? true : false
         this.difficulty = options.difficulty ? options.difficulty : 0
         this.maxPlayers = options.enableBots ? 8 : 16
         this.respawnTime = options.respawnTime ? options.respawnTime : 3
         this.teamBalanceType = options.teamBalance ? options.teamBalance : 0
-        this.weaponRestrictions = options.weaponRestrictions ? options.weaponRestrictions : 0
+        this.weaponRestrictions = options.weaponRestrictions
+            ? options.weaponRestrictions
+            : 0
         this.status = RoomStatus.Waiting
         this.hltvEnabled = options.hltvEnabled ? options.hltvEnabled : 0
         this.mapCycleType = 1

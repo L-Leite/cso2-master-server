@@ -9,8 +9,7 @@ import { TextEncoder } from 'util'
 export class PacketLongString {
     public static from(data: Buffer): PacketLongString {
         const length = data.readUInt16LE(0)
-        const str = data.slice(2,
-            2 + length).toString('utf8')
+        const str = data.slice(2, 2 + length).toString('utf8')
 
         return new PacketLongString(str, length)
     }
@@ -23,13 +22,15 @@ export class PacketLongString {
     // the length of actualStrLen plus the size byte
     public totalLen: number
 
-    constructor(str: string, rawLength: number = 0) {
+    constructor(str: string, rawLength = 0) {
         const expectedLen: number = new TextEncoder().encode(str).length
 
         if (rawLength !== 0) {
             // ensure the received string has a correct length
             if (expectedLen !== rawLength) {
-                throw new Error('The string\'s expected length is different from the one in the packet')
+                throw new Error(
+                    'The expected length is different from the one in the packet'
+                )
             }
         }
 

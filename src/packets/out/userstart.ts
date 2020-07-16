@@ -16,12 +16,18 @@ import { PacketId } from 'packets/definitions'
  * @class OutUserStartPacket
  */
 export class OutUserStartPacket extends OutPacketBase {
-    constructor(userId: number, loginName: string, userName: string,
-                holepunchPort: number) {
+    constructor(
+        userId: number,
+        loginName: string,
+        userName: string,
+        holepunchPort: number
+    ) {
         super(PacketId.UserStart)
 
-        this.outStream = new WritableStreamBuffer(
-            { initialSize: 20, incrementAmount: 4 })
+        this.outStream = new WritableStreamBuffer({
+            initialSize: 20,
+            incrementAmount: 4
+        })
 
         this.buildHeader()
         this.writeUInt32(userId)

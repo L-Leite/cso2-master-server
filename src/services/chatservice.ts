@@ -1,7 +1,7 @@
 export class ChatService {
-  private baseUrl: string
+    private baseUrl: string
 
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl
-  }
+    constructor(baseUrl: string) {
+        this.baseUrl = baseUrl
+    }
 }

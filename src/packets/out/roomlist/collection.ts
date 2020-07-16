@@ -13,11 +13,11 @@ export class RoomListCollection {
     constructor(rooms: Room[]) {
         this.rooms = rooms
     }
-    public async build(outPacket: OutPacketBase): Promise<void> {
+    public build(outPacket: OutPacketBase): void {
         outPacket.writeUInt16(this.rooms.length)
 
         for (const room of this.rooms) {
-            await new RoomListItem(room).build(outPacket)
+            new RoomListItem(room).build(outPacket)
         }
     }
 }

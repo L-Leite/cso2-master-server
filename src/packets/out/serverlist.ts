@@ -22,8 +22,10 @@ export class OutServerListPacket extends OutPacketBase {
     constructor(channelServers: ChannelServer[]) {
         super(PacketId.ServerList)
 
-        this.outStream = new WritableStreamBuffer(
-            { initialSize: 60, incrementAmount: 12 })
+        this.outStream = new WritableStreamBuffer({
+            initialSize: 60,
+            incrementAmount: 12
+        })
 
         this.buildHeader()
         this.writeUInt8(channelServers.length)

@@ -2,7 +2,7 @@ import { InPacketBase } from 'packets/in/packet'
 
 export enum RoomCountdownType {
     InProgress = 0,
-    Stop = 1,
+    Stop = 1
 }
 
 /**

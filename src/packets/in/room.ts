@@ -9,7 +9,7 @@ export enum InRoomType {
     UpdateSettings = 6,
     OnCloseResultWindow = 7,
     SetUserTeamRequest = 9,
-    GameStartCountdownRequest = 19,
+    GameStartCountdownRequest = 19
 }
 
 /**

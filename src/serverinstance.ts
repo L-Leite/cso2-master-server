@@ -28,13 +28,13 @@ import { ChatService } from 'services/chatservice'
 /**
  * The welcome message sent to the client
  */
-const clientWelcomeMessage: string = '~SERVERCONNECTED\n\0'
+const clientWelcomeMessage = '~SERVERCONNECTED\n\0'
 
 export interface IServerOptions {
-    hostname: string,
-    portMaster: number,
-    portHolepunch: number,
-    shouldLogPackets?: boolean,
+    hostname: string
+    portMaster: number
+    portHolepunch: number
+    shouldLogPackets?: boolean
 }
 
 /**
@@ -44,14 +44,18 @@ export interface IServerOptions {
  * @class ServerManager
  */
 export class ServerInstance {
-    private static onVersionPacket(versionData: Buffer, sourceConn: ExtendedSocket): boolean {
-        /*const versionPacket: InVersionPacket = new InVersionPacket(versionData)
+    private static onVersionPacket(
+        versionData: Buffer,
+        sourceConn: ExtendedSocket
+    ): boolean {
+        /* const versionPacket: InVersionPacket = new InVersionPacket(versionData)
         console.log(sourceConn.uuid + ' sent a version packet. clientHash: '
             + versionPacket.clientHash)*/
 
         // i think the client ignores the hash string
-        sourceConn.send(new OutVersionPacket(
-            false, '6246015df9a7d1f7311f888e7e861f18'))
+        sourceConn.send(
+            new OutVersionPacket(false, '6246015df9a7d1f7311f888e7e861f18')
+        )
 
         return true
     }
@@ -87,23 +91,30 @@ export class ServerInstance {
             this.packetLogging = new PacketLogger()
         }
 
-        this.server.on('connection', (socket: net.Socket) => {
-            this.onServerConnection(socket)
-        }).on('close', () => {
-            this.onServerClose()
-        }).on('error', (err: Error) => {
-            this.onServerError(err)
-        }).on('listening', () => {
-            this.onServerListening()
-        })
+        this.server
+            .on('connection', (socket: net.Socket) => {
+                this.onServerConnection(socket)
+            })
+            .on('close', () => {
+                this.onServerClose()
+            })
+            .on('error', (err: Error) => {
+                this.onServerError(err)
+            })
+            .on('listening', () => {
+                this.onServerListening()
+            })
 
-        this.holepunchServer.on('error', (err: Error) => {
-            this.onServerError(err)
-        }).on('message', (msg: Buffer, rinfo: net.AddressInfo) => {
-            this.onHolepunchMessage(msg, rinfo)
-        }).on('listening', () => {
-            this.onHolepunchListening()
-        })
+        this.holepunchServer
+            .on('error', (err: Error) => {
+                this.onServerError(err)
+            })
+            .on('message', (msg: Buffer, rinfo: net.AddressInfo) => {
+                this.onHolepunchMessage(msg, rinfo)
+            })
+            .on('listening', () => {
+                this.onHolepunchListening()
+            })
     }
 
     public listen(): void {
@@ -130,7 +141,7 @@ export class ServerInstance {
 
         // setup socket callbacks
         newConn.on('data', (data: string) => {
-            this.onSocketData(newConn, data)
+            void this.onSocketData(newConn, data)
         })
 
         newConn.on('error', (err: Error) => {
@@ -138,7 +149,7 @@ export class ServerInstance {
         })
 
         newConn.on('close', (hadError: boolean) => {
-            this.onSocketClose(newConn, hadError)
+            void this.onSocketClose(newConn, hadError)
         })
 
         newConn.on('end', () => {
@@ -171,15 +182,15 @@ export class ServerInstance {
      * Called when the server starts listening
      */
     private onServerListening(): void {
-        const address: net.AddressInfo =
-            this.server.address() as net.AddressInfo
-        console.log('server is now started listening at ' +
-            address.address + ':' + address.port)
+        const address: net.AddressInfo = this.server.address() as net.AddressInfo
+        console.log(
+            `server is now started listening at ${address.address}:${address.port}`
+        )
     }
 
     private onHolepunchListening(): void {
         const address: net.AddressInfo = this.holepunchServer.address() as net.AddressInfo
-        console.log('holepunch listening at ' + address.address + ':' + address.port)
+        console.log(`holepunch listening at ${address.address}:${address.port}`)
     }
 
     /**
@@ -199,7 +210,9 @@ export class ServerInstance {
             return
         }
 
-        const conn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(packet.userId)
+        const conn: ExtendedSocket = ActiveConnections.Singleton().FindByOwnerId(
+            packet.userId
+        )
 
         if (conn == null) {
             return
@@ -208,25 +221,37 @@ export class ServerInstance {
         const session: UserSession = conn.session
 
         if (session == null) {
-            console.warn('Couldnt\'t get user ID %i\'s session when holepunching', packet.userId)
+            console.warn(
+                `Could not get user ID ${packet.userId}'s session when holepunching`
+            )
             return
         }
 
         // FIX ME: temporary workaround because Docker sets the NAT IP address when creating a session in usermanager.ts
-        /*if (session.externalNet.ipAddress !== rinfo.address) {
+        /* if (session.externalNet.ipAddress !== rinfo.address) {
             console.warn('Holepunch IP address is different from session\'s IP. Is someone spoofing packets?'
                 + 'userId: %i original IP: %s packet IP: %s',
                 packet.userId, session.externalNet.ipAddress, rinfo.address)
             return
         }*/
 
-        if (session.shouldUpdatePorts(packet.portId, packet.port, rinfo.port) === false) {
+        if (
+            session.shouldUpdatePorts(
+                packet.portId,
+                packet.port,
+                rinfo.port
+            ) === false
+        ) {
             return
         }
 
         session.externalNet.ipAddress = rinfo.address
         session.internalNet.ipAddress = packet.ipAddress
-        const portIndex = session.setHolepunch(packet.portId, packet.port, rinfo.port)
+        const portIndex = session.setHolepunch(
+            packet.portId,
+            packet.port,
+            rinfo.port
+        )
 
         if (portIndex === -1) {
             console.warn('Unknown hole punch port')
@@ -242,25 +267,30 @@ export class ServerInstance {
      * @param conn the client's socket
      * @param data the data received from the client
      */
-    private async onSocketData(conn: ExtendedSocket, data: string): Promise<void> {
+    private async onSocketData(conn: ExtendedSocket, data: string) {
         // the data comes in as a string, so we need to convert it to a buffer
         const newData: Buffer = Buffer.from(data, 'hex')
         // process the received data
-        this.processPackets(newData, conn)
+        await this.processPackets(newData, conn)
     }
 
-    private processPackets(packetData: Buffer, conn: ExtendedSocket) {
-        let curOffset: number = 0
-        let curTotalLen: number = 0
+    private async processPackets(packetData: Buffer, conn: ExtendedSocket) {
+        let curOffset = 0
+        let curTotalLen = 0
 
-        for (let len = packetData.length;
+        for (
+            let len = packetData.length;
             len >= InPacketBase.headerLength;
-            len -= curTotalLen) {
-            const pktBuffer: Buffer = packetData.slice(curOffset, curOffset + len)
+            len -= curTotalLen
+        ) {
+            const pktBuffer: Buffer = packetData.slice(
+                curOffset,
+                curOffset + len
+            )
             const curPacket: InPacketBase = new InPacketBase(pktBuffer)
             const totalPktLen = curPacket.length + InPacketBase.headerLength
 
-            this.onIncomingPacket(curPacket, conn)
+            await this.onIncomingPacket(curPacket, conn)
 
             curTotalLen = totalPktLen
             curOffset += totalPktLen
@@ -273,7 +303,10 @@ export class ServerInstance {
      * @param connection represents a connection with the client
      * @returns true if successful, otherwise it failed
      */
-    private onIncomingPacket(packet: InPacketBase, connection: ExtendedSocket): boolean {
+    private async onIncomingPacket(
+        packet: InPacketBase,
+        connection: ExtendedSocket
+    ): Promise<boolean> {
         if (packet.isValid() === false) {
             console.warn('bad packet from ' + connection.uuid)
             return false
@@ -282,46 +315,46 @@ export class ServerInstance {
         const data: Buffer = packet.getData()
 
         if (this.packetLogging) {
-            this.packetLogging.dumpIn(connection.uuid, connection.getRealSeq(), packet.id, data)
+            this.packetLogging.dumpIn(
+                connection.uuid,
+                connection.getRealSeq(),
+                packet.id,
+                data
+            )
         }
 
         // the most received packets should go first
         switch (packet.id) {
             case PacketId.Host:
-                UserManager.onHostPacket(data, connection)
-                return true
+                return await UserManager.onHostPacket(data, connection)
             case PacketId.Room:
-                ChannelManager.onRoomRequest(data, connection)
-                return true
+                return ChannelManager.onRoomRequest(data, connection)
             case PacketId.Chat:
-                this.chatHandler.OnPacket(data, connection)
-                return true
+                return this.chatHandler.OnPacket(data, connection)
             case PacketId.Achievement:
                 UserManager.TEST_onAchievementPacket(data, connection)
                 return true
             case PacketId.RequestChannels:
-                ChannelManager.onChannelListPacket(connection)
-                return true
+                return ChannelManager.onChannelListPacket(connection)
             case PacketId.RequestRoomList:
-                ChannelManager.onRoomListPacket(data, connection)
-                return true
+                return ChannelManager.onRoomListPacket(data, connection)
             case PacketId.AboutMe:
-                UserManager.onAboutmePacket(data, connection)
-                return true;
+                return await UserManager.onAboutmePacket(data, connection)
             case PacketId.Option:
-                UserManager.onOptionPacket(data, connection)
-                return true
+                return await UserManager.onOptionPacket(data, connection)
             case PacketId.Favorite:
-                UserManager.onFavoritePacket(data, connection)
-                return true
+                return await UserManager.onFavoritePacket(data, connection)
             case PacketId.Login:
-                UserManager.onLoginPacket(data, connection, this.holepunchPort)
-                return true
+                return await UserManager.onLoginPacket(
+                    data,
+                    connection,
+                    this.holepunchPort
+                )
             case PacketId.Version:
                 return ServerInstance.onVersionPacket(data, connection)
         }
 
-        console.warn('unknown packet id ' + packet.id + ' from ' + connection.uuid)
+        console.warn(`unknown packet id ${packet.id} from ${connection.uuid}`)
         return false
     }
 
@@ -330,8 +363,15 @@ export class ServerInstance {
      * @param conn the client's connection
      * @param hadError true if it was closed because of an error
      */
-    private async onSocketClose(conn: ExtendedSocket, hadError: boolean): Promise<void> {
-        console.log('socket ' + conn.uuid + ' closed hadError: ' + hadError)
+    private async onSocketClose(
+        conn: ExtendedSocket,
+        hadError: boolean
+    ): Promise<void> {
+        console.log(
+            `socket ${conn.uuid} closed hadError: ${
+                hadError ? 'true' : 'false'
+            }`
+        )
         Room.cleanUpUser(conn)
         await UserManager.OnSocketClosed(conn)
         ActiveConnections.Singleton().Remove(conn)
@@ -343,7 +383,7 @@ export class ServerInstance {
      * @param err the occured error
      */
     private onSocketError(conn: ExtendedSocket, err: Error): void {
-        console.warn('socket ' + conn.uuid + ' had an error: ' + err)
+        console.warn(`socket ${conn.uuid} had an error: ${err.name}`)
     }
 
     /**
@@ -351,7 +391,7 @@ export class ServerInstance {
      * @param conn the client's connection
      */
     private onSocketEnd(conn: ExtendedSocket): void {
-        console.log('socket ' + conn.uuid + ' ended')
+        console.log(`socket ${conn.uuid} ended`)
     }
 
     /**
@@ -370,7 +410,10 @@ export class ServerInstance {
      * @returns the placed socket
      */
     private addSocket(conn: net.Socket): ExtendedSocket {
-        const newConn: ExtendedSocket = ExtendedSocket.from(conn, this.packetLogging)
+        const newConn: ExtendedSocket = ExtendedSocket.from(
+            conn,
+            this.packetLogging
+        )
 
         // treat data as hexadecimal
         newConn.setEncoding('hex')

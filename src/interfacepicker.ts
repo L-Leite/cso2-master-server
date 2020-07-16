@@ -38,7 +38,7 @@ function getAvailableInterfaces(): INetIntf[] {
 function readChoiceFromConsole(): Promise<number> {
     const rl = readline.createInterface({
         input: process.stdin,
-        output: process.stdout,
+        output: process.stdout
     })
 
     rl.prompt()
@@ -54,7 +54,8 @@ function readChoiceFromConsole(): Promise<number> {
             } else {
                 resolve(result)
             }
-        }))
+        })
+    )
 }
 
 /**
@@ -78,10 +79,15 @@ export async function getOrAskNetIntf(): Promise<INetIntf> {
         let printIndex = 0
 
         for (const intf of interfaces) {
-            console.log('(%i) - %s (%s)', printIndex++, intf.name, intf.net.address)
+            console.log(
+                '(%i) - %s (%s)',
+                printIndex++,
+                intf.name,
+                intf.net.address
+            )
         }
 
-        let choice: number = 0
+        let choice = 0
 
         try {
             choice = await readChoiceFromConsole()
@@ -101,7 +107,11 @@ export async function getOrAskNetIntf(): Promise<INetIntf> {
         chosenIntf = interfaces[0]
     }
 
-    console.log('Using interface %s (%s)', chosenIntf.name, chosenIntf.net.address)
+    console.log(
+        'Using interface %s (%s)',
+        chosenIntf.name,
+        chosenIntf.net.address
+    )
     return chosenIntf
 }
 

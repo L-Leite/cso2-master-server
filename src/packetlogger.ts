@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 
 function padNumber(n: number): string {
-    return n > 9 ? '' + n : '0' + n
+    return n > 9 ? '' + n.toString() : '0' + n.toString()
 }
 
 /**
@@ -20,9 +20,7 @@ export class PacketLogger {
     private inPath: string
     private outPath: string
 
-    constructor(baseDir: string = 'packets',
-                incomingDir: string = 'in',
-                outgoingDir: string = 'out') {
+    constructor(baseDir = 'packets', incomingDir = 'in', outgoingDir = 'out') {
         this.inPath = baseDir + '/' + incomingDir + '/'
         this.outPath = baseDir + '/' + outgoingDir + '/'
 
@@ -56,13 +54,19 @@ export class PacketLogger {
      * logs incoming packet
      * @param inPacket the packet to log
      */
-    public dumpIn(connUuid: string, seq: number, packetId: number, packetData: Buffer): void {
-        const packetPath: string
-            = this.inPath + connUuid + '_' + padNumber(seq) + '-' + packetId + '.bin'
+    public dumpIn(
+        connUuid: string,
+        seq: number,
+        packetId: number,
+        packetData: Buffer
+    ): void {
+        const packetPath = `${this.inPath}${connUuid}_${padNumber(
+            seq
+        )}-${packetId}.bin`
 
         fs.writeFileSync(packetPath, packetData, {
             encoding: 'binary',
-            flag: 'w',
+            flag: 'w'
         })
     }
 
@@ -70,17 +74,27 @@ export class PacketLogger {
      * logs outgoing packet
      * @param outPacket the packet data to log
      */
-    public dumpOut(connUuid: string, seq: number, packetId: number, packetData: Buffer) {
+    public dumpOut(
+        connUuid: string,
+        seq: number,
+        packetId: number,
+        packetData: Buffer
+    ): void {
         // parse the out packet as an in packet
         // the header is the same
-        const packetPath: string
-            = this.outPath + connUuid + '_' + padNumber(seq) + '-' + packetId + '.bin'
+        const packetPath = `${this.outPath}${connUuid}_${padNumber(
+            seq
+        )}-${packetId}.bin`
 
-        fs.writeFile(packetPath, packetData, { encoding: 'binary', flag: 'w' },
+        fs.writeFile(
+            packetPath,
+            packetData,
+            { encoding: 'binary', flag: 'w' },
             (err) => {
                 if (err) {
                     console.error(err)
                 }
-            })
+            }
+        )
     }
 }

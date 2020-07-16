@@ -20,8 +20,11 @@ export class OutOptionBuyMenu {
         this.buildSubmenu(buyMenu.equipment, outPacket)
     }
 
-    public static buildSubmenu(items: number[], outPacket: OutPacketBase): void {
-        let curItem: number = 0
+    public static buildSubmenu(
+        items: number[],
+        outPacket: OutPacketBase
+    ): void {
+        let curItem = 0
 
         outPacket.writeUInt8(items.length) // number of items in the submenu
         for (const item of items) {

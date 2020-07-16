@@ -5,10 +5,14 @@ import { UserInventoryItem } from 'user/userinventoryitem'
  * sends an user's inventory to a host
  */
 export class OutHostSetInventory {
-    public static build(userId: number, items: UserInventoryItem[], outPacket: OutPacketBase): void {
+    public static build(
+        userId: number,
+        items: UserInventoryItem[],
+        outPacket: OutPacketBase
+    ): void {
         outPacket.writeUInt32(userId)
 
-         // writes somewhere to CGameClient
+        // writes somewhere to CGameClient
         outPacket.writeUInt8(0) // unk00
 
         // these are unconfirmed

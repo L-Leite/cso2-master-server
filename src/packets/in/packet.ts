@@ -67,13 +67,13 @@ export class InPacketBase extends PacketBaseShared {
      * reads two bytes from the current offset
      * @returns the read signed bytes
      */
-    public readInt16(bigEndian: boolean = false): number {
+    public readInt16(bigEndian = false): number {
         if (this.canReadBytes(2) === false) {
             throw new Error('Data buffer is too small')
         }
-        const res: number = bigEndian ?
-            this.packetData.readInt16BE(this.curOffset) :
-            this.packetData.readInt16LE(this.curOffset)
+        const res: number = bigEndian
+            ? this.packetData.readInt16BE(this.curOffset)
+            : this.packetData.readInt16LE(this.curOffset)
         this.curOffset += 2
         return res
     }
@@ -82,13 +82,13 @@ export class InPacketBase extends PacketBaseShared {
      * reads four bytes from the current offset
      * @returns the read signed bytes
      */
-    public readInt32(bigEndian: boolean = false): number {
+    public readInt32(bigEndian = false): number {
         if (this.canReadBytes(4) === false) {
             throw new Error('Data buffer is too small')
         }
-        const res: number = bigEndian ?
-            this.packetData.readInt32BE(this.curOffset) :
-            this.packetData.readInt32LE(this.curOffset)
+        const res: number = bigEndian
+            ? this.packetData.readInt32BE(this.curOffset)
+            : this.packetData.readInt32LE(this.curOffset)
         this.curOffset += 4
         return res
     }
@@ -97,13 +97,13 @@ export class InPacketBase extends PacketBaseShared {
      * reads eight bytes from the current offset
      * @returns the read signed bytes
      */
-    public readInt64(bigEndian: boolean = false): Int64LE | Int64BE {
+    public readInt64(bigEndian = false): Int64LE | Int64BE {
         if (this.canReadBytes(8) === false) {
             throw new Error('Data buffer is too small')
         }
-        const res: Int64LE | Int64BE = bigEndian ?
-            new Int64BE(this.packetData, this.curOffset) :
-            new Int64LE(this.packetData, this.curOffset)
+        const res: Int64LE | Int64BE = bigEndian
+            ? new Int64BE(this.packetData, this.curOffset)
+            : new Int64LE(this.packetData, this.curOffset)
         this.curOffset += 8
         return res
     }
@@ -123,13 +123,13 @@ export class InPacketBase extends PacketBaseShared {
      * reads two bytes from the current offset
      * @returns the read unsigned bytes
      */
-    public readUInt16(bigEndian: boolean = false): number {
+    public readUInt16(bigEndian = false): number {
         if (this.canReadBytes(2) === false) {
             throw new Error('Data buffer is too small')
         }
-        const res: number = bigEndian ?
-            this.packetData.readUInt16BE(this.curOffset) :
-            this.packetData.readUInt16LE(this.curOffset)
+        const res: number = bigEndian
+            ? this.packetData.readUInt16BE(this.curOffset)
+            : this.packetData.readUInt16LE(this.curOffset)
         this.curOffset += 2
         return res
     }
@@ -138,13 +138,13 @@ export class InPacketBase extends PacketBaseShared {
      * reads four bytes from the current offset
      * @returns the read unsigned bytes
      */
-    public readUInt32(bigEndian: boolean = false): number {
+    public readUInt32(bigEndian = false): number {
         if (this.canReadBytes(4) === false) {
             throw new Error('Data buffer is too small')
         }
-        const res: number = bigEndian ?
-            this.packetData.readUInt32BE(this.curOffset) :
-            this.packetData.readUInt32LE(this.curOffset)
+        const res: number = bigEndian
+            ? this.packetData.readUInt32BE(this.curOffset)
+            : this.packetData.readUInt32LE(this.curOffset)
         this.curOffset += 4
         return res
     }
@@ -153,13 +153,13 @@ export class InPacketBase extends PacketBaseShared {
      * reads eight bytes from the current offset
      * @returns the read unsigned bytes
      */
-    public readUInt64(bigEndian: boolean = false): Uint64LE | Uint64BE {
+    public readUInt64(bigEndian = false): Uint64LE | Uint64BE {
         if (this.canReadBytes(8) === false) {
             throw new Error('Data buffer is too small')
         }
-        const res: Uint64LE | Uint64BE = bigEndian ?
-            new Uint64BE(this.packetData, this.curOffset) :
-            new Uint64LE(this.packetData, this.curOffset)
+        const res: Uint64LE | Uint64BE = bigEndian
+            ? new Uint64BE(this.packetData, this.curOffset)
+            : new Uint64LE(this.packetData, this.curOffset)
         this.curOffset += 8
         return res
     }
@@ -174,8 +174,8 @@ export class InPacketBase extends PacketBaseShared {
             throw new Error('Data buffer is too small')
         }
         const res: PacketString = PacketString.from(
-            this.packetData.slice(this.curOffset,
-                this.packetData.length))
+            this.packetData.slice(this.curOffset, this.packetData.length)
+        )
         this.curOffset += res.totalLen
         return res.str
     }
@@ -190,8 +190,8 @@ export class InPacketBase extends PacketBaseShared {
             throw new Error('Data buffer is too small')
         }
         const res: PacketLongString = PacketLongString.from(
-            this.packetData.slice(this.curOffset,
-                this.packetData.length))
+            this.packetData.slice(this.curOffset, this.packetData.length)
+        )
         this.curOffset += res.totalLen
         return res.str
     }
@@ -205,8 +205,10 @@ export class InPacketBase extends PacketBaseShared {
         if (this.canReadBytes(length) === false) {
             throw new Error('Data buffer is too small')
         }
-        const res: Buffer = this.packetData.slice(this.curOffset,
-            this.curOffset + length)
+        const res: Buffer = this.packetData.slice(
+            this.curOffset,
+            this.curOffset + length
+        )
         this.curOffset += length
         return res
     }
@@ -218,7 +220,9 @@ export class InPacketBase extends PacketBaseShared {
         this.signature = this.readUInt8()
 
         if (this.isValid() === false) {
-            throw new Error('This is not a packet. Signature: ' + this.signature)
+            throw new Error(
+                `This is not a packet. Signature: ${this.signature}`
+            )
         }
 
         this.sequence = this.readUInt8()

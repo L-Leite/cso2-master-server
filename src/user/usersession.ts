@@ -42,24 +42,37 @@ export class UserSession {
      * @param externalPort the user's external port
      * @returns true if it should be updated, false if not
      */
-    public shouldUpdatePorts(portId: number, localPort: number, externalPort: number): boolean {
+    public shouldUpdatePorts(
+        portId: number,
+        localPort: number,
+        externalPort: number
+    ): boolean {
         switch (portId) {
             case HolepunchType.Client:
-                return localPort !== this.internalNet.clientPort
-                    || externalPort !== this.externalNet.clientPort
+                return (
+                    localPort !== this.internalNet.clientPort ||
+                    externalPort !== this.externalNet.clientPort
+                )
             case HolepunchType.Server:
-                return localPort !== this.internalNet.serverPort
-                    || externalPort !== this.externalNet.serverPort
+                return (
+                    localPort !== this.internalNet.serverPort ||
+                    externalPort !== this.externalNet.serverPort
+                )
             case HolepunchType.SourceTV:
-                return localPort !== this.internalNet.tvPort
-                    || externalPort !== this.externalNet.tvPort
+                return (
+                    localPort !== this.internalNet.tvPort ||
+                    externalPort !== this.externalNet.tvPort
+                )
         }
 
         return false
     }
 
-    public setHolepunch(portId: number, localPort: number,
-                        externalPort: number): number {
+    public setHolepunch(
+        portId: number,
+        localPort: number,
+        externalPort: number
+    ): number {
         switch (portId) {
             case HolepunchType.Client:
                 this.internalNet.clientPort = localPort

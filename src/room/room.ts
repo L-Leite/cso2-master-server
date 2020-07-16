@@ -2,7 +2,6 @@ import { Channel } from 'channel/channel'
 
 import { ExtendedSocket } from 'extendedsocket'
 
-import { ChannelManager } from 'channel/channelmanager'
 import { RoomSettings } from 'room/roomsettings'
 import { RoomUserEntry } from 'room/roomuserentry'
 
@@ -18,13 +17,13 @@ export enum RoomTeamNum {
     Unknown = 0,
     Terrorist = 1,
     CounterTerrorist = 2,
-    Spectator = 3,
+    Spectator = 3
 }
 
 export enum RoomReadyStatus {
     NotReady = 0,
     Ingame = 1,
-    Ready = 2,
+    Ready = 2
 }
 
 // pasted from scripts/cso2_modlist.csv
@@ -95,28 +94,28 @@ export enum RoomGamemode {
     z_scenario_side = 65,
     hide_multi = 66,
     madcity_team = 67,
-    rankmatch_stealth = 68,
+    rankmatch_stealth = 68
 }
 
 export enum RoomTeamBalance {
     Disabled = 0,
     Enabled = 1,
     WithBots = 2,
-    ByKadRatio = 4,
+    ByKadRatio = 4
 }
 
 export interface IRoomOptions {
-    roomName?: string,
-    roomPassword?: string,
-    gameModeId?: number,
-    mapId?: number,
-    winLimit?: number,
-    killLimit?: number,
-    startMoney?: number,
-    forceCamera?: number,
-    nextMapEnabled?: number,
-    changeTeams?: number,
-    enableBots?: boolean,
+    roomName?: string
+    roomPassword?: string
+    gameModeId?: number
+    mapId?: number
+    winLimit?: number
+    killLimit?: number
+    startMoney?: number
+    forceCamera?: number
+    nextMapEnabled?: number
+    changeTeams?: number
+    enableBots?: boolean
     difficulty?: number
     respawnTime?: number
     teamBalance?: number
@@ -126,10 +125,10 @@ export interface IRoomOptions {
 
 export enum RoomStatus {
     Waiting = 1,
-    Ingame = 2,
+    Ingame = 2
 }
 
-const defaultCountdownNum: number = 7
+const defaultCountdownNum = 7
 
 export class Room {
     /**
@@ -178,9 +177,14 @@ export class Room {
     private countingDown: boolean
     private countdown: number
 
-    constructor(roomId: number, hostUserId: number, hostConn: ExtendedSocket, parentChannel: Channel,
-                emptyRoomCallback?: (emptyRoom: Room, channel: Channel) => void,
-                options?: IRoomOptions) {
+    constructor(
+        roomId: number,
+        hostUserId: number,
+        hostConn: ExtendedSocket,
+        parentChannel: Channel,
+        emptyRoomCallback?: (emptyRoom: Room, channel: Channel) => void,
+        options?: IRoomOptions
+    ) {
         this.id = roomId
 
         this.usersInfo = []
@@ -201,7 +205,8 @@ export class Room {
      * @returns the free player slots
      */
     public getFreeSlots(): number {
-        const availableSlots: number = this.settings.maxPlayers - this.usersInfo.length
+        const availableSlots: number =
+            this.settings.maxPlayers - this.usersInfo.length
         return Math.max(0, availableSlots)
     }
 
@@ -218,7 +223,10 @@ export class Room {
      * @returns true if so, false if not
      */
     public IsPasswordProtected(): boolean {
-        return this.settings.roomPassword != null && this.settings.roomPassword.length > 0
+        return (
+            this.settings.roomPassword != null &&
+            this.settings.roomPassword.length > 0
+        )
     }
 
     /**
@@ -245,8 +253,12 @@ export class Room {
      * @returns the created user's room data
      */
     public addUser(userId: number, connection: ExtendedSocket): RoomUserEntry {
-        const userData: RoomUserEntry = new RoomUserEntry(userId, connection,
-            this.findDesirableTeamNum(), RoomReadyStatus.NotReady)
+        const userData: RoomUserEntry = new RoomUserEntry(
+            userId,
+            connection,
+            this.findDesirableTeamNum(),
+            RoomReadyStatus.NotReady
+        )
         this.usersInfo.push(userData)
         return userData
     }
@@ -270,8 +282,8 @@ export class Room {
      * @returns the team with less users
      */
     public findDesirableTeamNum(): RoomTeamNum {
-        let trNum: number = 0
-        let ctNum: number = 0
+        let trNum = 0
+        let ctNum = 0
 
         for (const userData of this.usersInfo.values()) {
             const team: RoomTeamNum = userData.team
@@ -322,10 +334,9 @@ export class Room {
      * @returns the num of players ready
      */
     public getNumOfReadyRealPlayers(): number {
-        let numReadyPlayers: number = 0
+        let numReadyPlayers = 0
         for (const info of this.usersInfo) {
-            if (info.isReady() === true
-                || info === this.host) {
+            if (info.isReady() === true || info === this.host) {
                 numReadyPlayers++
             }
         }
@@ -337,7 +348,7 @@ export class Room {
      * gives the number of elements in the counter terrorist team
      */
     public getNumOfRealCts(): number {
-        let numCt: number = 0
+        let numCt = 0
         for (const userData of this.usersInfo.values()) {
             const team: RoomTeamNum = userData.team
             if (team === RoomTeamNum.CounterTerrorist) {
@@ -352,7 +363,7 @@ export class Room {
      * gives the number of elements in the terrorist team
      */
     public getNumOfRealTerrorists(): number {
-        let numTerrorists: number = 0
+        let numTerrorists = 0
         for (const userData of this.usersInfo.values()) {
             const team: RoomTeamNum = userData.team
             if (team === RoomTeamNum.Terrorist) {
@@ -368,7 +379,8 @@ export class Room {
      * @returns the num of players ready
      */
     public getNumOfReadyPlayers(): number {
-        let botPlayers: number = this.settings.numCtBots + this.settings.numTrBots
+        let botPlayers: number =
+            this.settings.numCtBots + this.settings.numTrBots
 
         if (this.settings.teamBalanceType === RoomTeamBalance.WithBots) {
             const numCts: number = this.getNumOfRealCts()
@@ -407,7 +419,7 @@ export class Room {
         const userInfo: RoomUserEntry = this.getRoomUser(userId)
 
         if (userInfo == null) {
-            console.warn('isUserReady: couldnt get user\'s room data (userId: %i)', userId)
+            console.warn(`couldnt get user's room data (userId: ${userId})`)
             return false
         }
 
@@ -485,14 +497,17 @@ export class Room {
         }
 
         if (userInfo.isIngame === true) {
-            console.warn(`toggleUserReadyStatus: user ${userId} tried to toggle ready status while ingame`)
+            console.warn(
+                `toggleUserReadyStatus: user ${userId} tried to toggle ready status while ingame`
+            )
             return null
         }
 
         const curStatus: RoomReadyStatus = userInfo.ready
         const newStatus: RoomReadyStatus =
             curStatus === RoomReadyStatus.NotReady
-                ? RoomReadyStatus.Ready : RoomReadyStatus.NotReady
+                ? RoomReadyStatus.Ready
+                : RoomReadyStatus.NotReady
         userInfo.ready = newStatus
         return newStatus
     }
@@ -504,7 +519,9 @@ export class Room {
     public resetIngameUsersReadyStatus(): boolean {
         for (const user of this.usersInfo) {
             if (user == null) {
-                console.warn('resetIngameUsersReadyStatus: couldnt get userinfo')
+                console.warn(
+                    'resetIngameUsersReadyStatus: couldnt get userinfo'
+                )
                 return false
             }
 
@@ -538,8 +555,7 @@ export class Room {
      * @param hostNextNum the host's next countdown number
      */
     public progressCountdown(hostNextNum: number): void {
-        if (this.countdown > defaultCountdownNum
-            || this.countdown < 0) {
+        if (this.countdown > defaultCountdownNum || this.countdown < 0) {
             console.warn('Room: the saved countdown is invalid!')
             this.countdown = 0
         }
@@ -551,7 +567,9 @@ export class Room {
         this.countdown--
 
         if (this.countdown !== hostNextNum) {
-            console.warn('Room: host\'s countdown does not match ours. ours %i host %i', this.countdown, hostNextNum)
+            console.warn(
+                `host's countdown does not match ours. ours ${this.countdown} host ${hostNextNum}`
+            )
         }
     }
 
@@ -560,17 +578,18 @@ export class Room {
      */
     public getCountdown(): number {
         if (this.countingDown === false) {
-            console.warn('getCountdown: tried to get countdown without counting down'
-                + 'this is most likely a bug')
+            console.warn(
+                'getCountdown: tried to get countdown without counting down' +
+                    'this is most likely a bug'
+            )
             return 0
         }
 
         // make sure the countdown is inbounds
-        if (this.countdown > defaultCountdownNum
-            || this.countdown < 0) {
+        if (this.countdown > defaultCountdownNum || this.countdown < 0) {
             console.warn(
-                'getCountdown: our countdown is out of bounds. it\'s %i',
-                this.countdown)
+                `our countdown is out of bounds. it's ${this.countdown}`
+            )
             this.countdown = 0
         }
 
@@ -755,12 +774,16 @@ export class Room {
             this.settings.multiMaps = newSettings.multiMaps
         }
         // which flag enabled this?
-        /*if (newSettings.nextMapEnabled != null) {
+        /* if (newSettings.nextMapEnabled != null) {
             this.settings.nextMapEnabled = newSettings.nextMapEnabled
         }*/
         if (newSettings.botEnabled != null) {
-            this.updateBotEnabled(newSettings.botEnabled, newSettings.botDifficulty,
-                newSettings.numCtBots, newSettings.numTrBots)
+            this.updateBotEnabled(
+                newSettings.botEnabled,
+                newSettings.botDifficulty,
+                newSettings.numCtBots,
+                newSettings.numTrBots
+            )
         }
 
         if (newSettings.unk00 != null) {
@@ -855,7 +878,10 @@ export class Room {
         user.conn.send(OutRoomPacket.updateSettings(this.settings))
     }
 
-    public sendUpdateRoomSettingsTo(user: RoomUserEntry, updatedSettings: RoomSettings): void {
+    public sendUpdateRoomSettingsTo(
+        user: RoomUserEntry,
+        updatedSettings: RoomSettings
+    ): void {
         user.conn.send(OutRoomPacket.updateSettings(updatedSettings))
     }
 
@@ -868,8 +894,12 @@ export class Room {
         const team: RoomTeamNum = newUser.team
 
         if (team == null) {
-            console.warn('sendNewUserTo: couldnt get user team (userId: %i room "%s" room id %i)',
-                user.userId, this.settings.roomName, this.id)
+            console.warn(
+                'sendNewUserTo: couldnt get user team (userId: %i room "%s" room id %i)',
+                user.userId,
+                this.settings.roomName,
+                this.id
+            )
             return null
         }
 
@@ -914,7 +944,7 @@ export class Room {
         this.sendStartMatchTo(this.host)
     }
 
-    public async guestGameJoin(guestUserId: number): Promise<void> {
+    public guestGameJoin(guestUserId: number): void {
         const guest: RoomUserEntry = this.getRoomUser(guestUserId)
 
         this.sendRoomStatusTo(guest)
@@ -951,7 +981,10 @@ export class Room {
      * @param sourceUserId the user whose team number changed
      * @param newTeamNum the new team number
      */
-    public broadcastNewUserTeamNum(sourceUserId: number, newTeamNum: RoomTeamNum): void {
+    public broadcastNewUserTeamNum(
+        sourceUserId: number,
+        newTeamNum: RoomTeamNum
+    ): void {
         const sourceUser: RoomUserEntry = this.getRoomUser(sourceUserId)
         this.recurseUsers((u: RoomUserEntry): void => {
             this.sendTeamChangeTo(u, sourceUser, newTeamNum)
@@ -978,12 +1011,19 @@ export class Room {
      * @param user the player to send the other player's ready status
      * @param player the player whose ready status will be sent
      */
-    public sendUserReadyStatusTo(user: RoomUserEntry, player: RoomUserEntry): void {
+    public sendUserReadyStatusTo(
+        user: RoomUserEntry,
+        player: RoomUserEntry
+    ): void {
         const ready: RoomReadyStatus = player.ready
 
         if (ready == null) {
-            console.warn('sendUserReadyStatusTo: couldnt get user status (userId: %i room "%s" room id %i)',
-                user.userId, this.settings.roomName, this.id)
+            console.warn(
+                'sendUserReadyStatusTo: couldnt get user status (userId: %i room "%s" room id %i)',
+                user.userId,
+                this.settings.roomName,
+                this.id
+            )
             return null
         }
 
@@ -1015,15 +1055,23 @@ export class Room {
      * @param host the host to connect to
      */
     public sendConnectHostTo(user: RoomUserEntry, host: RoomUserEntry): void {
-        const hostConn = ActiveConnections.Singleton().FindByOwnerId(host.userId)
+        const hostConn = ActiveConnections.Singleton().FindByOwnerId(
+            host.userId
+        )
         const hostSession: UserSession = hostConn.session
 
         if (hostSession == null) {
             return
         }
 
-        user.conn.send(new OutUdpPacket(true, host.userId,
-            hostSession.externalNet.ipAddress, hostSession.externalNet.serverPort))
+        user.conn.send(
+            new OutUdpPacket(
+                true,
+                host.userId,
+                hostSession.externalNet.ipAddress,
+                hostSession.externalNet.serverPort
+            )
+        )
         user.conn.send(OutHostPacket.joinHost(host.userId))
     }
 
@@ -1033,15 +1081,23 @@ export class Room {
      * @param guest the guest player joining the host's match
      */
     public sendGuestDataTo(host: RoomUserEntry, guest: RoomUserEntry): void {
-        const guestConn = ActiveConnections.Singleton().FindByOwnerId(guest.userId)
+        const guestConn = ActiveConnections.Singleton().FindByOwnerId(
+            guest.userId
+        )
         const guestSession: UserSession = guestConn.session
 
         if (guestSession == null) {
             return
         }
 
-        host.conn.send(new OutUdpPacket(false, guest.userId,
-            guestSession.externalNet.ipAddress, guestSession.externalNet.clientPort))
+        host.conn.send(
+            new OutUdpPacket(
+                false,
+                guest.userId,
+                guestSession.externalNet.ipAddress,
+                guestSession.externalNet.clientPort
+            )
+        )
     }
 
     /**
@@ -1058,7 +1114,11 @@ export class Room {
      * @param player the user who changed its team
      * @param newTeamNum the player's new team number
      */
-    public sendTeamChangeTo(user: RoomUserEntry, player: RoomUserEntry, newTeamNum: RoomTeamNum): void {
+    public sendTeamChangeTo(
+        user: RoomUserEntry,
+        player: RoomUserEntry,
+        newTeamNum: RoomTeamNum
+    ): void {
         user.conn.send(OutRoomPacket.setUserTeam(player.userId, newTeamNum))
     }
 
@@ -1067,7 +1127,10 @@ export class Room {
      * @param player the user who changed its team
      * @param newTeamNum the player's new team number
      */
-    public sendTeamChangeGlobal(player: RoomUserEntry, newTeamNum: RoomTeamNum): void {
+    public sendTeamChangeGlobal(
+        player: RoomUserEntry,
+        newTeamNum: RoomTeamNum
+    ): void {
         this.recurseUsers((u: RoomUserEntry) => {
             this.sendTeamChangeTo(u, player, newTeamNum)
         })
@@ -1078,10 +1141,15 @@ export class Room {
      * @param user the user to send the countdown to
      * @param shouldCountdown should the countdown continue
      */
-    public sendCountdownTo(user: RoomUserEntry, shouldCountdown: boolean): void {
-        user.conn.send(shouldCountdown
-            ? OutRoomPacket.progressCountdown(this.getCountdown())
-            : OutRoomPacket.stopCountdown())
+    public sendCountdownTo(
+        user: RoomUserEntry,
+        shouldCountdown: boolean
+    ): void {
+        user.conn.send(
+            shouldCountdown
+                ? OutRoomPacket.progressCountdown(this.getCountdown())
+                : OutRoomPacket.stopCountdown()
+        )
     }
 
     /**
@@ -1126,8 +1194,12 @@ export class Room {
      * handle bot enabled setting's update event
      * @param newMaxPlayers should enable the bots?
      */
-    private updateBotEnabled(botEnabled: number, botDifficulty: number,
-                             ctBots: number, terBots: number): void {
+    private updateBotEnabled(
+        botEnabled: number,
+        botDifficulty: number,
+        ctBots: number,
+        terBots: number
+    ): void {
         this.settings.areBotsEnabled = !!botEnabled
 
         if (this.settings.areBotsEnabled) {

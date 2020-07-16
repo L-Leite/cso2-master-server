@@ -11,7 +11,12 @@ export class RoomUserEntry {
     public ready: RoomReadyStatus
     public isIngame: boolean
 
-    constructor(userId: number, connection: ExtendedSocket, team: RoomTeamNum, ready: RoomReadyStatus) {
+    constructor(
+        userId: number,
+        connection: ExtendedSocket,
+        team: RoomTeamNum,
+        ready: RoomReadyStatus
+    ) {
         this.userId = userId
         this.conn = connection
         this.team = team

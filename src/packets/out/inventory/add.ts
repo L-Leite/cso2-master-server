@@ -11,12 +11,17 @@ import { UserInventoryItem } from 'user/userinventoryitem'
  * @class OutInventoryAdd
  */
 export class OutInventoryAdd {
-    public static build(items: UserInventoryItem[], outPacket: OutPacketBase): void {
+    public static build(
+        items: UserInventoryItem[],
+        outPacket: OutPacketBase
+    ): void {
         outPacket.writeUInt16(items.length)
 
-        let curItem: number = 0
+        let curItem = 0
         for (const item of items) {
-            new OutInventoryItem(curItem++, item.item_id, item.ammount).build(outPacket)
+            new OutInventoryItem(curItem++, item.item_id, item.ammount).build(
+                outPacket
+            )
         }
     }
 }

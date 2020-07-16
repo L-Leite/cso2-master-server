@@ -12,7 +12,10 @@ export class Channel {
      * @param emptyRoom the empty room object
      * @param channel the channel where the room's from
      */
-    private static onEmptyRoomCallback(emptyRoom: Room, channel: Channel): void {
+    private static onEmptyRoomCallback(
+        emptyRoom: Room,
+        channel: Channel
+    ): void {
         channel.rooms.splice(channel.rooms.indexOf(emptyRoom), 1)
     }
 
@@ -55,9 +58,21 @@ export class Channel {
      * @param options the room's parameters
      * @returns the created room
      */
-    public createRoom(hostUserId: number, hostConn: ExtendedSocket, options?: IRoomOptions): Room {
-        const newRoom: Room = new Room(this.nextRoomId++, hostUserId, hostConn,
-            this, Channel.onEmptyRoomCallback, options)
+    public createRoom(
+        hostUserId: number,
+        hostConn: ExtendedSocket,
+        options?: IRoomOptions
+    ): Room {
+        const newRoom: Room = new Room(
+            this.nextRoomId++,
+            hostUserId,
+            hostConn,
+            this,
+            (emptyRoom, channel) => {
+                Channel.onEmptyRoomCallback(emptyRoom, channel)
+            },
+            options
+        )
         this.rooms.push(newRoom)
         return this.rooms[this.rooms.length - 1]
     }

@@ -5,15 +5,18 @@ import { OutPacketBase } from 'packets/out/packet'
 
 import { UserSession } from 'user/usersession'
 
-const MIN_SEQUENCE: number = 0
-const MAX_SEQUENCE: number = 255
+const MIN_SEQUENCE = 0
+const MAX_SEQUENCE = 255
 
 /**
  * Expands net.Socket with more socket information
  * @class ExtendedSocket
  */
 export class ExtendedSocket extends net.Socket {
-    public static from(socket: net.Socket, packetDumper: PacketLogger): ExtendedSocket {
+    public static from(
+        socket: net.Socket,
+        packetDumper: PacketLogger
+    ): ExtendedSocket {
         const newSocket: ExtendedSocket = new ExtendedSocket()
         Object.assign(newSocket, socket)
 
@@ -71,7 +74,9 @@ export class ExtendedSocket extends net.Socket {
      */
     public send(packet: OutPacketBase): boolean {
         if (this.destroyed === true) {
-            console.warn('ExtendedSocket::send: tried to send with a broken socket. This is most likely a bug')
+            console.warn(
+                'ExtendedSocket::send: tried to send with a broken socket. This is most likely a bug'
+            )
             return false
         }
 
@@ -92,13 +97,15 @@ export class ExtendedSocket extends net.Socket {
      */
     public sendBuffer(buff: Buffer): boolean {
         if (this.destroyed === true) {
-            console.warn('ExtendedSocket::sendBuffer: tried to send with a broken socket. This is most likely a bug')
+            console.warn(
+                'ExtendedSocket::sendBuffer: tried to send with a broken socket. This is most likely a bug'
+            )
             return false
         }
 
         buff.writeUInt8(this.getNextSeq(), 1)
 
-        /*if (this.packetDumper) {
+        /* if (this.packetDumper) {
             this.packetDumper.dumpOut(buff, this)
         }*/
 

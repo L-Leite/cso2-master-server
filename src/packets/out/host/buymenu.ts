@@ -7,7 +7,11 @@ import { UserBuyMenu } from 'user/userbuymenu'
  * @class OutHostPreloadInventory
  */
 export class OutHostBuyMenu {
-    public static build(userId: number, buymenu: UserBuyMenu, outPacket: OutPacketBase): void {
+    public static build(
+        userId: number,
+        buymenu: UserBuyMenu,
+        outPacket: OutPacketBase
+    ): void {
         outPacket.writeUInt32(userId)
         outPacket.writeUInt16(369) // buy menu's byte length
         outPacket.writeUInt8(0) // unk00
@@ -22,8 +26,11 @@ export class OutHostBuyMenu {
         this.buildSubmenu(buymenu.equipment, outPacket)
     }
 
-    public static buildSubmenu(items: number[], outPacket: OutPacketBase): void {
-        let curItem: number = 0
+    public static buildSubmenu(
+        items: number[],
+        outPacket: OutPacketBase
+    ): void {
+        let curItem = 0
 
         outPacket.writeUInt8(items.length) // number of items in the submenu
         for (const item of items) {

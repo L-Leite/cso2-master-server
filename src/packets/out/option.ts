@@ -16,8 +16,10 @@ export class OutOptionPacket extends OutPacketBase {
     public static setBuyMenu(buyMenu: UserBuyMenu): OutOptionPacket {
         const packet: OutOptionPacket = new OutOptionPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 40, incrementAmount: 15 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 40,
+            incrementAmount: 15
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OptionPacketType.SetBuyMenu)

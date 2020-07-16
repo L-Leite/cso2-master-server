@@ -28,7 +28,7 @@ enum OutRoomPacketType {
     SetHost = 5,
     SetGameResult = 6,
     setUserTeam = 7,
-    Countdown = 14,
+    Countdown = 14
 }
 
 /**
@@ -39,8 +39,10 @@ export class OutRoomPacket extends OutPacketBase {
     public static createAndJoin(room: Room): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 200, incrementAmount: 20 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 200,
+            incrementAmount: 20
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.CreateAndJoin)
@@ -50,11 +52,16 @@ export class OutRoomPacket extends OutPacketBase {
         return packet
     }
 
-    public static playerJoin(user: RoomUserEntry, teamNum: RoomTeamNum): OutRoomPacket {
+    public static playerJoin(
+        user: RoomUserEntry,
+        teamNum: RoomTeamNum
+    ): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 60, incrementAmount: 15 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 60,
+            incrementAmount: 15
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.PlayerJoin)
@@ -67,8 +74,10 @@ export class OutRoomPacket extends OutPacketBase {
     public static playerLeave(userId: number): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 20, incrementAmount: 15 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 20,
+            incrementAmount: 15
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.PlayerLeave)
@@ -78,11 +87,16 @@ export class OutRoomPacket extends OutPacketBase {
         return packet
     }
 
-    public static setUserReadyStatus(userId: number, readyStatus: RoomReadyStatus): OutRoomPacket {
+    public static setUserReadyStatus(
+        userId: number,
+        readyStatus: RoomReadyStatus
+    ): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 20, incrementAmount: 15 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 20,
+            incrementAmount: 15
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.SetPlayerReady)
@@ -95,8 +109,10 @@ export class OutRoomPacket extends OutPacketBase {
     public static updateSettings(newSettings: RoomSettings): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 30, incrementAmount: 15 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 30,
+            incrementAmount: 15
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.UpdateSettings)
@@ -109,8 +125,10 @@ export class OutRoomPacket extends OutPacketBase {
     public static setHost(userId: number): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 30, incrementAmount: 15 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 30,
+            incrementAmount: 15
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.SetHost)
@@ -123,8 +141,10 @@ export class OutRoomPacket extends OutPacketBase {
     public static setGameResult(): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 30, incrementAmount: 15 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 30,
+            incrementAmount: 15
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.SetGameResult)
@@ -136,8 +156,10 @@ export class OutRoomPacket extends OutPacketBase {
 
     public static progressCountdown(countdown: number): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 20, incrementAmount: 15 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 20,
+            incrementAmount: 15
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.Countdown)
@@ -150,8 +172,10 @@ export class OutRoomPacket extends OutPacketBase {
     public static stopCountdown(): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 20, incrementAmount: 15 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 20,
+            incrementAmount: 15
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.Countdown)
@@ -164,8 +188,10 @@ export class OutRoomPacket extends OutPacketBase {
     public static setUserTeam(userId: number, teamNum: number): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 20, incrementAmount: 15 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 20,
+            incrementAmount: 15
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OutRoomPacketType.setUserTeam)

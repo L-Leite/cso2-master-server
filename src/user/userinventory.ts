@@ -19,11 +19,11 @@ export class UserInventory {
             return false
         }
 
-        const invPromises: Array<Promise<boolean>> = [
+        const invPromises: Promise<boolean>[] = [
             UserInventory.createInventory(userId),
             UserInventory.createCosmetics(userId),
             UserInventory.createBuyMenu(userId),
-            UserInventory.createLoadouts(userId),
+            UserInventory.createLoadouts(userId)
         ]
 
         const results: boolean[] = await Promise.all(invPromises)
@@ -40,12 +40,12 @@ export class UserInventory {
     public static async createInventory(ownerId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .post(userSvcAuthority() + '/inventory/' + ownerId)
+                .post(`${userSvcAuthority()}/inventory/${ownerId}`)
                 .accept('json')
             return res.status === 201
         } catch (error) {
             console.error(error)
-            UserSvcPing.checkNow()
+            await UserSvcPing.checkNow()
             return false
         }
     }
@@ -58,12 +58,12 @@ export class UserInventory {
     public static async createCosmetics(ownerId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .post(userSvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
+                .post(`${userSvcAuthority()}/inventory/${ownerId}/cosmetics`)
                 .accept('json')
             return res.status === 201
         } catch (error) {
             console.error(error)
-            UserSvcPing.checkNow()
+            await UserSvcPing.checkNow()
             return false
         }
     }
@@ -76,12 +76,12 @@ export class UserInventory {
     public static async createLoadouts(ownerId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .post(userSvcAuthority() + '/inventory/' + ownerId + '/loadout')
+                .post(`${userSvcAuthority()}/inventory/${ownerId}/loadout`)
                 .accept('json')
             return res.status === 201
         } catch (error) {
             console.error(error)
-            UserSvcPing.checkNow()
+            await UserSvcPing.checkNow()
             return false
         }
     }
@@ -94,12 +94,12 @@ export class UserInventory {
     public static async createBuyMenu(ownerId: number): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
-                .post(userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .post(`${userSvcAuthority()}/inventory/${ownerId}/buymenu`)
                 .accept('json')
             return res.status === 201
         } catch (error) {
             console.error(error)
-            UserSvcPing.checkNow()
+            await UserSvcPing.checkNow()
             return null
         }
     }
@@ -121,18 +121,18 @@ export class UserInventory {
             }
 
             const res: superagent.Response = await superagent
-                .get(userSvcAuthority() + '/inventory/' + ownerId)
+                .get(`${userSvcAuthority()}/inventory/${ownerId}`)
                 .accept('json')
 
             if (res.status === 200) {
                 inventoryCache.set(ownerId, res.body)
-                return res.body
+                return res.body as UserInventory
             }
 
             return null
         } catch (error) {
             console.error(error)
-            UserSvcPing.checkNow()
+            await UserSvcPing.checkNow()
             return null
         }
     }
@@ -154,18 +154,18 @@ export class UserInventory {
             }
 
             const res: superagent.Response = await superagent
-                .get(userSvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
+                .get(`${userSvcAuthority()}/inventory/${ownerId}/cosmetics`)
                 .accept('json')
 
             if (res.status === 200) {
                 cosmeticsCache.set(ownerId, res.body)
-                return res.body
+                return res.body as UserCosmetics
             }
 
             return null
         } catch (error) {
             console.error(error)
-            UserSvcPing.checkNow()
+            await UserSvcPing.checkNow()
             return null
         }
     }
@@ -175,16 +175,27 @@ export class UserInventory {
      * @param ownerId the loadout owner's user ID
      * @param loadoutNum the loadout's index number
      */
-    public static async getLoadout(ownerId: number, loadoutNum: number): Promise<UserLoadout> {
+    public static async getLoadout(
+        ownerId: number,
+        loadoutNum: number
+    ): Promise<UserLoadout> {
         try {
             const res: superagent.Response = await superagent
-                .get(userSvcAuthority() + '/inventory/' + ownerId + '/loadout')
-                .send({ loadoutNum })
+                .get(
+                    userSvcAuthority() +
+                        `/inventory/${ownerId}/loadout/${loadoutNum}`
+                )
+                .send()
                 .accept('json')
-            return res.status === 200 ? res.body : null
+
+            if (res.ok !== true) {
+                return null
+            }
+
+            return res.body as UserLoadout
         } catch (error) {
             console.error(error)
-            UserSvcPing.checkNow()
+            await UserSvcPing.checkNow()
             return null
         }
     }
@@ -193,7 +204,9 @@ export class UserInventory {
      * get every loadout from an user
      * @param ownerId the loadouts owner's user ID
      */
-    public static async getAllLoadouts(ownerId: number): Promise<UserLoadout[]> {
+    public static async getAllLoadouts(
+        ownerId: number
+    ): Promise<UserLoadout[]> {
         let loadouts: UserLoadout[] = loadoutsCache.get(ownerId)
 
         if (loadouts != null) {
@@ -204,7 +217,7 @@ export class UserInventory {
             return null
         }
 
-        const loadoutPromises: Array<Promise<UserLoadout>> = []
+        const loadoutPromises: Promise<UserLoadout>[] = []
 
         for (let i = 0; i < 3; i++) {
             loadoutPromises.push(UserInventory.getLoadout(ownerId, i))
@@ -232,18 +245,18 @@ export class UserInventory {
             }
 
             const res: superagent.Response = await superagent
-                .get(userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .get(`${userSvcAuthority()}/inventory/${ownerId}/buymenu`)
                 .accept('json')
 
             if (res.status === 200) {
                 buymenuCache.set(ownerId, res.body)
-                return res.body
+                return res.body as UserBuyMenu
             }
 
             return null
         } catch (error) {
             console.error(error)
-            UserSvcPing.checkNow()
+            await UserSvcPing.checkNow()
             return null
         }
     }
@@ -254,11 +267,19 @@ export class UserInventory {
      * @param slot the cosmetic slot
      * @param itemId the new cosmetic's item ID
      */
-    public static async setCosmeticSlot(ownerId: number, slot: number, itemId: number): Promise<void> {
-        const params = UserInventory.buildSetCosmeticParams(ownerId, slot, itemId)
+    public static async setCosmeticSlot(
+        ownerId: number,
+        slot: number,
+        itemId: number
+    ): Promise<void> {
+        const params = UserInventory.buildSetCosmeticParams(
+            ownerId,
+            slot,
+            itemId
+        )
         try {
             const res: superagent.Response = await superagent
-                .put(userSvcAuthority() + '/inventory/' + ownerId + '/cosmetics')
+                .put(`${userSvcAuthority()}/inventory/${ownerId}/cosmetics`)
                 .send(params)
                 .accept('json')
 
@@ -268,7 +289,7 @@ export class UserInventory {
             }
         } catch (error) {
             console.error(error)
-            UserSvcPing.checkNow()
+            await UserSvcPing.checkNow()
         }
     }
 
@@ -279,12 +300,18 @@ export class UserInventory {
      * @param slot the weapon slot
      * @param itemId the new weapon's item id
      */
-    public static async setLoadoutWeapon(ownerId: number, loadout: number,
-                                         slot: number, itemId: number): Promise<void> {
-        const params = UserInventory.buildSetLoadoutParams(ownerId, loadout, slot, itemId)
+    public static async setLoadoutWeapon(
+        ownerId: number,
+        loadout: number,
+        slot: number,
+        itemId: number
+    ): Promise<void> {
+        const params = UserInventory.buildSetLoadoutParams(slot, itemId)
         try {
             const res: superagent.Response = await superagent
-                .put(userSvcAuthority() + '/inventory/' + ownerId + '/loadout')
+                .put(
+                    `${userSvcAuthority()}/inventory/${ownerId}/loadout/${loadout}`
+                )
                 .send(params)
                 .accept('json')
 
@@ -294,7 +321,7 @@ export class UserInventory {
             }
         } catch (error) {
             console.error(error)
-            UserSvcPing.checkNow()
+            await UserSvcPing.checkNow()
         }
     }
 
@@ -304,10 +331,13 @@ export class UserInventory {
      * @param column the buy menu's column index
      * @param items the new buy menu's column items
      */
-    public static async setBuyMenu(ownerId: number, newBuyMenu: UserBuyMenu): Promise<void> {
+    public static async setBuyMenu(
+        ownerId: number,
+        newBuyMenu: UserBuyMenu
+    ): Promise<void> {
         try {
             const res: superagent.Response = await superagent
-                .put(userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .put(`${userSvcAuthority()}/inventory/${ownerId}/buymenu`)
                 .send(newBuyMenu)
                 .accept('json')
 
@@ -317,7 +347,7 @@ export class UserInventory {
             }
         } catch (error) {
             console.error(error)
-            UserSvcPing.checkNow()
+            await UserSvcPing.checkNow()
         }
     }
 
@@ -327,11 +357,15 @@ export class UserInventory {
      * @param column the buy menu's column index
      * @param items the new buy menu's column items
      */
-    public static async setBuyMenuColumn(ownerId: number, column: number, items: number[]): Promise<void> {
+    public static async setBuyMenuColumn(
+        ownerId: number,
+        column: number,
+        items: number[]
+    ): Promise<void> {
         const params = UserInventory.buildSetBuyMenuParams(column, items)
         try {
             const res: superagent.Response = await superagent
-                .put(userSvcAuthority() + '/inventory/' + ownerId + '/buymenu')
+                .put(`${userSvcAuthority()}/inventory/${ownerId}/buymenu`)
                 .send(params)
                 .accept('json')
 
@@ -341,51 +375,55 @@ export class UserInventory {
             }
         } catch (error) {
             console.error(error)
-            UserSvcPing.checkNow()
+            await UserSvcPing.checkNow()
         }
     }
 
-    private static buildSetCosmeticParams(userId: number, slot: number, itemId: number): any {
+    private static buildSetCosmeticParams(
+        userId: number,
+        slot: number,
+        itemId: number
+    ) {
         switch (slot) {
             case 0:
                 return {
                     userId,
-                    ctItem: itemId,
+                    ctItem: itemId
                 }
             case 1:
                 return {
                     userId,
-                    terItem: itemId,
+                    terItem: itemId
                 }
             case 2:
                 return {
                     userId,
-                    headItem: itemId,
+                    headItem: itemId
                 }
             case 3:
                 return {
                     userId,
-                    gloveItem: itemId,
+                    gloveItem: itemId
                 }
             case 4:
                 return {
                     userId,
-                    backItem: itemId,
+                    backItem: itemId
                 }
             case 5:
                 return {
                     userId,
-                    stepsItem: itemId,
+                    stepsItem: itemId
                 }
             case 6:
                 return {
                     userId,
-                    cardItem: itemId,
+                    cardItem: itemId
                 }
             case 7:
                 return {
                     userId,
-                    sprayItem: itemId,
+                    sprayItem: itemId
                 }
         }
 
@@ -393,43 +431,31 @@ export class UserInventory {
         return null
     }
 
-    private static buildSetLoadoutParams(userId: number, loadoutNum: number, slot: number, itemId: number): any {
+    private static buildSetLoadoutParams(slot: number, itemId: number) {
         switch (slot) {
             case 0:
                 return {
-                    userId,
-                    loadoutNum,
-                    primary: itemId,
+                    primary: itemId
                 }
             case 1:
                 return {
-                    userId,
-                    loadoutNum,
-                    secondary: itemId,
+                    secondary: itemId
                 }
             case 2:
                 return {
-                    userId,
-                    loadoutNum,
-                    melee: itemId,
+                    melee: itemId
                 }
             case 3:
                 return {
-                    userId,
-                    loadoutNum,
-                    hegrenade: itemId,
+                    hegrenade: itemId
                 }
             case 4:
                 return {
-                    userId,
-                    loadoutNum,
-                    smoke: itemId,
+                    smoke: itemId
                 }
             case 5:
                 return {
-                    userId,
-                    loadoutNum,
-                    flash: itemId,
+                    flash: itemId
                 }
         }
 
@@ -437,39 +463,39 @@ export class UserInventory {
         return null
     }
 
-    private static buildSetBuyMenuParams(slot: number, items: number[]): any {
+    private static buildSetBuyMenuParams(slot: number, items: number[]) {
         switch (slot) {
             case 0:
                 return {
-                    pistols: items,
+                    pistols: items
                 }
             case 1:
                 return {
-                    shotguns: items,
+                    shotguns: items
                 }
             case 2:
                 return {
-                    smgs: items,
+                    smgs: items
                 }
             case 3:
                 return {
-                    rifles: items,
+                    rifles: items
                 }
             case 4:
                 return {
-                    snipers: items,
+                    snipers: items
                 }
             case 5:
                 return {
-                    machineguns: items,
+                    machineguns: items
                 }
             case 6:
                 return {
-                    melees: items,
+                    melees: items
                 }
             case 7:
                 return {
-                    equipment: items,
+                    equipment: items
                 }
         }
 
@@ -481,7 +507,19 @@ export class UserInventory {
     public items: UserInventoryItem[]
 }
 
-const inventoryCache = new LRU<number, UserInventory>({ max: 15, maxAge: 1000 * 15 })
-const cosmeticsCache = new LRU<number, UserCosmetics>({ max: 30, maxAge: 1000 * 15 })
-const loadoutsCache = new LRU<number, UserLoadout[]>({ max: 30, maxAge: 1000 * 15 })
-const buymenuCache = new LRU<number, UserBuyMenu>({ max: 30, maxAge: 1000 * 15 })
+const inventoryCache = new LRU<number, UserInventory>({
+    max: 15,
+    maxAge: 1000 * 15
+})
+const cosmeticsCache = new LRU<number, UserCosmetics>({
+    max: 30,
+    maxAge: 1000 * 15
+})
+const loadoutsCache = new LRU<number, UserLoadout[]>({
+    max: 30,
+    maxAge: 1000 * 15
+})
+const buymenuCache = new LRU<number, UserBuyMenu>({
+    max: 30,
+    maxAge: 1000 * 15
+})

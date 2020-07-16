@@ -5,7 +5,7 @@ import { UdpPacketSignature } from 'packets/definitions'
 export enum HolepunchType {
     Client = 0,
     Server = 256,
-    SourceTV = 512,
+    SourceTV = 512
 }
 
 /**
@@ -60,14 +60,12 @@ export class InHolepunchPacketUdp {
         if (this.isHeartbeat()) {
             // this.userId = this.packetData.readUInt32LE(curOffset)
             // curOffset += 4
-
             // keep alive packet, to be reversed?
         } else {
             this.userId = this.readUInt32()
             this.portId = this.readUInt16()
 
             // cso2 does a bitwise not operation on the ip. maybe find out why?
-            /* tslint:disable-next-line:no-bitwise */
             const fixedIp: number = ~this.readUInt32(true)
             this.ipAddress = ip.fromLong(fixedIp)
 
@@ -79,13 +77,13 @@ export class InHolepunchPacketUdp {
      * reads two bytes from the current offset
      * @returns the read unsigned bytes
      */
-    private readUInt16(bigEndian: boolean = false): number {
+    private readUInt16(bigEndian = false): number {
         if (this.canReadBytes(2) === false) {
             throw new Error('Data buffer is too small')
         }
-        const res: number = bigEndian ?
-            this.packetData.readUInt16BE(this.curOffset) :
-            this.packetData.readUInt16LE(this.curOffset)
+        const res: number = bigEndian
+            ? this.packetData.readUInt16BE(this.curOffset)
+            : this.packetData.readUInt16LE(this.curOffset)
         this.curOffset += 2
         return res
     }
@@ -94,13 +92,13 @@ export class InHolepunchPacketUdp {
      * reads four bytes from the current offset
      * @returns the read unsigned bytes
      */
-    private readUInt32(bigEndian: boolean = false): number {
+    private readUInt32(bigEndian = false): number {
         if (this.canReadBytes(4) === false) {
             throw new Error('Data buffer is too small')
         }
-        const res: number = bigEndian ?
-            this.packetData.readUInt32BE(this.curOffset) :
-            this.packetData.readUInt32LE(this.curOffset)
+        const res: number = bigEndian
+            ? this.packetData.readUInt32BE(this.curOffset)
+            : this.packetData.readUInt32LE(this.curOffset)
         this.curOffset += 4
         return res
     }

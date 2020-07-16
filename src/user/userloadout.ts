@@ -7,8 +7,15 @@ export class UserLoadout {
     public flash: number
     public smoke: number
 
-    constructor(loadoutNum: number, primary: number, secondary: number, melee: number,
-                hegrenade: number, flash: number, smoke: number) {
+    constructor(
+        loadoutNum: number,
+        primary: number,
+        secondary: number,
+        melee: number,
+        hegrenade: number,
+        flash: number,
+        smoke: number
+    ) {
         this.loadout_num = loadoutNum
         this.primary_weapon = primary
         this.secondary_weapon = secondary

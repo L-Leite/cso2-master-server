@@ -12,7 +12,7 @@ import { PacketId, PacketSignature } from 'packets/definitions'
  */
 export class PacketBaseShared {
     // does not count packetId
-    public static headerLength: number = 4
+    public static headerLength = 4
 
     public signature: number
     public sequence: number
@@ -26,5 +26,4 @@ export class PacketBaseShared {
     public isValid(): boolean {
         return this.signature === PacketSignature
     }
-
 }

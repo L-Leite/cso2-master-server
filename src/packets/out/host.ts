@@ -20,12 +20,13 @@ import { OutHostLoadout } from 'packets/out/host/loadout'
  * @class OutHostPacket
  */
 export class OutHostPacket extends OutPacketBase {
-
     public static gameStart(hostUserId: number): OutHostPacket {
         const packet: OutHostPacket = new OutHostPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 12, incrementAmount: 4 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 12,
+            incrementAmount: 4
+        })
 
         packet.buildHeader()
         packet.writeUInt8(HostPacketType.GameStart)
@@ -38,8 +39,10 @@ export class OutHostPacket extends OutPacketBase {
     public static joinHost(hostUserId: number): OutHostPacket {
         const packet: OutHostPacket = new OutHostPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 20, incrementAmount: 4 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 20,
+            incrementAmount: 4
+        })
 
         packet.buildHeader()
         packet.writeUInt8(HostPacketType.HostJoin)
@@ -52,8 +55,10 @@ export class OutHostPacket extends OutPacketBase {
     public static hostStop(): OutHostPacket {
         const packet: OutHostPacket = new OutHostPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 8, incrementAmount: 4 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 8,
+            incrementAmount: 4
+        })
 
         packet.buildHeader()
         packet.writeUInt8(HostPacketType.HostStop)
@@ -64,8 +69,10 @@ export class OutHostPacket extends OutPacketBase {
     public static leaveResultWindow(): OutHostPacket {
         const packet: OutHostPacket = new OutHostPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 8, incrementAmount: 4 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 8,
+            incrementAmount: 4
+        })
 
         packet.buildHeader()
         packet.writeUInt8(HostPacketType.LeaveResultWindow)
@@ -76,8 +83,10 @@ export class OutHostPacket extends OutPacketBase {
     public static itemUse(userId: number, itemId: number): OutHostPacket {
         const packet: OutHostPacket = new OutHostPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 80, incrementAmount: 20 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 80,
+            incrementAmount: 20
+        })
 
         packet.buildHeader()
         packet.writeUInt8(HostPacketType.ItemUsing)
@@ -87,11 +96,16 @@ export class OutHostPacket extends OutPacketBase {
         return packet
     }
 
-    public static setInventory(userId: number, items: UserInventoryItem[]): OutHostPacket {
+    public static setInventory(
+        userId: number,
+        items: UserInventoryItem[]
+    ): OutHostPacket {
         const packet: OutHostPacket = new OutHostPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 80, incrementAmount: 20 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 80,
+            incrementAmount: 20
+        })
 
         packet.buildHeader()
         packet.writeUInt8(HostPacketType.SetInventory)
@@ -104,8 +118,10 @@ export class OutHostPacket extends OutPacketBase {
     public static async setLoadout(userId: number): Promise<OutHostPacket> {
         const packet: OutHostPacket = new OutHostPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 80, incrementAmount: 20 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 80,
+            incrementAmount: 20
+        })
 
         packet.buildHeader()
         packet.writeUInt8(HostPacketType.SetLoadout)
@@ -122,13 +138,19 @@ export class OutHostPacket extends OutPacketBase {
     public static async setBuyMenu(userId: number): Promise<OutHostPacket> {
         const packet: OutHostPacket = new OutHostPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 80, incrementAmount: 20 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 80,
+            incrementAmount: 20
+        })
 
         packet.buildHeader()
         packet.writeUInt8(HostPacketType.SetBuyMenu)
 
-        OutHostBuyMenu.build(userId, await UserInventory.getBuyMenu(userId), packet)
+        OutHostBuyMenu.build(
+            userId,
+            await UserInventory.getBuyMenu(userId),
+            packet
+        )
 
         return packet
     }

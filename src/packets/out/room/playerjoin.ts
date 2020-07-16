@@ -13,7 +13,11 @@ import { User } from 'user/user'
  * @class OutRoomPlayerJoin
  */
 export class OutRoomPlayerJoin {
-    public static build(conn: ExtendedSocket, teamNum: RoomTeamNum, outPacket: OutPacketBase): void {
+    public static build(
+        conn: ExtendedSocket,
+        teamNum: RoomTeamNum,
+        outPacket: OutPacketBase
+    ): void {
         const user: User = conn.session.user
 
         outPacket.writeUInt32(user.id)

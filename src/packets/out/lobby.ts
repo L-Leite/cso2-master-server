@@ -7,7 +7,7 @@ import { LobbyJoinRoom } from 'packets/out/lobby/joinroom'
 
 enum OutLobbyType {
     JoinRoom = 1,
-    UpdateUserInfo = 2,
+    UpdateUserInfo = 2
 }
 
 /**
@@ -15,12 +15,13 @@ enum OutLobbyType {
  * @class OutLobbyPacket
  */
 export class OutLobbyPacket extends OutPacketBase {
-
     public static joinRoom(): OutLobbyPacket {
         const packet: OutLobbyPacket = new OutLobbyPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 16, incrementAmount: 4 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 16,
+            incrementAmount: 4
+        })
 
         packet.buildHeader()
         packet.writeUInt8(OutLobbyType.JoinRoom)

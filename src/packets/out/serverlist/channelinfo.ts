@@ -19,7 +19,7 @@ export class ServerListChannelInfo {
         this.id = channel.index
         this.name = channel.name
         this.unk00 = 4
-        this.unk01 = 0x1F4
+        this.unk01 = 0x1f4
         this.unk02 = 1
         this.unk03 = 0
         this.unk04 = 1

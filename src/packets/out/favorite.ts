@@ -15,20 +15,37 @@ import { OutFavoritePresetLoadout } from 'packets/out/favorite/presetloadout'
  * @class OutFavoritePacket
  */
 export class OutFavoritePacket extends OutPacketBase {
-
-    public static setCosmetics(ctModelItem: number, terModelItem: number, headItem: number,
-                               gloveItem: number, backItem: number, stepsItem: number,
-                               cardItem: number, sprayItem: number): OutFavoritePacket {
+    public static setCosmetics(
+        ctModelItem: number,
+        terModelItem: number,
+        headItem: number,
+        gloveItem: number,
+        backItem: number,
+        stepsItem: number,
+        cardItem: number,
+        sprayItem: number
+    ): OutFavoritePacket {
         const packet: OutFavoritePacket = new OutFavoritePacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 40, incrementAmount: 15 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 40,
+            incrementAmount: 15
+        })
 
         packet.buildHeader()
         packet.writeUInt8(FavoritePacketType.SetCosmetics)
 
-        OutFavoriteCosmetics.build(ctModelItem, terModelItem, headItem, gloveItem, backItem,
-            stepsItem, cardItem, sprayItem, packet)
+        OutFavoriteCosmetics.build(
+            ctModelItem,
+            terModelItem,
+            headItem,
+            gloveItem,
+            backItem,
+            stepsItem,
+            cardItem,
+            sprayItem,
+            packet
+        )
 
         return packet
     }
@@ -36,8 +53,10 @@ export class OutFavoritePacket extends OutPacketBase {
     public static setLoadout(loadout: UserLoadout[]): OutFavoritePacket {
         const packet: OutFavoritePacket = new OutFavoritePacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 40, incrementAmount: 15 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 40,
+            incrementAmount: 15
+        })
 
         packet.buildHeader()
         packet.writeUInt8(FavoritePacketType.SetLoadout)
@@ -49,4 +68,4 @@ export class OutFavoritePacket extends OutPacketBase {
     constructor() {
         super(PacketId.Favorite)
     }
- }
+}

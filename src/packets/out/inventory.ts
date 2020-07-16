@@ -13,11 +13,15 @@ import { UserInventoryItem } from 'user/userinventoryitem'
  * @class OutInventoryPacket
  */
 export class OutInventoryPacket extends OutPacketBase {
-    public static createInventory(items: UserInventoryItem[]): OutInventoryPacket {
+    public static createInventory(
+        items: UserInventoryItem[]
+    ): OutInventoryPacket {
         const packet: OutInventoryPacket = new OutInventoryPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 80, incrementAmount: 20 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 80,
+            incrementAmount: 20
+        })
 
         packet.id = PacketId.Inventory_Create
         packet.buildHeader()
@@ -30,8 +34,10 @@ export class OutInventoryPacket extends OutPacketBase {
     public static addInventory(items: UserInventoryItem[]): OutInventoryPacket {
         const packet: OutInventoryPacket = new OutInventoryPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 80, incrementAmount: 20 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 80,
+            incrementAmount: 20
+        })
 
         packet.id = PacketId.Inventory_Add
         packet.buildHeader()

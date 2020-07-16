@@ -139,7 +139,6 @@ export class InRoomUpdateSettings {
         const lowFlag = flagBuf.readUInt32LE(0)
         const highFlag = flagBuf.readUInt32LE(4)
 
-        /* tslint:disable: no-bitwise */
         if (lowFlag & 0x1) {
             this.roomName = inPacket.readString()
         }
@@ -279,6 +278,5 @@ export class InRoomUpdateSettings {
         if (highFlag & 0x10) {
             this.respawnTime = inPacket.readUInt8()
         }
-        /* tslint:enable: no-bitwise */
     }
 }

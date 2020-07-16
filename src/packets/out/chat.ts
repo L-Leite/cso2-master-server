@@ -1,4 +1,3 @@
-
 import { WritableStreamBuffer } from 'stream-buffers'
 
 import { ChatMessageType, PacketId } from 'packets/definitions'
@@ -8,11 +7,17 @@ import { OutChatDefaultMsg } from 'packets/out/chat/defaultmsg'
 import { OutChatSystemMsg } from 'packets/out/chat/systemmsg'
 
 export class OutChatPacket extends OutPacketBase {
-    public static channelMessage(sender: string, isGm: boolean, message: string): OutChatPacket {
+    public static channelMessage(
+        sender: string,
+        isGm: boolean,
+        message: string
+    ): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 32, incrementAmount: 64 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 32,
+            incrementAmount: 64
+        })
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.Channel)
@@ -23,28 +28,48 @@ export class OutChatPacket extends OutPacketBase {
         return packet
     }
 
-    public static directMessage(sender: string, vipLevel: number, isGm: boolean,
-                                target: string, isTarget: boolean, message: string): OutChatPacket {
+    public static directMessage(
+        sender: string,
+        vipLevel: number,
+        isGm: boolean,
+        target: string,
+        isTarget: boolean,
+        message: string
+    ): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 32, incrementAmount: 64 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 32,
+            incrementAmount: 64
+        })
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.DirectMessage)
         packet.writeUInt8(isGm ? 1 : 0) // is GM?
         packet.writeUInt8(isTarget ? 1 : 0) // is direct message's target?
 
-        OutChatDefaultMsg.build(isTarget ? sender : target, vipLevel, message, packet)
+        OutChatDefaultMsg.build(
+            isTarget ? sender : target,
+            vipLevel,
+            message,
+            packet
+        )
 
         return packet
     }
 
-    public static roomMessage(sender: string, vipLevel: number, isGm: boolean, message: string): OutChatPacket {
+    public static roomMessage(
+        sender: string,
+        vipLevel: number,
+        isGm: boolean,
+        message: string
+    ): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 32, incrementAmount: 64 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 32,
+            incrementAmount: 64
+        })
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.Room)
@@ -55,11 +80,18 @@ export class OutChatPacket extends OutPacketBase {
         return packet
     }
 
-    public static ingameMessage(sender: string, vipLevel: number, isGm: boolean, message: string): OutChatPacket {
+    public static ingameMessage(
+        sender: string,
+        vipLevel: number,
+        isGm: boolean,
+        message: string
+    ): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 32, incrementAmount: 64 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 32,
+            incrementAmount: 64
+        })
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.IngameGlobal)
@@ -70,11 +102,18 @@ export class OutChatPacket extends OutPacketBase {
         return packet
     }
 
-    public static ingameTeamMessage(sender: string, vipLevel: number, isGm: boolean, message: string): OutChatPacket {
+    public static ingameTeamMessage(
+        sender: string,
+        vipLevel: number,
+        isGm: boolean,
+        message: string
+    ): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 32, incrementAmount: 64 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 32,
+            incrementAmount: 64
+        })
 
         packet.buildHeader()
         packet.writeUInt8(ChatMessageType.IngameTeam)
@@ -85,11 +124,16 @@ export class OutChatPacket extends OutPacketBase {
         return packet
     }
 
-    public static systemMessage(message: string, type: ChatMessageType): OutChatPacket {
+    public static systemMessage(
+        message: string,
+        type: ChatMessageType
+    ): OutChatPacket {
         const packet: OutChatPacket = new OutChatPacket()
 
-        packet.outStream = new WritableStreamBuffer(
-            { initialSize: 32, incrementAmount: 64 })
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 32,
+            incrementAmount: 64
+        })
 
         packet.buildHeader()
         packet.writeUInt8(type)
@@ -102,5 +146,4 @@ export class OutChatPacket extends OutPacketBase {
     constructor() {
         super(PacketId.Chat)
     }
-
 }

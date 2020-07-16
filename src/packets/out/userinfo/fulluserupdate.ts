@@ -17,10 +17,10 @@ export class UserInfoFullUpdate {
         // outPacket.writeUInt32(this.userId)
 
         // should always be 0xFFFFFFFF for a full update
-        outPacket.writeUInt32(0xFFFFFFFF) // flags
+        outPacket.writeUInt32(0xffffffff) // flags
 
         // flag & 0x1
-        outPacket.writeUInt64(new Uint64LE(0x2241158F)) // unk00, nexon id?
+        outPacket.writeUInt64(new Uint64LE(0x2241158f)) // unk00, nexon id?
         // end flag & 0x1
 
         // flag & 0x2
@@ -87,11 +87,11 @@ export class UserInfoFullUpdate {
         outPacket.writeString(user.clan_name) // clan name
         outPacket.writeUInt32(user.clan_mark) // clan mark (0-10)
         outPacket.writeUInt8(0) // unk37
-         // array size is always 5
+        // array size is always 5
         for (const elem of [0, 0, 0, 0, 0]) {
-            outPacket.writeUInt32(elem)  // unk38
+            outPacket.writeUInt32(elem) // unk38
         }
-         // array size is always 5
+        // array size is always 5
         for (const elem of [0, 0, 0, 0, 0]) {
             outPacket.writeUInt32(elem) // unk39
         }
@@ -123,7 +123,7 @@ export class UserInfoFullUpdate {
 
         // flag & 0x8000
         outPacket.writeUInt16(user.title) // title
-         // end of flag & 0x8000
+        // end of flag & 0x8000
 
         // flag & 0x10000
         outPacket.writeUInt16(0) // unk50
@@ -160,7 +160,7 @@ export class UserInfoFullUpdate {
         for (const elem of user.unlocked_achievements) {
             outPacket.writeUInt8(elem) // achievement unlocked (all 0xFF only 1024 unlocked)
         }
-        outPacket.writeUInt32(0xA5C8) // unk60
+        outPacket.writeUInt32(0xa5c8) // unk60
         // end of flag & 0x400000
 
         // flag & 0x800000

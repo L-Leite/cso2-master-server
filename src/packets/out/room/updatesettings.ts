@@ -10,17 +10,20 @@ import { RoomSettings } from 'room/roomsettings'
  */
 export class OutRoomUpdateSettings {
     public static getFlags(settings: RoomSettings): Uint64LE {
-        let lowFlag: number = 0
-        let highFlag: number = 0
+        let lowFlag = 0
+        let highFlag = 0
 
-        /* tslint:disable: no-bitwise */
         if (settings.roomName != null) {
             lowFlag |= 0x1
         }
         if (settings.unk00 != null) {
             lowFlag |= 0x2
         }
-        if (settings.unk01 != null && settings.unk02 != null && settings.unk03 != null) {
+        if (
+            settings.unk01 != null &&
+            settings.unk02 != null &&
+            settings.unk03 != null
+        ) {
             lowFlag |= 0x4
         }
         if (settings.roomPassword != null) {
@@ -59,10 +62,12 @@ export class OutRoomUpdateSettings {
         if (settings.status != null) {
             lowFlag |= 0x4000
         }
-        if (settings.unk21 != null
-            && settings.mapCycleType != null
-            && settings.unk23 != null
-            && settings.unk24 != null) {
+        if (
+            settings.unk21 != null &&
+            settings.mapCycleType != null &&
+            settings.unk23 != null &&
+            settings.unk24 != null
+        ) {
             lowFlag |= 0x8000
         }
         if (settings.unk25 != null) {
@@ -140,13 +145,15 @@ export class OutRoomUpdateSettings {
         if (settings.respawnTime != null) {
             highFlag |= 0x10
         }
-        /* tslint:enable: no-bitwise */
 
         const flags: Uint64LE = new Uint64LE(highFlag, lowFlag)
         return flags
     }
 
-    public static build(settings: RoomSettings, outPacket: OutPacketBase): void {
+    public static build(
+        settings: RoomSettings,
+        outPacket: OutPacketBase
+    ): void {
         const flags: Uint64LE = this.getFlags(settings)
 
         outPacket.writeUInt64(flags)
@@ -157,8 +164,6 @@ export class OutRoomUpdateSettings {
         const lowFlag = flagBuf.readUInt32LE(0)
         const highFlag = flagBuf.readUInt32LE(4)
 
-        // disable linter bitwise restrictions so we can check the flags
-        /* tslint:disable: no-bitwise */
         if (lowFlag & 0x1) {
             outPacket.writeString(settings.roomName)
         }
@@ -241,7 +246,7 @@ export class OutRoomUpdateSettings {
             outPacket.writeUInt8(settings.unk33)
         }
         if (lowFlag & 0x1000000) {
-            const botEnabled: number = settings.areBotsEnabled as unknown as number
+            const botEnabled: number = (settings.areBotsEnabled as unknown) as number
             outPacket.writeUInt8(botEnabled)
 
             if (settings.areBotsEnabled === true) {
@@ -272,7 +277,7 @@ export class OutRoomUpdateSettings {
         }
 
         if (lowFlag & 0x40000000) {
-            outPacket.writeUInt8(settings.isIngame as unknown as number)
+            outPacket.writeUInt8((settings.isIngame as unknown) as number)
         }
 
         if (lowFlag & 0x80000000) {
@@ -298,6 +303,5 @@ export class OutRoomUpdateSettings {
         if (highFlag & 0x10) {
             outPacket.writeUInt8(settings.respawnTime)
         }
-        /* tslint:enable: no-bitwise */
     }
 }

@@ -8,8 +8,16 @@ export class UserCosmetics {
     public card_item: number
     public spray_item: number
 
-    constructor(ctItem: number, terItem: number, headItem: number, gloveItem: number,
-                backItem: number, stepsItem: number, cardItem: number, sprayItem: number) {
+    constructor(
+        ctItem: number,
+        terItem: number,
+        headItem: number,
+        gloveItem: number,
+        backItem: number,
+        stepsItem: number,
+        cardItem: number,
+        sprayItem: number
+    ) {
         this.ct_item = ctItem
         this.ter_item = terItem
         this.head_item = headItem

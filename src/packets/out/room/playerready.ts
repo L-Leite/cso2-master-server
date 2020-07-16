@@ -6,7 +6,11 @@ import { RoomReadyStatus } from 'room/room'
  * @class OutRoomPlayerReady
  */
 export class OutRoomPlayerReady {
-    public static build(userId: number, readyStatus: RoomReadyStatus, outPacket: OutPacketBase): void {
+    public static build(
+        userId: number,
+        readyStatus: RoomReadyStatus,
+        outPacket: OutPacketBase
+    ): void {
         outPacket.writeUInt32(userId)
         outPacket.writeUInt8(readyStatus)
     }

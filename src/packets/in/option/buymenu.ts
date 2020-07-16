@@ -2,7 +2,7 @@ import { InPacketBase } from 'packets/in/packet'
 
 import { UserBuyMenu } from 'user/userbuymenu'
 
-const SUBMENU_ITEM_NUM: number = 9 // the ammount of items in a sub buy menu
+const SUBMENU_ITEM_NUM = 9 // the ammount of items in a sub buy menu
 
 /**
  * parses an user defined buy menu
@@ -24,7 +24,7 @@ export class InOptionBuyMenu {
             snipers: this.readSubmenu(inPacket),
             machineguns: this.readSubmenu(inPacket),
             melees: this.readSubmenu(inPacket),
-            equipment: this.readSubmenu(inPacket),
+            equipment: this.readSubmenu(inPacket)
         }
     }
 
@@ -32,7 +32,9 @@ export class InOptionBuyMenu {
         const submenuLen: number = inPacket.readUInt8()
 
         if (submenuLen !== SUBMENU_ITEM_NUM) {
-            throw new Error('The sub menu\'s length is different. Actual len: ' + submenuLen)
+            throw new Error(
+                `The sub menu's length is different. Actual len: ${submenuLen}`
+            )
         }
 
         const items: number[] = []
@@ -41,8 +43,9 @@ export class InOptionBuyMenu {
             const curItem: number = inPacket.readUInt8()
 
             if (curItem !== i) {
-                throw new Error('The current sub buy menu index is different from the expected.'
-                    + 'curItem: ' + curItem + ' i: ' + i)
+                throw new Error(
+                    `The current sub buy menu index is different from the expected. curItem: ${curItem} i: ${i}`
+                )
             }
 
             items.push(inPacket.readUInt32())

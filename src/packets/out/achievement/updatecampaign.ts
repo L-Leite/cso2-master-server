@@ -7,10 +7,9 @@ export class OutAchievementUpdateCampaign {
     public static build(outPacket: OutPacketBase): void {
         outPacket.writeUInt16(1) // id
 
-        const flags = 0xFF
+        const flags = 0xff
         outPacket.writeUInt32(flags)
 
-        /* tslint:disable: no-bitwise */
         if (flags & 0x1) {
             outPacket.writeUInt16(0)
         }
@@ -49,6 +48,5 @@ export class OutAchievementUpdateCampaign {
         if (flags & 0x80) {
             outPacket.writeUInt16(0)
         }
-        /* tslint:enable: no-bitwise */
     }
 }

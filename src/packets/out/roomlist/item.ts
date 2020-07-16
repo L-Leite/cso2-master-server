@@ -15,7 +15,7 @@ export class RoomListItem {
         this.room = room
     }
 
-    public async build(outPacket: OutPacketBase): Promise<void> {
+    public build(outPacket: OutPacketBase): void {
         const host: User = this.room.host.conn.session.user
 
         if (host == null) {
@@ -62,25 +62,25 @@ export class RoomListItem {
         // end flags & 0x400
         // flags & 0x800
         // maybe some ip? it looks like 61.164.61.215
-        outPacket.writeUInt32(0xD73DA43D) // unk13
+        outPacket.writeUInt32(0xd73da43d) // unk13
         // would this be some port? 40753 in decimal
-        outPacket.writeUInt16(0x9F31) // unk14
-        outPacket.writeUInt16(0xB2B9) // unk15
-        outPacket.writeUInt32(0xD73DA43D) // unk16
-        outPacket.writeUInt16(0x9F31) // unk17
-        outPacket.writeUInt16(0xB2B9) // unk18
+        outPacket.writeUInt16(0x9f31) // unk14
+        outPacket.writeUInt16(0xb2b9) // unk15
+        outPacket.writeUInt32(0xd73da43d) // unk16
+        outPacket.writeUInt16(0x9f31) // unk17
+        outPacket.writeUInt16(0xb2b9) // unk18
         outPacket.writeUInt8(5) // unk19
         // end flags & 0x800
         // flags & 0x1000
-        const unk20: number = 0 // unk20
+        const unk20 = 0 // unk20
         outPacket.writeUInt8(unk20)
-        if (unk20 === 1) {
+        /* if (unk20 === 1) {
             // unknown values in here
             outPacket.writeUInt32(0) // unk2001
             outPacket.writeUInt8(0) // unk2002
             outPacket.writeUInt32(0) // unk2003
             outPacket.writeUInt8(0) // unk2004
-        }
+        } */
         // end flags & 0x1000
         // flags & 0x2000
         outPacket.writeUInt8(5) // unk21
@@ -110,7 +110,7 @@ export class RoomListItem {
         outPacket.writeUInt8(1) // unk29
         // end flags & 0x200000
         // flags & 0x400000
-        outPacket.writeUInt64(new Uint64LE(0x5AF6F7BF)) // unk30
+        outPacket.writeUInt64(new Uint64LE(0x5af6f7bf)) // unk30
         // end flags & 0x400000
         // flags & 0x800000
         outPacket.writeUInt8(this.room.settings.winLimit) // winLimit

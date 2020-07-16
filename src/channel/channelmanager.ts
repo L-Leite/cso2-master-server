@@ -24,15 +24,17 @@ export class ChannelManager {
      * called when the user sends a RequestChannels packet
      * @param sourceConn the user's socket
      */
-    public static async onChannelListPacket(sourceConn: ExtendedSocket): Promise<boolean> {
+    public static onChannelListPacket(sourceConn: ExtendedSocket): boolean {
         const session: UserSession = sourceConn.session
 
         if (session == null) {
-            console.warn(`uuid ${sourceConn.uuid} tried to get channels without a session`)
+            console.warn(
+                `uuid ${sourceConn.uuid} tried to get channels without a session`
+            )
             return false
         }
 
-        console.log(`user ID ${session.user.id} requested server list` )
+        console.log(`user ID ${session.user.id} requested server list`)
         this.sendChannelListTo(sourceConn)
 
         return true
@@ -44,37 +46,57 @@ export class ChannelManager {
      * @param sourceSocket the user's socket
      * @param users the user manager object
      */
-    public static async onRoomListPacket(packetData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
+    public static onRoomListPacket(
+        packetData: Buffer,
+        sourceConn: ExtendedSocket
+    ): boolean {
         const session: UserSession = sourceConn.session
 
         if (session == null) {
-            console.warn('uuid ' + sourceConn.uuid + ' tried to get rooms without a session')
+            console.warn(
+                'uuid ' +
+                    sourceConn.uuid +
+                    ' tried to get rooms without a session'
+            )
             return false
         }
 
-        const listReq: InRequestRoomListPacket = new InRequestRoomListPacket(packetData)
+        const listReq: InRequestRoomListPacket = new InRequestRoomListPacket(
+            packetData
+        )
 
-        const server: ChannelServer = ChannelManager.getServerByIndex(listReq.channelServerIndex)
+        const server: ChannelServer = ChannelManager.getServerByIndex(
+            listReq.channelServerIndex
+        )
 
         if (server == null) {
-            console.warn('user ID %i requested room list, but it isn\'t in a channel server', session.user.id)
+            console.warn(
+                `user ID ${session.user.id} requested room list, but it isn't in a channel server`
+            )
             return false
         }
 
         const channel: Channel = server.getChannelByIndex(listReq.channelIndex)
 
         if (channel == null) {
-            console.warn('user ID %i requested room list, but it isn\'t in a channel', session.user.id)
+            console.warn(
+                `user ID ${session.user.id} requested room list, but it isn't in a channel`
+            )
             return false
         }
 
-        console.log('user "%s" requested room list successfully, sending it...', session.user.id)
-        await this.setUserChannel(sourceConn, channel)
+        console.log(
+            `user ${session.user.id} requested room list successfully, sending it...`
+        )
+        this.setUserChannel(sourceConn, channel)
 
         return true
     }
 
-    public static async onRoomRequest(reqData: Buffer, sourceConn: ExtendedSocket): Promise<boolean> {
+    public static onRoomRequest(
+        reqData: Buffer,
+        sourceConn: ExtendedSocket
+    ): boolean {
         return roomHandler.onRoomRequest(reqData, sourceConn)
     }
 
@@ -99,19 +121,24 @@ export class ChannelManager {
         return null
     }
 
-    public static async sendRoomListTo(conn: ExtendedSocket, channel: Channel): Promise<void> {
+    public static sendRoomListTo(conn: ExtendedSocket, channel: Channel): void {
         conn.send(OutLobbyPacket.joinRoom())
-        conn.send(await OutRoomListPacket.getFullList(channel.rooms))
+        conn.send(OutRoomListPacket.getFullList(channel.rooms))
     }
 
-    private static channelServers: ChannelServer[] = [new ChannelServer('Test server', 1, 1, 1)]
+    private static channelServers: ChannelServer[] = [
+        new ChannelServer('Test server', 1, 1, 1)
+    ]
 
     /**
      * sets an user's current channel
      * @param conn the target user's connection
      * @param channel the target channel
      */
-    private static async setUserChannel(conn: ExtendedSocket, channel: Channel): Promise<void> {
+    private static setUserChannel(
+        conn: ExtendedSocket,
+        channel: Channel
+    ): void {
         const session: UserSession = conn.session
 
         if (session.currentChannel != null) {
