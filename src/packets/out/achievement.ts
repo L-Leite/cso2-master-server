@@ -9,7 +9,7 @@ import { OutAchievementUpdateCampaign } from 'packets/out/achievement/updatecamp
  * creates achievement related packets
  */
 export class OutAchievementPacket extends OutPacketBase {
-    public static UpdateCampaign(): OutAchievementPacket {
+    public static UpdateCampaign(campaignId: number): OutAchievementPacket {
         const packet: OutAchievementPacket = new OutAchievementPacket()
 
         packet.outStream = new WritableStreamBuffer({
@@ -20,7 +20,7 @@ export class OutAchievementPacket extends OutPacketBase {
         packet.buildHeader()
         packet.writeUInt8(AchievementPacketType.Campaign)
 
-        OutAchievementUpdateCampaign.build(packet)
+        OutAchievementUpdateCampaign.build(campaignId, packet)
 
         return packet
     }

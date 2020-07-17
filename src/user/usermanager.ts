@@ -31,6 +31,7 @@ import { InLoginPacket } from 'packets/in/login'
 import { InOptionPacket } from 'packets/in/option'
 import { InOptionBuyMenu } from 'packets/in/option/buymenu'
 
+import { OutAchievementPacket } from 'packets/out/achievement'
 import { OutChatPacket } from 'packets/out/chat'
 import { OutFavoritePacket } from 'packets/out/favorite'
 import { OutHostPacket } from 'packets/out/host'
@@ -724,7 +725,10 @@ Real host: ${currentRoom.host.userId} room ${currentRoom.id}`
 
         if (achPacket.packetType === AchievementPacketType.Campaign) {
             console.log('sending campaign data')
-            const achievementReplyTest: Buffer = Buffer.from([
+            for (let i = 0; i < 6; i++) {
+                conn.send(OutAchievementPacket.UpdateCampaign(i))
+            }
+            /* const achievementReplyTest: Buffer = Buffer.from([
                 0x55,
                 0x12,
                 0x21,
@@ -763,7 +767,7 @@ Real host: ${currentRoom.host.userId} room ${currentRoom.id}`
                 0x00,
                 0x00
             ])
-            conn.sendBuffer(achievementReplyTest)
+            conn.sendBuffer(achievementReplyTest) */
         }
     }
 
@@ -786,47 +790,6 @@ Real host: ${currentRoom.host.userId} room ${currentRoom.id}`
                 holepunchPort
             )
         )
-
-        const achievementReplyTest: Buffer = Buffer.from([
-            0x55,
-            0x12,
-            0x21,
-            0x00,
-            0x60,
-            0x03,
-            0x00,
-            0x00,
-            0x40,
-            0x00,
-            0x00,
-            0x00,
-            0x03,
-            0xde,
-            0x07,
-            0x00,
-            0x00,
-            0x02,
-            0x00,
-            0x00,
-            0x00,
-            0xd8,
-            0x07,
-            0x00,
-            0x00,
-            0x04,
-            0x00,
-            0x00,
-            0x00,
-            0xdd,
-            0x07,
-            0x00,
-            0x00,
-            0x06,
-            0x00,
-            0x00,
-            0x00
-        ])
-        conn.sendBuffer(achievementReplyTest)
 
         conn.send(OutUserInfoPacket.fullUserUpdate(user))
     }
