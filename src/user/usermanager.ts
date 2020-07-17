@@ -12,12 +12,11 @@ import { UserSession } from 'user/usersession'
 
 import { ChannelManager } from 'channel/channelmanager'
 
-import { AchievementPacketType, ChatMessageType } from 'packets/definitions'
+import { ChatMessageType } from 'packets/definitions'
 import { FavoritePacketType } from 'packets/definitions'
 import { HostPacketType } from 'packets/definitions'
 import { OptionPacketType } from 'packets/definitions'
 
-import { InAchievementPacket } from 'packets/in/achievement'
 import { InFavoritePacket } from 'packets/in/favorite'
 import { InFavoriteSetCosmetics } from 'packets/in/favorite/setcosmetics'
 import { InFavoriteSetLoadout } from 'packets/in/favorite/setloadout'
@@ -31,7 +30,6 @@ import { InLoginPacket } from 'packets/in/login'
 import { InOptionPacket } from 'packets/in/option'
 import { InOptionBuyMenu } from 'packets/in/option/buymenu'
 
-import { OutAchievementPacket } from 'packets/out/achievement'
 import { OutChatPacket } from 'packets/out/chat'
 import { OutFavoritePacket } from 'packets/out/favorite'
 import { OutHostPacket } from 'packets/out/host'
@@ -713,62 +711,6 @@ Real host: ${currentRoom.host.userId} room ${currentRoom.id}`
         currentRoom.endGame()
 
         return true
-    }
-
-    public static TEST_onAchievementPacket(
-        packetData: Buffer,
-        conn: ExtendedSocket
-    ): void {
-        const achPacket: InAchievementPacket = new InAchievementPacket(
-            packetData
-        )
-
-        if (achPacket.packetType === AchievementPacketType.Campaign) {
-            console.log('sending campaign data')
-            for (let i = 0; i < 6; i++) {
-                conn.send(OutAchievementPacket.UpdateCampaign(i))
-            }
-            /* const achievementReplyTest: Buffer = Buffer.from([
-                0x55,
-                0x12,
-                0x21,
-                0x00,
-                0x60,
-                0x03,
-                0x00,
-                0x00,
-                0x40,
-                0x00,
-                0x00,
-                0x00,
-                0x03,
-                0xde,
-                0x07,
-                0x00,
-                0x00,
-                0x02,
-                0x00,
-                0x00,
-                0x00,
-                0xd8,
-                0x07,
-                0x00,
-                0x00,
-                0x04,
-                0x00,
-                0x00,
-                0x00,
-                0xdd,
-                0x07,
-                0x00,
-                0x00,
-                0x06,
-                0x00,
-                0x00,
-                0x00
-            ])
-            conn.sendBuffer(achievementReplyTest) */
-        }
     }
 
     /**

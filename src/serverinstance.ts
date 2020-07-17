@@ -22,7 +22,9 @@ import { ActiveConnections } from 'storage/activeconnections'
 
 import { PacketLogger } from 'packetlogger'
 
+import { AchievementHandler } from 'handlers/achievementhandler'
 import { ChatHandler } from 'handlers/chathandler'
+
 import { ChatService } from 'services/chatservice'
 
 /**
@@ -68,6 +70,7 @@ export class ServerInstance {
 
     private chatSvc: ChatService
 
+    private achievementHandler: AchievementHandler
     private chatHandler: ChatHandler
 
     private packetLogging: PacketLogger
@@ -85,6 +88,8 @@ export class ServerInstance {
         this.holepunchServer = dgram.createSocket('udp4')
 
         this.chatSvc = new ChatService('https://implement.me.invalid')
+
+        this.achievementHandler = new AchievementHandler()
         this.chatHandler = new ChatHandler(this.chatSvc)
 
         if (options.shouldLogPackets) {
@@ -332,8 +337,7 @@ export class ServerInstance {
             case PacketId.Chat:
                 return this.chatHandler.OnPacket(data, connection)
             case PacketId.Achievement:
-                UserManager.TEST_onAchievementPacket(data, connection)
-                return true
+                return this.achievementHandler.OnPacket(data, connection)
             case PacketId.RequestChannels:
                 return ChannelManager.onChannelListPacket(connection)
             case PacketId.RequestRoomList:
