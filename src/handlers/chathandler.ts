@@ -2,7 +2,6 @@ import { ExtendedSocket } from 'extendedsocket'
 import { UserSession } from 'user/usersession'
 
 import { ChatMessageType } from 'packets/definitions'
-import { ChatService } from 'services/chatservice'
 
 import { Channel } from 'channel/channel'
 import { Room } from 'room/room'
@@ -17,11 +16,7 @@ import { ActiveConnections } from 'storage/activeconnections'
  * handles incoming Chat packets
  */
 export class ChatHandler {
-    private chatSvc: ChatService
-
-    constructor(chatSvc: ChatService) {
-        this.chatSvc = chatSvc
-    }
+    /* constructor() {} */
 
     public OnPacket(packetData: Buffer, conn: ExtendedSocket): boolean {
         const chatPkt: InChatPacket = new InChatPacket(packetData)

@@ -25,8 +25,6 @@ import { PacketLogger } from 'packetlogger'
 import { AchievementHandler } from 'handlers/achievementhandler'
 import { ChatHandler } from 'handlers/chathandler'
 
-import { ChatService } from 'services/chatservice'
-
 /**
  * The welcome message sent to the client
  */
@@ -68,8 +66,6 @@ export class ServerInstance {
     private holepunchPort: number
     private hostname: string
 
-    private chatSvc: ChatService
-
     private achievementHandler: AchievementHandler
     private chatHandler: ChatHandler
 
@@ -87,10 +83,8 @@ export class ServerInstance {
         this.server = net.createServer()
         this.holepunchServer = dgram.createSocket('udp4')
 
-        this.chatSvc = new ChatService('https://implement.me.invalid')
-
         this.achievementHandler = new AchievementHandler()
-        this.chatHandler = new ChatHandler(this.chatSvc)
+        this.chatHandler = new ChatHandler()
 
         if (options.shouldLogPackets) {
             this.packetLogging = new PacketLogger()
