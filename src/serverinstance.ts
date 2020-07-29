@@ -316,7 +316,7 @@ export class ServerInstance {
         if (this.packetLogging) {
             this.packetLogging.dumpIn(
                 connection.uuid,
-                connection.getRealSeq(),
+                connection.getRealInSeq(),
                 packet.id,
                 data
             )

@@ -21,7 +21,9 @@ export class ExtendedSocket extends net.Socket {
         Object.assign(newSocket, socket)
 
         newSocket.session = null
-        newSocket.realSeq = MIN_SEQUENCE
+
+        newSocket.realInSeq = MIN_SEQUENCE
+        newSocket.realOutSeq = MIN_SEQUENCE
         newSocket.packetDumper = packetDumper
 
         return newSocket
@@ -37,7 +39,8 @@ export class ExtendedSocket extends net.Socket {
     private seq: number
 
     // the real current packet sequence, used by logger
-    private realSeq: number
+    private realInSeq: number
+    private realOutSeq: number
 
     private packetDumper: PacketLogger
 
@@ -54,10 +57,17 @@ export class ExtendedSocket extends net.Socket {
     }
 
     /**
-     * get the current real sequence
+     * get the current incoming packet real sequence
      */
-    public getRealSeq(): number {
-        return this.realSeq++
+    public getRealInSeq(): number {
+        return this.realInSeq++
+    }
+
+    /**
+     * get the current outgoing packet real sequence
+     */
+    public getRealOutSeq(): number {
+        return this.realOutSeq++
     }
 
     /**
@@ -84,7 +94,12 @@ export class ExtendedSocket extends net.Socket {
         data.writeUInt8(this.getNextSeq(), 1)
 
         if (this.packetDumper) {
-            this.packetDumper.dumpOut(this.uuid, this.realSeq, packet.id, data)
+            this.packetDumper.dumpOut(
+                this.uuid,
+                this.getRealOutSeq(),
+                packet.id,
+                data
+            )
         }
 
         return super.write(data)

@@ -21,11 +21,11 @@ export class PacketLogger {
     private outPath: string
 
     constructor(baseDir = 'packets', incomingDir = 'in', outgoingDir = 'out') {
-        this.inPath = baseDir + '/' + incomingDir + '/'
-        this.outPath = baseDir + '/' + outgoingDir + '/'
+        this.inPath = `${baseDir}/${incomingDir}/`
+        this.outPath = `${baseDir}/${outgoingDir}/`
 
-        console.log('PacketDumper: using %s as incoming dir', this.inPath)
-        console.log('PacketDumper: using %s as outgoing dir', this.outPath)
+        console.log(`PacketDumper: using ${this.inPath} as incoming dir`)
+        console.log(`PacketDumper: using ${this.outPath} as outgoing dir`)
 
         try {
             if (fs.existsSync(baseDir) === false) {
@@ -86,15 +86,9 @@ export class PacketLogger {
             seq
         )}-${packetId}.bin`
 
-        fs.writeFile(
-            packetPath,
-            packetData,
-            { encoding: 'binary', flag: 'w' },
-            (err) => {
-                if (err) {
-                    console.error(err)
-                }
-            }
-        )
+        fs.writeFileSync(packetPath, packetData, {
+            encoding: 'binary',
+            flag: 'w'
+        })
     }
 }
