@@ -273,26 +273,36 @@ export class ServerInstance {
         await this.processPackets(newData, conn)
     }
 
+    private GetPacketLength(data: Buffer): number {
+        try {
+            const pkt = new InPacketBase(data)
+            return pkt.length + InPacketBase.headerLength
+        } catch (error) {
+            return 0
+        }
+    }
+
     private async processPackets(packetData: Buffer, conn: ExtendedSocket) {
-        let curOffset = 0
-        let curTotalLen = 0
+        const fullDataLen = packetData.length
+        let nextPktLen = 0
 
         for (
-            let len = packetData.length;
-            len >= InPacketBase.headerLength;
-            len -= curTotalLen
+            let curOffset = 0;
+            curOffset + InPacketBase.headerLength <= fullDataLen;
+            curOffset += nextPktLen
         ) {
-            const pktBuffer: Buffer = packetData.slice(
-                curOffset,
-                curOffset + len
+            nextPktLen = this.GetPacketLength(packetData.slice(curOffset))
+
+            if (nextPktLen === 0) {
+                console.error('processPackets: got a null length packet')
+                return
+            }
+
+            const curPacket = new InPacketBase(
+                packetData.slice(curOffset, curOffset + nextPktLen)
             )
-            const curPacket: InPacketBase = new InPacketBase(pktBuffer)
-            const totalPktLen = curPacket.length + InPacketBase.headerLength
 
             await this.onIncomingPacket(curPacket, conn)
-
-            curTotalLen = totalPktLen
-            curOffset += totalPktLen
         }
     }
 
