@@ -118,6 +118,37 @@ export class UserService {
     }
 
     /**
+     * sets an user's signature
+     * @param targetUser the user to have the avatar updated
+     * @param signature the new signature string
+     * @returns true if updated successfully, false if not
+     */
+    public async SetUserCampaignFlags(
+        targetUser: User,
+        campaignFlags: number
+    ): Promise<boolean> {
+        try {
+            const res: superagent.Response = await superagent
+                .put(this.baseUrl + `/users/${targetUser.id}`)
+                .send({
+                    campaign_flags: campaignFlags
+                })
+                .accept('json')
+
+            if (res.status === 200) {
+                targetUser.campaign_flags = campaignFlags
+                this.userCache.set(targetUser.id, targetUser)
+                return true
+            }
+        } catch (error) {
+            console.error(error)
+            await UserSvcPing.checkNow()
+        }
+
+        return false
+    }
+
+    /**
      * sets an user's avatar
      * @param targetUser the user to have the avatar updated
      * @param avatarId the new avatar's ID

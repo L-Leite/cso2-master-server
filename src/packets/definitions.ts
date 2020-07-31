@@ -35,6 +35,7 @@ export enum PacketId {
 }
 
 export enum AboutmePacketType {
+    CampaignUpdate = 4,
     SetSignature = 5,
     SetTitle = 6,
     SetAvatar = 7
@@ -87,4 +88,32 @@ export enum HostPacketType {
 
 export enum OptionPacketType {
     SetBuyMenu = 1
+}
+
+export enum MissionCampaignIds {
+    Campaign_0 = 1,
+    Campaign_1 = 8 << 0,
+    Campaign_2 = 8 << 1,
+    Campaign_3 = 8 << 2,
+    Campaign_4 = 8 << 3,
+    Campaign_5 = 8 << 4,
+    Campaign_6 = 8 << 5 // unused
+}
+
+export function IsMissionCampaignIdValid(
+    id: number | MissionCampaignIds
+): boolean {
+    return (
+        id === MissionCampaignIds.Campaign_0 ||
+        id === MissionCampaignIds.Campaign_1 ||
+        id === MissionCampaignIds.Campaign_2 ||
+        id === MissionCampaignIds.Campaign_3 ||
+        id === MissionCampaignIds.Campaign_4 ||
+        id === MissionCampaignIds.Campaign_5 ||
+        id === MissionCampaignIds.Campaign_6
+    )
+}
+export enum AboutmeCampaignUpdateType {
+    Started = 0,
+    Finished = 1
 }

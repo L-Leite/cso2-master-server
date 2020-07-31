@@ -334,7 +334,7 @@ room but it couldn't be found.`)
         currentRoom.updateUserTeam(targetSession.user.id, teamData.newTeam)
 
         console.log(
-            `Automatic changing User ID ${requesterSession.user.id}'s team to the ${teamData.newTeam} in room ${currentRoom.id}`
+            `Changing user ${requesterSession.user.id}'s team to ${teamData.newTeam} in room ${currentRoom.id}`
         )
 
         return true

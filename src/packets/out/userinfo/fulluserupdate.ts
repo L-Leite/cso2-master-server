@@ -108,7 +108,7 @@ export class UserInfoFullUpdate {
 
         // flag & 0x1000
         outPacket.writeUInt8(0) // unk43
-        outPacket.writeUInt16(255) // unk44
+        outPacket.writeUInt16(user.campaign_flags)
         outPacket.writeUInt32(0) // unk45
         // end of flag & 0x1000
 

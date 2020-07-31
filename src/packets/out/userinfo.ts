@@ -29,6 +29,22 @@ export class OutUserInfoPacket extends OutPacketBase {
         return packet
     }
 
+    public static updateCampaignFlags(user: User): OutUserInfoPacket {
+        const packet: OutUserInfoPacket = new OutUserInfoPacket()
+
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 100,
+            incrementAmount: 20
+        })
+
+        packet.buildHeader()
+        packet.writeUInt32(user.id)
+
+        UserInfoDynamicUpdate.buildCampaign(user.campaign_flags, packet)
+
+        return packet
+    }
+
     public static updateAvatar(user: User): OutUserInfoPacket {
         const packet: OutUserInfoPacket = new OutUserInfoPacket()
 

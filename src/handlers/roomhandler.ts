@@ -140,7 +140,7 @@ export class RoomHandler {
         newRoom.sendRoomSettingsTo(session.user.id)
 
         console.log(
-            'user ID ${session.user.id} created a new room. name: "${newRoom.settings.roomNam}" (id: ${newRoom.id})'
+            `user ID ${session.user.id} created a new room. name: "${newRoom.settings.roomName}" (id: ${newRoom.id})`
         )
 
         return true

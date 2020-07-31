@@ -1,18 +1,22 @@
 import { ExtendedSocket } from 'extendedsocket'
 
-import { AboutmePacketType } from 'packets/definitions'
+import {
+    AboutmePacketType,
+    AboutmeCampaignUpdateType,
+    IsMissionCampaignIdValid
+} from 'packets/definitions'
 
 import { InAboutmePacket } from 'packets/in/aboutme'
+import { InAboutmeCampaignUpdate } from 'packets/in/aboutme/campaigncomplete'
 import { InAboutmeSetAvatar } from 'packets/in/aboutme/avatar'
 import { InAboutmeSetSignature } from 'packets/in/aboutme/signature'
 import { InAboutmeSetTitle } from 'packets/in/aboutme/title'
 
 import { OutUserInfoPacket } from 'packets/out/userinfo'
 
-import { UserService } from 'services/userservice'
-
 import { Room } from 'room/room'
 import { UserSession } from 'user/usersession'
+import { UserService } from 'services/userservice'
 
 /**
  * handles incoming AboutMe type packets
@@ -38,6 +42,8 @@ export class AboutMeHandler {
         }
 
         switch (aboutPacket.packetType) {
+            case AboutmePacketType.CampaignUpdate:
+                return this.OnCampaignUpdate(aboutPacket, connection)
             case AboutmePacketType.SetAvatar:
                 return this.OnSetAvatar(aboutPacket, connection)
             case AboutmePacketType.SetSignature:
@@ -52,6 +58,62 @@ export class AboutMeHandler {
         )
 
         return false
+    }
+
+    private async OnCampaignUpdate(
+        aboutPkt: InAboutmePacket,
+        conn: ExtendedSocket
+    ): Promise<boolean> {
+        const campaignData = new InAboutmeCampaignUpdate(aboutPkt)
+
+        const user = conn.session.user
+
+        switch (campaignData.type) {
+            case AboutmeCampaignUpdateType.Started:
+                console.debug(`user ${user.id} sent a campaign started packet`)
+                return true
+
+            default:
+                return this.OnCampaignFinished(campaignData, conn)
+        }
+
+        console.warn(
+            `user ${user.id} sent an invalid campaign update request type ${campaignData.type}`
+        )
+
+        return false
+    }
+
+    private async OnCampaignFinished(
+        campaignData: InAboutmeCampaignUpdate,
+        conn: ExtendedSocket
+    ): Promise<boolean> {
+        const user = conn.session.user
+        const campaignId = campaignData.campaignId
+
+        if (IsMissionCampaignIdValid(campaignId) === false) {
+            console.warn(
+                `user ${user.id} sent an invalid campaign complete request for ${campaignId}`
+            )
+            return false
+        }
+
+        const newFlags = user.campaign_flags | campaignId
+        const updated = await this.userSvc.SetUserCampaignFlags(user, newFlags)
+
+        if (updated === false) {
+            console.warn(
+                `Failed to update user ${user.id}'s campaign flags to ${newFlags}`
+            )
+            return false
+        }
+
+        const updateInfoPkt = OutUserInfoPacket.updateCampaignFlags(user)
+        conn.send(updateInfoPkt)
+
+        console.debug(`Setting user ${user.id}'s campaign flags to ${newFlags}`)
+
+        return true
     }
 
     private async OnSetAvatar(

@@ -3,13 +3,19 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { AchievementPacketType, PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
 
-import { OutAchievementUpdateCampaign } from 'packets/out/achievement/updatecampaign'
+import {
+    OutAchievementUpdateCampaign,
+    OutAchUpdCampaignOptions
+} from 'packets/out/achievement/updatecampaign'
 
 /**
  * creates achievement related packets
  */
 export class OutAchievementPacket extends OutPacketBase {
-    public static UpdateCampaign(campaignId: number): OutAchievementPacket {
+    public static UpdateCampaign(
+        campaignId: number,
+        options: OutAchUpdCampaignOptions = {}
+    ): OutAchievementPacket {
         const packet: OutAchievementPacket = new OutAchievementPacket()
 
         packet.outStream = new WritableStreamBuffer({
@@ -20,7 +26,7 @@ export class OutAchievementPacket extends OutPacketBase {
         packet.buildHeader()
         packet.writeUInt8(AchievementPacketType.Campaign)
 
-        OutAchievementUpdateCampaign.build(campaignId, packet)
+        OutAchievementUpdateCampaign.build(campaignId, packet, options)
 
         return packet
     }
