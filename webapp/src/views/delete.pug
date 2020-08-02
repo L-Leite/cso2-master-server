@@ -1,0 +1,24 @@
+include includes/globals
+
+- const pageTitle = 'Account deletion'
+
+doctype html
+html(lang="en")  
+  include includes/head
+  body
+    include includes/background
+    include includes/status    
+    div(class="container-userstats")
+      div(class="container-content")
+        div(class="page-title")
+          h1 Deleting your account
+        form(action="/do_delete", method="post")
+          div(class="page-content")
+            h3= 'Are you sure you want to delete \'' + user.playerName + '\'?'
+            div(class="form-item")
+              label(for="confirmation") Delete this account   
+                input#confirmation(type="checkbox", name="confirmation" required="true" class="form-text-input")
+            div(class="form-item")
+              input(type="submit", value="Delete" class="button")
+            div(class="help-url")
+              a(href='/user') Go back

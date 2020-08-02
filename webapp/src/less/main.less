@@ -1,0 +1,239 @@
+@import "base";
+
+@mainContainerOffset: 45rem;
+@loginContainerOffset: 30rem;
+@signupContainerOffset: 35rem;
+@statsContainerOffset: 40rem;
+
+@anchorColor: saturate(blue, 20%);
+@anchorHoverColor: darken(@anchorColor, 20%);
+@anchorActiveColor: darken(@anchorHoverColor, 20%);
+
+@containerBgColor: desaturate(fadeout(darken(cyan, 10%), 25%), 50%);
+
+@pageTitleBgColor: saturate(@containerBgColor, 25%);
+@pageTitleWidth: 2rem;
+@pageTitleHeight: 4rem;
+
+@formMargin: 1rem;
+@formItemSeparator: 1rem;
+
+@inputPadding: 0.65rem;
+
+@buttonBgColor: fadeout(desaturate(blue, 50%), 10%);
+@buttonBgHoverColor: darken(@buttonBgColor, 20%);
+@buttonBgClickedColor: darken(@buttonBgColor, 30%);
+@buttonBorderColor: darken(@buttonBgColor, 20%);
+@buttonBorderSize: 0.15rem;
+@buttonPadding: 1rem;
+
+@helpUrlColor: black;
+@helpUrlFontSize: 0.9rem;
+
+@mainUrlColor: darken(white, 5%);
+@mainUrlFontSize: 1rem;
+@mainUrlPadding: 1rem 2rem;
+
+body {
+    font-family: -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Helvetica Neue",
+        Arial,
+        "Noto Sans",
+        sans-serif,
+        "Apple Color Emoji",
+        "Segoe UI Emoji",
+        "Segoe UI Symbol",
+        "Noto Color Emoji";
+    margin: 0;
+}
+
+a {
+    color: @anchorColor;
+    text-decoration: none;
+
+    &:hover {
+        color: @anchorHoverColor;
+        text-decoration: underline;
+    }
+
+    &:focus {
+        color: @anchorActiveColor;
+        text-decoration: underline;
+    }
+}
+
+.container-main {
+    .container-base();
+    height: @mainContainerOffset + 20rem;
+
+    @media (min-width: 480px) {
+        height: @mainContainerOffset + 10rem;
+    }
+
+    @media (min-width: 768px) {
+        height: @mainContainerOffset;
+    }
+}
+
+.container-login {
+    .container-base();
+    height: @loginContainerOffset;
+}
+
+.container-signup {
+    .container-base();
+    height: @signupContainerOffset;
+}
+
+.container-userstats {
+    .container-base();
+    height: @statsContainerOffset;
+}
+
+.container-bg {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+    z-index: -100;
+}
+
+.container-bg-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: auto;
+    height: auto;
+    min-width: 100%;
+    min-height: 100%;
+    transform: translate(-50%, -50%);
+}
+
+.container-content {
+    background-color: @containerBgColor;
+    max-width: 75%;
+
+    @media (min-width: 480px) {
+        max-width: 62.5%;
+    }
+
+    @media (min-width: 1024px) {
+        max-width: 50%;
+    }
+
+    @media (min-width: 1280px) {
+        max-width: 35%;
+    }
+}
+
+.page-title {
+    padding: @pageTitleWidth @pageTitleHeight;
+    background-color: @pageTitleBgColor;
+
+    h1 {
+        margin: 0;
+        text-align: center;
+    }
+}
+
+.page-content {
+    margin: @formMargin;
+}
+
+.form-item {
+    margin: @formItemSeparator 0;
+
+    input {
+        box-sizing: border-box;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+        background-color: @buttonBgClickedColor;
+        padding: @inputPadding;
+        width: 100%;
+    }
+
+    input[type="submit"] {
+        width: 100%;
+    }
+
+    label {
+        font-weight: bold;
+
+        input[type="checkbox"] {
+            position: relative;
+            vertical-align: middle;
+            bottom: 1px;
+        }
+    }
+}
+
+.button {
+    background-color: @buttonBgColor;
+    padding: @buttonPadding;
+    border: @buttonBorderSize @buttonBorderColor solid;
+    border-radius: 0;
+    transition: 0.3s;
+
+    &:hover {
+        background-color: @buttonBgHoverColor;
+    }
+
+    &:focus {
+        background-color: @buttonBgClickedColor;
+    }
+}
+
+.help-url {
+    margin: 1rem 0;
+
+    a {
+        color: @helpUrlColor;
+        font-size: @helpUrlFontSize;
+        padding: 0 0.2rem;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+.main-url-container {
+    display: inline-block;
+    width: 100%;
+}
+
+.main-url {
+    display: block;
+    float: left;
+    width: 50%;
+
+    a {
+        color: @mainUrlColor;
+        box-sizing: border-box;
+        display: inline-block;
+        font-size: @mainUrlFontSize;
+        padding: @mainUrlPadding;
+        text-align: center;
+        text-decoration: none;
+        width: 100%;
+    }
+}
+
+.disclaimer {
+    h4 {
+        margin: 0;
+    }
+
+    p {
+        font-size: 0.9rem;
+        margin: 0;
+        margin-bottom: 0.25rem;
+    }
+}

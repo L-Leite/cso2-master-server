@@ -1,0 +1,19 @@
+#%RAML 1.0 DataType
+
+description: An user's inventory
+properties: 
+  owner_id:
+    type: integer
+    description: The owning user's ID
+    example: 75
+  items:
+    type: array
+    items: !include UserInventoryItem.raml
+    description: The user's items
+    example:
+      - itemId: 10003
+        ammount: 1
+      - itemId: 10008
+        ammount: 5
+      - itemId: 10016
+        ammount: 2

@@ -1,63 +1,126 @@
-# cso2-master-server
+# cso2-master-services
 
-[![Build Status](https://travis-ci.org/L-Leite/cso2-master-server.svg?branch=master)](https://travis-ci.org/L-Leite/cso2-master-server)
+This repository includes all the services required to run a master server for Nexon's Counter-Strike: Online 2.
 
-A master server for Nexon's Counter-Strike: Online 2 written in Typescript on top of NodeJS.
+**The master server is currently in development and is missing many features.**
+You can keep track of the project's progress [here](https://github.com/Ochii/cso2-master-services/projects/1).
 
-Used by this [client launcher](https://github.com/L-Leite/cso2-launcher/).
+You can get [this client launcher](https://github.com/Ochii/cso2-launcher/) to play in the server.
 
-**You can no longer use this by itself**, see [cso2-master-services](https://github.com/L-Leite/cso2-master-services#running-the-services) for more information.
+## Communities
 
-## Starting the master server
+You can find other players in these.
 
-*Note: go to [cso2-master-services](https://github.com/L-Leite/cso2-master-services#running-the-services) for download and build scripts.*
+If your community isn't listed here feel free to open pull request with it.
 
-***Note: You must have an user service running somewhere.***
+*Note: These communities are not run by the repository owner.*
 
-You can start the master server with:
+- [Counter Strike Online Wiki's discord](https://discord.gg/GKPgrBG) (discuss at #cso2-project-discussion)
+- [CSO2 Revive](https://discord.gg/3tydYTC) (in Korean)
+- [Counter-Strike Online 2 - EU/RU Server](https://discord.gg/yue5Zaf) (in English)
+- [反恐精英Online2(CSOL2)](https://jq.qq.com/?k=5PMEa6y) (in China, you will need [QQ](https://www.imqq.com/English1033.html) if you are not Chinese)
+
+## Running the services
+
+You must have the following installed and in your path:
+- Node.js
+- MongoDB
+- cURL
+- git
+- tar
+
+### Setting up
+
+*Note: If you want to use `docker-compose`, see [Running the services with `docker-compose`](#Running-the-services-with-docker-compose)*.
+
+The Powershell scripts must be run in Powershell version 4 or better.
+
+To download the services, go to the master-services directory in a shell, and:
+
+(In a *nix environment:)
 
 ```sh
-# environment variables
-export USERSERVICE_HOST=127.0.0.1 # the user service's host
-export USERSERVICE_PORT=30100 # the user service's port
-
-# starts the master server
-node dist/server.js
+git submodule update --init # needed to get the services' versions
+./setup_services.sh # downloads the required services
 ```
 
-You **must** set those environment variables, or the service will not start.
+(In a Windows environment:)
 
-See the [command line arguments](#command-line-arguments) for more options.
+```powershell
+git submodule update --init # needed to get the services' versions
+.\setup_services.ps1 # downloads the required services
+```
 
-### Starting with docker-compose
+If you want to build them yourself instead, do:
 
-Go to [cso2-master-services](https://github.com/L-Leite/cso2-master-services) to learn how to start the master server with docker-compose.
+(In a *nix environment:)
 
-### Command line arguments
+```sh
+git submodule update --init # fetches the services source code
+./setup_services.sh --build-services # builds the required services
+```
 
-Options:
+(In a Windows environment:)
 
-- ```-i, --ip-address [ip]``` (*optional*) The IP address to listen on (don't use --interface with this)
-- ```-I, --interface [intf]``` (*optional*) The interface to be used by the server (don't use --ip-address with this)
-- ```-p, --port-master [port]``` (*optional*) The server's (TCP) port (default: 30001)
-- ```-P, --port-holepunch [port]``` (*optional*) The server's holepunch (UDP) port (default: 30002)
-- ```-l, --log-packets``` (*optional*) Log the incoming and outgoing packets
+```powershell
+git submodule update --init # fetches the services source code
+.\setup_services.ps1 -BuildServices # builds the required services
+```
 
-If you don't specify an IP address or an interface, the server **will ask you which network interface to listen on**.
+### Starting the services
 
-## Contributing
+To start the services, do:
 
-Bug reports and pull requests are very much welcome.
+(In a *nix environment:)
 
-See the [current project's progress](https://github.com/L-Leite/cso2-master-services/projects/1) for more information.
+```sh
+./start_services.sh # starts the services
+```
 
-## Contributors
+(In a Windows environment:)
+```powershell
+.\start_services.ps1 # starts the services
+```
 
-- [JusicP](https://github.com/JusicP)
-- [dounai2333](https://github.com/dounai2333)
+In *nix systems, you can stop the services by pressing CTRL+C in the shell.
+
+## Running the services with ```docker-compose```
+
+You must have installed both [```docker```](https://docs.docker.com/) and [```docker-compose```](https://docs.docker.com/compose/) in order to run the services all at once.
+
+### Setting up with ```docker-compose```
+
+The repository has two ```docker-compose``` configuration files, `docker-compose.development.yml` and `docker-compose.production.yml`.
+
+`docker-compose.development.yml` can be used for development environments, where `docker-compose.production.yml` can be used for development production environments (such as a remote server).
+
+Rename the configuration file you prefer to `docker-compose.yml` so you can use it with ```docker-compose```.
+
+### Starting the services with ```docker-compose```
+
+If this is your first time running the services, use ```docker-compose up -d``` to start them. If not you can use ```docker-compose start -d```.
+
+To stop the services, use ```docker-compose down```.
+
+## Services bundled
+
+The following services bundled in this repository:
+
+- [cso2-master-server](https://github.com/Ochii/cso2-master-server)
+- [cso2-users-service](https://github.com/Ochii/cso2-users-service)
+- [cso2-inventory-service](https://github.com/Ochii/cso2-inventory-service)
+- [cso2-webapp](https://github.com/Ochii/cso2-webapp)
+
+## Pull requests
+
+Pull requests are very much welcome.
+
+Before you create one, be sure you're in the right repository.
+
+See [Services bundled](##Services-bundled) for a list of the services bundled here.
 
 ## License
 
-`cso2-masters-server` is licensed under the MIT License.
+Read `LICENSE` for the project's license information.
 
-This project is not affiliated with either Valve Software or Nexon.
+This project is not affiliated with either Valve or Nexon. Counter-Strike: Online 2 is owned by these companies.

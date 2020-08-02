@@ -1,0 +1,45 @@
+#%RAML 1.0 ResourceType
+
+usage: This resourceType should be used for any collection of items
+description: The collection of <<collectionItemTypeName | !pluralize>>
+get:
+  description: Get all <<collectionItemTypeName | !pluralize>>, optionally filtered
+  responses:
+    200:
+      description: The <<collectionItemTypeName | !pluralize>> data was retrieved successfully.
+      body:
+        application/json:
+          type: <<collectionItemTypeName>>[]
+    400:
+      description: The request is malformed.
+    413:
+      description: The requested number of <<collectionItemTypeName | pluralize>> is too large.
+    500:
+      description: An internal error has occured.
+post:
+  description: Create a new <<collectionItemTypeName>>
+  body:
+    application/json:   
+      properties:
+        type: <<collectionCreateType>>
+  responses:
+    201:
+      description: The <<collectionItemTypeName>> was created sucessfully.
+      body:
+        application/json:   
+          type: <<collectionItemTypeName>>
+    400:
+      description: The request is malformed.
+    409:
+      description: The <<collectionItemTypeName>> is unavailable.
+    500:
+      description: An internal error has occured.
+delete:
+  description: Deletes all <<collectionItemTypeName | !pluralize>>   
+  responses:
+    200:
+      description: The <<collectionItemTypeName | !pluralize>> were deleted sucessfully.
+    400:
+      description: The request is malformed.
+    500:
+      description: An internal error has occured.

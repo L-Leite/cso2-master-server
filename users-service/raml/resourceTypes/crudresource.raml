@@ -1,0 +1,57 @@
+#%RAML 1.0 ResourceType
+
+usage: This resourceType handles CRUD requests
+description: Handles information of a <<resTypeName>>
+get:
+  description: Request for the <<resTypeName>>'s data.          
+  responses:
+    200:
+      description: The <<resTypeName>>'s data.
+      body:
+        application/json:
+          type: <<resTypeName>>
+    400:
+      description: The request is malformed.
+    404:
+      description: The <<resTypeName>> does not exist.
+    500:
+      description: An unknown internal error occured.
+post:
+  description: Create a new <<resTypeName>>. 
+  responses:
+    201:
+      description: The <<resTypeName>> was created successfully.
+      body:
+        application/json:
+          type: <<resTypeName>>
+    400:
+      description: The request is malformed.
+    409:
+      description: The <<resTypeName>> already exists.
+    500:
+      description: An unknown internal error occured.
+put:
+  description: Update the <<resTypeName>>.
+  body:
+    application/json:
+      type: <<resTypeName>>           
+  responses:
+    200:
+      description: The <<resTypeName>> was updated sucessfully.
+    400:
+      description: The request is malformed.
+    404:
+      description: The <<resTypeName>> does not exist.
+    500:
+      description: An unknown internal error occured.
+delete: 
+  description: Delete the <<resTypeName>>.
+  responses:
+    200:
+      description: The <<resTypeName>> was removed successfully
+    400:
+      description: The request is malformed.
+    404:
+      description: The <<resTypeName>> not exist.
+    500:
+      description: An unknown internal error occured.

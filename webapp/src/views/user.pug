@@ -1,0 +1,29 @@
+include includes/globals
+
+- const pageTitle = user.playerName + '\'s statistics'
+
+doctype html
+html(lang="en")  
+  include includes/head
+  body
+    include includes/background
+    include includes/status    
+    div(class="container-userstats")
+      div(class="container-content")
+        div(class="page-title")
+          h1= user.playerName + '\'s statistics'
+        div(class="page-content")
+          p= 'Level: ' + user.level
+          p= 'Current experience: ' + user.cur_xp
+          p= 'Experience until next level: ' + user.max_xp
+          p= 'Avatar ID: ' + user.avatar
+          p= 'Rank: ' + user.rank
+          p= 'VIP level: ' + user.vip_level
+          p= 'Wins: ' + user.wins
+          p= 'Kills: ' + user.kills
+          p= 'Deaths: ' + user.deaths
+          p= 'Assists: ' + user.assists
+          div(class="help-url")
+            a(href='/logout') Log out of your account
+            span |
+            a(href='/user/delete') Delete your account

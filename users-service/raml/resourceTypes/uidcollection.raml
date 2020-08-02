@@ -1,0 +1,43 @@
+#%RAML 1.0 ResourceType
+
+usage: This resourceType should be used for any collection of items which endpoint uses some sort of ID.
+description: This handles <<uidColItemTypeName | !pluralize>>
+get:
+  description: Get the <<uidColItemTypeName>>
+  responses:
+    200:
+      description: The <<uidColItemTypeName>> data was successfully.
+      body:
+        application/json:
+          type: <<uidColItemTypeName>>[]
+    400:
+      description: The request is malformed.
+    404:
+      description: The <<uidColItemTypeName>> does not exist.
+    500:
+      description: An internal error has occured.
+post:
+  description: Create a new <<uidColItemTypeName>>
+  responses:
+    201:
+      description: The <<uidColItemTypeName>> was created sucessfully.
+      body:
+        application/json:
+          type: <<uidColItemTypeName>>[]
+    400:
+      description: The request is malformed.
+    409:
+      description: The <<uidColItemTypeName>> is unavailable.
+    500:
+      description: An internal error has occured.
+delete:
+  description: Deletes a <<uidColItemTypeName>>
+  responses:
+    200:
+      description: The <<uidColItemTypeName>> were deleted sucessfully.
+    400:
+      description: The request is malformed.
+    404:
+      description: The <<uidColItemTypeName>> does not exist.
+    500:
+      description: An internal error has occured.

@@ -1,0 +1,1 @@
+export const INVENTORY_ITEM_OID = 20274

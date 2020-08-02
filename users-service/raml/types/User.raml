@@ -1,0 +1,202 @@
+#%RAML 1.0 DataType
+
+description: An user's full information.
+properties:      
+  id: 
+    type: integer
+    description: The user's ID
+    example: 123
+  username: 
+    type: string
+    description: The user's name
+    example: "gamer_x"
+  playername: 
+    type: string
+    description: The user's ingame name
+    example: "Gamer X"
+
+  gm:
+    type: boolean
+    description: Is the user a GM (Game Master / Admin)?
+    example: true
+
+  points:
+    type: integer
+    description: The ammount of free currency.
+    example: 30000
+  cash:
+    type: integer
+    description: The ammount of paid currency.
+    example: 5000
+  mpoints:
+    type: integer
+    description: The ammount of some currency.
+    example: 30000
+
+  level:
+    type: integer
+    description: The user's level
+    minimum: 1
+    maximum: 255
+    example: 13
+  cur_xp:
+    type: integer
+    description: The user's current experience
+    example: 3500
+  max_xp:
+    type: integer
+    description: The user's level maximum experience
+    example: 5000
+  vip_level:
+    type: integer
+    description: The user's VIP (paid) level
+    example: 2
+  vip_xp:
+    type: integer
+    description: The user's VIP experience number
+    example: 1000
+
+  rank:
+    type: integer
+    description: The user's rank
+    example: 50
+  rank_frame:
+    type: integer
+    description: The user's rank cosmetic frame
+    example: 2
+
+  played_matches:
+    type: integer
+    description: The lifetime number of matches played
+    example: 28
+  wins:
+    type: integer
+    description: The user's match wins
+    example: 5
+  seconds_played:
+    type: integer
+    description: The lifetime number of seconds of gameplay time.
+    example: 58031
+
+  kills:
+    type: integer
+    description: The user's kills
+    example: 1
+  deaths:
+    type: integer
+    description: The user's deaths
+    example: 230
+  assists:
+    type: integer
+    description: The user's assists
+    example: 7
+  headshots:
+    type: integer
+    description: The number of headshot kills.
+    example: 15
+  accuracy:
+    type: integer
+    description: The number an user's shots accuracy. (?)
+    example: 10
+
+  avatar:
+    type: integer
+    description: The User's equipped avatar. (?)
+    example: 1005
+  unlocked_avatars:
+    type: integer[]
+    description: The User's unlocked avatars. (?)
+    minItems: 128
+    maxItems: 128
+    example:
+      - 0xFF
+      - 0xFF
+      - ...
+
+  title:
+    type: integer
+    description: The User's title ID
+    example: 50
+  unlocked_titles:
+    type: integer[]
+    description: The User's unlocked titles. (?)
+    minItems: 128
+    maxItems: 128
+    example:
+      - 0xFF
+      - 0xFF
+      - ...
+  signature:
+    type: string
+    description: The user's custom signature
+    example: 'My cool clan'
+
+  unlocked_achievements:
+    type: integer[]
+    description: The User's unlocked achievements.
+    minItems: 128
+    maxItems: 128
+    example:
+      - 0xFF
+      - 0x00
+      - ...
+
+  campaign_flags:
+    type: number
+    description: The completed campaign mission's flags. Example: 0x9 means that the first (flag 0x1) and second (flag 0x8) campaign missions were complete by the user.
+    example: 0x09
+
+  netcafe_name:
+    type: string
+    description: The name of the current NetCafe
+    example: 'Some netcafe'
+
+  clan_name:
+    type: string
+    description: The name of the User's current clan
+    example: 'My cool clan'
+  clan_mark:
+    type: integer
+    description: The mark of the User's current clan
+    minimum: 0
+    maximum: 7
+    example: 2
+
+  world_rank:
+    type: integer
+    description: The User's world ranking
+    example: 50
+
+  best_gamemode:
+    type: integer
+    description: The User's most played (?) game mode
+    example: 5
+  best_map:
+    type: integer
+    description: The User's most played (?) map
+    example: 3
+
+  skill_human_curxp:
+    type: integer
+    description: The User's skill factory current human experience
+    example: 380
+  skill_human_maxxp:
+    type: integer
+    description: The User's skill factory maximum human experience
+    example: 2500
+  skill_human_points:
+    type: integer
+    description: The User's skill factory human points
+    example: 10
+  skill_zombie_curxp:
+    type: integer
+    description: The User's skill factory current zombie experience
+    example: 380
+  skill_zombie_maxxp:
+    type: integer
+    description: The User's skill factory maximum zombie experience
+    example: 2500
+  skill_zombie_points:
+    type: integer
+    description: The User's skill factory zombie points
+    example: 10

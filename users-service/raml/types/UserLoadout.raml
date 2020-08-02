@@ -1,0 +1,36 @@
+#%RAML 1.0 DataType
+
+description: An user's inventory loadout.
+properties:
+  owner_id:
+    type: integer
+    description: The owning user's ID
+  loadout_num: 
+    type: integer
+    description: The user's loadout number
+    minimum: 0
+    maximum: 2
+  primary_weapon: 
+    type: integer
+    description: The user's loadout primary weapon item ID
+    example: 10501
+  secondary_weapon: 
+    type: integer
+    description: The user's loadout secondary weapon item ID
+    example: 10321
+  melee: 
+    type: integer
+    description: The user's loadout melee weapon item ID
+    example: 10200
+  hegrenade: 
+    type: integer
+    description: The user's loadout explosive grenade item ID
+    example: 10030
+  flash: 
+    type: integer
+    description: The user's loadout flashbang item ID
+    example: 10007
+  smoke: 
+    type: integer
+    description: The user's loadout smoke grenade item ID
+    example: 10005

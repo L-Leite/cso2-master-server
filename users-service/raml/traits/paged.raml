@@ -1,0 +1,15 @@
+#%RAML 1.0 Trait
+
+queryParameters:
+  offset:
+    description: Specify the page offset that you want to retrieve.
+    type: integer
+    required: true
+    example: 5
+    minimum: 0
+  length:
+    description: Specify the amount of items that will be retrieved per page.
+    type: integer
+    minimum: 1
+    maximum: <<maxItems>>
+    example: 6

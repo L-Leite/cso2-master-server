@@ -1,0 +1,12 @@
+.vscode
+dist
+docs
+node_modules
+public/styles
+
+*.log
+.eslintrc.json
+.gitattributes
+.gitignore
+LICENSE
+README.md

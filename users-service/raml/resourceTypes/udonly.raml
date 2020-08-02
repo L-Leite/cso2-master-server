@@ -1,0 +1,34 @@
+#%RAML 1.0 ResourceType
+
+usage: This resourceType should be used for update and delete options only.
+description: Inserts or deletes <<udItemTypeName>>
+put:
+  description: Add item to an user's inventory
+  body:
+    application/json:
+      type: <<udItemTypeName>>
+  responses:
+    200:
+      description: The <<udItemTypeName>> was inserted successfully.
+    400:
+      description: The request is malformed.
+    404:
+      description: The <<udUidName>> does not exist.
+    500:
+      description: An unknown internal error occured.
+delete: 
+  description: Remove an item in an user's inventory
+  body:
+    application/json:
+      type: <<udItemTypeName>>
+  responses:
+    200:
+      description: The <<udItemTypeName>> was removed successfully.
+    400:
+      description: The request is malformed.
+    404:
+      description: The <<udUidName>> does not exist.
+    410:
+      description: The <<udItemTypeName>> does not exist.
+    500:
+      description: An unknown internal error occured.

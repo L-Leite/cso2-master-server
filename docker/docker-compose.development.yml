@@ -1,0 +1,51 @@
+version: '2.1'
+services:
+  master-server:
+    container_name: cso2-master-server
+    image: cso2-master-server
+    hostname: master-server
+    build: ./master-server
+    environment:
+      NODE_ENV: development
+      USERSERVICE_HOST: users-service
+      USERSERVICE_PORT: 30100
+    ports:
+      - 30001:30001
+      - 30002:30002/udp
+    depends_on:
+      - users-service
+  users-service:
+    container_name: cso2-users-service
+    image: cso2-users-service
+    hostname: users-service
+    build: ./users-service
+    environment:
+      NODE_ENV: development
+      USERS_PORT: 30100
+      DB_HOST: mongo
+      DB_PORT: 27017
+      DB_NAME: cso2
+    ports:
+      - 30100:30100
+  webapp:
+    container_name: cso2-webapp
+    image: cso2-webapp
+    hostname: webapp
+    build: ./webapp
+    environment:
+      NODE_ENV: development
+      WEBAPP_PORT: 8080
+      USERSERVICE_HOST: users-service
+      USERSERVICE_PORT: 30100
+    ports:
+      - 8080:8080
+    depends_on:
+      - users-service
+  mongo:
+    container_name: mongo_cso2
+    image: 'mongo:latest'
+    hostname: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - './db:/data/db'

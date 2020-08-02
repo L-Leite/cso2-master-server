@@ -1,0 +1,51 @@
+#%RAML 1.0 ResourceType
+
+usage: This resourceType should be used single items only
+uriParameters:
+  <<itemUniqueIdName>>:
+    type: <<itemUniqueIdType>>
+    description: The <<itemTypeName>>'s unique ID.  
+get:
+  description: Request to get an <<itemTypeName>>'s information.      
+  responses:
+    200:
+      description: The <<itemTypeName>>'s information.
+      body:
+        application/json:
+          type: <<itemTypeName>>
+          description: The requested <<itemTypeName>> information.
+    400:
+      description: The request is malformed.
+    404:
+      description: The <<itemTypeName>> does not exist.
+    500:
+      description: An internal error has occured.
+put:
+  description: Update an <<itemTypeName>>'s session data.  
+  body:
+    application/json: 
+      properties:
+        <<itemPutReqDataName>>:
+          type: <<itemPutReqDataType>>
+          description: <<itemPutReqDataDesc>>
+          example: <<itemPutReqDataExample>>
+  responses:
+    200:
+      description: The user's session data was updated successfully.                  
+    400:
+      description: The request is malformed.
+    404:
+      description: The user does not exist.
+    500:
+      description: An internal error has occured.
+delete:
+  description: Delete a <<itemTypeName>>. 
+  responses:
+    200:
+      description: The <<itemTypeName>> was deleted sucessfully.
+    400:
+      description: The request is malformed.
+    404:
+      description: The <<itemTypeName>> does not exist.    
+    500:
+      description: An internal error has occured.

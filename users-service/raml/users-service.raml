@@ -1,0 +1,200 @@
+#%RAML 1.0
+title: CSO2 Users Service
+description: The user's service API.
+version: 0.2.0
+
+types:
+  User: !include types/User.raml
+  NewUserRequest: !include types/NewUserRequest.raml
+  UserInventoryItem: !include types/UserInventoryItem.raml
+  UserInventory: !include types/UserInventory.raml
+  UserCosmetics: !include types/UserCosmetics.raml
+  UserLoadout: !include types/UserLoadout.raml
+  UserBuyMenu: !include types/UserBuyMenu.raml
+
+resourceTypes:
+  collection: !include resourceTypes/collection.raml
+  crudresource: !include resourceTypes/crudresource.raml
+  item: !include resourceTypes/item.raml
+  udonly: !include resourceTypes/udonly.raml
+  uidcollection: !include resourceTypes/uidcollection.raml
+
+traits:
+  paged: !include traits/paged.raml
+
+/users:
+  description: Endpoint for requests about Users
+  type:
+    collection:
+      collectionItemTypeName: User
+      collectionCreateType: NewUserRequest
+  get:
+    is:
+      - paged:
+          maxItems: 100
+  /{userId}:
+    uriParameters:
+      userId:
+        type: integer
+        description: The user's ID number.
+    type:
+      item:
+        itemTypeName: User
+        itemUniqueIdName: userId
+        itemUniqueIdType: integer
+        itemPutReqDataName: currentChannelIndex
+        itemPutReqDataType: integer
+        itemPutReqDataDesc: The new channel index where the user's currently at.
+        itemPutReqDataExample: 3
+  /byname/{username}:
+    uriParameters:
+      username:
+        type: string
+        description: The user's name.
+    get:
+      description: Request to get an user's information by their user name.
+      responses:
+        200:
+          description: The user's information.
+          body:
+            application/json:
+              type: User
+              description: The requested user's information.
+        400:
+          description: The request is malformed.
+        404:
+          description: The user does not exist.
+        500:
+          description: An internal error has occured.
+  /auth:
+    description: Route for user sign ups and logins.
+    /login:
+      post:
+        description: Attempt to login with credentials.
+        body:
+          application/json:
+            properties:
+              username: 
+                type: string
+                description: The user's name
+                example: "gamer_X"
+              password:
+                type: integer
+                description: The user's password
+                example: "myc00lp4ssw0rd"
+        responses:
+          200:
+            description: The user was logged in successfully.
+            body:
+              application/json:
+                userId:
+                  type: integer
+                  description: The logged in user's ID
+                  example: 38
+          400:
+            description: The request is malformed.
+          401:
+            description: The credentials are invalid.
+          500:
+            description: An internal error has occured.
+    /logout:
+      post:
+        description: Attempt to logout an user.
+        body:
+          application/json:
+            properties:
+              userId: 
+                type: integer
+                description: The ID of the user to be logged out
+                example: 2348
+              password:
+        responses:
+          200:
+            description: The user was logged out successfully.
+          400:
+            description: The request is malformed.
+          404:
+            description: The user does not exist.
+          500:
+            description: An internal error has occured.
+    /validate:
+      post:
+        description: Checks if the credentials are valid.
+        body:
+          application/json:
+            properties:
+              username: 
+                type: string
+                description: The user's name
+                example: "gamer_X"
+              password:
+                type: integer
+                description: The user's password
+                example: "myc00lp4ssw0rd"
+        responses:
+          200:
+            description: The credentials are valid.
+            body:
+              application/json:
+                properties:
+                  userId:
+                    type: integer
+                    description: The user ID that matches the credentials.
+                    example: 25
+          400:
+            description: The request is malformed.
+          401:
+            description: The credentials are invalid.
+          500:
+            description: An internal error has occured.
+    
+/inventory:
+  description: Endpoint for requests about users' inventories
+  /{userId}:
+    description: Handles a specific user's Inventory
+    uriParameters:
+      userId:
+        type: integer
+        description: The user's ID number.
+    type:
+      uidcollection:
+        uidColItemTypeName: UserInventory
+    /item:
+      type:
+        udonly:
+          udItemTypeName: UserInventoryItem
+          udUidName: User
+    /cosmetics:
+      description: Manages an user's equipped cosmetic items.
+      type:
+        crudresource:
+          resTypeName: UserCosmetics
+    /loadout:
+      description: Manages an user's weapon loadouts.
+      type:
+        crudresource:
+          resTypeName: UserLoadout
+    /buymenu:    
+      description: Manages an user's weapons buy menu.
+      type:
+        crudresource:
+          resTypeName: UserBuyMenu
+/ping:
+  get:
+    description: Checks if a service is running.
+    responses:
+      200:
+        description: The service is up and running.
+        body:
+          application/json:
+            properties:
+              sessions:
+                type: integer
+                description: The number of player sessions stored in the database
+                example: 3600
+              uptime:
+                type: integer
+                description: The number of seconds since the start of the service
+                example: 3600
+      500:
+        description: An internal error has occured.

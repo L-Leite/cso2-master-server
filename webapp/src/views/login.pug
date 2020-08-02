@@ -1,0 +1,26 @@
+include includes/globals
+
+- const pageTitle = 'Log in'
+
+doctype html
+html(lang="en")  
+  include includes/head
+  body
+    include includes/background
+    include includes/status    
+    div(class="container-login")
+      div(class="container-content")
+        div(class="page-title")
+          h1 Log in to your account
+        form(action="/do_login", method="post")
+          div(class="page-content")        
+            div(class="form-item")
+              input(type="text", name="username" placeholder="Account's user name" required="true" class="form-text-input")
+            div(class="form-item")
+              input(type="password", name="password" placeholder="Account's password" required="true" class="form-text-input")
+            div(class="form-item")
+              input(type="submit", value="Log in" class="button")
+            div(class="help-url")
+              a(href='/signup') Create an account
+              span |
+              a(href='/') Go back
