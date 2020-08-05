@@ -1,5 +1,18 @@
-version: '2.1'
+version: "2.1"
 services:
+  postgresql:
+    container_name: postgresql_cso2
+    image: postgres:12.3-alpine
+    hostname: postgres
+    environment:
+      POSTGRES_PASSWORD: password
+    ports:
+      - 5432:5432
+    volumes:
+      - ./db:/data/db
+      - ./config/db:/sql
+      - db-generated-src:/gensrc
+      - ./docker:/docker-entrypoint-initdb.d
   master-server:
     container_name: cso2-master-server
     image: cso2-master-server
@@ -22,11 +35,13 @@ services:
     environment:
       NODE_ENV: development
       USERS_PORT: 30100
-      DB_HOST: mongo
-      DB_PORT: 27017
+      DB_HOST: postgres
+      DB_PORT: 5432
       DB_NAME: cso2
     ports:
       - 30100:30100
+    volumes:
+      - db-generated-src:/gensrc
   webapp:
     container_name: cso2-webapp
     image: cso2-webapp
@@ -34,18 +49,13 @@ services:
     build: ./webapp
     environment:
       NODE_ENV: development
-      WEBAPP_PORT: 8080
+      WEBAPP_PORT: 8081
       USERSERVICE_HOST: users-service
       USERSERVICE_PORT: 30100
     ports:
-      - 8080:8080
+      - 8081:8081
     depends_on:
       - users-service
-  mongo:
-    container_name: mongo_cso2
-    image: 'mongo:latest'
-    hostname: mongo
-    ports:
-      - 27017:27017
-    volumes:
-      - './db:/data/db'
+
+volumes:
+  db-generated-src:

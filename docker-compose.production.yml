@@ -1,4 +1,4 @@
-version: '2.1'
+version: "2.1"
 services:
   master-server:
     container_name: cso2-master-server
@@ -48,9 +48,9 @@ services:
       - users-service
   mongo:
     container_name: mongo_cso2
-    image: 'mongo:latest'
+    image: "mongo:latest"
     hostname: mongo
     ports:
       - 27017
     volumes:
-      - './db:/data/db'
+      - "./db:/data/db"

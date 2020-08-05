@@ -5,7 +5,7 @@ FROM mhart/alpine-node:13
 WORKDIR /srv/master-service
 
 # copy dependencies and build files
-COPY package.json yarn.lock gulpfile.js tsconfig.json tslint.json ./
+COPY package.json yarn.lock gulpfile.js tsconfig.json .eslintrc.js ./
 
 # get source code
 COPY src ./src

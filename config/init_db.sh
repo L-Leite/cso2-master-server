@@ -13,4 +13,4 @@ psql cso2 cso2_user < $SCRIPTPATH/db/inventory/loadouts.sql
 
 # get inventoryitem oid
 new_oid=$(psql cso2 postgres -c "SELECT oid FROM pg_type WHERE typname = 'inventoryitem';" | sed -n 3p | tr -d ' ')
-echo "export const INVENTORY_ITEM_OID = $new_oid" > $SCRIPTPATH/../src/config/inventory_item_oid.ts
+echo "export const INVENTORY_ITEM_OID = $new_oid" > $SCRIPTPATH/users-service/src/config/inventory_item_oid.ts
