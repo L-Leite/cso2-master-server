@@ -9,9 +9,9 @@ export type DB_POSTGRES_CUSTOM_TYPES = {
     inventoryItem: InventoryItem
 }
 export const DB_POSTGRES_CONFIG: postgres.Options<DB_POSTGRES_CUSTOM_TYPES> = {
-    host: 'localhost',
-    port: 5432,
-    database: 'cso2',
+    host: process.env.DB_HOST != null ? process.env.DB_HOST : 'localhost',
+    port: process.env.DB_PORT != null ? Number(process.env.DB_PORT) : 5432,
+    database: process.env.DB_NAME != null ? process.env.DB_NAME : 'cso2',
     username: 'cso2_user',
     password: 'cso2',
     onnotice: (notice: postgres.Notice) => {
