@@ -6,24 +6,6 @@ const less = require('gulp-less')
 const log = require('fancy-log')
 const sourcemaps = require('gulp-sourcemaps')
 const ts = require('gulp-typescript')
-const typedoc = require('gulp-typedoc')
-
-gulp.task('readme', () => {
-  log('Generating documentation...')
-  return gulp.src(['src/**/*.ts']).pipe(
-    typedoc({
-      excludeExternals: true,
-      ignoreCompilerErrors: false,
-      includeDeclarations: true,
-      name: 'cso2-inventory-service',
-      out: './docs',
-      plugins: ['mdFlavour github'],
-      theme: 'markdown',
-      tsconfig: 'tsconfig.json',
-      version: true
-    })
-  )
-})
 
 gulp.task('eslint', () => {
   log('Linting source code...')
@@ -64,7 +46,5 @@ gulp.task('assets', () => {
 })
 
 gulp.task('build', gulp.series('assets', 'less', 'eslint', 'typescript'))
-
-gulp.task('typedoc', gulp.series('readme'))
 
 gulp.task('default', gulp.series('build'))
