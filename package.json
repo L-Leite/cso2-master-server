@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-cli": "^2.3.0",
+    "gulp-yarn": "^2.0.0"
+  }
+}

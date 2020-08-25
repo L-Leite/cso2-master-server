@@ -12,3 +12,5 @@ logs
 
 # ignore default docker-compose file
 /docker-compose.yml
+
+node_modules
