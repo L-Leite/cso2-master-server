@@ -87,3 +87,6 @@ version.txt
 
 # auto generated documentation
 /docs
+
+# generated inventory_item OID
+/src/config/inventory_item_oid.ts

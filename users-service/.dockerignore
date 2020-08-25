@@ -4,3 +4,4 @@ docs
 node_modules
 raml
 *.log
+/src/config/inventory_item_oid.ts
