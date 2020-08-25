@@ -58,6 +58,6 @@ services:
         ports:
             - 8080:8080
         volumes:
-            - ./public:/srv/website/public
+            - ./website/public:/srv/website/public
         depends_on:
             - users-service
