@@ -54,7 +54,5 @@ services:
             USERSERVICE_PORT: 30100
         ports:
             - 8081:8081
-        volumes:
-            - ./website/public:/srv/website/public
         depends_on:
             - users-service
