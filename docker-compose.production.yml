@@ -1,5 +1,18 @@
 version: "2.1"
 services:
+  postgresql:
+    container_name: postgresql_cso2
+    image: postgres:12.4-alpine
+    hostname: postgresql
+    environment:
+      POSTGRES_USER: cso2_user
+      POSTGRES_PASSWORD: cso2
+      POSTGRES_DB: cso2
+    ports:
+      - 5432
+    volumes:
+      - ./db:/var/lib/postgresql/data
+      - ./config/db:/docker-entrypoint-initdb.d
   master-server:
     container_name: cso2-master-server
     image: cso2-master-server
@@ -24,18 +37,18 @@ services:
     environment:
       NODE_ENV: production
       USERS_PORT: 30100
-      DB_HOST: mongo
-      DB_PORT: 27017
+      DB_HOST: postgresql
+      DB_PORT: 5432
       DB_NAME: cso2
     ports:
       - 30100
     depends_on:
-      - mongo
-  webapp:
-    container_name: cso2-webapp
-    image: cso2-webapp
-    hostname: webapp
-    build: ./webapp
+      - postgresql
+  website:
+    container_name: cso2-website
+    image: cso2-website
+    hostname: website
+    build: ./website
     restart: always
     environment:
       NODE_ENV: production
@@ -46,11 +59,3 @@ services:
       - 8080:8080
     depends_on:
       - users-service
-  mongo:
-    container_name: mongo_cso2
-    image: "mongo:latest"
-    hostname: mongo
-    ports:
-      - 27017
-    volumes:
-      - "./db:/data/db"

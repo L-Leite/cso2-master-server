@@ -2,17 +2,17 @@ version: "2.1"
 services:
   postgresql:
     container_name: postgresql_cso2
-    image: postgres:12.3-alpine
-    hostname: postgres
+    image: postgres:12.4-alpine
+    hostname: postgresql
     environment:
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: cso2_user
+      POSTGRES_PASSWORD: cso2
+      POSTGRES_DB: cso2
     ports:
       - 5432:5432
     volumes:
-      - ./db:/data/db
-      - ./config/db:/sql
-      - db-generated-src:/gensrc
-      - ./docker:/docker-entrypoint-initdb.d
+      - ./db:/var/lib/postgresql/data
+      - ./config/db:/docker-entrypoint-initdb.d
   master-server:
     container_name: cso2-master-server
     image: cso2-master-server
@@ -35,27 +35,24 @@ services:
     environment:
       NODE_ENV: development
       USERS_PORT: 30100
-      DB_HOST: postgres
+      DB_HOST: postgresql
       DB_PORT: 5432
       DB_NAME: cso2
     ports:
       - 30100:30100
-    volumes:
-      - db-generated-src:/gensrc
-  webapp:
-    container_name: cso2-webapp
-    image: cso2-webapp
-    hostname: webapp
-    build: ./webapp
+    depends_on:
+      - postgresql
+  website:
+    container_name: cso2-website
+    image: cso2-website
+    hostname: website
+    build: ./website
     environment:
       NODE_ENV: development
-      WEBAPP_PORT: 8081
+      WEBSITE_PORT: 8081
       USERSERVICE_HOST: users-service
       USERSERVICE_PORT: 30100
     ports:
       - 8081:8081
     depends_on:
       - users-service
-
-volumes:
-  db-generated-src:

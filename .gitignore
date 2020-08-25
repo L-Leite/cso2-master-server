@@ -5,7 +5,7 @@ logs
 # ignore vscode config files
 /.vscode/
 
-# ignore mongodb's database files
+# ignore database files
 /db
 
 .env
