@@ -6,6 +6,9 @@
     "author": "Luís Leite",
     "license": "MIT",
     "main": "src/service.ts",
+    "scripts": {
+        "postinstall": "patch-package"
+    },
     "dependencies": {
         "app-module-path": "^2.2.0",
         "body-parser": "^1.19.0",
@@ -15,8 +18,10 @@
         "express": "^4.17.1",
         "helmet": "^3.21.3",
         "morgan": "^1.10.0",
+        "patch-package": "^6.2.2",
         "pify": "^5.0.0",
         "postgres": "2.0.0-beta.0",
+        "postinstall-postinstall": "^2.1.0",
         "uuid": "^7.0.2",
         "winston": "^3.2.1"
     },

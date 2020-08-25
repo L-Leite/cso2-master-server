@@ -1,0 +1,13 @@
+diff --git a/node_modules/postgres/lib/index.js b/node_modules/postgres/lib/index.js
+index 3ae3e3b..dac9b3a 100644
+--- a/node_modules/postgres/lib/index.js
++++ b/node_modules/postgres/lib/index.js
+@@ -242,7 +242,7 @@ function Postgres(a, b) {
+           select b.oid, b.typarray
+           from pg_catalog.pg_type a
+           left join pg_catalog.pg_type b on b.oid = a.typelem
+-          where a.typcategory = 'A' and b.typcategory != 'C'
++          where a.typcategory = 'A'
+           group by b.oid, b.typarray
+           order by b.oid
+         `)
