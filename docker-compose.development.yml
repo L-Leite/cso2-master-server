@@ -1,58 +1,58 @@
-version: "2.1"
+version: '2.1'
 services:
-  postgresql:
-    container_name: postgresql_cso2
-    image: postgres:12.4-alpine
-    hostname: postgresql
-    environment:
-      POSTGRES_USER: cso2_user
-      POSTGRES_PASSWORD: cso2
-      POSTGRES_DB: cso2
-    ports:
-      - 5432:5432
-    volumes:
-      - ./db:/var/lib/postgresql/data
-      - ./config/db:/docker-entrypoint-initdb.d
-  master-server:
-    container_name: cso2-master-server
-    image: cso2-master-server
-    hostname: master-server
-    build: ./master-server
-    environment:
-      NODE_ENV: development
-      USERSERVICE_HOST: users-service
-      USERSERVICE_PORT: 30100
-    ports:
-      - 30001:30001
-      - 30002:30002/udp
-    depends_on:
-      - users-service
-  users-service:
-    container_name: cso2-users-service
-    image: cso2-users-service
-    hostname: users-service
-    build: ./users-service
-    environment:
-      NODE_ENV: development
-      USERS_PORT: 30100
-      DB_HOST: postgresql
-      DB_PORT: 5432
-      DB_NAME: cso2
-    ports:
-      - 30100:30100
-    depends_on:
-      - postgresql
-  website:
-    container_name: cso2-website
-    image: cso2-website
-    hostname: website
-    build: ./website
-    environment:
-      NODE_ENV: development
-      WEBSITE_PORT: 8081
-      USERSERVICE_HOST: users-service
-      USERSERVICE_PORT: 30100
-    ports:
-      - 8081:8081
-    depends_on:
-      - users-service
+    postgresql:
+        container_name: postgresql_cso2
+        image: postgres:12.4-alpine
+        hostname: postgresql
+        environment:
+            POSTGRES_USER: cso2_user
+            POSTGRES_PASSWORD: cso2
+            POSTGRES_DB: cso2
+        ports:
+            - 5432:5432
+        volumes:
+            - ./db:/var/lib/postgresql/data
+            - ./config/db:/docker-entrypoint-initdb.d
+    master-server:
+        container_name: cso2-master-server
+        image: cso2-master-server
+        hostname: master-server
+        build: ./master-server
+        environment:
+            NODE_ENV: development
+            USERSERVICE_HOST: users-service
+            USERSERVICE_PORT: 30100
+        ports:
+            - 30001:30001
+            - 30002:30002/udp
+        depends_on:
+            - users-service
+    users-service:
+        container_name: cso2-users-service
+        image: cso2-users-service
+        hostname: users-service
+        build: ./users-service
+        environment:
+            NODE_ENV: development
+            USERS_PORT: 30100
+            DB_HOST: postgresql
+            DB_PORT: 5432
+            DB_NAME: cso2
+        ports:
+            - 30100:30100
+        depends_on:
+            - postgresql
+    website:
+        container_name: cso2-website
+        image: cso2-website
+        hostname: website
+        build: ./website
+        environment:
+            NODE_ENV: development
+            WEBSITE_PORT: 8081
+            USERSERVICE_HOST: users-service
+            USERSERVICE_PORT: 30100
+        ports:
+            - 8081:8081
+        depends_on:
+            - users-service
