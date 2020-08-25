@@ -1,126 +1,71 @@
-# cso2-master-services
+# cso2-master-server
 
-This repository includes all the services required to run a master server for Nexon's Counter-Strike: Online 2.
+This repository includes all the services required to run a game server for Counter-Strike: Online 2.
 
-**The master server is currently in development and is missing many features.**
-You can keep track of the project's progress [here](https://github.com/Ochii/cso2-master-services/projects/1).
+You can get [this client launcher](https://github.com/L-Leite/cso2-launcher) to play in the server.
 
-You can get [this client launcher](https://github.com/Ochii/cso2-launcher/) to play in the server.
+A [test game server](https://cso2.leite.xyz) is available at the IP address `51.68.197.15` .
 
-## Communities
+## Discuss
 
-You can find other players in these.
+Join the [CSO2 Server Development Matrix room](https://matrix.to/#/#cso2:matrix.leite.xyz) for game server development discussion.
 
-If your community isn't listed here feel free to open pull request with it.
+### Community run discussions
 
-*Note: These communities are not run by the repository owner.*
+-   [Counter Strike Online Wiki's discord](https://discord.gg/GKPgrBG) (discuss at #cso2-project-discussion, in English)
+-   [CSO2 Revive](https://discord.gg/3tydYTC) (in Korean)
+-   [Counter-Strike Online 2 - EU/RU Server](https://discord.gg/yue5Zaf) (in English)
+-   [反恐精英 Online2(CSOL2)](https://jq.qq.com/?k=5PMEa6y) (in Chinese, requires [QQ](https://www.imqq.com/English1033.html))
 
-- [Counter Strike Online Wiki's discord](https://discord.gg/GKPgrBG) (discuss at #cso2-project-discussion)
-- [CSO2 Revive](https://discord.gg/3tydYTC) (in Korean)
-- [Counter-Strike Online 2 - EU/RU Server](https://discord.gg/yue5Zaf) (in English)
-- [反恐精英Online2(CSOL2)](https://jq.qq.com/?k=5PMEa6y) (in China, you will need [QQ](https://www.imqq.com/English1033.html) if you are not Chinese)
+## Running the game server
 
-## Running the services
+### With Docker and `docker-compose`
 
-You must have the following installed and in your path:
-- Node.js
-- MongoDB
-- cURL
-- git
-- tar
+You must have installed both [`docker`](https://docs.docker.com/) and [`docker-compose`](https://docs.docker.com/compose/) for these steps.
 
-### Setting up
+The repository has two `docker-compose` configuration files:
 
-*Note: If you want to use `docker-compose`, see [Running the services with `docker-compose`](#Running-the-services-with-docker-compose)*.
+-   `docker-compose.development.yml` can be used for development environments
+-   `docker-compose.production.yml` can be used for development production environments (such as a remote server).
 
-The Powershell scripts must be run in Powershell version 4 or better.
-
-To download the services, go to the master-services directory in a shell, and:
-
-(In a *nix environment:)
+#### Example start command
 
 ```sh
-git submodule update --init # needed to get the services' versions
-./setup_services.sh # downloads the required services
+docker-compose -f docker-compose.development.yml up -d --build
 ```
 
-(In a Windows environment:)
-
-```powershell
-git submodule update --init # needed to get the services' versions
-.\setup_services.ps1 # downloads the required services
-```
-
-If you want to build them yourself instead, do:
-
-(In a *nix environment:)
+#### Example stop command
 
 ```sh
-git submodule update --init # fetches the services source code
-./setup_services.sh --build-services # builds the required services
+docker-compose -f docker-compose.development.yml down
 ```
 
-(In a Windows environment:)
+### With Gulp
 
-```powershell
-git submodule update --init # fetches the services source code
-.\setup_services.ps1 -BuildServices # builds the required services
-```
+These steps require [Node.js](https://nodejs.org/en/download/) and [PostgreSQL](https://www.postgresql.org/download/) to be installed in your system.
 
-### Starting the services
+#### Setting up
 
-To start the services, do:
-
-(In a *nix environment:)
+In a shell, run
 
 ```sh
-./start_services.sh # starts the services
+./config/init_db.sh # initializes the database user and tables
+yarn # installs gulp and other build dependencies
+npx gulp build # builds the game server components
 ```
 
-(In a Windows environment:)
-```powershell
-.\start_services.ps1 # starts the services
+#### Starting the server
+
+In a shell, run
+
+```sh
+npx gulp start
 ```
 
-In *nix systems, you can stop the services by pressing CTRL+C in the shell.
-
-## Running the services with ```docker-compose```
-
-You must have installed both [```docker```](https://docs.docker.com/) and [```docker-compose```](https://docs.docker.com/compose/) in order to run the services all at once.
-
-### Setting up with ```docker-compose```
-
-The repository has two ```docker-compose``` configuration files, `docker-compose.development.yml` and `docker-compose.production.yml`.
-
-`docker-compose.development.yml` can be used for development environments, where `docker-compose.production.yml` can be used for development production environments (such as a remote server).
-
-Rename the configuration file you prefer to `docker-compose.yml` so you can use it with ```docker-compose```.
-
-### Starting the services with ```docker-compose```
-
-If this is your first time running the services, use ```docker-compose up -d``` to start them. If not you can use ```docker-compose start -d```.
-
-To stop the services, use ```docker-compose down```.
-
-## Services bundled
-
-The following services bundled in this repository:
-
-- [cso2-master-server](https://github.com/Ochii/cso2-master-server)
-- [cso2-users-service](https://github.com/Ochii/cso2-users-service)
-- [cso2-inventory-service](https://github.com/Ochii/cso2-inventory-service)
-- [cso2-webapp](https://github.com/Ochii/cso2-webapp)
-
-## Pull requests
-
-Pull requests are very much welcome.
-
-Before you create one, be sure you're in the right repository.
-
-See [Services bundled](##Services-bundled) for a list of the services bundled here.
+You can stop the server by pressing CTRL+C in the terminal.
 
 ## License
 
-Read `LICENSE` for the project's license information.
+Licensed under the MIT license, see `COPYING` for more information.
 
 This project is not affiliated with either Valve or Nexon. Counter-Strike: Online 2 is owned by these companies.
