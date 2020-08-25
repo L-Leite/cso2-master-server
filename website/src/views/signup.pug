@@ -17,6 +17,7 @@ html(lang="en")
         div(class="title")
           h3 Create a new account
         form(action="/do_signup", method="post") 
+          include includes/antibotfield
           div(class="form-item")
             span username:
             input(type="text", name="username" required="true")

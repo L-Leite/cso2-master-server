@@ -47,6 +47,7 @@ export class ActionsController {
       playername?: string
       password?: string
       confirmed_password?: string
+      coolfield?: string // anti bot field
     }
 
     const typedBody = req.body as signupBody
@@ -55,12 +56,14 @@ export class ActionsController {
     const playerName: string = typedBody.playername
     const password: string = typedBody.password
     const confirmedPassword: string = typedBody.confirmed_password
+    const antiBotField: string = typedBody.coolfield
 
     if (
       userName == null ||
       playerName == null ||
       password == null ||
-      confirmedPassword == null
+      confirmedPassword == null ||
+      antiBotField.length != 0
     ) {
       return SessionRedirectError(
         'A bad request was made.',
@@ -151,14 +154,16 @@ export class ActionsController {
     type loginBody = {
       username?: string
       password?: string
+      coolfield?: string // anti bot field
     }
 
     const typedBody = req.body as loginBody
 
     const username: string = typedBody.username
     const password: string = typedBody.password
+    const antiBotField: string = typedBody.coolfield
 
-    if (username == null || password == null) {
+    if (username == null || password == null || antiBotField.length != 0) {
       return SessionRedirectError('A bad request was made.', '/login', req, res)
     }
 
