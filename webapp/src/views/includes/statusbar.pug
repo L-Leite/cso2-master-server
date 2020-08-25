@@ -1,0 +1,9 @@
+div(class="status-bar")
+  div(class="path")
+    each dir in currentPath
+      span= dir
+  div(class="server-info")
+   if session && session.userName
+    span(class="player") Logged in as 
+      i #{session.userName}
+   span #{playersOnline} players ingame

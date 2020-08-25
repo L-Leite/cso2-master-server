@@ -1,0 +1,27 @@
+nav(class="sidebar")
+  ul
+    li(class="entry", tabindex="1")
+      p(class="header") account
+      ul(class="links")
+        if session.userId
+          li
+            a(href="/user", tabindex="2") profile
+          li
+            a(href="/logout", tabindex="3") log out
+        else
+          li
+            a(href="/login", tabindex="2") login
+          li
+            a(href="/signup", tabindex="3") sign up
+    li(class="entry", tabindex="10")
+      p(class="header") navigation
+      ul(class="links")
+        li
+          a(href="/", tabindex="11") home
+        li
+          a(href="/downloads", tabindex="12") downloads
+        //- li
+        //-   a(href="/stats", tabindex="13") player stats
+        li
+          a(href="/about", tabindex="14") about
+  div(class="separator")

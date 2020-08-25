@@ -1,29 +1,45 @@
 include includes/globals
 
-- const pageTitle = user.playerName + '\'s statistics'
+- const pageTitle = `${user.playername}'s profile`
+- const currentPath = ['account', 'profile']
 
 doctype html
 html(lang="en")  
   include includes/head
   body
     include includes/background
-    include includes/status    
-    div(class="container-userstats")
-      div(class="container-content")
-        div(class="page-title")
-          h1= user.playerName + '\'s statistics'
-        div(class="page-content")
-          p= 'Level: ' + user.level
-          p= 'Current experience: ' + user.cur_xp
-          p= 'Experience until next level: ' + user.max_xp
-          p= 'Avatar ID: ' + user.avatar
-          p= 'Rank: ' + user.rank
-          p= 'VIP level: ' + user.vip_level
-          p= 'Wins: ' + user.wins
-          p= 'Kills: ' + user.kills
-          p= 'Deaths: ' + user.deaths
-          p= 'Assists: ' + user.assists
-          div(class="help-url")
-            a(href='/logout') Log out of your account
-            span |
-            a(href='/user/delete') Delete your account
+    div(class="wrapper")
+      include includes/logo
+      include includes/announcement
+      include includes/statusbar
+      include includes/sidebar
+      div(class="content")
+        div(class="title")
+          h3 Player profile
+        div(class="player-content")
+          div(class="first-row")
+            div(class="avatar")
+              img(src="/static/images/avatars/" + user.avatar + ".png" alt="avatar" class="responsive-img")
+              span Avatar
+            div(class="details")
+              h3 #{user.playername}
+              if user.signature
+                p
+                  q(class="quote") #{user.signature}
+              p(class="level") Level #{user.level} 
+              p(class="vip") VIP  #{user.vip_level}
+              p(class="xp") Experience: #{user.cur_xp} out of #{user.max_xp}
+              p(class="kda") Kills/Deaths/Assists:  #{user.kills}/#{user.deaths}/#{user.assists}
+              p(class="hshots") Headshots: #{user.headshots}
+              p(class="accuracy") Accuracy: #{user.accuracy}
+              p(class="wins") Wins: #{user.wins}
+              p Matches played: #{user.played_matches}
+              p Rank: #{user.rank}
+            div(class="characters")
+              div(class="ct")
+                img(src="/static/images/characters/" + cosmetics.ct_item + ".png" alt="Counter-terrorist skin" class="responsive-img")
+                span Counter-terrorist skin
+              div(class="ter")
+                img(src="/static/images/characters/" + cosmetics.ter_item + ".png" alt="Terrorist skin" class="responsive-img")
+                span Terrorist skin
+              

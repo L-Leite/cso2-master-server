@@ -1,47 +1,32 @@
 include includes/globals
 
 - const pageTitle = 'Welcome'
-
-- let playerCountSentence = 'Could not get the number of players online.'
-- if (playersOnline === 0) { playerCountSentence = 'There are NO players connected to the server at the moment.' }
-- else if (playersOnline === 1) { playerCountSentence = 'There is ONE player connected to the server at the moment.'}
-- else { playerCountSentence = `There are ${playersOnline} players connected to the server at the moment.`}
+- const currentPath = ['home']
 
 doctype html
 html(lang="en")  
   include includes/head
   body
     include includes/background
-    include includes/status    
-    div(class="container-main")
-      div(class="container-content")
-        div(class="page-title")
-          h1= serverTitle        
-        div(class="page-content")     
-          div(class="main-url-container")
-            div(class="main-url")
-              a(href='/signup' class="button") Create a new account
-            div(class="main-url")
-              a(href='/login' class="button") Log in to your account   
-          div
-            p= 'Welcome to ' + serverTitle + '\'s user management web page.' 
-            p You may 
-              a(href='/signup') create an account
-              |  to play in this server, or 
-              a(href='/login') login to an existing one
-              |  to further manage your data.
-            p= playerCountSentence
-            div(class="disclaimer")
-              h4 Disclaimer
-              p This website stores a cookie in your computer to remember your logged in user's session.
-              p By creating an account, your user name, player name and password will be saved in a database, along with player statistics such as kills and wins.
-              p When logging in to the master server through CSO2, your IP address, client and server ports and the room you're currently in will be saved in the database, until you log off from or exit CSO2.
-              p You may delete your account by 
-                a(href='/login') login in
-                |  and 
-                a(href='/user/delete') going here.
-              p Counter-Strike Online 2 is owned by Valve and Nexon. Neither Valve or Nexon are associated with this.
-          div(class="help-url")
-            a(href='https://leite.xyz') Created by Luís Leite
-            span |
-            a(href='https://github.com/Ochii/cso2-webapp') Source code
+    div(class="wrapper")
+      include includes/logo
+      include includes/announcement
+      include includes/statusbar
+      include includes/sidebar
+      div(class="content")
+        div(class="title")
+          h3= `Welcome to ${serverTitle}`
+        p This website hosts a custom Counter-Strike Online 2 server. In here you can create and manage your account
+        p The game server's IP address is: 
+          code #{gameServerIp}
+        p You may 
+          a(href='/signup') create an account
+          | , or 
+          a(href='/login') login to your own
+        p You can also 
+          a(href='/downloads') download the game and learn how to install it
+        p For more information, go to the 
+          a(href='/about') about page
+        a(href='https://leite.xyz') Created by Luís Leite
+        span  | 
+        a(href='https://github.com/L-Leite/cso2-master-server') Source code

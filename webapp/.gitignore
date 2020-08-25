@@ -84,5 +84,5 @@ version.txt
 # ignore vscode config files
 /.vscode/
 
-# ignore generated css files
-/public/styles
+# ignore generated browser side files
+/public

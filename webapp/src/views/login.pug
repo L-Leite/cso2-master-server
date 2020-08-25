@@ -1,26 +1,29 @@
 include includes/globals
 
-- const pageTitle = 'Log in'
+- const pageTitle = 'Log in to your account'
+- const currentPath = ['account', 'login']
 
 doctype html
 html(lang="en")  
   include includes/head
   body
     include includes/background
-    include includes/status    
-    div(class="container-login")
-      div(class="container-content")
-        div(class="page-title")
-          h1 Log in to your account
-        form(action="/do_login", method="post")
-          div(class="page-content")        
-            div(class="form-item")
-              input(type="text", name="username" placeholder="Account's user name" required="true" class="form-text-input")
-            div(class="form-item")
-              input(type="password", name="password" placeholder="Account's password" required="true" class="form-text-input")
-            div(class="form-item")
-              input(type="submit", value="Log in" class="button")
-            div(class="help-url")
-              a(href='/signup') Create an account
-              span |
-              a(href='/') Go back
+    div(class="wrapper")
+      include includes/logo
+      include includes/announcement
+      include includes/statusbar
+      include includes/sidebar
+      div(class="content")
+        div(class="title")
+          h3 Log in to your account
+        form(action="/do_login", method="post")   
+          div(class="form-item")
+            span username:
+            input(type="text", name="username" required="true")
+          div(class="form-item")
+            span password:
+            input(type="password", name="password" required="true")
+          div(class="form-item")
+            input(type="submit", value="Log in" class="button")
+          div(class="help-url")
+            a(href='/signup') Create an account

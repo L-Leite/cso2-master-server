@@ -1,0 +1,9 @@
+if session
+  if session.status
+    div(class="announcement")
+      div(class="inner-announcement")
+        span= status
+  if session.error
+    div(class="announcement")
+      div(class="inner-announcement")
+        span= 'An error has occured: ' + error

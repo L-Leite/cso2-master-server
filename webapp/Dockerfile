@@ -1,7 +1,7 @@
 FROM mhart/alpine-node:13
 
 WORKDIR /srv/webapp
-COPY package.json yarn.lock gulpfile.js tsconfig.json tslint.json ./
+COPY package.json yarn.lock gulpfile.js tsconfig.json .eslintrc.js ./
 
 # get source code
 COPY src ./src

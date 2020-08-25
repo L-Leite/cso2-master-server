@@ -1,0 +1,51 @@
+include includes/globals
+
+- const pageTitle = 'Downloads'
+- const currentPath = ['downloads']
+
+doctype html
+html(lang="en")  
+  include includes/head
+  body
+    include includes/background
+    div(class="wrapper")
+      include includes/logo
+      include includes/announcement
+      include includes/statusbar
+      include includes/sidebar
+      div(class="content")
+        div(class="title")
+          h3= `Downloads`
+        h4 Game client
+        p The recommended client to be used is the Korean one, version 24406
+        p You may download it through:
+        ul
+          li
+            p
+              a(href='magnet:?xt=urn:btih:7BUJS77RR2AYAXCFPF7TSSSRF2NWUOU6') BitTorrent 
+              |  (magnet link: 
+              code magnet:?xt=urn:btih:7BUJS77RR2AYAXCFPF7TSSSRF2NWUOU6
+              | )
+          li
+            p
+              a(href='https://ipfs.io/ipfs/QmQcam3bRr2xBDC81dJAYEoKz8tr32RoDsZNjb7rA6iEjL') IPFS
+              |  (hash: 
+              code QmQcam3bRr2xBDC81dJAYEoKz8tr32RoDsZNjb7rA6iEjL
+              | )
+          li
+            p
+              a(href='https://mega.nz/#!nhgnBJgD!iR57D5Mf3_1GCcAR36tqFQ7H7KN_F0e3XicD2JBoSN4') MEGA
+          li
+            p Or 
+              a(href='https://drive.google.com/open?id=1y0diL2nTERlOaJZQTA3xPb8owx82GjtB') Google Drive
+        h4 Installing the custom launcher
+        p To play in this game server, you must download a custom launcher for CSO2
+        p 
+          a(href='https://github.com/L-Leite/cso2-launcher/releases/tag/0.5.1') You may download it here
+        p Extract the files inside the archive to the folder 
+          code Bin
+          |  inside your game's folder
+        p Once that's done, you may start the game by running 
+          code start-cso2.bat
+        p The game server's IP address is: 
+          code #{gameServerIp}

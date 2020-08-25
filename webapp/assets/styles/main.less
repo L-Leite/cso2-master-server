@@ -1,0 +1,407 @@
+@import (less) 'includes/normalize.css';
+
+/*! cso2-master-server, MIT license, https://github.com/L-Leite/cso2-master-server */
+@import 'includes/theme.less';
+
+*,
+::after,
+::before {
+  box-sizing: border-box;
+}
+
+body {
+  font-size: 13px;
+  font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+  color: @defaultFontColor;
+}
+
+p {
+  margin: 0;
+  margin-bottom: 1rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+a:link,
+a:visited {
+  color: @anchorColor;
+  text-decoration: none;
+}
+
+a:hover {
+  color: @anchorHoverColor;
+  text-decoration: underline;
+}
+
+.responsive-img {
+  max-width: 100%;
+  height: auto;
+}
+
+.site-bg {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  z-index: -100;
+
+  filter: @bgFilter;
+
+  img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: auto;
+    height: auto;
+    min-width: 100%;
+    min-height: 100%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.wrapper {
+  display: grid;
+  grid-template-columns: 0.2fr 1fr;
+  grid-template-areas:
+    'lg lg'
+    'ann ann'
+    'stat stat'
+    'sb con'
+    'sb con';
+
+  @media (max-width: 767px) {
+    grid-template-areas:
+      'lg lg'
+      'ann ann'
+      'stat stat'
+      'sb sb'
+      'con con';
+  }
+
+  background: @wrapperBg;
+  padding: 1rem 2rem;
+}
+
+.logo {
+  grid-area: lg;
+
+  display: flex;
+  justify-content: center;
+
+  margin-bottom: 0.5rem;
+}
+
+.status-bar {
+  grid-area: stat;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 0.25rem;
+  background: linear-gradient(to bottom, @headerBgColor);
+  border-bottom: @headerBorderColor 1px solid;
+
+  .path span {
+    &:first-child {
+      &::before {
+        content: '::';
+        margin-left: 0;
+      }
+    }
+
+    &::before {
+      content: '»';
+      margin-left: 0.2rem;
+      margin-right: 0.2rem;
+    }
+  }
+}
+
+.announcement {
+  grid-area: ann;
+
+  text-align: center;
+
+  padding: 0.25rem;
+  margin-bottom: 0.5rem;
+  border: lighten(@titleBg, 1%) 1px solid;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inner-announcement {
+  background: @titleBg;
+  width: 100%;
+  padding: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .server-info .player::after {
+    content: '.';
+    margin: 0 0.25rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .server-info {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+
+    .player {
+      margin-bottom: 0.25rem;
+    }
+  }
+}
+
+.sidebar {
+  grid-area: sb;
+
+  display: flex;
+  margin-top: 2px;
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    padding: 0.4rem 0;
+  }
+
+  .separator {
+    width: 0.5rem;
+    margin-left: 2px;
+    background: linear-gradient(to right, @separatorColors);
+
+    @media (max-width: 767px) {
+      background: linear-gradient(to bottom, @separatorColors);
+      margin-left: 0;
+      margin-top: 2px;
+      width: auto;
+      height: 0.5rem;
+    }
+  }
+
+  ul {
+    flex: 1 0 auto;
+
+    background: @sidebarBgColor;
+
+    list-style-type: none;
+    margin: 0;
+    padding-left: 0;
+  }
+
+  .header {
+    background: linear-gradient(to bottom, @headerBgColor);
+
+    margin-bottom: 0;
+    padding: 0.5rem;
+
+    display: flex;
+    align-items: center;
+
+    @media (max-width: 767px) {
+      // dropdown
+      cursor: pointer;
+    }
+
+    &::before {
+      content: data-uri('../images/ico.png');
+      margin-right: 0.25rem;
+    }
+  }
+
+  .links {
+    padding-left: 0.25rem;
+
+    @media (max-width: 767px) {
+      // dropdown
+      visibility: hidden;
+      opacity: 0;
+      transition: all 0.5s ease;
+      display: none;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+
+      margin: 0.25rem 0;
+
+      &::before {
+        content: '';
+        display: block;
+        margin-right: 0.25rem;
+
+        width: 5px;
+        height: 5px;
+
+        background: @sidebarDecoColor;
+        border: @sidebarDecoBorderColor 1px solid;
+      }
+    }
+  }
+
+  @media (max-width: 767px) {
+    .entry:focus > .links,
+    .links:hover,
+    .links:focus-within {
+      /* dropdown */
+      visibility: visible;
+      opacity: 1;
+      display: block;
+    }
+  }
+}
+
+.content {
+  grid-area: con;
+
+  font-size: 15px;
+  margin: 0.5rem 0 0.5rem 0.5rem;
+
+  @media (max-width: 767px) {
+    margin: 0.5rem 0;
+  }
+
+  .title {
+    border: lighten(@titleBg, 1%) 1px solid;
+    padding: 2px;
+    margin-bottom: 0.5rem;
+
+    h3 {
+      background: @titleBg;
+      padding: 0.5rem;
+      margin-bottom: 0;
+    }
+  }
+}
+
+.form-item {
+  display: flex;
+  align-items: center;
+
+  margin-bottom: 0.5rem;
+
+  span {
+    margin-right: 0.5rem;
+  }
+
+  input[type='text'],
+  input[type='password'],
+  input[type='submit'] {
+    background: @inputBgColor;
+    color: @inputTextColor;
+    border: @inputBorderColor 1px solid;
+    padding: 0.25rem;
+  }
+
+  input[type='text']:focus,
+  input[type='password']:focus,
+  input[type='submit']:hover {
+    color: @inputActiveTextColor;
+    background-color: @inputActiveBgColor;
+  }
+
+  input[type='submit'] {
+    cursor: pointer;
+  }
+}
+
+.player-content {
+  .first-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .avatar {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 100%;
+
+    @media (max-width: 767px) {
+      flex: 1 0 100%;
+      margin-bottom: 0.5rem;
+    }
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 0.5rem;
+
+    font-size: 14px;
+
+    img {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .details {
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 100%;
+
+    @media (max-width: 767px) {
+      order: 12;
+    }
+
+    h3 {
+      font-size: 1.35rem;
+    }
+  }
+
+  .characters {
+    flex: 0 0 auto;
+    max-width: 100%;
+
+    @media (max-width: 767px) {
+      flex: 1 0 100%;
+      order: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    img {
+      max-width: 126px;
+      max-height: 126px;
+      background: linear-gradient(to bottom, @userAvatarBgColors);
+    }
+
+    .ct,
+    .ter {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0 0.25rem;
+
+      font-size: 14px;
+
+      img {
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
+
+  .level,
+  .vip,
+  .kda,
+  .hshots,
+  .wins {
+    margin-bottom: 0;
+  }
+}

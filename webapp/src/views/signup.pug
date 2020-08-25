@@ -1,30 +1,35 @@
 include includes/globals
 
-- const pageTitle = 'Create an account'
+- const pageTitle = 'Create a new account'
+- const currentPath = ['account', 'sign up']
 
 doctype html
-html(lang="en")
+html(lang="en")  
   include includes/head
   body
     include includes/background
-    include includes/status
-    div(class="container-signup")
-      div(class="container-content")
-        div(class="page-title")
-          h1 Create a new account
-        form(action="/do_signup", method="post")
-          div(class="page-content")        
-            div(class="form-item")
-              input(type="text", name="username" placeholder="Your new user's name" required="true" class="form-text-input")
-            div(class="form-item")
-              input(type="text", name="playername" placeholder="Your new player in-game name" required="true" class="form-text-input")
-            div(class="form-item")
-              input(type="password", name="password" placeholder="Your user's password" required="true" class="form-text-input")
-            div(class="form-item")
-              input(type="password", name="confirmed_password" placeholder="Repeat your user's password" required="true" class="form-text-input")
-            div(class="form-item")
-              input(type="submit", value="Create" class="button")
-            div(class="help-url")
-              a(href='/login') Log in to an existing account
-              span |
-              a(href='/') Go back
+    div(class="wrapper")
+      include includes/logo
+      include includes/announcement
+      include includes/statusbar
+      include includes/sidebar
+      div(class="content")
+        div(class="title")
+          h3 Create a new account
+        form(action="/do_signup", method="post") 
+          div(class="form-item")
+            span username:
+            input(type="text", name="username" required="true")
+          div(class="form-item")
+            span ingame player name:
+            input(type="text", name="playername" required="true")
+          div(class="form-item")
+            span password:
+            input(type="password", name="password" required="true")
+          div(class="form-item")
+            span repeat your password:
+            input(type="password", name="confirmed_password" required="true")
+          div(class="form-item")
+            input(type="submit", value="Create" class="button")
+          div(class="help-url")
+            a(href='/login') Log in to an existing account
