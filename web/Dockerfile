@@ -6,8 +6,8 @@ COPY package.json yarn.lock gulpfile.js tsconfig.json .eslintrc.js ./
 # get source code
 COPY src ./src
 
-# copy static files
-COPY public ./public
+# copy prebuilt files
+COPY assets ./assets
 
 # install dependencies
 RUN yarn install --frozen-lockfile

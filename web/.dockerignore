@@ -10,3 +10,4 @@ public/styles
 .gitignore
 LICENSE
 README.md
+*.xcf
