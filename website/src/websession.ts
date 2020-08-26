@@ -5,6 +5,8 @@ export type WebSession = {
   status?: string
   userId?: number
   userName?: string
+  security_username?: string
+  security_question?: string
 }
 
 export function SessionRedirectError(

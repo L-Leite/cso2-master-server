@@ -4,6 +4,7 @@ import { UsersService } from 'services/usersservice'
 import { InventoryService } from 'services/inventoryservice'
 
 import { MapImageList } from 'maps'
+import { FORM_SECURITY_QUESTIONS } from 'securityquestions'
 import { WebSession } from 'websession'
 
 /**
@@ -32,6 +33,9 @@ export class PagesController {
     })
     app.route('/user/delete').get(async (req, res) => {
       await PagesController.OnGetUserDelete(req, res)
+    })
+    app.route('/recover_pw').get(async (req, res) => {
+      await PagesController.OnGetRecoverPw(req, res)
     })
     app.route('/about').get(async (req, res) => {
       await PagesController.OnGetAbout(req, res)
@@ -97,7 +101,8 @@ export class PagesController {
     res.render('signup', {
       playersOnline: numSessions,
       mapImage: MapImageList.getRandomFile(),
-      session
+      session,
+      questions: FORM_SECURITY_QUESTIONS
     })
 
     PagesController.cleanUpStatus(req)
@@ -205,6 +210,32 @@ export class PagesController {
 
     res.render('delete', {
       user,
+      playersOnline: numSessions,
+      mapImage: MapImageList.getRandomFile(),
+      session
+    })
+
+    PagesController.cleanUpStatus(req)
+  }
+
+  /**
+   * called when a GET request to /recover_pw is done
+   * renders the recover password page
+   * @param req the request data
+   * @param res the response data
+   */
+  private static async OnGetRecoverPw(
+    req: express.Request,
+    res: express.Response
+  ): Promise<void> {
+    if (req.session.userId != null) {
+      return res.redirect('/')
+    }
+
+    const session = req.session as WebSession
+    const numSessions = await UsersService.getSessions()
+
+    res.render('recover_pw', {
       playersOnline: numSessions,
       mapImage: MapImageList.getRandomFile(),
       session

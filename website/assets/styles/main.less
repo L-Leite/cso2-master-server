@@ -296,11 +296,13 @@ a:hover {
 
   span {
     margin-right: 0.5rem;
+    flex: 0 0 15%;
   }
 
   input[type='text'],
   input[type='password'],
-  input[type='submit'] {
+  input[type='submit'],
+  select {
     background: @inputBgColor;
     color: @inputTextColor;
     border: @inputBorderColor 1px solid;
@@ -309,14 +311,34 @@ a:hover {
 
   input[type='text']:focus,
   input[type='password']:focus,
-  input[type='submit']:hover {
+  input[type='submit']:hover,
+  select:focus {
     color: @inputActiveTextColor;
     background-color: @inputActiveBgColor;
+  }
+
+  select {
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+
+    background: data-uri('../icons/select-arrow-white.svg') 100% 50% no-repeat
+      @inputBgColor;
+    padding-right: 1.5rem;
+
+    &:focus {
+      background: data-uri('../icons/select-arrow-black.svg') 100% 50% no-repeat
+        @inputActiveBgColor;
+    }
   }
 
   input[type='submit'] {
     cursor: pointer;
   }
+}
+
+.help-url {
+  margin-bottom: 0.5rem;
 }
 
 .player-content {
@@ -409,5 +431,4 @@ a:hover {
 .cool-input-field {
   position: absolute;
   z-index: -9999;
-  visibility: hidden;
 }

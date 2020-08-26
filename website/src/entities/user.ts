@@ -4,59 +4,61 @@ export const USER_MAX_LEVEL = 99
  * represents an user and its data
  */
 export class User {
-    public id: number
-    public username: string
-    public playername: string
+  public id: number
+  public username: string
+  public playername: string
 
-    public gm: boolean
+  public security_question_index: number
 
-    public points: number
-    public cash: number
-    public mpoints: number
+  public gm: boolean
 
-    public level: number
-    public cur_xp: BigInt
-    public max_xp: BigInt
-    public vip_level: number
-    public vip_xp: number
+  public points: number
+  public cash: number
+  public mpoints: number
 
-    public rank: number
+  public level: number
+  public cur_xp: BigInt
+  public max_xp: BigInt
+  public vip_level: number
+  public vip_xp: number
 
-    public rank_frame: number
+  public rank: number
 
-    public played_matches: number
-    public wins: number
-    public seconds_played: number
+  public rank_frame: number
 
-    public kills: number
-    public deaths: number
-    public assists: number
-    public headshots: number
-    public accuracy: number
+  public played_matches: number
+  public wins: number
+  public seconds_played: number
 
-    public avatar: number
-    public unlocked_avatars: number[]
+  public kills: number
+  public deaths: number
+  public assists: number
+  public headshots: number
+  public accuracy: number
 
-    public title: number
-    public unlocked_titles: number[]
-    public signature: string
+  public avatar: number
+  public unlocked_avatars: number[]
 
-    public unlocked_achievements: number[]
+  public title: number
+  public unlocked_titles: number[]
+  public signature: string
 
-    public netcafe_name: string
+  public unlocked_achievements: number[]
 
-    public clan_name: string
-    public clan_mark: number
+  public netcafe_name: string
 
-    public world_rank: number
+  public clan_name: string
+  public clan_mark: number
 
-    public best_gamemode: number
-    public best_map: number
+  public world_rank: number
 
-    public skill_human_curxp: BigInt
-    public skill_human_maxxp: BigInt
-    public skill_human_points: BigInt
-    public skill_zombie_curxp: BigInt
-    public skill_zombie_maxxp: BigInt
-    public skill_zombie_points: BigInt
+  public best_gamemode: number
+  public best_map: number
+
+  public skill_human_curxp: BigInt
+  public skill_human_maxxp: BigInt
+  public skill_human_points: BigInt
+  public skill_zombie_curxp: BigInt
+  public skill_zombie_maxxp: BigInt
+  public skill_zombie_points: BigInt
 }

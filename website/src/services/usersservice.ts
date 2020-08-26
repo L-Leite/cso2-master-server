@@ -18,7 +18,9 @@ export class UsersService {
   public static async create(
     username: string,
     playername: string,
-    password: string
+    password: string,
+    securityQuestion: number,
+    securityAnswer: string
   ): Promise<User> {
     try {
       const res: superagent.Response = await superagent
@@ -26,7 +28,9 @@ export class UsersService {
         .send({
           username,
           playername,
-          password
+          password,
+          security_question: securityQuestion,
+          security_answer: securityAnswer
         })
         .accept('json')
 
@@ -103,6 +107,29 @@ export class UsersService {
   }
 
   /**
+   * update an user's password
+   * @param userId the user's whose password will be updated
+   * @returns true if deleted successfully, false if not
+   */
+  public static async updatePassword(
+    userId: number,
+    newPassword: string
+  ): Promise<boolean> {
+    try {
+      const res: superagent.Response = await superagent
+        .put(`http://${userSvcAuthority()}/users/${userId}`)
+        .send({
+          password: newPassword
+        })
+        .accept('json')
+      return res.status === 200
+    } catch (error) {
+      await UserSvcPing.checkNow()
+      throw error
+    }
+  }
+
+  /**
    * delete an user
    * @param userId the user's to be deleted ID
    * @returns true if deleted successfully, false if not
@@ -135,6 +162,37 @@ export class UsersService {
         .send({
           username,
           password
+        })
+        .accept('json')
+
+      if (res.status !== 200) {
+        return null
+      }
+
+      const typedBody = res.body as { userId: number }
+      return typedBody.userId
+    } catch (error) {
+      await UserSvcPing.checkNow()
+      throw error
+    }
+  }
+
+  /**
+   * validates an user's security answer and gets the matching user's id
+   * @param username the user's name
+   * @param securityAnswer the user's security answer
+   * @returns the matching user id if found, null if not
+   */
+  public static async validateSecurityAnswer(
+    username: string,
+    securityAnswer: string
+  ): Promise<number> {
+    try {
+      const res: superagent.Response = await superagent
+        .post(`http://${userSvcAuthority()}/users/auth/validate_security`)
+        .send({
+          username,
+          security_answer: securityAnswer
         })
         .accept('json')
 

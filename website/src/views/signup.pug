@@ -22,7 +22,7 @@ html(lang="en")
             span username:
             input(type="text", name="username" required="true")
           div(class="form-item")
-            span ingame player name:
+            span ingame name:
             input(type="text", name="playername" required="true")
           div(class="form-item")
             span password:
@@ -30,7 +30,18 @@ html(lang="en")
           div(class="form-item")
             span repeat your password:
             input(type="password", name="confirmed_password" required="true")
+
+          div(class="form-item")
+            span security question:
+            select(name="security_question" required="true")
+              each val, index in questions
+                option(value=`${index}`) #{val}
+          div(class="form-item")
+            span answer:
+            input(type="text", name="security_answer" required="true")
           div(class="form-item")
             input(type="submit", value="Create" class="button")
           div(class="help-url")
-            a(href='/login') Log in to an existing account
+            a(href='/login', class="help-url") Log in to an existing account
+          div(class="help-url")
+            a(href='/recover_pw') Recover your password

@@ -1,0 +1,45 @@
+include includes/globals
+
+- const pageTitle = 'Recover your password'
+- const currentPath = ['account', 'recover']
+
+doctype html
+html(lang="en")  
+  include includes/head
+  body
+    include includes/background
+    div(class="wrapper")
+      include includes/logo
+      include includes/announcement
+      include includes/statusbar
+      include includes/sidebar
+      div(class="content")
+        div(class="title")
+          h3 Recover your password
+        if session.security_question
+          form(action="/do_recover_pw2", method="post")
+            include includes/antibotfield
+            div(class="form-item")
+              span username:
+              input(type="text", name="username" value=`${session.security_username}` readonly)
+            div(class="form-item")
+              span #{session.security_question}:
+              input(type="text", name="security_answer" required="true")
+            div(class="form-item")
+              span new password:
+              input(type="password", name="password" required="true")
+            div(class="form-item")
+              span repeat your new password:
+              input(type="password", name="confirmed_password" required="true")
+            div(class="form-item")
+              input(type="submit", value="Recover" class="button")
+        else
+          form(action="/do_recover_pw", method="post")
+            include includes/antibotfield
+            div(class="form-item")
+              span username:
+              input(type="text", name="username" required="true")
+            div(class="form-item")
+              input(type="submit", value="Recover" class="button")
+        div(class="help-url")
+          a(href='/signup') Create an account
