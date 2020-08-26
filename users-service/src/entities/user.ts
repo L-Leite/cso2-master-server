@@ -286,9 +286,9 @@ export class User {
     }
 
     private static SanitizeForPublic(user: User): User {
-        user.password_hash = null
-        user.security_question_index = null
-        user.security_answer_hash = null
+        delete user.password_hash
+        delete user.security_question_index
+        delete user.security_answer_hash
         return user
     }
 
