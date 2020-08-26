@@ -1,3 +1,5 @@
+- const playerWord = playersOnline === 1 ? 'player' : 'players'
+
 div(class="status-bar")
   div(class="path")
     each dir in currentPath
@@ -6,4 +8,4 @@ div(class="status-bar")
    if session && session.userName
     span(class="player") Logged in as 
       i #{session.userName}
-   span #{playersOnline} players ingame
+   span #{playersOnline} #{playerWord} ingame
