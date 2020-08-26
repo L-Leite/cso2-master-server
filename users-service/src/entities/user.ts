@@ -80,9 +80,13 @@ export class User {
     /**
      * retrieve an user's information by its ID
      * @param userId the target's user ID
+     * @param sanitize should sensitive data be nulled out? defaults to true
      * @returns the target user, null if not
      */
-    public static async getById(userId: number): Promise<User> {
+    public static async getById(
+        userId: number,
+        sanitize = true
+    ): Promise<User> {
         const resRows = await sql<
             User
         >`SELECT * FROM users WHERE id = ${userId};`
@@ -90,7 +94,9 @@ export class User {
         if (resRows.count === 0) {
             return null
         } else if (resRows.count === 1) {
-            return resRows[0]
+            return sanitize === true
+                ? this.SanitizeForPublic(resRows[0])
+                : resRows[0]
         } else {
             throw new Error('getUserById: got more than one row for an user')
         }
@@ -99,9 +105,13 @@ export class User {
     /**
      * retrieve an user's information by its username
      * @param userName the target's user name
+     * @param sanitize should sensitive data be nulled out? defaults to true
      * @returns the target user if found, null if not
      */
-    public static async getByName(userName: string): Promise<User> {
+    public static async getByName(
+        userName: string,
+        sanitize = true
+    ): Promise<User> {
         const resRows = await sql<
             User
         >`SELECT * FROM users WHERE username = ${userName};`
@@ -109,7 +119,9 @@ export class User {
         if (resRows.count === 0) {
             return null
         } else if (resRows.count === 1) {
-            return resRows[0]
+            return sanitize === true
+                ? this.SanitizeForPublic(resRows[0])
+                : resRows[0]
         } else {
             throw new Error('getUserByName: got more than one row for an user')
         }
@@ -142,7 +154,7 @@ export class User {
         userId: number,
         updatedUser: SetUserBody
     ): Promise<boolean> {
-        if ((await User.getById(userId)) == null) {
+        if ((await User.getById(userId, false)) == null) {
             return false
         }
 
@@ -159,21 +171,29 @@ export class User {
      * @param userName the new user's name
      * @param playerName the new user's ingame player name
      * @param password the new user's password
+     * @param securityQuestion the new user's security question index
+     * @param securityAnswer the new user's security answer
      * @returns a promise with the new created user
      */
     public static async create(
         userName: string,
         playerName: string,
-        password: string
+        password: string,
+        securityQuestion: number,
+        securityAnswer: string
     ): Promise<User> {
-        const passwordHash: HashContainer = await HashContainer.create(password)
+        const [passwordHash, secAnswerHash] = await Promise.all([
+            HashContainer.create(password),
+            HashContainer.create(securityAnswer)
+        ])
 
         // clear out plain password
         password = null
+        securityAnswer = null
 
         const res = await sql<User>`
-            INSERT INTO users (username, playername, password_hash)
-            VALUES (${userName}, ${playerName}, ${passwordHash.build()})
+            INSERT INTO users (username, playername, password_hash, security_question_index, security_answer_hash)
+            VALUES (${userName}, ${playerName}, ${passwordHash.build()}, ${securityQuestion}, ${secAnswerHash.build()})
             RETURNING *;
         `
 
@@ -181,12 +201,8 @@ export class User {
             throw new Error('INSERT query did not return a single row')
         }
 
-        const outUser = res[0]
-
         // don't send the password hash over
-        outUser.password_hash = null
-
-        return outUser
+        return this.SanitizeForPublic(res[0])
     }
 
     /**
@@ -195,7 +211,7 @@ export class User {
      * @returns true if the user was deleted, false if the user was not fonud
      */
     public static async removeById(userId: number): Promise<boolean> {
-        if ((await User.getById(userId)) == null) {
+        if ((await User.getById(userId, false)) == null) {
             return false
         }
 
@@ -210,13 +226,13 @@ export class User {
      * validate an user's credentials
      * @param userName the user's name
      * @param password the user's password
-     * @return a promise with the logged in user's ID, or null if failed
+     * @return the user's ID, or null if failed
      */
     public static async validateCredentials(
         userName: string,
         password: string
     ): Promise<number> {
-        const user: User = await User.getByName(userName)
+        const user: User = await User.getByName(userName, false)
 
         if (user == null) {
             return null
@@ -234,10 +250,46 @@ export class User {
         return user.id
     }
 
+    /**
+     * validate an user's security answer
+     * @param userName the user's name
+     * @param password the user's security answer
+     * @return the user's ID, or null if failed
+     */
+    public static async validateSecurityAnswer(
+        userName: string,
+        securityAnswer: string
+    ): Promise<number> {
+        const user: User = await User.getByName(userName, false)
+
+        if (user == null) {
+            return null
+        }
+
+        const targetHash = HashContainer.from(user.security_answer_hash)
+        const inputHash = await targetHash.cloneSettings(securityAnswer)
+
+        if (targetHash.compare(inputHash) === false) {
+            return null
+        }
+
+        return user.id
+    }
+
+    private static SanitizeForPublic(user: User): User {
+        user.password_hash = null
+        user.security_question_index = null
+        user.security_answer_hash = null
+        return user
+    }
+
     public id: number
     public username: string
     public playername: string
+
     public password_hash: string
+    public security_question_index: number
+    public security_answer_hash: string
 
     public gm: boolean
 

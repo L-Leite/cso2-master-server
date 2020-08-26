@@ -147,6 +147,36 @@ traits:
             description: The credentials are invalid.
           500:
             description: An internal error has occured.
+    /validate_answer:
+      post:
+        description: Checks if the user and its security answer are correct.
+        body:
+          application/json:
+            properties:
+              username: 
+                type: string
+                description: The user's name
+                example: "gamer_X"
+              security_answer:
+                type: integer
+                description: The user's security answer
+                example: "some city, some place"
+        responses:
+          200:
+            description: The user and the security answer are correct.
+            body:
+              application/json:
+                properties:
+                  userId:
+                    type: integer
+                    description: The user ID that was found.
+                    example: 25
+          400:
+            description: The request is malformed.
+          401:
+            description: The user or the security answer are invalid.
+          500:
+            description: An internal error has occured.
     
 /inventory:
   description: Endpoint for requests about users' inventories

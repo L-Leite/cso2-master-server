@@ -45,6 +45,10 @@ export class UsersRoute {
             async (req: express.Request, res: express.Response) =>
                 await UsersRoute.onPostValidate(req, res)
         )
+        app.route('/users/auth/validate_security').post(
+            async (req: express.Request, res: express.Response) =>
+                await UsersRoute.onPostValidateSecurity(req, res)
+        )
         app.route('/users/byname/:username').get(
             async (req: express.Request, res: express.Response) =>
                 await UsersRoute.onGetUsersByName(req, res)
@@ -114,6 +118,8 @@ export class UsersRoute {
             username: string
             playername: string
             password: string
+            security_question: number
+            security_answer: string
         }
 
         const body = req.body as postUsersBody
@@ -121,8 +127,16 @@ export class UsersRoute {
         const userName: string = body.username
         const playerName: string = body.playername
         const password: string = body.password
+        const securityQuestion: number = body.security_question
+        const securityAnswer: string = body.security_answer
 
-        if (userName == null || playerName == null || password == null) {
+        if (
+            userName == null ||
+            playerName == null ||
+            password == null ||
+            isNaN(securityQuestion) === true ||
+            securityAnswer == null
+        ) {
             return res.status(400).end()
         }
 
@@ -143,7 +157,9 @@ export class UsersRoute {
             const newUser: User = await User.create(
                 userName,
                 playerName,
-                password
+                password,
+                securityQuestion,
+                securityAnswer
             )
 
             return res.status(201).json(newUser).end()
@@ -375,6 +391,51 @@ export class UsersRoute {
             const foundUserId = await User.validateCredentials(
                 username,
                 password
+            )
+
+            if (foundUserId == null) {
+                return res.status(401).json().end()
+            }
+
+            return res.status(200).json({ userId: foundUserId }).end()
+        } catch (error) {
+            LogInstance.error(error)
+            return res.status(500).end()
+        }
+    }
+
+    /**
+     * called when a POST request to /users/auth/validate_security is done
+     * checks if the user and the security answer are correct
+     * returns 200 if the they are
+     * returns 400 if the request is malformed
+     * returns 401 if the user and the security answer are invalid
+     * returns 500 if an internal error occured
+     * @param req the request data
+     * @param res the response data
+     */
+    private static async onPostValidateSecurity(
+        req: express.Request,
+        res: express.Response
+    ) {
+        type validateBody = {
+            username: string
+            security_answer: string
+        }
+
+        const body = req.body as validateBody
+
+        const username: string = body.username
+        const securityAnswer: string = body.security_answer
+
+        if (username == null || securityAnswer == null) {
+            return res.status(400).end()
+        }
+
+        try {
+            const foundUserId = await User.validateSecurityAnswer(
+                username,
+                securityAnswer
             )
 
             if (foundUserId == null) {

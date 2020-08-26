@@ -277,7 +277,9 @@ mocha.describe('Users', (): void => {
                 .send({
                     username: 'testuser',
                     playername: 'TestingUser',
-                    password: '222222'
+                    password: '222222',
+                    security_question: 1,
+                    security_answer: 'cool dude'
                 })
                 .end((err: Error, res: superagent.Response): void => {
                     res.should.be.status(201)
@@ -310,7 +312,9 @@ mocha.describe('Users', (): void => {
                     .send({
                         username: 'testuser',
                         playername: 'TestingUser',
-                        password: '222222'
+                        password: '222222',
+                        security_question: 1,
+                        security_answer: 'cool dude'
                     })
                     .end((err: Error, res: superagent.Response): void => {
                         res.should.be.status(409)
@@ -339,7 +343,9 @@ mocha.describe('Users', (): void => {
                 .send({
                     username: 'testuser',
                     playername: 'TestingUser',
-                    password: '222222'
+                    password: '222222',
+                    security_question: 1,
+                    security_answer: 'cool dude'
                 })
                 .then((res: superagent.Response) => {
                     firstUserId = res.body.id
@@ -348,7 +354,9 @@ mocha.describe('Users', (): void => {
                         .send({
                             username: 'gamer',
                             playername: 'cso2player',
-                            password: '123456'
+                            password: '123456',
+                            security_question: 2,
+                            security_answer: 'awesome kickass'
                         })
                         .then((res2: superagent.Response) => {
                             secondUserId = res2.body.id
@@ -465,7 +473,9 @@ mocha.describe('Users', (): void => {
                 .send({
                     username: 'testuser',
                     playername: 'TestingUser',
-                    password: '222222'
+                    password: '222222',
+                    security_question: 1,
+                    security_answer: 'cool dude'
                 })
                 .then((res: superagent.Response) => {
                     createdUserId = res.body.id
@@ -527,7 +537,9 @@ mocha.describe('Users', (): void => {
                 .send({
                     username: 'testuser',
                     playername: 'TestingUser',
-                    password: '222222'
+                    password: '222222',
+                    security_question: 1,
+                    security_answer: 'cool dude'
                 })
                 .then((res: superagent.Response) => {
                     createdUser = res.body.id
@@ -609,7 +621,9 @@ mocha.describe('Users', (): void => {
                 .send({
                     username: 'testuser',
                     playername: 'TestingUser',
-                    password: '222222'
+                    password: '222222',
+                    security_question: 1,
+                    security_answer: 'cool dude'
                 })
                 .then((res: superagent.Response) => {
                     firstUser = res.body.id
@@ -618,7 +632,9 @@ mocha.describe('Users', (): void => {
                         .send({
                             username: 'gamer',
                             playername: 'cso2player',
-                            password: '123456'
+                            password: '123456',
+                            security_question: 1,
+                            security_answer: 'cool dude'
                         })
                         .then((res2: superagent.Response) => {
                             secondUser = res2.body.id
@@ -687,7 +703,9 @@ mocha.describe('Users', (): void => {
                 .send({
                     username: 'testuser',
                     playername: 'TestingUser',
-                    password: '222222'
+                    password: '222222',
+                    security_question: 1,
+                    security_answer: 'cool dude'
                 })
                 .then((res: superagent.Response) => {
                     createdUserId = res.body.id
@@ -751,7 +769,9 @@ mocha.describe('Users', (): void => {
                     .send({
                         username: 'testuser',
                         playername: 'TestingUser',
-                        password: '222222'
+                        password: '222222',
+                        security_question: 1,
+                        security_answer: 'cool dude'
                     })
                     .then((res: superagent.Response) => {
                         createdUserId = res.body.id
@@ -855,7 +875,9 @@ mocha.describe('Users', (): void => {
                 .send({
                     username: 'testuser',
                     playername: 'TestingUser',
-                    password: '222222'
+                    password: '222222',
+                    security_question: 1,
+                    security_answer: 'cool dude'
                 })
                 .then((res: superagent.Response) => {
                     createdUserId = res.body.id
@@ -912,6 +934,92 @@ mocha.describe('Users', (): void => {
                     .send({
                         username: 'baduser',
                         password: 'badpassword'
+                    })
+                    .end((err: Error, res: superagent.Response): void => {
+                        res.should.be.status(401)
+                        return done()
+                    })
+            }
+        )
+
+        mocha.after((done: mocha.Done): void => {
+            chai.request(serviceInstance.app)
+                .delete('/users/' + createdUserId)
+                .send()
+                .then(() => {
+                    return done()
+                })
+        })
+    })
+
+    mocha.describe('POST /users/auth/validate_security', (): void => {
+        let createdUserId: number = 0
+
+        mocha.before((done: mocha.Done): void => {
+            chai.request(serviceInstance.app)
+                .post('/users')
+                .send({
+                    username: 'testuser',
+                    playername: 'TestingUser',
+                    password: '222222',
+                    security_question: 1,
+                    security_answer: 'cool dude'
+                })
+                .then((res: superagent.Response) => {
+                    createdUserId = res.body.id
+                    return done()
+                })
+        })
+
+        mocha.it(
+            'Should say the security answer is valid',
+            (done: mocha.Done): void => {
+                chai.request(serviceInstance.app)
+                    .post('/users/auth/validate_security')
+                    .send({
+                        username: 'testuser',
+                        security_answer: 'cool dude'
+                    })
+                    .end((err: Error, res: superagent.Response): void => {
+                        res.should.be.status(200)
+                        res.body.should.be.jsonSchema({
+                            type: 'object',
+                            required: ['userId'],
+                            properties: {
+                                userId: {
+                                    type: 'number'
+                                }
+                            }
+                        })
+                        res.body.userId.should.be.equal(createdUserId)
+                        return done()
+                    })
+            }
+        )
+
+        mocha.it(
+            'Should 400 when validating with a bad query',
+            (done: mocha.Done): void => {
+                chai.request(serviceInstance.app)
+                    .post('/users/auth/validate_security')
+                    .send({
+                        uuuuser: 'yes\n\r\t',
+                        aeiou: 6789
+                    })
+                    .end((err: Error, res: superagent.Response): void => {
+                        res.should.be.status(400)
+                        return done()
+                    })
+            }
+        )
+        mocha.it(
+            'Should 401 when validating with bad user credentials',
+            (done: mocha.Done): void => {
+                chai.request(serviceInstance.app)
+                    .post('/users/auth/validate_security')
+                    .send({
+                        username: 'baduser',
+                        security_answer: 'bad answer lol'
                     })
                     .end((err: Error, res: superagent.Response): void => {
                         res.should.be.status(401)

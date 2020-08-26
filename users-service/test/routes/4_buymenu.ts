@@ -115,7 +115,9 @@ mocha.describe("User's buy menu", (): void => {
             .send({
                 username: 'testuser',
                 playername: 'TestingUser',
-                password: '222222'
+                password: '222222',
+                security_question: 1,
+                security_answer: 'cool dude'
             })
             .then((res: superagent.Response) => {
                 firstUserId = res.body.id
@@ -125,7 +127,9 @@ mocha.describe("User's buy menu", (): void => {
                     .send({
                         username: 'another_test_user',
                         playername: 'AnotherTestUser',
-                        password: '123564'
+                        password: '123564',
+                        security_question: 1,
+                        security_answer: 'cool dude'
                     })
                     .then((res: superagent.Response) => {
                         secondUserId = res.body.id
