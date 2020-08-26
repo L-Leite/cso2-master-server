@@ -5,6 +5,9 @@ import { SetupSetParams } from 'utilitites'
 export const USER_MAX_LEVEL = 99
 
 export type SetUserBody = {
+    password?: string
+    password_hash?: string
+
     gm: boolean
 
     points: number
@@ -156,6 +159,12 @@ export class User {
     ): Promise<boolean> {
         if ((await User.getById(userId, false)) == null) {
             return false
+        }
+
+        if (updatedUser.password != null) {
+            const newPwHash = await HashContainer.create(updatedUser.password)
+            updatedUser.password_hash = newPwHash.build()
+            delete updatedUser.password
         }
 
         await sql`

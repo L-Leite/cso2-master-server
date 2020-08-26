@@ -573,6 +573,45 @@ mocha.describe('Users', (): void => {
             }
         )
         mocha.it(
+            "Should change an user's password",
+            (done: mocha.Done): void => {
+                chai.request(serviceInstance.app)
+                    .put('/users/' + createdUser)
+                    .send({
+                        password: 'kickass'
+                    })
+                    .end((err: Error, res: superagent.Response): void => {
+                        res.should.be.status(200)
+                        return done()
+                    })
+            }
+        )
+        mocha.it(
+            "Check if the user's password was changed successfully",
+            (done: mocha.Done): void => {
+                chai.request(serviceInstance.app)
+                    .post('/users/auth/validate')
+                    .send({
+                        username: 'testuser',
+                        password: 'kickass'
+                    })
+                    .end((err: Error, res: superagent.Response): void => {
+                        res.should.be.status(200)
+                        res.body.should.be.jsonSchema({
+                            type: 'object',
+                            required: ['userId'],
+                            properties: {
+                                userId: {
+                                    type: 'number'
+                                }
+                            }
+                        })
+                        res.body.userId.should.be.equal(createdUser)
+                        return done()
+                    })
+            }
+        )
+        mocha.it(
             "Should 400 when updated an user's data slots with an invalid user ID",
             (done: mocha.Done): void => {
                 chai.request(serviceInstance.app)
