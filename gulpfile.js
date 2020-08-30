@@ -71,14 +71,16 @@ function StartComponent(componentName, args, cmdEnv) {
     log(`Started ${componentName} successfully`)
 }
 
-gulp.task('build', (cb) => {
-    Promise.all([
-        BuildComponent('master-server'),
-        BuildComponent('users-service'),
-        BuildComponent('website')
-    ]).then(() => {
-        cb()
-    })
+gulp.task('build', async () => {
+    const components = ['master-server', 'users-service', 'website']
+
+    for (const c of components) {
+        if ((await BuildComponent(c)) === false) {
+            return false
+        }
+    }
+
+    return true
 })
 
 function FindNetworkInterface() {
