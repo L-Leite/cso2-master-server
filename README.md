@@ -59,7 +59,7 @@ npx gulp build # builds the game server components
 In a shell, run
 
 ```sh
-npx gulp start
+npx gulp start --intf eth0 # replace 'eth0' with your network interface
 ```
 
 You can stop the server by pressing CTRL+C in the terminal.
