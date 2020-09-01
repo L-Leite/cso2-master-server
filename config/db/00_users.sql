@@ -5,7 +5,7 @@ CREATE TABLE public.users
     playername text UNIQUE NOT NULL,
 
     password_hash text NOT NULL,
-    security_question_index number,
+    security_question_index integer,
     security_answer_hash text,
 
     gm boolean DEFAULT FALSE,
