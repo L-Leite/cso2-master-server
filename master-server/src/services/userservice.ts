@@ -224,7 +224,7 @@ export class UserService {
             const res: superagent.Response = await superagent
                 .put(this.baseUrl + `/users/${targetUser.id}`)
                 .send({
-                    titleId
+                    title: titleId
                 })
                 .accept('json')
 
