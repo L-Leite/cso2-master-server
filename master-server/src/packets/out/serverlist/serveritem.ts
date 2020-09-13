@@ -18,7 +18,7 @@ export class OutChannelServerItem {
     constructor(channelServer: ChannelServer) {
         this.serverIndex = 1
         this.serverStatus = 1
-        this.serverType = 3
+        this.serverType = 1
         this.serverName = channelServer.name
         this.channelCount = channelServer.channels.length
         this.channels = []
