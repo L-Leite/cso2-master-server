@@ -89,7 +89,7 @@ export class OutHostPacket extends OutPacketBase {
         })
 
         packet.buildHeader()
-        packet.writeUInt8(HostPacketType.ItemUsing)
+        packet.writeUInt8(HostPacketType.ItemUsed)
 
         OutHostItemUsing.build(userId, itemId, packet)
 

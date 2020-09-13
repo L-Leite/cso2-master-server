@@ -165,6 +165,36 @@ export class InPacketBase extends PacketBaseShared {
     }
 
     /**
+     * reads four bytes from the current offset as a floating point value
+     * @returns the read unsigned bytes
+     */
+    public readFloat(bigEndian = false): number {
+        if (this.canReadBytes(4) === false) {
+            throw new Error('Data buffer is too small')
+        }
+        const res: number = bigEndian
+            ? this.packetData.readFloatBE(this.curOffset)
+            : this.packetData.readFloatLE(this.curOffset)
+        this.curOffset += 4
+        return res
+    }
+
+    /**
+     * reads eight bytes from the current offset as a floating point value
+     * @returns the read unsigned bytes
+     */
+    public readDouble(bigEndian = false): number {
+        if (this.canReadBytes(8) === false) {
+            throw new Error('Data buffer is too small')
+        }
+        const res: number = bigEndian
+            ? this.packetData.readDoubleBE(this.curOffset)
+            : this.packetData.readDoubleLE(this.curOffset)
+        this.curOffset += 8
+        return res
+    }
+
+    /**
      * reads a string from the current offset
      * * the string's size is 1 byte long
      * @returns the read bytes

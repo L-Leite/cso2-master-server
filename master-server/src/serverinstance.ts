@@ -24,6 +24,7 @@ import { PacketLogger } from 'packetlogger'
 
 import { AchievementHandler } from 'handlers/achievementhandler'
 import { ChatHandler } from 'handlers/chathandler'
+import { HostHandler } from 'handlers/hosthandler'
 
 /**
  * The welcome message sent to the client
@@ -68,6 +69,7 @@ export class ServerInstance {
 
     private achievementHandler: AchievementHandler
     private chatHandler: ChatHandler
+    private hostHandler: HostHandler
 
     private packetLogging: PacketLogger
 
@@ -85,6 +87,7 @@ export class ServerInstance {
 
         this.achievementHandler = new AchievementHandler()
         this.chatHandler = new ChatHandler()
+        this.hostHandler = new HostHandler()
 
         if (options.shouldLogPackets) {
             this.packetLogging = new PacketLogger()
@@ -335,7 +338,7 @@ export class ServerInstance {
         // the most received packets should go first
         switch (packet.id) {
             case PacketId.Host:
-                return await UserManager.onHostPacket(data, connection)
+                return this.hostHandler.onPacket(data, connection)
             case PacketId.Room:
                 return ChannelManager.onRoomRequest(data, connection)
             case PacketId.Chat:
