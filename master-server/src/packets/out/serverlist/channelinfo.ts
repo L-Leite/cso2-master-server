@@ -12,8 +12,8 @@ export class ServerListChannelInfo {
     private unk00: number
     private unk01: number
     private unk02: number
-    private unk03: number
-    private unk04: number
+    private ChannelType: number
+    private ChannelStatus: number
 
     constructor(channel: Channel) {
         this.id = channel.index
@@ -21,8 +21,8 @@ export class ServerListChannelInfo {
         this.unk00 = 4
         this.unk01 = 0x1f4
         this.unk02 = 1
-        this.unk03 = 0
-        this.unk04 = 1
+        this.ChannelType = 0
+        this.ChannelStatus = 1
     }
 
     public build(outPacket: OutPacketBase): void {
@@ -31,7 +31,7 @@ export class ServerListChannelInfo {
         outPacket.writeUInt16(this.unk00)
         outPacket.writeUInt16(this.unk01)
         outPacket.writeUInt8(this.unk02)
-        outPacket.writeUInt8(this.unk03)
-        outPacket.writeUInt8(this.unk04)
+        outPacket.writeUInt8(this.ChannelType)
+        outPacket.writeUInt8(this.ChannelStatus)
     }
 }
