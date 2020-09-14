@@ -2,8 +2,8 @@ import { ExtendedSocket } from 'extendedsocket'
 
 import { ActiveConnections } from 'storage/activeconnections'
 
+import { CSTeamNum } from 'gametypes/shareddefs'
 import { HostPacketType } from 'packets/definitions'
-import { RoomTeamNum } from 'room/room'
 import { UserInventory } from 'user/userinventory'
 
 import { InHostPacket } from 'packets/in/host'
@@ -223,8 +223,8 @@ export class HostHandler {
         }
 
         if (
-            teamData.newTeam !== RoomTeamNum.Terrorist &&
-            teamData.newTeam !== RoomTeamNum.CounterTerrorist
+            teamData.newTeam !== CSTeamNum.Terrorist &&
+            teamData.newTeam !== CSTeamNum.CounterTerrorist
         ) {
             console.warn(
                 `User Id ${targetSession.user.id} tried to change his team, but the value ${teamData.newTeam} is not allowed.`
@@ -441,7 +441,11 @@ export class HostHandler {
     ): boolean {
         const deathData = new InHostIngame_PlayerDeath(hostPacket)
         console.debug(
-            `${deathData.attacker.userId} killed ${deathData.victim.userId} with ${deathData.attacker.weaponId}`
+            `${deathData.attacker.userId} killed ${
+                deathData.victim.userId
+            } with ${
+                deathData.attacker.weaponId
+            } (killFlags: ${deathData.killFlags.toString(16)})`
         )
         return true
     }

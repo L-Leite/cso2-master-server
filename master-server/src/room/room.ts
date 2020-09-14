@@ -2,6 +2,7 @@ import { Channel } from 'channel/channel'
 
 import { ExtendedSocket } from 'extendedsocket'
 
+import { CSTeamNum } from 'gametypes/shareddefs'
 import { RoomSettings } from 'room/roomsettings'
 import { RoomUserEntry } from 'room/roomuserentry'
 
@@ -12,13 +13,6 @@ import { OutUdpPacket } from 'packets/out/udp'
 import { UserSession } from 'user/usersession'
 
 import { ActiveConnections } from 'storage/activeconnections'
-
-export enum RoomTeamNum {
-    Unknown = 0,
-    Terrorist = 1,
-    CounterTerrorist = 2,
-    Spectator = 3
-}
 
 export enum RoomReadyStatus {
     NotReady = 0,
@@ -281,15 +275,15 @@ export class Room {
      * count the ammount of users on each team and returns the team with less users
      * @returns the team with less users
      */
-    public findDesirableTeamNum(): RoomTeamNum {
+    public findDesirableTeamNum(): CSTeamNum {
         let trNum = 0
         let ctNum = 0
 
         for (const userData of this.usersInfo.values()) {
-            const team: RoomTeamNum = userData.team
-            if (team === RoomTeamNum.Terrorist) {
+            const team: CSTeamNum = userData.team
+            if (team === CSTeamNum.Terrorist) {
                 trNum++
-            } else if (team === RoomTeamNum.CounterTerrorist) {
+            } else if (team === CSTeamNum.CounterTerrorist) {
                 ctNum++
             } else {
                 console.warn('Room::findDesirableTeamNum: Unknown team number')
@@ -302,15 +296,15 @@ export class Room {
         if (this.settings.areBotsEnabled) {
             // make sure there is at least one human player
             if (trNum + ctNum > 0) {
-                const hostTeamNum: RoomTeamNum = this.host.team
+                const hostTeamNum: CSTeamNum = this.host.team
                 return hostTeamNum
             }
         }
 
         if (trNum < ctNum) {
-            return RoomTeamNum.Terrorist
+            return CSTeamNum.Terrorist
         } else {
-            return RoomTeamNum.CounterTerrorist
+            return CSTeamNum.CounterTerrorist
         }
     }
 
@@ -318,12 +312,12 @@ export class Room {
      * returns an user's current team
      * @param userId the target user's ID
      */
-    public getUserTeam(userId: number): RoomTeamNum {
+    public getUserTeam(userId: number): CSTeamNum {
         const info: RoomUserEntry = this.getRoomUser(userId)
 
         if (info == null) {
             console.warn('getUserTeam: userId %i not found', userId)
-            return RoomTeamNum.Unknown
+            return CSTeamNum.Unknown
         }
 
         return info.team
@@ -350,8 +344,8 @@ export class Room {
     public getNumOfRealCts(): number {
         let numCt = 0
         for (const userData of this.usersInfo.values()) {
-            const team: RoomTeamNum = userData.team
-            if (team === RoomTeamNum.CounterTerrorist) {
+            const team: CSTeamNum = userData.team
+            if (team === CSTeamNum.CounterTerrorist) {
                 numCt++
             }
         }
@@ -365,8 +359,8 @@ export class Room {
     public getNumOfRealTerrorists(): number {
         let numTerrorists = 0
         for (const userData of this.usersInfo.values()) {
-            const team: RoomTeamNum = userData.team
-            if (team === RoomTeamNum.Terrorist) {
+            const team: CSTeamNum = userData.team
+            if (team === CSTeamNum.Terrorist) {
                 numTerrorists++
             }
         }
@@ -459,7 +453,7 @@ export class Room {
      * @param user the target user's ID
      * @param newTeam the user's new team
      */
-    public updateUserTeam(userId: number, newTeam: RoomTeamNum): void {
+    public updateUserTeam(userId: number, newTeam: CSTeamNum): void {
         const user: RoomUserEntry = this.getRoomUser(userId)
         user.team = newTeam
 
@@ -891,7 +885,7 @@ export class Room {
      * @param newUser the player whose ready status will be sent
      */
     public sendNewUserTo(user: RoomUserEntry, newUser: RoomUserEntry): void {
-        const team: RoomTeamNum = newUser.team
+        const team: CSTeamNum = newUser.team
 
         if (team == null) {
             console.warn(
@@ -983,7 +977,7 @@ export class Room {
      */
     public broadcastNewUserTeamNum(
         sourceUserId: number,
-        newTeamNum: RoomTeamNum
+        newTeamNum: CSTeamNum
     ): void {
         const sourceUser: RoomUserEntry = this.getRoomUser(sourceUserId)
         this.recurseUsers((u: RoomUserEntry): void => {
@@ -1117,7 +1111,7 @@ export class Room {
     public sendTeamChangeTo(
         user: RoomUserEntry,
         player: RoomUserEntry,
-        newTeamNum: RoomTeamNum
+        newTeamNum: CSTeamNum
     ): void {
         user.conn.send(OutRoomPacket.setUserTeam(player.userId, newTeamNum))
     }
@@ -1129,7 +1123,7 @@ export class Room {
      */
     public sendTeamChangeGlobal(
         player: RoomUserEntry,
-        newTeamNum: RoomTeamNum
+        newTeamNum: CSTeamNum
     ): void {
         this.recurseUsers((u: RoomUserEntry) => {
             this.sendTeamChangeTo(u, player, newTeamNum)
@@ -1210,10 +1204,10 @@ export class Room {
             //
             // set everyone to the host's team if bot mode is enabled
             //
-            const hostTeamNum: RoomTeamNum = this.host.team
+            const hostTeamNum: CSTeamNum = this.host.team
 
             this.recurseNonHostUsers((u: RoomUserEntry): void => {
-                const curUserTeamNum: RoomTeamNum = this.getUserTeam(u.userId)
+                const curUserTeamNum: CSTeamNum = this.getUserTeam(u.userId)
 
                 if (curUserTeamNum !== hostTeamNum) {
                     u.team = hostTeamNum

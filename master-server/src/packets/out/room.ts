@@ -3,7 +3,7 @@ import { WritableStreamBuffer } from 'stream-buffers'
 import { PacketId } from 'packets/definitions'
 import { OutPacketBase } from 'packets/out/packet'
 
-import { Room, RoomReadyStatus, RoomTeamNum } from 'room/room'
+import { Room, RoomReadyStatus } from 'room/room'
 
 import { OutRoomCountdown } from 'packets/out/room/countdown'
 import { OutRoomCreateAndJoin } from 'packets/out/room/createandjoin'
@@ -18,6 +18,7 @@ import { OutRoomUpdateSettings } from 'packets/out/room/updatesettings'
 import { RoomSettings } from 'room/roomsettings'
 
 import { RoomUserEntry } from 'room/roomuserentry'
+import { CSTeamNum } from 'gametypes/shareddefs'
 
 enum OutRoomPacketType {
     CreateAndJoin = 0,
@@ -54,7 +55,7 @@ export class OutRoomPacket extends OutPacketBase {
 
     public static playerJoin(
         user: RoomUserEntry,
-        teamNum: RoomTeamNum
+        teamNum: CSTeamNum
     ): OutRoomPacket {
         const packet: OutRoomPacket = new OutRoomPacket()
 

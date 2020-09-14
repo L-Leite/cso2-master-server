@@ -1,6 +1,6 @@
 import { InPacketBase } from 'packets/in/packet'
 
-import { Vector } from 'gamestructs/vector'
+import { Vector } from 'gametypes/vector'
 
 /**
  * received when a player spawns
