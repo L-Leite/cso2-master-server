@@ -1,6 +1,7 @@
 import { OutPacketBase } from 'packets/out/packet'
 
 import { Channel } from 'channel/channel'
+import { ChannelStatuses, ChannelTypes } from 'gametypes/shareddefs'
 
 /**
  * sends out a channel info to an user
@@ -12,8 +13,8 @@ export class ServerListChannelInfo {
     private unk00: number
     private unk01: number
     private unk02: number
-    private ChannelType: number
-    private ChannelStatus: number
+    private ChannelType: ChannelTypes
+    private ChannelStatus: ChannelStatuses
 
     constructor(channel: Channel) {
         this.id = channel.index
@@ -21,8 +22,8 @@ export class ServerListChannelInfo {
         this.unk00 = 4
         this.unk01 = 0x1f4
         this.unk02 = 1
-        this.ChannelType = 0
-        this.ChannelStatus = 1
+        this.ChannelType = ChannelTypes.Free
+        this.ChannelStatus = ChannelStatuses.Normal
     }
 
     public build(outPacket: OutPacketBase): void {
