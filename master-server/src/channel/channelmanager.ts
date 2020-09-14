@@ -127,7 +127,9 @@ export class ChannelManager {
     }
 
     private static channelServers: ChannelServer[] = [
-        new ChannelServer('Test server', 1, 1, 1)
+       new ChannelServer('Normal Server', 1, 1, 1),
+       new ChannelServer('Normal Server', 1, 2, 2),
+       new ChannelServer('Normal Server', 1, 3, 3)
     ]
 
     /**
