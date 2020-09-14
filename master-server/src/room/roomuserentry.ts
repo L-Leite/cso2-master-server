@@ -1,5 +1,6 @@
 import { ExtendedSocket } from 'extendedsocket'
-import { RoomReadyStatus, RoomTeamNum } from 'room/room'
+import { RoomReadyStatus } from 'room/room'
+import { CSTeamNum } from 'gametypes/shareddefs'
 
 /**
  * room info specific to a room's user
@@ -7,14 +8,14 @@ import { RoomReadyStatus, RoomTeamNum } from 'room/room'
 export class RoomUserEntry {
     public userId: number
     public conn: ExtendedSocket
-    public team: RoomTeamNum
+    public team: CSTeamNum
     public ready: RoomReadyStatus
     public isIngame: boolean
 
     constructor(
         userId: number,
         connection: ExtendedSocket,
-        team: RoomTeamNum,
+        team: CSTeamNum,
         ready: RoomReadyStatus
     ) {
         this.userId = userId

@@ -3,9 +3,9 @@ import { OutPacketBase } from 'packets/out/packet'
 import { OutRoomPlayerNetInfo } from 'packets/out/room/playernetinfo'
 import { UserInfoFullUpdate } from 'packets/out/userinfo/fulluserupdate'
 
-import { RoomTeamNum } from 'room/room'
-
 import { ExtendedSocket } from 'extendedsocket'
+
+import { CSTeamNum } from 'gametypes/shareddefs'
 import { User } from 'user/user'
 
 /**
@@ -15,7 +15,7 @@ import { User } from 'user/user'
 export class OutRoomPlayerJoin {
     public static build(
         conn: ExtendedSocket,
-        teamNum: RoomTeamNum,
+        teamNum: CSTeamNum,
         outPacket: OutPacketBase
     ): void {
         const user: User = conn.session.user

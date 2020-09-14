@@ -1,13 +1,45 @@
 import { InPacketBase } from 'packets/in/packet'
 
-import { Vector } from 'gamestructs/vector'
+import { Vector } from 'gametypes/vector'
+
+// TODO: reverse missing flags
+enum IPDKillFlags {
+    KilledByHeadshot = 0x1,
+    KilledThroughWall = 0x2,
+    KilledByJumpshot = 0x4,
+    KilledByLongshot = 0x8,
+    KilledByKnife = 0x400,
+    KilledByFalling = 0x1000,
+    KilledWithSomeoneElseWeapon = 0x2000,
+    KilledWithOpposingTeamWeapon = 0x4000,
+    KilledByScopedSniper = 0x8000,
+    KilledByNoscopedSniper = 0x10000,
+    KilledWithLastBullet = 0x20000,
+    KilledByGrenade = 0x40000,
+    KilledByProp = 0x80000,
+    KilledBySniper = 0x100000
+}
+
+enum IPDClientType {
+    Human = 0,
+    NPC = 1,
+    FakeClient = 2 // a bot
+}
+
+enum IPDCharacterType {
+    CSPlayer = 0,
+    Pig = 40,
+    Zombie = 50,
+    ZombieMaster = 51, // the host zombie
+    Sentrygun = 60
+}
 
 interface IPDPlayerInfo {
     userId: number
     weaponId: number
     teamNum: number
-    clientType: number
-    characterType: number
+    clientType: IPDClientType
+    characterType: IPDCharacterType
     characterClass: number
 }
 
@@ -15,7 +47,7 @@ interface IPDPlayerInfo {
  * received when an user scores a point in a game match
  */
 export class InHostIngame_PlayerDeath {
-    public killFlags: number
+    public killFlags: IPDKillFlags
     public attacker: IPDPlayerInfo
     public someVictimSpecialFlags: number
     public victim: IPDPlayerInfo

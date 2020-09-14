@@ -2,7 +2,7 @@ import ip from 'ip'
 
 import { OutPacketBase } from 'packets/out/packet'
 
-import { RoomTeamNum } from 'room/room'
+import { CSTeamNum } from 'gametypes/shareddefs'
 import { UserSession } from 'user/usersession'
 
 import { ExtendedSocket } from 'extendedsocket'
@@ -14,7 +14,7 @@ import { ExtendedSocket } from 'extendedsocket'
 export class OutRoomPlayerNetInfo {
     public static build(
         conn: ExtendedSocket,
-        teamNum: RoomTeamNum,
+        teamNum: CSTeamNum,
         outPacket: OutPacketBase
     ): void {
         const session: UserSession = conn.session
