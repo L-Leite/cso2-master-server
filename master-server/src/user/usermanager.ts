@@ -1,5 +1,4 @@
 import net from 'net'
-import superagent from 'superagent'
 
 import { ExtendedSocket } from 'extendedsocket'
 
@@ -29,8 +28,6 @@ import { OutOptionPacket } from 'packets/out/option'
 import { OutUserInfoPacket } from 'packets/out/userinfo'
 import { OutUserStartPacket } from 'packets/out/userstart'
 
-import { userSvcAuthority, UserSvcPing } from 'authorities'
-
 import { AboutMeHandler } from 'handlers/aboutmehandler'
 
 import { UserService } from 'services/userservice'
@@ -43,8 +40,7 @@ import {
 } from 'gamestrings'
 
 // TODO: move this to UserManager, make UserManager not static
-const userService = new UserService(userSvcAuthority())
-const aboutMeHandler = new AboutMeHandler(userService)
+const aboutMeHandler = new AboutMeHandler()
 
 /**
  * handles the user logic
@@ -63,39 +59,7 @@ export class UserManager {
             curChannel.OnUserLeft(conn)
         }
 
-        await userService.Logout(session.user.id)
-    }
-
-    /**
-     * validate an user's credentials
-     * @param username the user's name
-     * @param password the user's password
-     * @return a promise with the logged in user's ID, or zero if failed
-     */
-    public static async validateCredentials(
-        username: string,
-        password: string
-    ): Promise<number> {
-        try {
-            const res: superagent.Response = await superagent
-                .post(userSvcAuthority() + '/users/check')
-                .send({
-                    username,
-                    password
-                })
-                .accept('json')
-
-            if (res.ok === false) {
-                return 0
-            }
-
-            const typedBody = res.body as { userId: number }
-            return typedBody.userId
-        } catch (error) {
-            console.error(error)
-            await UserSvcPing.checkNow()
-            return 0
-        }
+        await UserService.Logout(session.user.id)
     }
 
     /**
@@ -111,7 +75,7 @@ export class UserManager {
     ): Promise<boolean> {
         const loginPacket: InLoginPacket = new InLoginPacket(loginData)
 
-        const loggedUserId = await userService.Login(
+        const loggedUserId = await UserService.Login(
             loginPacket.gameUsername,
             loginPacket.password
         )
@@ -138,7 +102,7 @@ export class UserManager {
         // clear plain password right away, we don't need it anymore
         loginPacket.password = null
 
-        const user: User = await userService.GetUserById(loggedUserId)
+        const user: User = await UserService.GetUserById(loggedUserId)
 
         if (user == null) {
             this.SendUserDialogBox(connection, GAME_LOGIN_INVALID_USERINFO)

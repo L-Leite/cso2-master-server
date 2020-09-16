@@ -5,11 +5,11 @@ import { UserSvcPing } from 'authorities'
 import { User } from 'user/user'
 
 export class UserService {
-    private baseUrl: string
+    private static baseUrl: string
 
-    private userCache: LRUCache<number, User>
+    private static userCache: LRUCache<number, User>
 
-    constructor(baseUrl: string) {
+    public static Init(baseUrl: string): void {
         this.baseUrl = baseUrl
 
         this.userCache = new LRUCache<number, User>({
@@ -23,7 +23,10 @@ export class UserService {
      * @param userId the user's ID
      * @returns the user object if found, null otherwise
      */
-    public async Login(username: string, password: string): Promise<number> {
+    public static async Login(
+        username: string,
+        password: string
+    ): Promise<number> {
         if (UserSvcPing.isAlive() === false) {
             return 0
         }
@@ -58,7 +61,7 @@ export class UserService {
      * @param userId the user's ID
      * @returns the user object if found, null otherwise
      */
-    public async Logout(userId: number): Promise<boolean> {
+    public static async Logout(userId: number): Promise<boolean> {
         if (UserSvcPing.isAlive() === false) {
             return false
         }
@@ -87,7 +90,7 @@ export class UserService {
      * @param userId the user's ID
      * @returns the user object if found, null otherwise
      */
-    public async GetUserById(userId: number): Promise<User> {
+    public static async GetUserById(userId: number): Promise<User> {
         try {
             let user: User = this.userCache.get(userId)
 
@@ -123,7 +126,7 @@ export class UserService {
      * @param signature the new signature string
      * @returns true if updated successfully, false if not
      */
-    public async SetUserCampaignFlags(
+    public static async SetUserCampaignFlags(
         targetUser: User,
         campaignFlags: number
     ): Promise<boolean> {
@@ -154,7 +157,7 @@ export class UserService {
      * @param avatarId the new avatar's ID
      * @returns true if updated successfully, false if not
      */
-    public async SetUserAvatar(
+    public static async SetUserAvatar(
         targetUser: User,
         avatarId: number
     ): Promise<boolean> {
@@ -185,7 +188,7 @@ export class UserService {
      * @param signature the new signature string
      * @returns true if updated successfully, false if not
      */
-    public async SetUserSignature(
+    public static async SetUserSignature(
         targetUser: User,
         signature: string
     ): Promise<boolean> {
@@ -216,7 +219,7 @@ export class UserService {
      * @param titleId the new title's ID
      * @returns true if updated successfully, false if not
      */
-    public async SetUserTitle(
+    public static async SetUserTitle(
         targetUser: User,
         titleId: number
     ): Promise<boolean> {
@@ -246,7 +249,7 @@ export class UserService {
      * @param targetUser the user and the user data to be updated
      * @returns true if updated, false if not
      */
-    public async Update(targetUser: User): Promise<boolean> {
+    public static async Update(targetUser: User): Promise<boolean> {
         try {
             const res: superagent.Response = await superagent
                 .put(this.baseUrl + `/users/${targetUser.id}`)

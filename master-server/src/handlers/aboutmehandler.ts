@@ -22,11 +22,7 @@ import { UserService } from 'services/userservice'
  * handles incoming AboutMe type packets
  */
 export class AboutMeHandler {
-    private userSvc: UserService
-
-    constructor(userSvc: UserService) {
-        this.userSvc = userSvc
-    }
+    /* constructor() {} */
 
     public async OnPacket(
         packetData: Buffer,
@@ -99,7 +95,7 @@ export class AboutMeHandler {
         }
 
         const newFlags = user.campaign_flags | campaignId
-        const updated = await this.userSvc.SetUserCampaignFlags(user, newFlags)
+        const updated = await UserService.SetUserCampaignFlags(user, newFlags)
 
         if (updated === false) {
             console.warn(
@@ -123,7 +119,7 @@ export class AboutMeHandler {
         const avatarData: InAboutmeSetAvatar = new InAboutmeSetAvatar(aboutPkt)
 
         const session: UserSession = conn.session
-        const updated: boolean = await this.userSvc.SetUserAvatar(
+        const updated: boolean = await UserService.SetUserAvatar(
             session.user,
             avatarData.avatarId
         )
@@ -172,7 +168,7 @@ export class AboutMeHandler {
             return false
         }
 
-        const updated: boolean = await this.userSvc.SetUserSignature(
+        const updated: boolean = await UserService.SetUserSignature(
             session.user,
             signatureData.msg
         )
@@ -217,7 +213,7 @@ export class AboutMeHandler {
             return false
         }
 
-        const updated: boolean = await this.userSvc.SetUserTitle(
+        const updated: boolean = await UserService.SetUserTitle(
             session.user,
             titleData.titleId
         )

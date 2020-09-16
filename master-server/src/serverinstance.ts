@@ -18,6 +18,9 @@ import { Room } from 'room/room'
 import { UserManager } from 'user/usermanager'
 import { UserSession } from 'user/usersession'
 
+import { UserService } from 'services/userservice'
+import { userSvcAuthority } from 'authorities'
+
 import { ActiveConnections } from 'storage/activeconnections'
 
 import { PacketLogger } from 'packetlogger'
@@ -117,6 +120,8 @@ export class ServerInstance {
             .on('listening', () => {
                 this.onHolepunchListening()
             })
+
+        UserService.Init(userSvcAuthority())
     }
 
     public listen(): void {
