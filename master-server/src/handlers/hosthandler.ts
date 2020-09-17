@@ -79,7 +79,7 @@ export class HostHandler {
         return false
     }
 
-    private onGameEnd(userConn: ExtendedSocket): boolean {
+    private async onGameEnd(userConn: ExtendedSocket): Promise<boolean> {
         const session = userConn.session
 
         if (session == null) {
@@ -112,7 +112,7 @@ export class HostHandler {
             currentRoom.id
         )
 
-        currentRoom.endGame()
+        await currentRoom.endGame()
 
         return true
     }
@@ -437,7 +437,7 @@ export class HostHandler {
 
     private onIngamePlayerDeath(
         hostPacket: InHostPacket,
-        userConn: ExtendedSocket
+        hostConn: ExtendedSocket
     ): boolean {
         const deathData = new InHostIngame_PlayerDeath(hostPacket)
         console.debug(
@@ -447,6 +447,58 @@ export class HostHandler {
                 deathData.attacker.weaponId
             } (killFlags: ${deathData.killFlags.toString(16)})`
         )
+
+        const curRoom = hostConn.session.currentRoom
+
+        if (curRoom == null) {
+            console.warn('The host must be in a room')
+            return false
+        }
+
+        if (deathData.attacker.userId !== 0) {
+            const attackerConn = ActiveConnections.Singleton().FindByOwnerId(
+                deathData.attacker.userId
+            )
+            if (attackerConn == null) {
+                console.warn('Could not get the connection of the attacker')
+                return false
+            }
+
+            if (
+                attackerConn.session.currentRoom !==
+                hostConn.session.currentRoom
+            ) {
+                console.warn('The attacker is not on the same room as the host')
+                return false
+            }
+        }
+
+        if (deathData.victim.userId !== 0) {
+            const victimConn = ActiveConnections.Singleton().FindByOwnerId(
+                deathData.victim.userId
+            )
+
+            if (victimConn == null) {
+                console.warn('Could not get the connection of the victim')
+                return false
+            }
+
+            if (
+                victimConn.session.currentRoom !== hostConn.session.currentRoom
+            ) {
+                console.warn('The victim is not on the same room as the host')
+                return false
+            }
+        }
+
+        if (deathData.attacker.userId !== 0) {
+            curRoom.onUserKilled(deathData.attacker.userId, 1)
+        }
+
+        if (deathData.victim.userId !== 0) {
+            curRoom.onUserDeath(deathData.victim.userId)
+        }
+
         return true
     }
 

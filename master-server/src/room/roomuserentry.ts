@@ -12,6 +12,10 @@ export class RoomUserEntry {
     public ready: RoomReadyStatus
     public isIngame: boolean
 
+    public kills: number
+    public deaths: number
+    public assists: number
+
     constructor(
         userId: number,
         connection: ExtendedSocket,

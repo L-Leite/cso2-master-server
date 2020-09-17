@@ -2,7 +2,7 @@ import { Channel } from 'channel/channel'
 
 import { ExtendedSocket } from 'extendedsocket'
 
-import { CSTeamNum } from 'gametypes/shareddefs'
+import { CSTeamNum, RoomTeamBalance, RoomGamemode } from 'gametypes/shareddefs'
 import { RoomSettings } from 'room/roomsettings'
 import { RoomUserEntry } from 'room/roomuserentry'
 
@@ -13,89 +13,13 @@ import { OutUdpPacket } from 'packets/out/udp'
 import { UserSession } from 'user/usersession'
 
 import { ActiveConnections } from 'storage/activeconnections'
+import { UserService } from 'services/userservice'
+import { OutUserInfoPacket } from 'packets/out/userinfo'
 
 export enum RoomReadyStatus {
     NotReady = 0,
     Ingame = 1,
     Ready = 2
-}
-
-// pasted from scripts/cso2_modlist.csv
-export enum RoomGamemode {
-    original = 1,
-    teamdeath = 2,
-    zombie = 3,
-    stealth = 4,
-    gunteamdeath = 5,
-    tutorial = 6,
-    hide = 7,
-    pig = 8,
-    animationtest_vcd = 9,
-    gz_survivor = 10,
-    devtest = 11,
-    originalmr = 12,
-    originalmrdraw = 13,
-    casualbomb = 14,
-    deathmatch = 15,
-    scenario_test = 16,
-    gz = 17,
-    gz_intro = 18,
-    gz_tour = 19,
-    gz_pve = 20,
-    eventmod01 = 21,
-    duel = 22,
-    gz_ZB = 23,
-    heroes = 24,
-    eventmod02 = 25,
-    zombiecraft = 26,
-    campaign1 = 27,
-    campaign2 = 28,
-    campaign3 = 29,
-    campaign4 = 30,
-    campaign5 = 31,
-    campaign6 = 32,
-    campaign7 = 33,
-    campaign8 = 34,
-    campaign9 = 35,
-    z_scenario = 36,
-    zombie_prop = 37,
-    ghost = 38,
-    tag = 39,
-    hide_match = 40,
-    hide_ice = 41,
-    diy = 42,
-    hide_Item = 43,
-    zd_boss1 = 44,
-    zd_boss2 = 45,
-    zd_boss3 = 46,
-    practice = 47,
-    zombie_commander = 48,
-    casualoriginal = 49,
-    hide2 = 50,
-    gunball = 51,
-    zombie_zeta = 53,
-    tdm_small = 54,
-    de_small = 55,
-    gunteamdeath_re = 56,
-    endless_wave = 57,
-    rankmatch_original = 58,
-    rankmatch_teamdeath = 59,
-    play_ground = 60,
-    madcity = 61,
-    hide_origin = 62,
-    teamdeath_mutation = 63,
-    giant = 64,
-    z_scenario_side = 65,
-    hide_multi = 66,
-    madcity_team = 67,
-    rankmatch_stealth = 68
-}
-
-export enum RoomTeamBalance {
-    Disabled = 0,
-    Enabled = 1,
-    WithBots = 2,
-    ByKadRatio = 4
 }
 
 export interface IRoomOptions {
@@ -609,7 +533,7 @@ export class Room {
     /**
      * ends a match and sends players to the match results screen
      */
-    public endGame(): void {
+    public async endGame(): Promise<void> {
         this.setStatus(RoomStatus.Waiting)
         this.resetIngameUsersReadyStatus()
 
@@ -623,6 +547,7 @@ export class Room {
         })
 
         this.sendBroadcastReadyStatus()
+        await this.RewardUsers()
     }
 
     /**
@@ -630,7 +555,7 @@ export class Room {
      * @returns true if we can countdown, else false
      */
     public canStartGame(): boolean {
-        const gamemode: RoomGamemode = this.settings.gameModeId
+        const gamemode = this.settings.gameModeId
 
         switch (gamemode) {
             case RoomGamemode.deathmatch:
@@ -861,6 +786,21 @@ export class Room {
 
         // inform every user in the room of the changes
         this.broadcastNewRoomSettings()
+    }
+
+    public onUserKilled(userId: number, kills: number): void {
+        const user = this.getRoomUser(userId)
+        user.kills += kills
+    }
+
+    public onUserDeath(userId: number): void {
+        const user = this.getRoomUser(userId)
+        user.deaths++
+    }
+
+    public onUserAssisted(userId: number, assists: number): void {
+        const user = this.getRoomUser(userId)
+        user.assists += assists
     }
 
     /**
@@ -1277,5 +1217,46 @@ export class Room {
 
         this.updateHost(this.usersInfo[0])
         return true
+    }
+
+    private async RewardUsers(): Promise<void> {
+        const updatePromises = []
+
+        for (const userInfo of this.usersInfo) {
+            const userConn = ActiveConnections.Singleton().FindByOwnerId(
+                userInfo.userId
+            )
+
+            if (userConn == null) {
+                console.warn(
+                    `RewardUsers: could not find user's connection with id ${userInfo.userId}`
+                )
+                continue
+            }
+
+            const user = userConn.session.user
+
+            if (user == null) {
+                console.warn(
+                    `RewardUsers: got user's ${userInfo.userId} connection but not the data?`
+                )
+                continue
+            }
+
+            user.kills += userInfo.kills
+            user.deaths += userInfo.deaths
+            user.assists += userInfo.assists
+
+            updatePromises.push(UserService.UpdateKDA(user))
+            userConn.send(OutUserInfoPacket.updateGameStats(user))
+        }
+
+        const updateRes = await Promise.all(updatePromises)
+
+        for (const res of updateRes) {
+            if (res === false) {
+                console.warn('RewardUsers: failed to update an user')
+            }
+        }
     }
 }

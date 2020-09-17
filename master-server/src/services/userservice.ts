@@ -268,4 +268,33 @@ export class UserService {
 
         return false
     }
+
+    /**
+     * update an user
+     * @param targetUser the user and the user data to be updated
+     * @returns true if updated, false if not
+     */
+    public static async UpdateKDA(targetUser: User): Promise<boolean> {
+        try {
+            const res: superagent.Response = await superagent
+                .put(this.baseUrl + `/users/${targetUser.id}`)
+                .send({
+                    kills: targetUser.kills,
+                    deaths: targetUser.deaths,
+                    assists: targetUser.assists
+                })
+                .accept('json')
+
+            if (res.status === 200) {
+                this.userCache.set(targetUser.id, targetUser)
+                console.log('Updated KDA successfully')
+                return true
+            }
+        } catch (error) {
+            console.error(error)
+            await UserSvcPing.checkNow()
+        }
+
+        return false
+    }
 }

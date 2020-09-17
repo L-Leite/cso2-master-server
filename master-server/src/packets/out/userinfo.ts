@@ -93,6 +93,32 @@ export class OutUserInfoPacket extends OutPacketBase {
         return packet
     }
 
+    public static updateGameStats(user: User): OutUserInfoPacket {
+        const packet: OutUserInfoPacket = new OutUserInfoPacket()
+
+        packet.outStream = new WritableStreamBuffer({
+            initialSize: 40,
+            incrementAmount: 10
+        })
+
+        packet.buildHeader()
+        packet.writeUInt32(user.id)
+
+        UserInfoDynamicUpdate.buildGameStats(
+            user.played_matches,
+            user.wins,
+            user.kills,
+            user.headshots,
+            user.deaths,
+            user.assists,
+            user.accuracy,
+            user.seconds_played,
+            packet
+        )
+
+        return packet
+    }
+
     constructor() {
         super(PacketId.UserInfo)
     }

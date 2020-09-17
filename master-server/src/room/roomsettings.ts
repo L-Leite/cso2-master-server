@@ -1,9 +1,5 @@
-import {
-    IRoomOptions,
-    RoomGamemode,
-    RoomStatus,
-    RoomTeamBalance
-} from 'room/room'
+import { IRoomOptions, RoomStatus } from 'room/room'
+import { RoomGamemode, RoomTeamBalance } from 'gametypes/shareddefs'
 
 export class RoomSettings {
     public roomName: string
