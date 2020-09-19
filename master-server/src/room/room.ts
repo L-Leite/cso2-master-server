@@ -4,7 +4,6 @@ import { ExtendedSocket } from 'extendedsocket'
 
 import { CSO2TakeDamageInfo, TDIKillFlags } from 'gametypes/cso2takedamageinfo'
 import { CSTeamNum, RoomTeamBalance, RoomGamemode } from 'gametypes/shareddefs'
-import { IngameSession } from 'room/ingamesession'
 import { RoomSettings } from 'room/roomsettings'
 import { RoomUserEntry } from 'room/roomuserentry'
 
@@ -96,8 +95,6 @@ export class Room {
 
     private countingDown: boolean
     private countdown: number
-
-    private ingame: IngameSession
 
     constructor(
         roomId: number,
@@ -989,10 +986,7 @@ export class Room {
      * @param host the host to connect to
      */
     public sendConnectHostTo(user: RoomUserEntry, host: RoomUserEntry): void {
-        const hostConn = ActiveConnections.Singleton().FindByOwnerId(
-            host.userId
-        )
-        const hostSession: UserSession = hostConn.session
+        const hostSession = host.conn.session
 
         if (hostSession == null) {
             return
@@ -1015,10 +1009,7 @@ export class Room {
      * @param guest the guest player joining the host's match
      */
     public sendGuestDataTo(host: RoomUserEntry, guest: RoomUserEntry): void {
-        const guestConn = ActiveConnections.Singleton().FindByOwnerId(
-            guest.userId
-        )
-        const guestSession: UserSession = guestConn.session
+        const guestSession: UserSession = guest.conn.session
 
         if (guestSession == null) {
             return
