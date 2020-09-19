@@ -2,7 +2,9 @@ import { Channel } from 'channel/channel'
 
 import { ExtendedSocket } from 'extendedsocket'
 
+import { CSO2TakeDamageInfo, TDIKillFlags } from 'gametypes/cso2takedamageinfo'
 import { CSTeamNum, RoomTeamBalance, RoomGamemode } from 'gametypes/shareddefs'
+import { IngameSession } from 'room/ingamesession'
 import { RoomSettings } from 'room/roomsettings'
 import { RoomUserEntry } from 'room/roomuserentry'
 
@@ -10,11 +12,11 @@ import { InRoomUpdateSettings } from 'packets/in/room/updatesettings'
 import { OutHostPacket } from 'packets/out/host'
 import { OutRoomPacket } from 'packets/out/room'
 import { OutUdpPacket } from 'packets/out/udp'
-import { UserSession } from 'user/usersession'
+import { OutUserInfoPacket } from 'packets/out/userinfo'
 
 import { ActiveConnections } from 'storage/activeconnections'
+import { UserSession } from 'user/usersession'
 import { UserService } from 'services/userservice'
-import { OutUserInfoPacket } from 'packets/out/userinfo'
 
 export enum RoomReadyStatus {
     NotReady = 0,
@@ -94,6 +96,8 @@ export class Room {
 
     private countingDown: boolean
     private countdown: number
+
+    private ingame: IngameSession
 
     constructor(
         roomId: number,
@@ -788,14 +792,10 @@ export class Room {
         this.broadcastNewRoomSettings()
     }
 
-    public onUserKilled(userId: number, kills: number): void {
-        const user = this.getRoomUser(userId)
-        user.kills += kills
-    }
-
-    public onUserDeath(userId: number): void {
-        const user = this.getRoomUser(userId)
-        user.deaths++
+    public onPlayerKilled(damageInfo: CSO2TakeDamageInfo): void {
+        console.debug(this.GetDebugKillMessage(damageInfo))
+        this.HandlePlayerKilled(damageInfo)
+        this.HandlePlayerDeath(damageInfo)
     }
 
     public onUserAssisted(userId: number, assists: number): void {
@@ -1219,17 +1219,91 @@ export class Room {
         return true
     }
 
+    private GetDebugKillMessage(damageInfo: CSO2TakeDamageInfo): string {
+        let attackerName = null
+        let victimName = null
+
+        const attackerConn = ActiveConnections.Singleton().FindByOwnerId(
+            damageInfo.attacker.userId
+        )
+        const victimConn = ActiveConnections.Singleton().FindByOwnerId(
+            damageInfo.victim.userId
+        )
+
+        if (attackerConn != null) {
+            attackerName = attackerConn.session.user.playername
+        }
+
+        if (victimConn != null) {
+            victimName = victimConn.session.user.playername
+        }
+
+        return `${attackerName} killed ${victimName} with ${
+            damageInfo.attacker.weaponId
+        } (killFlags: ${damageInfo.killFlags.toString(16)})`
+    }
+
+    private HandlePlayerKilled(damageInfo: CSO2TakeDamageInfo): void {
+        if (damageInfo.attacker.userId === 0) {
+            // this means the attacker is a bot
+            return
+        }
+
+        const attackerConn = ActiveConnections.Singleton().FindByOwnerId(
+            damageInfo.attacker.userId
+        )
+
+        if (attackerConn == null) {
+            console.warn('Could not get the connection of the attacker')
+            return
+        }
+
+        if (attackerConn.session.currentRoom !== this) {
+            console.warn('The attacker is not on the same room as the host')
+            return
+        }
+
+        const attackerEntry = this.getRoomUser(damageInfo.attacker.userId)
+        attackerEntry.kills++
+
+        if (damageInfo.killFlags & TDIKillFlags.KilledByHeadshot) {
+            attackerEntry.headshots++
+        }
+    }
+
+    private HandlePlayerDeath(damageInfo: CSO2TakeDamageInfo): void {
+        if (damageInfo.victim.userId === 0) {
+            // this means the victim is a bot
+            return
+        }
+
+        const victimConn = ActiveConnections.Singleton().FindByOwnerId(
+            damageInfo.victim.userId
+        )
+
+        if (victimConn == null) {
+            console.warn('Could not get the connection of the victim')
+            return
+        }
+
+        if (victimConn.session.currentRoom !== this) {
+            console.warn('The victim is not on the same room as the host')
+            return
+        }
+
+        const roomUser = this.getRoomUser(damageInfo.victim.userId)
+        roomUser.deaths++
+    }
+
     private async RewardUsers(): Promise<void> {
         const updatePromises = []
 
         for (const userInfo of this.usersInfo) {
-            const userConn = ActiveConnections.Singleton().FindByOwnerId(
-                userInfo.userId
-            )
+            const userConn = userInfo.conn
 
             if (userConn == null) {
                 console.warn(
-                    `RewardUsers: could not find user's connection with id ${userInfo.userId}`
+                    `RewardUsers: user's connection with id ${userInfo.userId} is null`
                 )
                 continue
             }

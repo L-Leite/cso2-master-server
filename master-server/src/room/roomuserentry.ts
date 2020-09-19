@@ -13,6 +13,7 @@ export class RoomUserEntry {
     public isIngame: boolean
 
     public kills: number
+    public headshots: number
     public deaths: number
     public assists: number
 
@@ -27,6 +28,11 @@ export class RoomUserEntry {
         this.team = team
         this.ready = ready
         this.isIngame = false
+
+        this.kills = 0
+        this.headshots = 0
+        this.deaths = 0
+        this.assists = 0
     }
 
     /**

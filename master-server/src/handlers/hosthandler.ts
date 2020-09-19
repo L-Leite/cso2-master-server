@@ -439,14 +439,7 @@ export class HostHandler {
         hostPacket: InHostPacket,
         hostConn: ExtendedSocket
     ): boolean {
-        const deathData = new InHostIngame_PlayerDeath(hostPacket)
-        console.debug(
-            `${deathData.attacker.userId} killed ${
-                deathData.victim.userId
-            } with ${
-                deathData.attacker.weaponId
-            } (killFlags: ${deathData.killFlags.toString(16)})`
-        )
+        const deathPacket = new InHostIngame_PlayerDeath(hostPacket)
 
         const curRoom = hostConn.session.currentRoom
 
@@ -455,49 +448,7 @@ export class HostHandler {
             return false
         }
 
-        if (deathData.attacker.userId !== 0) {
-            const attackerConn = ActiveConnections.Singleton().FindByOwnerId(
-                deathData.attacker.userId
-            )
-            if (attackerConn == null) {
-                console.warn('Could not get the connection of the attacker')
-                return false
-            }
-
-            if (
-                attackerConn.session.currentRoom !==
-                hostConn.session.currentRoom
-            ) {
-                console.warn('The attacker is not on the same room as the host')
-                return false
-            }
-        }
-
-        if (deathData.victim.userId !== 0) {
-            const victimConn = ActiveConnections.Singleton().FindByOwnerId(
-                deathData.victim.userId
-            )
-
-            if (victimConn == null) {
-                console.warn('Could not get the connection of the victim')
-                return false
-            }
-
-            if (
-                victimConn.session.currentRoom !== hostConn.session.currentRoom
-            ) {
-                console.warn('The victim is not on the same room as the host')
-                return false
-            }
-        }
-
-        if (deathData.attacker.userId !== 0) {
-            curRoom.onUserKilled(deathData.attacker.userId, 1)
-        }
-
-        if (deathData.victim.userId !== 0) {
-            curRoom.onUserDeath(deathData.victim.userId)
-        }
+        curRoom.onPlayerKilled(deathPacket.damageInfo)
 
         return true
     }
