@@ -51,14 +51,6 @@ const defaultCountdownNum = 7
 
 export class Room {
     /**
-     * tell the user to close the game result window
-     * @param conn the user's connection
-     */
-    public static sendCloseResultWindow(conn: ExtendedSocket): void {
-        conn.send(OutHostPacket.leaveResultWindow())
-    }
-
-    /**
      * remove an user from its current room
      * if the user isn't in a room then it won't do anything
      * @param user the target user

@@ -25,6 +25,7 @@ import {
     GAME_ROOM_JOIN_FAILED_CLOSED,
     GAME_ROOM_JOIN_FAILED_FULL
 } from 'gamestrings'
+import { OutHostPacket } from 'packets/out/host'
 
 export class RoomHandler {
     /**
@@ -433,7 +434,7 @@ room name "${currentRoom.settings.roomName}" room id: ${currentRoom.id}`
      * @returns true if successful
      */
     private onCloseResultRequest(sourceConn: ExtendedSocket): boolean {
-        Room.sendCloseResultWindow(sourceConn)
+        sourceConn.send(OutHostPacket.leaveResultWindow())
         console.log(
             `user ID ${sourceConn.session.user.id} closed game result window`
         )
