@@ -95,7 +95,12 @@ export class AboutMeHandler {
         }
 
         const newFlags = user.campaign_flags | campaignId
-        const updated = await UserService.SetUserCampaignFlags(user, newFlags)
+        const updated = await UserService.UpdatePartial(
+            {
+                campaign_flags: newFlags
+            },
+            user.id
+        )
 
         if (updated === false) {
             console.warn(
@@ -119,9 +124,11 @@ export class AboutMeHandler {
         const avatarData: InAboutmeSetAvatar = new InAboutmeSetAvatar(aboutPkt)
 
         const session: UserSession = conn.session
-        const updated: boolean = await UserService.SetUserAvatar(
-            session.user,
-            avatarData.avatarId
+        const updated: boolean = await UserService.UpdatePartial(
+            {
+                avatar: avatarData.avatarId
+            },
+            session.user.id
         )
 
         if (updated === false) {
@@ -168,9 +175,11 @@ export class AboutMeHandler {
             return false
         }
 
-        const updated: boolean = await UserService.SetUserSignature(
-            session.user,
-            signatureData.msg
+        const updated: boolean = await UserService.UpdatePartial(
+            {
+                signature: signatureData.msg
+            },
+            session.user.id
         )
 
         if (updated === false) {
@@ -213,9 +222,11 @@ export class AboutMeHandler {
             return false
         }
 
-        const updated: boolean = await UserService.SetUserTitle(
-            session.user,
-            titleData.titleId
+        const updated: boolean = await UserService.UpdatePartial(
+            {
+                title: titleData.titleId
+            },
+            session.user.id
         )
 
         if (updated === false) {
