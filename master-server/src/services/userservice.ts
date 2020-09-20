@@ -246,7 +246,7 @@ export class UserService {
 
     /**
      * update an user
-     * @param targetUser the user and the user data to be updated
+     * @param targetUser the user containing the data to be updated
      * @returns true if updated, false if not
      */
     public static async Update(targetUser: User): Promise<boolean> {
@@ -259,6 +259,39 @@ export class UserService {
             if (res.status === 200) {
                 this.userCache.set(targetUser.id, targetUser)
                 console.log('Set buy menu successfully')
+                return true
+            }
+        } catch (error) {
+            console.error(error)
+            await UserSvcPing.checkNow()
+        }
+
+        return false
+    }
+
+    /**
+     * update an user
+     * @param updatedMembers the user fields to be updated
+     * @returns true if updated, false if not
+     */
+    public static async UpdatePartial(
+        updatedMembers: Omit<Partial<User>, 'id'>,
+        targetUserId: number
+    ): Promise<boolean> {
+        try {
+            const res: superagent.Response = await superagent
+                .put(this.baseUrl + `/users/${targetUserId}`)
+                .send(updatedMembers)
+                .accept('json')
+
+            if (res.status === 200) {
+                if (this.userCache.has(targetUserId) === true) {
+                    const cachedUser = this.userCache.get(targetUserId)
+                    Object.assign(cachedUser, updatedMembers)
+                    this.userCache.set(targetUserId, cachedUser)
+                }
+
+                console.log('Updated user partially successfully')
                 return true
             }
         } catch (error) {

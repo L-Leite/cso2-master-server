@@ -455,16 +455,19 @@ export class HostHandler {
 
     private onIngameRoundEnd(
         hostPacket: InHostPacket,
-        userConn: ExtendedSocket
+        hostConn: ExtendedSocket
     ): boolean {
         const roundData = new InHostIngame_RoundEnd(hostPacket)
-        console.debug(
-            `${
-                roundData.winningTeamNum === 1 ? 'terrorists' : 'cts'
-            } win the round. ct score: ${roundData.ctWins} ter score: ${
-                roundData.terWins
-            }`
-        )
+
+        const curRoom = hostConn.session.currentRoom
+
+        if (curRoom == null) {
+            console.warn('The host must be in a room')
+            return false
+        }
+
+        curRoom.onRoundWon(roundData.winningTeamNum)
+
         return true
     }
 

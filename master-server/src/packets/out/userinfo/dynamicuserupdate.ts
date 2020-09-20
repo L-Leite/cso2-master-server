@@ -1,5 +1,3 @@
-import { Uint64LE } from 'int64-buffer'
-
 import { OutPacketBase } from 'packets/out/packet'
 
 /**

@@ -4,6 +4,7 @@ import { ExtendedSocket } from 'extendedsocket'
 
 import { CSO2TakeDamageInfo, TDIKillFlags } from 'gametypes/cso2takedamageinfo'
 import { CSTeamNum, RoomTeamBalance, RoomGamemode } from 'gametypes/shareddefs'
+import { MatchProgress } from 'room/matchprogress'
 import { RoomSettings } from 'room/roomsettings'
 import { RoomUserEntry } from 'room/roomuserentry'
 
@@ -88,6 +89,8 @@ export class Room {
     private countingDown: boolean
     private countdown: number
 
+    private ingameMatchProgress: MatchProgress
+
     constructor(
         roomId: number,
         hostUserId: number,
@@ -109,6 +112,8 @@ export class Room {
         this.countdown = defaultCountdownNum
 
         this.host = this.addUser(hostUserId, hostConn)
+
+        this.ingameMatchProgress = new MatchProgress()
     }
 
     /**
@@ -457,6 +462,7 @@ export class Room {
     public setStatus(newStatus: RoomStatus): void {
         this.settings.status = newStatus
         this.settings.isIngame = newStatus === RoomStatus.Ingame
+        this.ingameMatchProgress.SetIngame(this.settings.isIngame)
     }
 
     /**
@@ -790,6 +796,13 @@ export class Room {
     public onUserAssisted(userId: number, assists: number): void {
         const user = this.getRoomUser(userId)
         user.assists += assists
+    }
+
+    public onRoundWon(winningTeam: CSTeamNum): void {
+        this.ingameMatchProgress.ScoreTeam(winningTeam)
+        console.debug(
+            this.ingameMatchProgress.GetDebugRoundEndMessage(winningTeam)
+        )
     }
 
     /**
@@ -1281,6 +1294,8 @@ export class Room {
     private async RewardUsers(): Promise<void> {
         const updatePromises = []
 
+        const winnerTeam = this.ingameMatchProgress.GetWinningTeam()
+
         for (const userInfo of this.usersInfo) {
             const userConn = userInfo.conn
 
@@ -1301,10 +1316,30 @@ export class Room {
             }
 
             user.kills += userInfo.kills
+            user.headshots += userInfo.headshots
             user.deaths += userInfo.deaths
             user.assists += userInfo.assists
 
-            updatePromises.push(UserService.UpdateKDA(user))
+            user.played_matches++
+
+            if (userInfo.team === winnerTeam) {
+                user.wins++
+            }
+
+            updatePromises.push(
+                UserService.UpdatePartial(
+                    {
+                        kills: user.kills,
+                        headshots: user.headshots,
+                        deaths: user.deaths,
+                        assists: user.assists,
+                        played_matches: user.played_matches,
+                        wins: user.wins
+                    },
+                    user.id
+                )
+            )
+
             userConn.send(OutUserInfoPacket.updateGameStats(user))
         }
 
