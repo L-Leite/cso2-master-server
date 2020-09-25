@@ -14,6 +14,7 @@ import { PagesController } from 'controller/pages'
 import { ActionsController } from 'controller/actions'
 
 import { MapImageList } from 'maps'
+import { ROBOTS_TXT_CONTENT } from 'config/robots'
 
 const sessionSettings: session.SessionOptions = {
   secret: crypto.randomBytes(32).toString('hex'),
@@ -98,7 +99,9 @@ export class ServiceInstance {
     this.app.set('view engine', 'pug')
 
     // set static files location
-    this.app.use('/static', express.static('public'))
+    this.app.use('/static', express.static('public', {}))
+
+    this.setupRobots()
 
     // set favicon
     this.app.use(favicon('public/favicon.ico'))
@@ -110,6 +113,14 @@ export class ServiceInstance {
   private setupRoutes(): void {
     PagesController.setup(this.app)
     ActionsController.setup(this.app)
+  }
+
+  private setupRobots(): void {
+    this.app.get('/robots.txt', (req, res) => {
+      res.type('text/plain')
+      res.send(ROBOTS_TXT_CONTENT)
+      res.end()
+    })
   }
 
   /**
