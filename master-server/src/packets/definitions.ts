@@ -16,6 +16,7 @@ export enum PacketId {
     Host = 68,
     AboutMe = 69,
     Udp = 70,
+    Shop = 72,
     Ban = 74,
     Option = 76,
     Favorite = 77,
