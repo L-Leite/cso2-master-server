@@ -8,6 +8,10 @@
   "main": "src/server.ts",
   "scripts": {
     "start": "node dist/server.js",
+    "build": "npm run tslint && npm run build-ts",
+    "build-ts": "tsc",
+    "watch-ts": "tsc -w",
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
     "write-version": "cross-var \"echo $npm_package_version > version.txt\""
   },
   "dependencies": {

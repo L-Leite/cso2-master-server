@@ -141,7 +141,7 @@ export class UserInfoFullUpdate {
         // end of flag & 0x40000
 
         // flag & 0x80000
-        outPacket.writeUInt8(0) // unk53
+        outPacket.writeUInt8(user.unreaded_message) // unk53
         outPacket.writeUInt8(0) // unk54
         // end of flag & 0x80000
 

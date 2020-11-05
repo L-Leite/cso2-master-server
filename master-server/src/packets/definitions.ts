@@ -24,6 +24,7 @@ export enum PacketId {
     Automatch = 88,
     Friend = 89,
     Unlock = 90,
+    UnReaded_Message = 91,
     GZ = 95,
     Achievement = 96,
     ConfigInfo = 106,

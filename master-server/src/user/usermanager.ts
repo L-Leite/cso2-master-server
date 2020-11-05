@@ -27,6 +27,7 @@ import { OutInventoryPacket } from 'packets/out/inventory'
 import { OutOptionPacket } from 'packets/out/option'
 import { OutUserInfoPacket } from 'packets/out/userinfo'
 import { OutUserStartPacket } from 'packets/out/userstart'
+import { OutUnlockPacket } from 'packets/out/unlock'
 
 import { AboutMeHandler } from 'handlers/aboutmehandler'
 
@@ -351,6 +352,7 @@ export class UserManager {
         conn.sendBuffer(achievementReply3) */
 
         // TO BE REVERSED
+        /*
         const unlockReply: Buffer = Buffer.from([
             0x55,
             0x19,
@@ -1731,8 +1733,8 @@ export class UserManager {
             0x01,
             0x00,
             0x00
-        ])
-        conn.sendBuffer(unlockReply)
+        ]) */
+        conn.send(OutUnlockPacket.createUnlockInfo())
         conn.send(
             OutFavoritePacket.setCosmetics(
                 cosmetics.ct_item,
