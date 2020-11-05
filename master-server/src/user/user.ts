@@ -38,6 +38,8 @@ export class User {
     public unlocked_titles: number[]
     public signature: string
 
+    public unreaded_message: number  
+
     public unlocked_achievements: number[]
 
     public campaign_flags: number
