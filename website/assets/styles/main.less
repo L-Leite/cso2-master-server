@@ -70,8 +70,11 @@ a:hover {
 }
 
 .wrapper {
+  display: -webkit-grid;
   display: grid;
+  -webkit-grid-template-columns: 0.2fr 1fr;
   grid-template-columns: 0.2fr 1fr;
+  -webkit-grid-template-areas: 'lg lg' 'ann ann' 'stat stat' 'sb con' 'sb con';
   grid-template-areas:
     'lg lg'
     'ann ann'
@@ -80,6 +83,7 @@ a:hover {
     'sb con';
 
   @media (max-width: 767px) {
+    -webkit-grid-template-areas: 'lg lg' 'ann ann' 'stat stat' 'sb sb' 'con con';
     grid-template-areas:
       'lg lg'
       'ann ann'
@@ -93,6 +97,7 @@ a:hover {
 }
 
 .logo {
+  -webkit-grid-area: lg;
   grid-area: lg;
 
   display: flex;
@@ -102,6 +107,7 @@ a:hover {
 }
 
 .status-bar {
+  -webkit-grid-area: stat;
   grid-area: stat;
 
   display: flex;
@@ -129,6 +135,7 @@ a:hover {
 }
 
 .announcement {
+  -webkit-grid-area: ann;
   grid-area: ann;
 
   text-align: center;
@@ -168,6 +175,7 @@ a:hover {
 }
 
 .sidebar {
+  -webkit-grid-area: sb;
   grid-area: sb;
 
   display: flex;
@@ -266,6 +274,7 @@ a:hover {
 }
 
 .content {
+  -webkit-grid-area: con;
   grid-area: con;
 
   font-size: 15px;
@@ -306,6 +315,7 @@ a:hover {
     background: @inputBgColor;
     color: @inputTextColor;
     border: @inputBorderColor 1px solid;
+    border-radius: 0;
     padding: 0.25rem;
   }
 
