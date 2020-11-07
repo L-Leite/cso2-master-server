@@ -16,17 +16,17 @@ export class OutUnlockPacket extends OutPacketBase {
         })
 
         packet.buildHeader()
-        packet.writeUInt8(1)        //unk00, type ?
+        packet.writeUInt8(1) // unk00, type ?
 
-        //build unlock weapons info
+        // build unlock weapons info
         OutUnlockInfo.build(packet)
 
-        //build killNum
+        // build killNum
         OutUnlockKills.build(packet)
 
-        //build ID list
-        packet.writeUInt16(1)        //ID list array length,to be continued...
-        packet.writeUInt32(1)        //test item id
+        // build ID list
+        packet.writeUInt16(1) // ID list array length,to be continued...
+        packet.writeUInt32(1) // test item id
         return packet
     }
 
