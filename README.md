@@ -16,6 +16,7 @@ Join the [CSO2 Server Development Matrix room](https://matrix.to/#/#cso2:matrix.
 -   [CSO2 Revive](https://discord.gg/3tydYTC) (in Korean)
 -   [Counter-Strike Online 2 - EU/RU Server](https://discord.gg/yue5Zaf) (in English)
 -   [反恐精英 Online2(CSOL2)](https://jq.qq.com/?k=5PMEa6y) (in Chinese, requires [QQ](https://www.imqq.com/English1033.html))
+-   [CSO2 Remastered Turkey](https://discord.gg/DC3n6nX89D) (in Turkey)
 
 ## Running the game server
 
